@@ -243,46 +243,46 @@ void PhaseSpacePlots() {
   TCanvas* c3 = new TCanvas("c3");
 
   gr1->SetLineColor(2);
-  gr1->SetLineWidth(5);
+  gr1->SetLineWidth(3);
   gr2->SetLineColor(4);
-  gr2->SetLineWidth(5);
+  gr2->SetLineWidth(3);
   gr3->SetLineColor(6);
-  gr3->SetLineWidth(5);
+  gr3->SetLineWidth(3);
   gr4->SetLineColor(9);
-  gr4->SetLineWidth(5);
+  gr4->SetLineWidth(3);
 
   gr11->SetLineColor(2);
-  gr11->SetLineWidth(5);
+  gr11->SetLineWidth(3);
   gr12->SetLineColor(4);
-  gr12->SetLineWidth(5);
+  gr12->SetLineWidth(3);
 
   gr5->SetLineColor(2);
-  gr5->SetLineWidth(8);
+  gr5->SetLineWidth(5);
   gr6->SetLineColor(kGreen+1);
-  gr6->SetLineWidth(3);
+  gr6->SetLineWidth(2);
 
   gr7->SetLineColor(2);
-  gr7->SetLineWidth(8);
+  gr7->SetLineWidth(5);
   gr8->SetLineColor(kGreen+1);
-  gr8->SetLineWidth(3);
+  gr8->SetLineWidth(2);
   gr9->SetLineColor(6);
-  gr9->SetLineWidth(5);
+  gr9->SetLineWidth(3);
   gr10->SetLineColor(4);
-  gr10->SetLineWidth(5);
+  gr10->SetLineWidth(3);
 
   auto legend = new TLegend(0.1,0.65,0.4,0.9);
-  legend->AddEntry(gr7,  "BR(D->Ne)*Fe", "l");
-  legend->AddEntry(gr8,  "BR(D->Nmu)*Fmu", "l");
-  legend->AddEntry(gr9,  "BR(DS->Ne)*Fe", "l");
-  legend->AddEntry(gr10, "BR(DS->Nmu)*Fmu", "l");
+  legend->AddEntry(gr7,  "BR(D->nue)*Fe", "l");
+  legend->AddEntry(gr8,  "BR(D->numu)*Fmu", "l");
+  legend->AddEntry(gr9,  "BR(DS->nu)*Fe", "l");
+  legend->AddEntry(gr10, "BR(DS->numu)*Fmu", "l");
 
   auto legend2 = new TLegend(0.1,0.65,0.45,0.9);
   legend2->AddEntry(gr11,  "BRe/tot for D", "l");
   legend2->AddEntry(gr12,  "BRe/tot for DS", "l");
 
   auto legend3 = new TLegend(0.1,0.75,0.35,0.9);
-  legend3->AddEntry(gr5,  "D->pie", "l");
-  legend3->AddEntry(gr6,  "D->pimu", "l");
+  legend3->AddEntry(gr5,  "N->pie", "l");
+  legend3->AddEntry(gr6,  "N->pimu", "l");
   
   c->cd();
   M->Add(gr7);
@@ -294,6 +294,7 @@ void PhaseSpacePlots() {
   M->GetXaxis()->SetRangeUser(-50, 2100);
   M->GetYaxis()->SetTitle("BR*F");
   M->GetYaxis()->SetTitleOffset(1.);
+  M->GetXaxis()->SetTitleOffset(0.9);
   M->GetXaxis()->SetTitleSize(labelSize);
   M->GetYaxis()->SetTitleSize(labelSize);
   M->GetXaxis()->SetLabelSize(labelSize);
@@ -308,6 +309,7 @@ void PhaseSpacePlots() {
   gr1->SetTitle("Phase space factor vs N mass");
   gr1->GetXaxis()->SetTitle("N mass [MeV]");
   gr1->GetXaxis()->SetRangeUser(0, 2000);
+  gr1->GetXaxis()->SetTitleOffset(0.9);
   gr1->GetXaxis()->SetTitleSize(labelSize);
   gr1->GetYaxis()->SetTitleSize(labelSize);
   gr1->GetXaxis()->SetLabelSize(labelSize);
@@ -321,6 +323,7 @@ void PhaseSpacePlots() {
   gr2->SetTitle("Phase space factor vs N mass");
   gr2->GetXaxis()->SetTitle("N mass [MeV]");
   gr2->GetXaxis()->SetRangeUser(0, 2000);
+  gr2->GetXaxis()->SetTitleOffset(0.9);
   gr2->GetXaxis()->SetTitleSize(labelSize);
   gr2->GetYaxis()->SetTitleSize(labelSize);
   gr2->GetXaxis()->SetLabelSize(labelSize);
@@ -335,6 +338,7 @@ void PhaseSpacePlots() {
   M2->GetXaxis()->SetTitle("N mass [MeV]");
   M2->GetXaxis()->SetRangeUser(-500, 2500);
   M2->GetYaxis()->SetTitle("BRe/tot");
+  M2->GetXaxis()->SetTitleOffset(0.9);
   M2->GetXaxis()->SetTitleSize(labelSize);
   M2->GetYaxis()->SetTitleSize(labelSize);
   M2->GetXaxis()->SetLabelSize(labelSize);
@@ -350,6 +354,7 @@ void PhaseSpacePlots() {
   M3->GetXaxis()->SetTitle("N mass [MeV]");
   M3->GetYaxis()->SetTitle("Decay amplitude [MeV]");
   M3->GetYaxis()->SetTitleOffset(1.);
+  M3->GetXaxis()->SetTitleOffset(0.9);
   M3->GetXaxis()->SetTitleSize(labelSize);
   M3->GetYaxis()->SetTitleSize(labelSize);
   M3->GetXaxis()->SetLabelSize(labelSize);
