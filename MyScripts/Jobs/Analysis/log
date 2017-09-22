@@ -1,0 +1,176 @@
+Sender: LSF System <lsfadmin@b66e8253e0.cern.ch>
+Subject: Job 89733215: <SingleJobAccYield.sh> in cluster <batch> Exited
+
+Job <SingleJobAccYield.sh> was submitted from host <lxplus086.cern.ch> by user <liacobuz> in cluster <batch>.
+Job was executed on host(s) <b66e8253e0.cern.ch>, in queue <1nh>, as user <liacobuz> in cluster <batch>.
+</afs/cern.ch/user/l/liacobuz> was used as the home directory.
+</afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/MyScripts/Jobs/Analysis> was used as the working directory.
+Started at Wed Sep 20 13:18:00 2017
+Results reported on Wed Sep 20 14:34:00 2017
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+SingleJobAccYield.sh
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 143.
+
+Resource usage summary:
+
+    CPU time :                                   591.00 sec.
+    Max Memory :                                 484.69 MB
+    Average Memory :                             430.42 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   2517 MB
+    Max Processes :                              8
+    Max Threads :                                10
+    Run time :                                   4559 sec.
+    Turnaround time :                            5427 sec.
+
+The output (if any) follows:
+
+@(#)CERN job starter $Date: 2010/06/23 14:22:16 $
+Working directory is </pool/lsf/liacobuz/89733215> on <b66e8253e0.cern.ch>
+
+Sourcing /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool
+Setting global verbosity to 1
+[RICHParameters] Found 116 entries in /afs/cern.ch/na62/offline/metadata//RICHMirrorPositions.txt
+[RICHParameters] Found 26 run ranges in /afs/cern.ch/na62/offline/metadata//RICHMirrorAlignment.txt
+[RICHParameters] Found 7 run ranges in /afs/cern.ch/na62/offline/metadata//RICHElectronRing.txt
+[BeamParameters] Found 386 entries in /afs/cern.ch/na62/offline/metadata//SpectrometerCalibration.txt
+[BeamParameters] Found 212 entries in /afs/cern.ch/na62/offline/metadata//BeamPar.txt
+[BeamParameters] Found 2 entries in /afs/cern.ch/na62/offline/metadata//SpectrometerCalibration.MC.txt
+[BeamParameters] Found 2 entries in /afs/cern.ch/na62/offline/metadata//BeamPar.MC.txt
+[TriggerConditions] Found 39 L0 trigger conditions and 2037 entries in /afs/cern.ch/na62/offline/metadata//L0TriggerConditions.txt
+[TriggerConditions] Found 923 entries in /afs/cern.ch/na62/offline/metadata//L0VacantBits.txt
+[TriggerConditions] Found 113 entries in /afs/cern.ch/na62/offline/metadata//L0VariableBits.txt
+[TriggerConditions] Found 74 L1 trigger conditions and 8442 entries in /afs/cern.ch/na62/offline/metadata//L1TriggerConditions.txt
+[L0PrimitiveHandler] WARNING: Invalid value of L0Detector 5
+[BadBursts] Bad bursts found: 18659 by Run+ID, 0 by burst time
+[BadBursts] Subsystems masked by user: none
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_100.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_10.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_11.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_12.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_13.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_14.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_15.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_16.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_17.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_18.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_19.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_1.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_20.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_21.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_22.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_23.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_24.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_25.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_26.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_27.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_28.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_29.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_2.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_30.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_31.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_32.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_33.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_34.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_35.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_36.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_37.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_38.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_39.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_3.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_40.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_41.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_42.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_43.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_44.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_45.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_46.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_47.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_48.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_49.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_4.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_50.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_51.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_52.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_53.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_54.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_55.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_56.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_57.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_58.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_59.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_5.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_60.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_61.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_62.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_63.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_64.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_65.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_66.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_67.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_68.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_69.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_6.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_70.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_71.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_72.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_73.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_74.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_75.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_76.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_77.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_78.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_79.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_7.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_80.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_81.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_82.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_83.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_84.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_85.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_86.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_87.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_88.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_89.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_8.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_90.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_91.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_92.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_93.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_94.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_95.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_96.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_97.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_98.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_99.root
+Error in <TChain::LoadTree>: Cannot find tree with name MC in file /afs/cern.ch/work/l/liacobuz/private/SingleHistos/Reco/HNLMCReco_9.root
+[K3piSelection] Reading reconstructed data
+[20/09/17 13:20:53] Processing event 0/100000           =>   0.00%   ETA: ----s   Elapsed: 0s   Total: 0s         Error in <TObjArray::At>: index 100 out of bounds (size: 100, this: 0x2bf1ab0)
+[20/09/17 13:53:07] Processing event 10000/100000       =>  10.00%   ETA: 17406s   Elapsed: 1934s   Total: 19340s         [20/09/17 14:25:09] Processing event 20000/100000       =>  20.00%   ETA: 15424s   Elapsed: 3856s   Total: 19280s         
+********************************************************************************
+Killed with Signal 2
+
+********************************************************************************
+Bye!
+
+********************************************************************************
+Killed with Signal 15
+
+********************************************************************************
+Bye!
+
+Job finished at Wed Sep 20 14:31:56 CEST 2017 on node 
+ under linux version Scientific Linux CERN SLC release 6.9 (Carbon)
+
+CERN statistics: This process used approximately : 0:00:01 KSI2K hours (1 KSI2K seconds)
+                 This process corresponds to     : 0:00:06 HS06  hours (6 HS06  seconds)
+
+CERN report: Job Killed. See mail from LSF for messages and native time cpu usage.

@@ -1,14 +1,14 @@
-void CreatePDF() {
-  TFile *f1 = TFile::Open("~/NA62AnalysisTool/HNLAnalysis.root");
+void CreatePlotsPDFReport() {
+  /*
+  TFile *f1 = TFile::Open("/home/li/Desktop/HNLMCAnalysis.root");
   TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelection");  
   TIter next(dir1->GetListOfKeys());
   TKey *key;
   TCanvas *c1 = new TCanvas();
+  */
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-  Double_t x = 0.07;
-  Double_t y = 0.065;
-
+  /*
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
     if (!cl->InheritsFrom("TH1") && !cl->InheritsFrom("TH2")) continue;
@@ -48,10 +48,13 @@ void CreatePDF() {
 	h1->GetXaxis()->SetLabelSize(labelSize);
 	h1->GetYaxis()->SetLabelSize(labelSize);
 	gStyle->SetStatW(0.3); 
-	gStyle->SetStatH(0.3); 
+	gStyle->SetStatH(0.3);
+	gStyle->SetOptStat(10);
 	gPad->Update();
 	if (!strcmp(key->GetName(), "InvMassReco")) {
 	  h1->Fit("gaus");
+	  gStyle->SetStatW(0.2); 
+	  gStyle->SetStatH(0.2);
 	  gStyle->SetOptFit(1);
 	}
         if (!strcmp(key->GetName(), "PhysicsEventsVsCuts"))
@@ -60,8 +63,44 @@ void CreatePDF() {
           h1->Draw();
       }
       
-      TString path = "/home/lorenza/GitVarious/PhD/HeavyNeutrino/Plots/";
+      TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
       c1->SaveAs(path + key->GetName() + ".png");
+    }
+  }
+  */
+  
+  TFile *f2 = TFile::Open("/home/li/Desktop/HNLMCAnalysisAccYield.root");
+  TDirectory * dir2 = (TDirectory*)f2->Get("HeavyNeutrinoPiMuSelection");
+  TIter next2(dir2->GetListOfKeys());
+  TKey *key2;
+  TCanvas *c2 = new TCanvas();
+
+  while ((key2 = (TKey*)next2())) {
+    TClass *cl2 = gROOT->GetClass(key2->GetClassName());
+    if (!cl2->InheritsFrom("TH1") && !cl2->InheritsFrom("TH2")) continue;
+    else {
+      if (cl2->InheritsFrom("TH2")) continue;
+      else if (!cl2->InheritsFrom("TH2")) {
+	TH1 *h12 = (TH1*)key2->ReadObj();
+        if (!strcmp(key2->GetName(), "Acc") || !strcmp(key2->GetName(), "Yield")) {
+          //h12->Fit("gaus");
+          gStyle->SetStatW(0.2);
+          gStyle->SetStatH(0.2);
+          //gStyle->SetOptFit(1);
+	  gStyle->SetOptStat(1110);
+	  h12->SetFillColor(38);
+	  h12->SetTitleSize(titleSize, "t");
+	  h12->GetXaxis()->SetTitleSize(labelSize);
+	  h12->GetXaxis()->SetLabelSize(labelSize);
+	  h12->GetYaxis()->SetLabelSize(labelSize);
+	  h12->GetXaxis()->SetRangeUser(0., 30.E-6);
+	  gPad->Update();
+	  h12->Draw();
+	}
+
+	TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
+	c2->SaveAs(path + key2->GetName() + ".png");
+      }
     }
   }
 }

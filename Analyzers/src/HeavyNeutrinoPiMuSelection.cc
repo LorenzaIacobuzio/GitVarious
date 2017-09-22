@@ -53,20 +53,20 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hNk3pi",    new TH1D("Nk3pi", "Total number of K3pi events", 1, 0., 1.));
   BookHisto("hNbursts",  new TH1D("Nbursts", "Total number of processed bursts", 1, 0., 1.));
   BookHisto("hNEvents",  new TH1D("NEvents", "Number of total processed events" , 1, 0., 1.));
-  BookHisto("hNtracks",  new TH1D("Ntracks",               "Number of tracks", 10, -0.5, 9.5));
+  BookHisto("hNtracks",  new TH1D("Ntracks",               "Number of tracks", 4, -0.5, 3.5));
   BookHisto("hN2tracks", new TH1D("N2tracks",      "Number of two-tracks events", 1, 0., 1.));
 
-  BookHisto("hZDProd",        new TH1D("ZDProd",  "Z of D meson production point", 200., -250., 400.));
-  BookHisto("hZDDecay",       new TH1D("ZDDecay",  "Z of D meson decay point",     200., -250., 400.));
-  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100, -0.1, 1.));
-  BookHisto("hDLambda",       new TH1D("DLambda",    "D meson mean path length",   100, -1., 50.));
-  BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 100.));
-  BookHisto("hDMom",          new TH1D("DMom",       "D meson momentum",           100, -1., 150.));
+  BookHisto("hZDProd",        new TH1D("ZDProd",  "Z of D meson production point", 200., -250., 250.));
+  BookHisto("hZDDecay",       new TH1D("ZDDecay",  "Z of D meson decay point",     200., -250., 300.));
+  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100, -0.1, 0.3));
+  BookHisto("hDLambda",       new TH1D("DLambda",    "D meson decay length",       100, -1., 40.));
+  BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 50.));
+  BookHisto("hDMom",          new TH1D("DMom",       "D meson momentum",           100, -1., 170.));
 
   BookHisto("hZHNLDecay",     new TH1D("ZHNLDecay",    "Z of HNL decay point",           100., 90., 190.));
-  BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., -0.5, 199.5));
-  BookHisto("hHNLDecayProb",  new TH1D("HNLDecayProb", "HNL decay probability",          100., 0., 0.008));
-  BookHisto("hHNLReachProb",  new TH1D("HNLReachProb", "HNL probability of reaching FV", 100., 0.99, 1.));
+  BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., 0., 170.));
+  BookHisto("hHNLDecayProb",  new TH1D("HNLDecayProb", "HNL decay probability",          100., 0., 0.0065));
+  BookHisto("hHNLReachProb",  new TH1D("HNLReachProb", "HNL probability of reaching FV", 100., 0.99, 1.001));
   BookHisto("hHNLTheta",      new TH1D("HNLTheta",     "HNL theta",                      100., -0.5, 3.5));
   BookHisto("hWeight",        new TH1D("Weight",       "Weight",                         1000, 0., 0.08E-12));
   BookHisto("hMomPi",         new TH1D("MomPi",        "Pion momentum",                  100, -0.5, 200.));
@@ -112,7 +112,7 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hBeamlineDistvsTargetDist_TotMomFinal",                new TH2D("BeamlineDistvsTargetDist_TotMomFinal",                "Two-track total momentum wrt beam axis, after all selections",       100, 0., 1., 100, 0., 1.));
   
   BookHisto("hDeltaTimeFromCHOD",     new TH1D("DeltaTimeFromCHOD",     "Time difference of two tracks (CHOD candidates)",         200, -20., 20.));  
-  BookHisto("hNMUV3CandAssocToTrack", new TH1D("NMUV3CandAssocToTrack", "Number of MUV3 candidates associated to each track", 10, -0.5, 9.5));
+  BookHisto("hNMUV3CandAssocToTrack", new TH1D("NMUV3CandAssocToTrack", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
   BookHisto("hNCHODCandAssocToTrack", new TH1D("NCHODCandAssocToTrack", "Number of CHOD candidates associated to each track", 10, 0., 10.));
   
   BookHisto("hEoP", new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
@@ -218,7 +218,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
 	gammaTot = GammaTot(mass1, mass2, MN, USquared);
-	HNLTau = Tau(gammaTot);
+	//HNLTau = Tau(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
 	BR = ComputeBR(p, MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
@@ -238,8 +238,8 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	// HNL production in the Cu TAXs
 
 	//Weight = fDCuProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
-
-	fSumAll += Weight;
+	if (Weight >= 0. && Weight <= 10)
+	  fSumAll += Weight;
 
 	FillHisto("hZDProd", p->GetPosAtCheckPoint(0).z());
 	FillHisto("hZDDecay", p->GetProdPos().Z());
@@ -787,7 +787,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
 	gammaTot = GammaTot(mass1, mass2, MN, USquared);
-	HNLTau = Tau(gammaTot);
+	//HNLTau = Tau(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
 	BR = ComputeBR(p, MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
@@ -807,8 +807,8 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	// HNL production in the Cu TAXs
 
 	//Weight = fDCuProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
-
-	fSumGood += Weight;
+	if (Weight >= 0. && Weight <= 10)
+	  fSumGood += Weight;
       }
     }
   }
@@ -912,13 +912,13 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   fhZDProd      ->GetXaxis()->SetTitle("Z [mm]");
   fhZDDecay     ->GetXaxis()->SetTitle("Z [mm]");
   fhDTheta      ->GetXaxis()->SetTitle("Theta [rad]");
-  fhDLambda     ->GetXaxis()->SetTitle("Mean path length [mm]");
+  fhDLambda     ->GetXaxis()->SetTitle("Decay length [mm]");
   fhDPath       ->GetXaxis()->SetTitle("Z [mm]");
   fhDMom        ->GetXaxis()->SetTitle("P [GeV]");
   fhZHNLDecay   ->GetXaxis()->SetTitle("Z [m]");
   fhHNLGamma    ->GetXaxis()->SetTitle("Lorentz gamma");
   fhHNLDecayProb->GetXaxis()->SetTitle("Decay probability");
-  fhHNLReachProb->GetXaxis()->SetTitle("Decay probability");
+  fhHNLReachProb->GetXaxis()->SetTitle("Reach probability");
   fhHNLTheta    ->GetXaxis()->SetTitle("Theta [rad]");
   fhMomPi       ->GetXaxis()->SetTitle("P [GeV]");
   fhMomMu       ->GetXaxis()->SetTitle("P [GeV]");
