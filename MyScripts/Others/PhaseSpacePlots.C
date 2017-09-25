@@ -134,8 +134,7 @@ void PhaseSpacePlots() {
     xMN[MN] = MN;
     if (PSF >= 0.)
       yPSF[MN] = PSF;
-    if (BR > 0.)
-      yBR[MN] = BR;
+    yBR[MN] = BR;
     if (BRratio > 0.)
       yBRratio[MN] = BRratio;
   }
@@ -156,8 +155,7 @@ void PhaseSpacePlots() {
     xMN[MN] = MN;
     if (PSF >= 0.) 
       yPSF[MN] = PSF;
-    if (BR > 0.)
-      yBR[MN] = BR;
+    yBR[MN] = BR;
   }
 
   TGraph* gr2 = new TGraph(Mass, xMN, yPSF);
@@ -174,8 +172,7 @@ void PhaseSpacePlots() {
     xMN[MN] = MN;
     if (PSF >= 0.)
       yPSF[MN] = PSF;
-    if (BR > 0.)
-      yBR[MN] = BR;
+    yBR[MN] = BR;
     if (BRratio > 0.)
       yBRratio[MN] = BRratio;
   }
@@ -196,8 +193,7 @@ void PhaseSpacePlots() {
     xMN[MN] = MN;
     if (PSF >= 0.)
       yPSF[MN] = PSF;
-    if (BR > 0.)
-      yBR[MN] = BR;
+    yBR[MN] = BR;
   }
 
   TGraph* gr4 = new TGraph(Mass, xMN, yPSF);
@@ -233,7 +229,7 @@ void PhaseSpacePlots() {
   M->SetName("M");
   TMultiGraph* M2 = new TMultiGraph("M2", "BR vs N mass");
   M2->SetName("M2");
-  TMultiGraph* M3 = new TMultiGraph("M3", "N semi-leptonic decay amplitude vs N mass");
+  TMultiGraph* M3 = new TMultiGraph("M3", "N semi-leptonic partial decay widths vs N mass");
   M3->SetName("M3");
 
   TCanvas* c = new TCanvas("c");
@@ -273,7 +269,7 @@ void PhaseSpacePlots() {
   auto legend = new TLegend(0.1,0.65,0.4,0.9);
   legend->AddEntry(gr7,  "BR(D->nue)*Fe", "l");
   legend->AddEntry(gr8,  "BR(D->numu)*Fmu", "l");
-  legend->AddEntry(gr9,  "BR(DS->nu)*Fe", "l");
+  legend->AddEntry(gr9,  "BR(DS->nue)*Fe", "l");
   legend->AddEntry(gr10, "BR(DS->numu)*Fmu", "l");
 
   auto legend2 = new TLegend(0.1,0.65,0.45,0.9);
@@ -352,7 +348,7 @@ void PhaseSpacePlots() {
   M3->Add(gr6);
   M3->Draw("AC");
   M3->GetXaxis()->SetTitle("N mass [MeV]");
-  M3->GetYaxis()->SetTitle("Decay amplitude [MeV]");
+  M3->GetYaxis()->SetTitle("Decay width [MeV]");
   M3->GetYaxis()->SetTitleOffset(1.);
   M3->GetXaxis()->SetTitleOffset(0.9);
   M3->GetXaxis()->SetTitleSize(labelSize);
