@@ -1,6 +1,6 @@
 Double_t PhaseSpace(Double_t mesonMass, Double_t MN, Double_t leptonMass) {
 
-  Double_t phaseSpace = phaseSpace = TMath::Power(mesonMass*mesonMass-MN*MN-leptonMass*leptonMass,2) - 4.*MN*MN*leptonMass*leptonMass;
+  Double_t phaseSpace = TMath::Power(mesonMass*mesonMass-MN*MN-leptonMass*leptonMass,2) - 4.*MN*MN*leptonMass*leptonMass;
 
   return phaseSpace;
 }
@@ -54,7 +54,7 @@ Double_t ComputeBR(Double_t mesonMass, Double_t leptonMass, Double_t Factor) {
   Double_t DSm2BR = 5.56E-3;
   Double_t brt = 0.;
 
-  if (Factor >= 0.) {
+  if (Factor > 0.) {
     if (mesonMass == DMass && leptonMass == Me)
       brt = De2BR*Factor;
     
@@ -82,17 +82,18 @@ Double_t ComputeTotalBR(Double_t mesonMass, Double_t MN) {
   Double_t DSe2BR = 1.4E-7;
   Double_t DSm2BR = 5.56E-3;
   Double_t brt = 0.;
+
   Double_t phaseSpaceE = PhaseSpace(mesonMass, MN, Me);
   Double_t phaseSpaceMu = PhaseSpace(mesonMass, MN, Mmu);
   Double_t FactorE = PhaseSpaceFactor(mesonMass, MN, Me, phaseSpaceE);
   Double_t FactorMu = PhaseSpaceFactor(mesonMass, MN, Mmu, phaseSpaceMu);
-
-  if (FactorE >= 0. && FactorMu >= 0.) {
+  
+  if (FactorE > 0. && FactorMu > 0.) {
     if (mesonMass == DMass)
-      brt = De2BR*FactorE/(De2BR*FactorE + Dm2BR*FactorMu);
+      brt = De2BR*FactorE/(De2BR*FactorE+Dm2BR*FactorMu);
     
     else if (mesonMass == DSMass)
-      brt = DSe2BR*FactorE/(DSe2BR*FactorE + DSm2BR*FactorMu);
+      brt = DSe2BR*FactorE/(DSe2BR*FactorE+DSm2BR*FactorMu);
   }
   
   return brt;
@@ -135,8 +136,7 @@ void PhaseSpacePlots() {
     if (PSF >= 0.)
       yPSF[MN] = PSF;
     yBR[MN] = BR;
-    if (BRratio > 0.)
-      yBRratio[MN] = BRratio;
+    yBRratio[MN] = BRratio;
   }
 
   TGraph* gr1 = new TGraph(Mass, xMN, yPSF);
@@ -147,13 +147,13 @@ void PhaseSpacePlots() {
 
   TGraph* gr11 = new TGraph(Mass, xMN, yBRratio);
   gr11->SetName("gr11");
-
+  
   for (Int_t MN = 0; MN < Mass; MN += step) {
     PS = PhaseSpace(DMass, MN, Mmu);
     PSF = PhaseSpaceFactor(DMass, MN, Mmu, PS);
     BR = ComputeBR(DMass, Mmu, PSF);
     xMN[MN] = MN;
-    if (PSF >= 0.) 
+    if (PSF >= 0.)
       yPSF[MN] = PSF;
     yBR[MN] = BR;
   }
@@ -173,8 +173,7 @@ void PhaseSpacePlots() {
     if (PSF >= 0.)
       yPSF[MN] = PSF;
     yBR[MN] = BR;
-    if (BRratio > 0.)
-      yBRratio[MN] = BRratio;
+    yBRratio[MN] = BRratio;
   }
 
   TGraph* gr3 = new TGraph(Mass, xMN, yPSF);
@@ -232,12 +231,6 @@ void PhaseSpacePlots() {
   TMultiGraph* M3 = new TMultiGraph("M3", "N semi-leptonic partial decay widths vs N mass");
   M3->SetName("M3");
 
-  TCanvas* c = new TCanvas("c");
-  TCanvas* c1 = new TCanvas("c1");
-  TCanvas* c1b = new TCanvas("c1b");
-  TCanvas* c2 = new TCanvas("c2");
-  TCanvas* c3 = new TCanvas("c3");
-
   gr1->SetLineColor(2);
   gr1->SetLineWidth(3);
   gr2->SetLineColor(4);
@@ -279,8 +272,7 @@ void PhaseSpacePlots() {
   auto legend3 = new TLegend(0.1,0.75,0.35,0.9);
   legend3->AddEntry(gr5,  "N->pie", "l");
   legend3->AddEntry(gr6,  "N->pimu", "l");
-  
-  c->cd();
+
   M->Add(gr7);
   M->Add(gr8);
   M->Add(gr9);
@@ -297,10 +289,8 @@ void PhaseSpacePlots() {
   M->GetYaxis()->SetLabelSize(labelSize);
   TGaxis::SetMaxDigits(2);
   gPad->Update();
-  legend->Draw();
-  c->Write();
+  M->Write();
 
-  c1->cd();
   gr1->GetYaxis()->SetTitle("F(D,DS->Ne)");
   gr1->SetTitle("Phase space factor vs N mass");
   gr1->GetXaxis()->SetTitle("N mass [MeV]");
@@ -311,9 +301,9 @@ void PhaseSpacePlots() {
   gr1->GetXaxis()->SetLabelSize(labelSize);
   gr1->GetYaxis()->SetLabelSize(labelSize); 
   gr1->Draw("AC");
-  c1->Write();
+  gPad->Update();
+  gr1->Write();
 
-  c1b->cd();
   gr2->GetYaxis()->SetTitle("F(D,DS->Nmu)");
   gr2->GetYaxis()->SetTitleOffset(1.);
   gr2->SetTitle("Phase space factor vs N mass");
@@ -325,9 +315,9 @@ void PhaseSpacePlots() {
   gr2->GetXaxis()->SetLabelSize(labelSize);
   gr2->GetYaxis()->SetLabelSize(labelSize); 
   gr2->Draw("AC");
-  c1b->Write();
+  gPad->Update();
+  gr2->Write();
 
-  c2->cd();
   M2->Add(gr11);
   M2->Add(gr12);
   M2->Draw("AC");
@@ -338,12 +328,10 @@ void PhaseSpacePlots() {
   M2->GetXaxis()->SetTitleSize(labelSize);
   M2->GetYaxis()->SetTitleSize(labelSize);
   M2->GetXaxis()->SetLabelSize(labelSize);
-  M2->GetYaxis()->SetLabelSize(labelSize); 
+  M2->GetYaxis()->SetLabelSize(labelSize);
   gPad->Update();
-  legend2->Draw();
-  c2->Write();
+  M2->Write();
 
-  c3->cd();
   M3->Add(gr5);
   M3->Add(gr6);
   M3->Draw("AC");
@@ -354,10 +342,9 @@ void PhaseSpacePlots() {
   M3->GetXaxis()->SetTitleSize(labelSize);
   M3->GetYaxis()->SetTitleSize(labelSize);
   M3->GetXaxis()->SetLabelSize(labelSize);
-  M3->GetYaxis()->SetLabelSize(labelSize); 
+  M3->GetYaxis()->SetLabelSize(labelSize);
   gPad->Update();
-  legend3->Draw();
-  c3->Write(); 
+  M3->Write();
 
   f->Write();
 }
