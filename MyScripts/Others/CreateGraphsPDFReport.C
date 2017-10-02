@@ -1,6 +1,7 @@
 void CreateGraphsPDFReport() {
   TFile *f1 = TFile::Open("/home/li/Desktop/Plots.root");
   TString path = "/home/li/GitVarious/HeavyNeutrino/Graphs/";
+
   TGaxis::SetMaxDigits(2);
   TCanvas *c = (TCanvas *)f1->Get("c");
   c->Draw();
