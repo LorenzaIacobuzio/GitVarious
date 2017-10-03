@@ -75,6 +75,18 @@ protected:
   Double_t fAcc[fN];
   Double_t fProb[fN];
   Double_t fYield[fN];
+  Double_t fCouplings[fN];
+
+  TH2D *fhReach;
+  TH2D *fhDecay;
+  TH2D *fhDecayBR;
+  TH2D *fhProdBR;
+  TH2D *fhGammaTot;
+  TH2D *fhTau;
+  TH2D *fhWeight;
+
+  TGraph *fgAcc;
+  TGraph *fgYield;
 };
 
 #endif

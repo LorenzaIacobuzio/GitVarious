@@ -39,18 +39,27 @@ HeavyNeutrinoPiMuSelectionScanCoupling::HeavyNeutrinoPiMuSelectionScanCoupling(C
   fSAVMatching = new SAVMatching();
 
   for (Int_t i = 0; i < fN; i++) {
-    fSumGood[i] = 0;
-    fSumAll[i] = 0;
+    fSumGood[i] = 0.;
+    fSumAll[i] = 0.;
     fNevents[i] = 0;
-    fAcc[i] = 0;
-    fProb[i] = 0;
-    fYield[i] = 0;
+    fCouplings[i] = 0.;
+    fAcc[i] = 0.;
+    fProb[i] = 0.;
+    fYield[i] = 0.;
   }
 }
 
 void HeavyNeutrinoPiMuSelectionScanCoupling::InitHist() {
 
-  //BookHisto("hNk3pi",    new TH1D("Nk3pi", "Total number of K3pi events", 1, 0., 1.));
+  BookHisto("hReach",    new TH2D("Reach", "Probability of HNL reaching the FV vs coupling",    fN, fCouplingStart, fCouplingStop, 1000, 0., 1.));
+  BookHisto("hDecay",    new TH2D("Decay", "Probability of HNL decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, 0., 1.));
+  BookHisto("hDecayBR",  new TH2D("DecayBR", "HNL decay factor vs coupling",                    fN, fCouplingStart, fCouplingStop, 1000, 0., 1.E18));
+  BookHisto("hProdBR",   new TH2D("ProdBR", "HNL production factor vs coupling",                fN, fCouplingStart, fCouplingStop, 1000, 0., 1.E18));
+  BookHisto("hGammaTot", new TH2D("GammaTot", "HNL total decay width vs coupling",              fN, fCouplingStart, fCouplingStop, 1000, 0., 1.E18));
+  BookHisto("hTau",      new TH2D("Tau", "HNL lifetime vs coupling",                            fN, fCouplingStart, fCouplingStop, 1000, 0., 1.));
+  BookHisto("hWeight",   new TH2D("Weight", "HNL weight vs coupling",                           fN, fCouplingStart, fCouplingStop, 1000, 0., 1.));
+  BookHisto("gAcc",      new TGraph("Acc", "Acceptance vs coupling"));
+  BookHisto("gYield",    new TGraph("Yield", "Yield per POT vs coupling"));
 }
 
 void HeavyNeutrinoPiMuSelectionScanCoupling::Process(Int_t) {
@@ -106,6 +115,7 @@ void HeavyNeutrinoPiMuSelectionScanCoupling::Process(Int_t) {
     UmuSquared = 16.*UeSquared;
     UtauSquared = 3.8*UeSquared;
     fIndex = round((std::abs(fCouplingStart-fCoupling))/fCouplingStep);
+    fCouplings[fIndex] = fCoupling;
 
     if (GetWithMC()) {
       Event *evt = GetMCEvent();
@@ -161,7 +171,7 @@ void HeavyNeutrinoPiMuSelectionScanCoupling::Process(Int_t) {
       }
     }
 
-    cout<<"coupling "<<fCoupling<<" index "<<fIndex<<" sumall "<<fSumAll[fIndex]<<" sumgood "<<fSumGood[fIndex]<<" n evt "<<fNevents[fIndex]<<endl;
+    //cout<<"coupling "<<fCoupling<<" index "<<fIndex<<" sumall "<<fSumAll[fIndex]<<" sumgood "<<fSumGood[fIndex]<<" n evt "<<fNevents[fIndex]<<endl;
 
     // L0 data                                                                       
 
@@ -187,288 +197,315 @@ void HeavyNeutrinoPiMuSelectionScanCoupling::Process(Int_t) {
     Bool_t On4 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, ID4);
     Bool_t TriggerStreamOK = (On1 || On2 || On3 || On4);
 
-    if (!TriggerOK)
-      return;
-    if (!TriggerStreamOK && !GetWithMC())
-      return;
+    if (TriggerOK) {
+      if (TriggerStreamOK && !GetWithMC()) {
+	
+	// Select two-track events                                                             
+	
+	std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
+	
+	if (Tracks.size() == 2) {
+	  
+	  // Features of the tracks                                                                 
+	  
+	  Int_t Charge1 = Tracks[0].GetCharge();
+	  Int_t Charge2 = Tracks[1].GetCharge();
+	  Double_t ChiSquare1 = Tracks[0].GetChi2();
+	  Double_t ChiSquare2 = Tracks[1].GetChi2();
+	  TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
+	  TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
+	  TVector3 Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
+	  TVector3 Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
+	  TVector3 TotMom = Mom1 + Mom2;
+	  
+	  // Compute CDA of track1,2 wrt kaon axis, between each other and of two-track total momentum wrt beam axis
+	  
+	  fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);     // kaon axis                      
+	  fCDAcomp->SetDir1(1.2E-3, 0., 1.);
+	  fCDAcomp->SetLine2Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);     // track1                                                             
+	  fCDAcomp->SetDir2(Mom1);
+	  fCDAcomp->ComputeVertexCDA();
+	  
+	  Double_t CDA1 = fCDAcomp->GetCDA();
+	  Double_t Zvertex1 = fCDAcomp->GetVertex().z();     // kaon axis-track1                      
+	  
+	  fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);     // track2                                                     
+	  fCDAcomp->SetDir2(Mom2);
+	  fCDAcomp->ComputeVertexCDA();
+	  
+	  Double_t CDA2 = fCDAcomp->GetCDA();
+	  Double_t Zvertex2 = fCDAcomp->GetVertex().z();     // kaon axis-track2                   
+	  
+	  fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);     // track1                                                                
+	  fCDAcomp->SetDir1(Mom1);
+	  fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);     // track2                                                     
+	  fCDAcomp->SetDir2(Mom2);
+	  fCDAcomp->ComputeVertexCDA();
+	  
+	  Double_t CDA = fCDAcomp->GetCDA();
+	  TVector3 Vertex = fCDAcomp->GetVertex();
+	  Double_t Zvertex = fCDAcomp->GetVertex().z();     // track1-track2                           
+	  
+	  fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);     // beam axis                           
+	  fCDAcomp->SetDir1(0., 0., 1.);
+	  fCDAcomp->SetLine2Point1(Vertex);     // total momentum                          
+	  fCDAcomp->SetDir2(TotMom);
+	  fCDAcomp->ComputeVertexCDA();
+	  
+	  Double_t CDAMom = fCDAcomp->GetCDA();
+	  Double_t ZvertexMom = fCDAcomp->GetVertex().z();     // beam axis-total momentum 
+	  
+	  // Compute distance of two-track momentum wrt target (extrapolation at target)               
+	  
+	  fDistcomp->SetLineDir(TotMom);     // total momentum                                     
+	  fDistcomp->SetLinePoint1(Vertex);
+	  fDistcomp->SetPoint(0., 0., 0.);     // target                                             
+	  fDistcomp->ComputeDistance();
+	  
+	  Double_t TargetDist = fDistcomp->GetDistance();
+	  
+	  // Compute distance of two-track vertex wrt beam axis                                    
+	  
+	  fDistcomp->SetLinePoint1(0., 0., 102000.);
+	  fDistcomp->SetLineDir(0., 0., 1.);
+	  fDistcomp->SetPoint(Vertex);
+	  fDistcomp->ComputeDistance();
+	  
+	  Double_t BeamlineDist = fDistcomp->GetDistance();
+	  
+	  // Track selection, CUT 1: Two tracks in Spectrometer acceptance                  
+    
+	  for (Int_t i = 0; i < 4; i++) {
+	    Double_t x1 = SpectrometerCand1->xAt(zStraw[i]);
+	    Double_t y1 = SpectrometerCand1->yAt(zStraw[i]);
+	    Double_t r1 = sqrt(x1*x1 + y1*y1);
+	    Double_t rShifted1 = sqrt(pow(x1-xStrawChamberCentre[i],2) + y1*y1);
+	    Double_t x2 = SpectrometerCand2->xAt(zStraw[i]);
+	    Double_t y2 = SpectrometerCand2->yAt(zStraw[i]);
+	    Double_t r2 = sqrt(x2*x2 + y2*y2);
+	    Double_t rShifted2 = sqrt(pow(x2-xStrawChamberCentre[i],2) + y2*y2);
+	    Bool_t inAcc = false;
+	    
+	    if ((rShifted1 > rMinStraw && r1 < rMaxStraw) && (rShifted2 > rMinStraw && r2 < rMaxStraw))
+	      inAcc = true;
+	    if (inAcc) {
+	      
+	      // Track selection, CUT 2: Chi2 and momentum cuts                                        
+	      
+	      if (ChiSquare1 <= 20. || ChiSquare2 <= 20.) {
+		if (SpectrometerCand1->GetNChambers() >= 3 || SpectrometerCand2->GetNChambers() >= 3) {
 
-    // Select two-track events                                                             
-   
-    std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
+		  // Track selection, CUT 3: Opposite-charged tracks                                
+		  
+		  if (Charge1 + Charge2 == 0) {
 
-    if (Tracks.size() != 2)
-      return;
+		    // Downstream track selection, CUT 4: Extrapolation and association to CHOD    
+		    
+		    Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
+		    Double_t x1 = SpectrometerCand1->xAtAfterMagnet(zCHOD);
+		    Double_t y1 = SpectrometerCand1->yAtAfterMagnet(zCHOD);
+		    Double_t r1 = sqrt(x1*x1+y1*y1);
+		    Double_t x2 = SpectrometerCand2->xAtAfterMagnet(zCHOD);
+		    Double_t y2 = SpectrometerCand2->yAtAfterMagnet(zCHOD);
+		    Double_t r2 = sqrt(x2*x2+y2*y2);
+		    Bool_t inAcc = false;
+		    
+		    if ((r1 > rMinCHOD && r1 < rMaxCHOD) && (r2 > rMinCHOD && r2 < rMaxCHOD))
+		      inAcc = true;
+		    if (inAcc) {
+		      if (CHODAssoc) {
     
-    // Features of the tracks                                                                         
+			// Downstream track selection, CUT 5: Extrapolation and association to LKr    
+			
+			Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
+			
+			if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr)) {
+			  if (LKrAssoc) {
 
-    Int_t Charge1 = Tracks[0].GetCharge();
-    Int_t Charge2 = Tracks[1].GetCharge();
-    Double_t ChiSquare1 = Tracks[0].GetChi2();
-    Double_t ChiSquare2 = Tracks[1].GetChi2();
-    TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
-    TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
-    TVector3 Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
-    TVector3 Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
-    TVector3 TotMom = Mom1 + Mom2;
+			    // Downstream track selection, CUT 6: Extrapolation and association to MUV3
+			    
+			    if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3)) {
+			      
+			      Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
+			      Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
+			      Int_t Assoc = 0;
+			      
+			      if (Assoc1 && !Assoc2)
+				Assoc = 1;
+			      else if (!Assoc1 && Assoc2)
+				Assoc = 2;
+			      else
+				Assoc = 0;
+			      
+			      if (Assoc == 1 || Assoc == 2) {
 
-    // Compute CDA of track1,2 wrt kaon axis, between each other and of two-track total momentum wrt beam axis
-                                                                                               
-    fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);     // kaon axis                                   
-    fCDAcomp->SetDir1(1.2E-3, 0., 1.);
-    fCDAcomp->SetLine2Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);     // track1                                                                        
-    fCDAcomp->SetDir2(Mom1);
-    fCDAcomp->ComputeVertexCDA();
+				// Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks    
+				
+				Double_t MUV3Time;
+				
+				if (Assoc == 1)
+				  MUV3Time = Tracks[0].GetMUV3Time(0);
+				else if (Assoc == 2)
+				  MUV3Time = Tracks[1].GetMUV3Time(0);
+				
+				Double_t CHODTime1 = Tracks[0].GetCHODTime();
+				Double_t CHODTime2 = Tracks[1].GetCHODTime();
+				
+				// Energy cuts, CUT 7: Cut on E/p in LKr                      
+				
+				Double_t EoP1 = Tracks[0].GetLKrEoP();
+				Double_t EoP2 = Tracks[1].GetLKrEoP();
+				Double_t MuEoP = 0.;
+				Double_t PiEoP = 0.;
+				
+				if (Assoc == 1) {
+				  MuEoP = EoP1;
+				  PiEoP = EoP2;
+				}
+				else if (Assoc == 2) {
+				  MuEoP = EoP2;
+				  PiEoP = EoP1;
+				}
+				
+				if (MuEoP < 0.2) {
+				  if (PiEoP > 0.2 && PiEoP < 0.8) {
+				    
+				    // Veto cuts, CUT 8: LAV veto                                
+				    
+				    fLAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+				    
+				    if (GetWithMC())
+				      fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC           
+				    else
+				      fLAVMatching->SetTimeCuts(-10., 10.);
+				    
+				    if (!fLAVMatching->LAVHasTimeMatching(LAVEvent)) {
+    
+				      // Veto cuts, CUT 9: SAV veto                           
+				      
+				      fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+				      
+				      if (GetWithMC()) {
+					fSAVMatching->SetIRCTimeCuts(99999, 99999);
+					fSAVMatching->SetSACTimeCuts(99999, 99999);
+				      } else {
+					fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
+					fSAVMatching->SetSACTimeCuts(10.0, 10.0);
+				      }
+				      
+				      if (!fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent)) {
+					
+					// Geometrical cuts, CUT 11: Cut on CDA of two tracks     
+					
+					if (CDA < 10.) {
+    
+					  // Geometrical cuts, CUT 12: Cut on two-track vertex wrt beamline                         
+					  
+					  if (BeamlineDist > 100.) {
 
-    Double_t CDA1 = fCDAcomp->GetCDA();
-    Double_t Zvertex1 = fCDAcomp->GetVertex().z();     // kaon axis-track1                      
-
-    fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);     // track2                                                                        
-    fCDAcomp->SetDir2(Mom2);
-    fCDAcomp->ComputeVertexCDA();
+					    // Geometrical cuts, CUT 13: Cut on Z of two-track vertex                              
+					    if (Zvertex > 102500. && Zvertex < 180000.) {
+					      
+					      // Geometrical cuts, CUT 14: Cut on CDA of each track wrt beam axis                       
+					      
+					      if (CDA1 > 50. && CDA2 > 50.) {
     
-    Double_t CDA2 = fCDAcomp->GetCDA();
-    Double_t Zvertex2 = fCDAcomp->GetVertex().z();     // kaon axis-track2                   
-    
-    fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);     // track1                                                                
-    fCDAcomp->SetDir1(Mom1);
-    fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);     // track2                                                                       
-    fCDAcomp->SetDir2(Mom2);
-    fCDAcomp->ComputeVertexCDA();
-    
-    Double_t CDA = fCDAcomp->GetCDA();
-    TVector3 Vertex = fCDAcomp->GetVertex();
-    Double_t Zvertex = fCDAcomp->GetVertex().z();     // track1-track2                           
-    
-    fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);     // beam axis                           
-    fCDAcomp->SetDir1(0., 0., 1.);
-    fCDAcomp->SetLine2Point1(Vertex);     // total momentum                                           
-    fCDAcomp->SetDir2(TotMom);
-    fCDAcomp->ComputeVertexCDA();
-    
-    Double_t CDAMom = fCDAcomp->GetCDA();
-    Double_t ZvertexMom = fCDAcomp->GetVertex().z();     // beam axis-total momentum                
-
-    // Compute distance of two-track momentum wrt target (extrapolation at target)                    
-
-    fDistcomp->SetLineDir(TotMom);     // total momentum                                     
-    fDistcomp->SetLinePoint1(Vertex);
-    fDistcomp->SetPoint(0., 0., 0.);     // target                                             
-    fDistcomp->ComputeDistance();
-    
-    Double_t TargetDist = fDistcomp->GetDistance();
-    
-    // Compute distance of two-track vertex wrt beam axis                                    
-
-    fDistcomp->SetLinePoint1(0., 0., 102000.);
-    fDistcomp->SetLineDir(0., 0., 1.);
-    fDistcomp->SetPoint(Vertex);
-    fDistcomp->ComputeDistance();
-    
-    Double_t BeamlineDist = fDistcomp->GetDistance();
-
-    // Track selection, CUT 1: Two tracks in Spectrometer acceptance                                  
-    
-    for (Int_t i = 0; i < 4; i++) {
-      Double_t x1 = SpectrometerCand1->xAt(zStraw[i]);
-      Double_t y1 = SpectrometerCand1->yAt(zStraw[i]);
-      Double_t r1 = sqrt(x1*x1 + y1*y1);
-      Double_t rShifted1 = sqrt(pow(x1-xStrawChamberCentre[i],2) + y1*y1);
-      Double_t x2 = SpectrometerCand2->xAt(zStraw[i]);
-      Double_t y2 = SpectrometerCand2->yAt(zStraw[i]);
-      Double_t r2 = sqrt(x2*x2 + y2*y2);
-      Double_t rShifted2 = sqrt(pow(x2-xStrawChamberCentre[i],2) + y2*y2);
-      Bool_t inAcc = false;
-      
-      if ((rShifted1 > rMinStraw && r1 < rMaxStraw) && (rShifted2 > rMinStraw && r2 < rMaxStraw))
-	inAcc = true;
-      if (!inAcc)
-	return;
-    }
-    
-    // Track selection, CUT 2: Chi2 and momentum cuts                                        
-    
-    if (ChiSquare1 >= 20. || ChiSquare2 >= 20.)
-      return;
-
-    if (SpectrometerCand1->GetNChambers() < 3 || SpectrometerCand2->GetNChambers() < 3)
-      return;
-
-    // Track selection, CUT 3: Opposite-charged tracks                                                
-    
-    if (Charge1 + Charge2 != 0)
-      return;
-    
-    // Downstream track selection, CUT 4: Extrapolation and association to CHOD                      
-
-    Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
-    Double_t x1 = SpectrometerCand1->xAtAfterMagnet(zCHOD);
-    Double_t y1 = SpectrometerCand1->yAtAfterMagnet(zCHOD);
-    Double_t r1 = sqrt(x1*x1+y1*y1);
-    Double_t x2 = SpectrometerCand2->xAtAfterMagnet(zCHOD);
-    Double_t y2 = SpectrometerCand2->yAtAfterMagnet(zCHOD);
-    Double_t r2 = sqrt(x2*x2+y2*y2);
-    Bool_t inAcc = false;
-    
-    if ((r1 > rMinCHOD && r1 < rMaxCHOD) && (r2 > rMinCHOD && r2 < rMaxCHOD))
-      inAcc = true;
-    if (!inAcc)
-      return;
-    
-    if (!CHODAssoc)
-      return;
-    
-    // Downstream track selection, CUT 5: Extrapolation and association to LKr               
-    
-    Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
-
-    if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr))
-      return;
-
-    if (!LKrAssoc)
-      return;
-
-    // Downstream track selection, CUT 6: Extrapolation and association to MUV3                     
-
-    if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3))
-      return;
-
-    Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
-    Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
-    Int_t Assoc = 0;
-    
-    if (Assoc1 && !Assoc2)
-      Assoc = 1;
-    else if (!Assoc1 && Assoc2)
-      Assoc = 2;
-    else
-      Assoc = 0;
-    
-    if (Assoc != 1 && Assoc != 2)
-      return;
-
-    // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks    
-
-    Double_t MUV3Time;
-    
-    if (Assoc == 1)
-      MUV3Time = Tracks[0].GetMUV3Time(0);
-    else if (Assoc == 2)
-      MUV3Time = Tracks[1].GetMUV3Time(0);
-    
-    Double_t CHODTime1 = Tracks[0].GetCHODTime();
-    Double_t CHODTime2 = Tracks[1].GetCHODTime();
-    
-    // Energy cuts, CUT 7: Cut on E/p in LKr                                                   
-    
-    Double_t EoP1 = Tracks[0].GetLKrEoP();
-    Double_t EoP2 = Tracks[1].GetLKrEoP();
-    Double_t MuEoP = 0.;
-    Double_t PiEoP = 0.;
-    
-    if (Assoc == 1) {
-      MuEoP = EoP1;
-      PiEoP = EoP2;
-    }
-    else if (Assoc == 2) {
-      MuEoP = EoP2;
-      PiEoP = EoP1;
-    }
-    
-    if (MuEoP >= 0.2)
-      return;
-    
-    if (PiEoP <= 0.2 || PiEoP >= 0.8)
-      return;
-
-    // Veto cuts, CUT 8: LAV veto                                                                   
-    
-    fLAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
-    
-    if (GetWithMC())
-      fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC           
-    else
-      fLAVMatching->SetTimeCuts(-10., 10.);
-    
-    if (fLAVMatching->LAVHasTimeMatching(LAVEvent))
-      return;
-    
-    // Veto cuts, CUT 9: SAV veto                                                         
-
-    fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
-    
-    if (GetWithMC()) {
-      fSAVMatching->SetIRCTimeCuts(99999, 99999);
-      fSAVMatching->SetSACTimeCuts(99999, 99999);
-    } else {
-      fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
-      fSAVMatching->SetSACTimeCuts(10.0, 10.0);
-    }
-    
-    if (fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent))
-      return;
-    
-    // Geometrical cuts, CUT 11: Cut on CDA of two tracks                                      
-    
-    if (CDA >= 10.)
-      return;
-    
-    // Geometrical cuts, CUT 12: Cut on two-track vertex wrt beamline                         
-    
-    if (BeamlineDist <= 100.)
-      return;
-
-    // Geometrical cuts, CUT 13: Cut on Z of two-track vertex                               
-    
-    if (Zvertex <= 102500. || Zvertex >= 180000.)
-      return;
-
-    // Geometrical cuts, CUT 14: Cut on CDA of each track wrt beam axis                       
-
-    if (CDA1 <= 50. || CDA2 <= 50.)
-      return;
-    
-    // Computation of coupling-related quantities of good HNL in the MC event                      
-    /*  
-    if (GetWithMC()) {
-      Event *evt = GetMCEvent();
-      for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-	KinePart *p = evt->GetKinePart(i);
-	if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
-	  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-	  point2.SetXYZ(0., 0., LInitialFV);
-	  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	  MN = ComputeHNLMass(p);
-	  gammaTot = GammaTot(mass1, mass2, MN, USquared);
-	  HNLTau = Tau(gammaTot);
-	  LReach = ComputeL(point1, point2, momentum1);
-	  BR = ComputeBR(p, MN);
-	  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-	  NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
-	  NPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
-
-	  if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
-	    LeptonUSquared = UeSquared;
-
-	  else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
-	    LeptonUSquared = UmuSquared;
-
-	  // HNL production in the Be target
-
-	  Weight = DBeProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
-
-	  // HNL production in the Cu TAXs
-
-	  //Weight = DCuProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
-
-	  if (Weight >= 0. && Weight <= 10.)
-	    fSumGood[fIndex] += Weight;
+						// Computation of coupling-related quantities of good HNL in the MC event                      
+						
+						if (GetWithMC()) {
+						  Event *evt = GetMCEvent();
+						  for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
+						    KinePart *p = evt->GetKinePart(i);
+						    if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
+						      point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
+						      point2.SetXYZ(0., 0., LInitialFV);
+						      momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
+						      MN = ComputeHNLMass(p);
+						      gammaTot = GammaTot(mass1, mass2, MN, USquared);
+						      HNLTau = Tau(gammaTot);
+						      LReach = ComputeL(point1, point2, momentum1);
+						      BR = ComputeBR(p, MN);
+						      NReachProb = ComputeNReachProb(p, HNLTau, LReach);
+						      NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
+						      NPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
+						      
+						      if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
+							LeptonUSquared = UeSquared;
+						      
+						      else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
+							LeptonUSquared = UmuSquared;
+						      
+						      // HNL production in the Be target
+						      
+						      Weight = DBeProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
+						      
+						      // HNL production in the Cu TAXs
+						      
+						      //Weight = DCuProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
+						      
+						      if (Weight >= 0. && Weight <= 10.)
+							fSumGood[fIndex] += Weight;
+						    }
+						  }
+						}
+					      }
+					    }
+					  }
+					}
+				      }
+				    }
+				  }
+				}
+			      }
+			    }
+			  }
+			}
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
 	}
       }
-      }*/
+    }
   }
 }
 
 void HeavyNeutrinoPiMuSelectionScanCoupling::EndOfJobUser() {
+
+  // Retrieve plots
+
+  fhReach    = (TH2D*)fHisto.GetTH2("hReach");
+  fhDecay    = (TH2D*)fHisto.GetTH2("hDecay");
+  fhDecayBR  = (TH2D*)fHisto.GetTH2("hDecayBR");
+  fhProdBR   = (TH2D*)fHisto.GetTH2("hProdBR");
+  fhGammaTot = (TH2D*)fHisto.GetTH2("hGammaTot");
+  fhTau      = (TH2D*)fHisto.GetTH2("hTau");
+  fhWeight   = (TH2D*)fHisto.GetTH2("hWeight");
+  fgAcc      = (TGraph*)fHisto.GetTGraph("gAcc");
+  fgYield    = (TGraph*)fHisto.GetTGraph("gYield");
+
+  fhReach   ->GetXaxis()->SetTitle("Log of coupling");
+  fhDecay   ->GetXaxis()->SetTitle("Log of coupling");
+  fhDecayBR ->GetXaxis()->SetTitle("Log of coupling");
+  fhProdBR  ->GetXaxis()->SetTitle("Log of coupling");
+  fhGammaTot->GetXaxis()->SetTitle("Log of coupling");
+  fhTau     ->GetXaxis()->SetTitle("Log of coupling");
+  fhWeight  ->GetXaxis()->SetTitle("Log of coupling");
+  //fgAcc     ->GetXaxis()->SetTitle("Log of coupling");
+  //fgYield   ->GetXaxis()->SetTitle("Log of coupling");
+
+  fhReach   ->GetYaxis()->SetTitle("Reach probability");
+  fhDecay   ->GetYaxis()->SetTitle("Decay probability");
+  fhDecayBR ->GetYaxis()->SetTitle("Decay factor");
+  fhProdBR  ->GetYaxis()->SetTitle("Production factor");
+  fhGammaTot->GetYaxis()->SetTitle("Total decay width [MeV]");
+  fhTau     ->GetYaxis()->SetTitle("Lifetime [ns]");
+  fhWeight  ->GetYaxis()->SetTitle("Weight");
+  //fgAcc     ->GetYaxis()->SetTitle("Acceptance");
+  //fgYield   ->GetYaxis()->SetTitle("Yield");
 
   // Acceptance computation
 
@@ -483,7 +520,7 @@ void HeavyNeutrinoPiMuSelectionScanCoupling::EndOfJobUser() {
     cout << "Yield = " << fAcc[i] << "*" << fProb[i] << " = " << fYield[i] << endl;
   }
 
-  //SaveAllPlots();
+  SaveAllPlots();
 
   return;
 }
