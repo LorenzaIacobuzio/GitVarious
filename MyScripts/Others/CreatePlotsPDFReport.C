@@ -1,14 +1,12 @@
 void CreatePlotsPDFReport() {
-  /*
   TFile *f1 = TFile::Open("/home/li/Desktop/HNLMCAnalysis.root");
   TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelection");  
   TIter next(dir1->GetListOfKeys());
   TKey *key;
   TCanvas *c1 = new TCanvas();
-  */
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-  /*
+
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
     if (!cl->InheritsFrom("TH1") && !cl->InheritsFrom("TH2")) continue;
@@ -67,8 +65,7 @@ void CreatePlotsPDFReport() {
       c1->SaveAs(path + key->GetName() + ".png");
     }
   }
-  */
-  
+  /*  
   TFile *f2 = TFile::Open("/home/li/Desktop/HNLMCAnalysisAccYield.root");
   TDirectory * dir2 = (TDirectory*)f2->Get("HeavyNeutrinoPiMuSelection");
   TIter next2(dir2->GetListOfKeys());
@@ -102,5 +99,5 @@ void CreatePlotsPDFReport() {
 	c2->SaveAs(path + key2->GetName() + ".png");
       }
     }
-  }
+    }*/
 }
