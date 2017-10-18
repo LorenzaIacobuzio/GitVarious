@@ -34,12 +34,13 @@ void CreatePlotsPDFReportScanCoupling() {
       h2->GetYaxis()->SetTitleSize(labelSize);
       h2->GetXaxis()->SetLabelSize(labelSize);
       h2->GetYaxis()->SetLabelSize(labelSize);
+      h2->GetZaxis()->SetLabelSize(labelSize);
       gStyle->SetOptStat(0);
       gPad->SetLogy();
       gPad->SetLogz();
       gPad->SetGridx();
       gPad->SetGridy();
-      gPad->Update();
+      c1->SetRightMargin(0.2);
       h2->Draw("colz");    
     }
    
