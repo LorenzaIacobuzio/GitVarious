@@ -58,7 +58,7 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
 
   BookHisto("hZDProd",        new TH1D("ZDProd",  "Z of D meson production point", 200., -250., 250.));
   BookHisto("hZDDecay",       new TH1D("ZDDecay",  "Z of D meson decay point",     200., -250., 300.));
-  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100, -0.1, 0.3));
+  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100,  0., 0.3));
   BookHisto("hDLambda",       new TH1D("DLambda",    "D meson decay length",       100, -1., 40.));
   BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 50.));
   BookHisto("hDMom",          new TH1D("DMom",       "D meson momentum",           100, -1., 170.));
@@ -67,7 +67,8 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., 0., 170.));
   BookHisto("hHNLDecayProb",  new TH1D("HNLDecayProb", "HNL decay probability",          100., 0., 0.0065));
   BookHisto("hHNLReachProb",  new TH1D("HNLReachProb", "HNL probability of reaching FV", 100., 0.99, 1.001));
-  BookHisto("hHNLTheta",      new TH1D("HNLTheta",     "HNL theta",                      100., -0.5, 3.5));
+  BookHisto("hHNLTheta",      new TH1D("HNLTheta",     "HNL theta",                      100., 0., 0.5));
+  BookHisto("hHNLMom",        new TH1D("HNLMom",       "HNL momentum",                   100., -0.5, 200.));
   BookHisto("hWeight",        new TH1D("Weight",       "Weight",                         1000, 0., 0.08E-12));
   BookHisto("hMomPi",         new TH1D("MomPi",        "Pion momentum",                  100, -0.5, 200.));
   BookHisto("hMomMu",         new TH1D("MomMu",        "Muon momentum",                  100, -0.5, 200.));
@@ -171,6 +172,9 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   TVector3 point1;
   TVector3 point2;
   TVector3 momentum1;
+  Double_t p1,p2;
+  Double_t DProdProb = 0.;
+  Double_t fTAXDistance = 24685.;
 
   fDBeProdProb = 0.00069;
   fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
@@ -190,18 +194,20 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	Double_t yMUV3 = p->yAt(zMUV3);
 	FillHisto("hXYCHODTrue", xCHOD/1000., yCHOD/1000.);
 	FillHisto("hXYMUV3True", xMUV3/1000., yMUV3/1000.);
-	if (p->GetCharge() == 1.) {
+	if (p->GetParticleName() == "pi+" || p->GetParticleName() == "pi-") {
 	  mom1 = p->GetInitial4Momentum();
 	  mass1 = TMath::Sqrt(mom1.E()*mom1.E() - mom1.P()*mom1.P());
+	  p1 = TMath::Sqrt(mom1.Px()*mom1.Px()+mom1.Py()*mom1.Py()+mom1.Pz()*mom1.Pz());
 	}
-	else if (p->GetCharge() == -1.) {
+	else if (p->GetParticleName() == "mu+" || p->GetParticleName() == "mu-") {
 	  mom2 = p->GetInitial4Momentum();
 	  mass2 = TMath::Sqrt(mom2.E()*mom2.E() - mom2.P()*mom2.P());
+	  p2 = TMath::Sqrt(mom2.Px()*mom2.Px()+mom2.Py()*mom2.Py()+mom2.Pz()*mom2.Pz());
 	}
 	if (counter == 2) {
-	  FillHisto("hMomPi",  mom1.P()/1000.);
-	  FillHisto("hMomMu",  mom2.P()/1000.);
-	  FillHisto("hP1vsP2", mom1.P()/1000., mom2.P()/1000.);
+	  FillHisto("hMomPi",  p1/1000.);
+	  FillHisto("hMomMu",  p2/1000.);
+	  FillHisto("hP1vsP2", p1/1000., p2/1000.);
 	  FillHisto("hInvMassMC", (mom1+mom2).M2()/1000.);
 	}
       }
@@ -231,13 +237,15 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
 	  LeptonUSquared = UmuSquared;
 
-	// HNL production in the Be target
+	if (p->GetProdPos().Z() < fTAXDistance)
+	  DProdProb = fDBeProdProb;
+	else if (p->GetProdPos().Z() >= fTAXDistance)
+	  DProdProb = fDCuProdProb;
 
-	Weight = fDBeProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+	cout<<p->GetProdPos().Z()<<" "<<fTAXDistance<<" "<<DProdProb<<" "<<fDBeProdProb<<" "<<fDCuProdProb<<endl;
 
-	// HNL production in the Cu TAXs
-
-	//Weight = fDCuProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+	
 	if (Weight >= 0. && Weight <= 10)
 	  fSumAll += Weight;
 
@@ -252,6 +260,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	FillHisto("hHNLReachProb", NReachProb);
 	FillHisto("hHNLDecayProb", NDecayProb);
 	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
+	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
 	FillHisto("hWeight",Weight);
       }
     }
@@ -628,7 +637,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   CutID++;
   
   // Veto cuts, CUT 10: Residual LKr veto
-  
+  /*  
   Double_t LKrEnergyInTime = 0;
   Double_t LKrWeightedTime = 0;
   Int_t NLKrCand = LKrEvent->GetNCandidates();
@@ -696,7 +705,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
     FillHisto("hAddEnLKrHit", LKrWeightedTime - MUV3Time, LKrEnergyInTime/1000.);
     return;
   }
-
+  */
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
   
@@ -800,13 +809,15 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
 	  LeptonUSquared = UmuSquared;
 
-	// HNL production in the Be target
+        if (p->GetProdPos().Z() < fTAXDistance)
+	  DProdProb = fDBeProdProb;
+	else if(p->GetProdPos().Z() >= fTAXDistance)
+          DProdProb = fDCuProdProb;
+	
+        cout<<p->GetProdPos().Z()<<" "<<fTAXDistance<<" "<<DProdProb<<" "<<fDBeProdProb<<" "<<fDCuProdProb<<endl;
 
-	Weight = fDBeProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
-
-	// HNL production in the Cu TAXs
-
-	//Weight = fDCuProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+	
 	if (Weight >= 0. && Weight <= 10)
 	  fSumGood += Weight;
       }
@@ -840,6 +851,7 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   fhHNLDecayProb = (TH1D*) fHisto.GetTH1("hHNLDecayProb");
   fhHNLReachProb = (TH1D*) fHisto.GetTH1("hHNLReachProb");
   fhHNLTheta     = (TH1D*) fHisto.GetTH1("hHNLTheta");
+  fhHNLMom       = (TH1D*) fHisto.GetTH1("hHNLMom");
   fhMomPi        = (TH1D*) fHisto.GetTH1("hMomPi");
   fhMomMu        = (TH1D*) fHisto.GetTH1("hMomMu");
   fhWeight       = (TH1D*) fHisto.GetTH1("hWeight");
@@ -920,6 +932,7 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   fhHNLDecayProb->GetXaxis()->SetTitle("Decay probability");
   fhHNLReachProb->GetXaxis()->SetTitle("Reach probability");
   fhHNLTheta    ->GetXaxis()->SetTitle("Theta [rad]");
+  fhHNLMom      ->GetXaxis()->SetTitle("P [GeV]");
   fhMomPi       ->GetXaxis()->SetTitle("P [GeV]");
   fhMomMu       ->GetXaxis()->SetTitle("P [GeV]");
   fhWeight      ->GetXaxis()->SetTitle("Weight");
@@ -1013,12 +1026,12 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   fhCDAvsZVertex_TrackToTrackAfterCut   ->GetYaxis()->SetTitle("CDA [m]");
   fhCDAvsZVertex_TrackToTrackFinal      ->GetYaxis()->SetTitle("CDA [m]");
   
-  fhBeamlineDistvsTargetDist_TotMomInitial             ->GetYaxis()->SetTitle("Beamline distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack->GetYaxis()->SetTitle("Beamline distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts     ->GetYaxis()->SetTitle("Beamline distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts       ->GetYaxis()->SetTitle("Beamline distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterVetoes         ->GetYaxis()->SetTitle("Beamline distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomFinal               ->GetYaxis()->SetTitle("Beamline distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomInitial             ->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts     ->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts       ->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes         ->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomFinal               ->GetYaxis()->SetTitle("Beam axis distance [m]");
   
   fhEoPMuVsPi->GetYaxis()->SetTitle("Muon E/p");
   
@@ -1272,9 +1285,6 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeTotalBR(KinePart* p, Double_t USquar
 }
 
 HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
-
-  faccFile.close();
-  fyieldFile.close();
   
   delete fCDAcomp;
   delete fDistcomp;

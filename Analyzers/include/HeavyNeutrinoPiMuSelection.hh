@@ -85,6 +85,7 @@ protected:
   TH1D *fhHNLDecayProb;
   TH1D *fhHNLReachProb;
   TH1D *fhHNLTheta;
+  TH1D *fhHNLMom;
   TH1D *fhWeight;
   TH1D *fhMomPi;
   TH1D *fhMomMu;
