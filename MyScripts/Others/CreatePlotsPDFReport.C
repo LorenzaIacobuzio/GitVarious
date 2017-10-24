@@ -6,7 +6,10 @@ void CreatePlotsPDFReport() {
   TCanvas *c1 = new TCanvas();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-
+  TH1D* hh1 = new TH1D();
+  TH1D* hhh1 = new TH1D();      
+  TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
+  
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
     if (!cl->InheritsFrom("TH1") && !cl->InheritsFrom("TH2")) continue;
@@ -49,6 +52,34 @@ void CreatePlotsPDFReport() {
 	gStyle->SetStatH(0.3);
 	gStyle->SetOptStat(10);
 	gPad->Update();
+	if (!strcmp(key->GetName(), "ZDProd")) {
+	  hh1 = (TH1D*)h1->Clone("hh1");
+	  hh1->SetName("ZDProdTarget");
+	  hh1->SetTitle("Z of D meson production point in the target");
+	  hh1->GetXaxis()->SetRangeUser(-250., 250.);
+	  hh1->Draw();
+	  c1->SaveAs(path + hh1->GetName() + ".png");
+	  hhh1 = (TH1D*)h1->Clone("hhh1");
+	  hhh1->SetName("ZDProdTAX");
+	  hhh1->SetTitle("Z of D meson production point in the TAXs");
+	  hhh1->GetXaxis()->SetRangeUser(24500., 27000.);
+	  hhh1->Draw();
+	  c1->SaveAs(path + hhh1->GetName() + ".png");
+	}
+	if (!strcmp(key->GetName(), "ZDDecay")) {
+          hh1 = (TH1D*)h1->Clone("hh1");
+	  hh1->SetName("ZDDecayTarget");
+	  hh1->SetTitle("Z of D meson decay point in the target");
+          hh1->GetXaxis()->SetRangeUser(-250., 300.);
+          hh1->Draw();
+	  c1->SaveAs(path + hh1->GetName() + ".png");
+	  hhh1 = (TH1D*)h1->Clone("hhh1");
+	  hhh1->SetName("ZDDecayTAX");
+	  hhh1->SetTitle("Z of D meson decay point in the TAXs");
+          hhh1->GetXaxis()->SetRangeUser(24500., 27000.);
+	  hhh1->Draw();
+	  c1->SaveAs(path + hhh1->GetName() + ".png");
+        }
 	if (!strcmp(key->GetName(), "InvMassReco")) {
 	  h1->Fit("gaus");
 	  gStyle->SetStatW(0.2); 
@@ -60,8 +91,6 @@ void CreatePlotsPDFReport() {
         else
           h1->Draw();
       }
-      
-      TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
       c1->SaveAs(path + key->GetName() + ".png");
     }
   }
