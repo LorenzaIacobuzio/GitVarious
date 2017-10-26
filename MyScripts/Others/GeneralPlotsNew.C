@@ -17,6 +17,7 @@ Double_t D0Mass = 1864.84;
 Double_t KMass = 493.68;
 Double_t K0Mass = 497.61;
 Double_t Mrho = 775.4;
+const int InitialMass = 100;
 const int Mass = 10000;
 const int step = 1;
 const int Masses = Mass/step;
@@ -30,17 +31,22 @@ Double_t PiMu = 0.;
 
 Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t TwoBody) {
 
-  Double_t phaseSpace = TMath::Power(Mass1*Mass1-Mass2*Mass2-Mass3*Mass3,2) - 4.*Mass2*Mass2*Mass3*Mass3;
+  Double_t phaseSpace = 0.;
+
+  if (TwoBody == kTRUE)
+    phaseSpace = TMath::Power(Mass1*Mass1-Mass2*Mass2-Mass3*Mass3,2) - 4.*Mass2*Mass2*Mass3*Mass3;
 
   return phaseSpace;
 }
 
-Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t phaseSpace, Bool_t TwoBody)) {
+Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t phaseSpace, Bool_t TwoBody) {
 
   Double_t factor = 0.;
 
-  if(phaseSpace > 0.) {
-    factor = ((Mass1*Mass1*(Mass2*Mass2 + Mass3*Mass3)-TMath::Power(Mass2*Mass2-Mass3*Mass3,2))*TMath::Power(phaseSpace,0.5))/(Mass3*Mass3*TMath::Power(Mass1*Mass1-Mass3*Mass3,2));
+  if (TwoBody == kTRUE) {
+    if(phaseSpace > 0.) {
+      factor = (Mass1*Mass1*(Mass2*Mass2 + Mass3*Mass3)-TMath::Power(Mass2*Mass2-Mass3*Mass3,2))*TMath::Power(phaseSpace,0.5)/(Mass3*Mass3*TMath::Power(Mass1*Mass1-Mass3*Mass3,2));
+    }
   }
 
   return factor;
@@ -56,9 +62,7 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   if (Mass1 >= (Mass2+Mass3))
     gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
-  else
-    gamma_l_l_nu = 0.;
-  
+
   return gamma_l_l_nu;
 }
 
@@ -68,103 +72,94 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
   
   if (Mass1 >= (Mass2+Mass3)) 
     gamma_2 = (GF*GF*form*form/(8*TMath::Pi()*Mass1*Mass1)*(Mass3*Mass3 + Mass1*Mass1)*(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3)*TMath::Power(Mass1*Mass1*Mass1*Mass1 + Mass2*Mass2*Mass2*Mass2 + Mass3*Mass3*Mass3*Mass3 - 2.*Mass1*Mass3*Mass1*Mass3 - 2.*Mass1*Mass2*Mass1*Mass2 - 2.*Mass2*Mass3*Mass2*Mass3,0.5))/(2*Mass1);
-  else
-    gamma_2 = 0.;
 
   return gamma_2;
 }
 
 Double_t GammaTot(Double_t MN) {
-
+  /*
   Double_t USquared = 1.E-6;
   Double_t UeSquared = USquared/20.8;
   Double_t UmuSquared = 16.*UeSquared;
   Double_t UtauSquared = 3.8*UeSquared;
-  Double_t Coupling = 0.;
+  */
   Double_t gammaTot = 0.;
 
-  if (MN < 2*Me) {
-    gammaTot += 0.;
-    if (MN >= 2*Me && MN < (Me+Mmu)) {
-      gammaTot += GammaLeptonNu3(MN, Me, Me)/**UeSquared*/;
-      if (MN >= (Me+Mmu) && MN < (Me+Mpi)) {
-	gammaTot += GammaLeptonNu3(MN, Me, Mmu)/**TMath::Sqrt(UeSquared)*TMath::Sqrt(UmuSquared)*/;
-	if (MN >= (Me+Mpi) && MN < 2*Mmu) {
-	  gammaTot += Gamma2(MN, Me, Mpi, fPi)/**UeSquared*/;
-	  if (MN >= 2*Mmu && MN < (Mmu+Mpi)) {
-	    gammaTot += GammaLeptonNu3(MN, Mmu, Mmu)/**UmuSquared*/;
-	    if (MN >= (Mmu+Mpi) && MN < (Mrho+Me)) {
-	      gammaTot += Gamma2(MN, Mmu, Mpi, fPi)/**UmuSquared*/;
-	      if (MN >= (Mrho+Me) && MN < (Mrho+Mmu)) {
-		gammaTot += Gamma2(MN, Mrho, Me, fRho)/**UeSquared*/;
-		if (MN >= (Mmu+Mrho) && MN < (Me+Mtau)) {
-		  gammaTot+= Gamma2(MN, Mrho, Mmu, fRho)/**UmuSquared*/;
-		  if (MN >= (Me+Mtau) && MN < (Mpi+Mtau)) {
-		    gammaTot += GammaLeptonNu3(MN, Me, Mtau)/**TMath::Sqrt(UeSquared)*TMath::Sqrt(UtauSquared)*/;
-		    if (MN >= (Mpi+Mtau) && MN < (Mmu+Mtau)) {
-		      gammaTot += Gamma2(MN, Mtau, Mpi, fPi)/**UtauSquared*/;
-		      if (MN >= (Mmu+Mtau) && MN < (Mrho+Mtau)) {
-			gammaTot += GammaLeptonNu3(MN, Mmu, Mtau)/**TMath::Sqrt(UmuSquared)*TMath::Sqrt(UtauSquared)*/;
-			if (MN >= (Mrho+Mtau) && MN < 2*Mtau) {
-			  gammaTot += Gamma2(MN, Mrho, Mtau, fRho)/**UtauSquared*/;
-			  if (MN >= 2*Mtau) {
-			    gammaTot += GammaLeptonNu3(MN, Mtau, Mtau)/**UtauSquared*/;
-			  }
-			}
-		      }
-		    }
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
+  if (MN < 2*Me) 
+    gammaTot = 0.;
+  else if (MN >= 2*Me && MN < (Me+Mmu)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me)/**UeSquared*/;
+  else if (MN >= (Me+Mmu) && MN < (Me+Mpi)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu)/**TMath::Sqrt(UeSquared)*TMath::Sqrt(UmuSquared)*/;
+  else if (MN >= (Me+Mpi) && MN < 2*Mmu) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi)/**UeSquared*/;
+  else if (MN >= 2*Mmu && MN < (Mmu+Mpi)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu)/**UmuSquared*/;
+  else if (MN >= (Mmu+Mpi) && MN < (Mrho+Me)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi)/**UmuSquared*/;
+  else if (MN >= (Mrho+Me) && MN < (Mrho+Mmu)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho)/**UeSquared*/;
+  else if (MN >= (Mmu+Mrho) && MN < (Me+Mtau)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho)/**UmuSquared*/;
+  else if (MN >= (Me+Mtau) && MN < (Mpi+Mtau)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho) + GammaLeptonNu3(MN, Me, Mtau)/**TMath::Sqrt(UeSquared)*TMath::Sqrt(UtauSquared)*/;
+  else if (MN >= (Mpi+Mtau) && MN < (Mmu+Mtau)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho) + GammaLeptonNu3(MN, Me, Mtau) + Gamma2(MN, Mtau, Mpi, fPi)/**UtauSquared*/;
+  else if (MN >= (Mmu+Mtau) && MN < (Mrho+Mtau)) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho) + GammaLeptonNu3(MN, Me, Mtau) + Gamma2(MN, Mtau, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mtau)/**TMath::Sqrt(UmuSquared)*TMath::Sqrt(UtauSquared)*/;
+  else if (MN >= (Mrho+Mtau) && MN < 2*Mtau) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho) + GammaLeptonNu3(MN, Me, Mtau) + Gamma2(MN, Mtau, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mtau) + Gamma2(MN, Mrho, Mtau, fRho)/**UtauSquared*/;
+  else if (MN >= 2*Mtau) 
+    gammaTot = GammaLeptonNu3(MN, Me, Me) + GammaLeptonNu3(MN, Me, Mmu) + Gamma2(MN, Me, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mmu) + Gamma2(MN, Mmu, Mpi, fPi) + Gamma2(MN, Mrho, Me, fRho) + Gamma2(MN, Mrho, Mmu, fRho) + GammaLeptonNu3(MN, Me, Mtau) + Gamma2(MN, Mtau, Mpi, fPi) + GammaLeptonNu3(MN, Mmu, Mtau) + Gamma2(MN, Mrho, Mtau, fRho) + GammaLeptonNu3(MN, Mtau, Mtau)/**UtauSquared*/;
 
   return gammaTot;
 }
 
-Double_t ComputeBRProd(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
+Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
 
   Double_t brt = 0.;
   
   if (Prod == kTRUE) {
-    if (Factor > 0.) {
-      if (Mass1 == DMass && Mass3 == Me)
-	brt = De2BR*Factor;
-      else if (Mass1 == DMass && Mass3 == Mmu)
-	brt = Dm2BR*Factor;
-      else if (Mass1 == DSMass && Mass3 == Me)
-	brt = DSe2BR*Factor;
-      else if (Mass1 == DSMass && Mass3 == Mmu)
-	brt = DSm2BR*Factor;
-      else if (Mass1 == DSMass && Mass3 == Mtau)
-	brt = DSt2BR*Factor;
-      else if (Mass1 == Mtau && Mass3 == Mpi) 
-	brt = TauPi2BR*Factor*DSt2BR*PhaseSpaceFactor2(DSMass, 0., Mtau, PhaseSpace2(DSMass, 0., Mtau));
+    if (Factor > 0. && Mass1 >= (Mass2+Mass3)) {
+      if (TwoBody == kTRUE) {
+	if (Mass1 == DMass && Mass3 == Me)
+	  brt = De2BR*Factor;
+	else if (Mass1 == DMass && Mass3 == Mmu)
+	  brt = Dm2BR*Factor;
+	else if (Mass1 == DSMass && Mass3 == Me)
+	  brt = DSe2BR*Factor;
+	else if (Mass1 == DSMass && Mass3 == Mmu)
+	  brt = DSm2BR*Factor;
+	else if (Mass1 == DSMass && Mass3 == Mtau)
+	  brt = DSt2BR*Factor;
+	else if (Mass1 == Mtau && Mass3 == Mpi)
+	  brt = TauPi2BR*Factor*DSt2BR*PhaseSpaceFactor(DSMass, 0., Mtau, PhaseSpace(DSMass, 0., Mtau, TwoBody), TwoBody);
+      }
+      else if (TwoBody == kFALSE)
+	brt = 0.;
     }
-  }
+    else
+      brt = 0.;
+  }      
   else if (Prod == kFALSE) {
     if (TwoBody == kTRUE) {
       if ((Mass2 == Mpi || Mass3 == Mpi) && Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
-	brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(MN);
+	brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
       else if ((Mass2 == Mpi || Mass3 == Mpi) && Gamma2(Mass1, Mass2, Mass3, fPi) == 0.)
 	brt = 0.;
       if ((Mass2 == Mrho || Mass3 == Mrho) && Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
-	brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(MN);
+	brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
       else if ((Mass2 == Mrho || Mass3 == Mrho) && Gamma2(Mass1, Mass2, Mass3, fRho) == 0.)
 	brt = 0.;
     }
     else if (TwoBody == kFALSE) {
-      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0.)
-	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(MN);
-      else if (GammaLeptonNu3(Mass1, Mass2, Mass3) == 0.)
+      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
+	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
+      else if (GammaLeptonNu3(Mass1, Mass2, Mass3) == 0. || GammaTot(Mass1) == 0.)
 	brt = 0.;
     }
   }
-  
+
   return brt;
 }
 
@@ -189,92 +184,87 @@ Double_t ComputeTotalBR(Double_t mesonMass, Double_t MN) {
   return brt;
 }
 */
-void MassScan(Double_t Mass1, Double_t Mass2, Bool_t Prod, Bool_t TwoBody)) {
+void MassScan(Double_t Mass1, Double_t Mass2, Bool_t Prod, Bool_t TwoBody) {
 
   Double_t PS = 0.;
   Double_t PSF = 0.;
   Double_t BR = 0.;
-  Double_t xMN      [Masses];
-  Double_t yBR      [Masses];
-  Double_t yeenu    [Masses];
-  Double_t yemunu   [Masses];
-  Double_t ypie     [Masses];
-  Double_t ymumunu  [Masses];
-  Double_t ypimu    [Masses];
-  Double_t yrhoe    [Masses];
-  Double_t yrhomu   [Masses];
-  Double_t yetaunu  [Masses];
-  Double_t ypitau   [Masses];
-  Double_t ymutaunu [Masses];
-  Double_t yrhotau  [Masses];
-  Double_t ytautaunu[Masses];
+  Double_t xMN[Masses];
+  Double_t yBR[Masses];
 
   if (Prod == kTRUE) {
-    for (Int_t MN = 0; MN < Mass; MN += step) {
-      PS = PhaseSpace(Mass1, MN, Mass2, 1);
-      PSF = PhaseSpaceFactor(Mass1, MN, Mass2, PS, 1);
-      BR = ComputeBRProd(Mass1, MN, Mass2, PSF, Prod, 1);
-      xMN[MN] = MN;
+    for (Int_t MN = InitialMass; MN < Mass; MN += step) {
+      PS = PhaseSpace(Mass1, MN, Mass2, TwoBody);
+      PSF = PhaseSpaceFactor(Mass1, MN, Mass2, PS, TwoBody);
+      BR = ComputeBR(Mass1, MN, Mass2, PSF, Prod, TwoBody);
+      xMN[MN] = MN/1000.;
       yBR[MN] = BR;
     }
   }
 
-  else if (Prod == kFALSE) {}
-  
+  else if (Prod == kFALSE) {
+    for (Int_t MN = InitialMass; MN < Mass; MN += step) {
+      BR = ComputeBR(MN, Mass1, Mass2, PSF, Prod, TwoBody);
+      xMN[MN] = MN/1000.;
+      yBR[MN] = BR;
+    }
+  }
+    
   TGraph* gr = new TGraph(Mass, xMN, yBR);
   Int_t color = (Int_t)(rand() % 8 + 2);
   gr->SetLineColor(color);
   gr->SetLineWidth(3);
-  gr->GetYaxis()->SetTitle("F*BR");
-  gr->SetTitle("Phase space factor*BR vs N mass");
-  gr->GetXaxis()->SetTitle("N mass [MeV]");
-  gr->GetXaxis()->SetTitleOffset(0.9);
-  gr->GetXaxis()->SetTitleSize(labelSize);
-  gr->GetYaxis()->SetTitleSize(labelSize);
-  gr->GetXaxis()->SetLabelSize(labelSize);
-  gr->GetYaxis()->SetLabelSize(labelSize);
+
+  if (Prod == kTRUE) {
+    gr->GetYaxis()->SetTitle("F*BR(D->NX)");
+    gr->SetTitle("N production BR vs N mass");
+  }
+  else {
+    gr->GetYaxis()->SetTitle("BR(N->X)");
+    gr->SetTitle("N decay BR vs N mass");
+  }
+
+  gr->GetXaxis()->SetTitle("N mass [GeV]");
+  //gr->GetXaxis()->SetTitleOffset(0.9);
+  //gr->GetXaxis()->SetTitleSize(labelSize);
+  //gr->GetYaxis()->SetTitleSize(labelSize);
+  //gr->GetXaxis()->SetLabelSize(labelSize);
+  //gr->GetYaxis()->SetLabelSize(labelSize);
+  TGaxis::SetMaxDigits(2);
   gr->Draw("AC");
+  //gPad->SetLogx();
+  //gPad->SetLogy();
+  //gPad->Update();
   gr->Write();  
 }
 
 void GeneralPlotsNew() {
 
   TFile *f = new TFile("/home/li/Desktop/Plots.root","RECREATE");
-  Double_t yGammaPiE[Masses];
-  Double_t yGammaPiMu[Masses];
 
-  // HNL production via two-body decays
-  
+  // HNL production via two-body decay
+  /*  
   MassScan(DMass, Me, 1, 1);
   MassScan(DMass, Mmu, 1, 1);
   MassScan(DSMass, Me, 1, 1);
   MassScan(DSMass, Mmu, 1, 1);
   MassScan(DSMass, Mtau, 1, 1);
   MassScan(Mtau, Mpi, 1, 1);
-  /*
-  for (Int_t MN = 0; MN < Mass; MN += step) {
-    if (MN > Mpi + Me)
-      PiE = GammaPiE(MN)*1.E13;
-    else
-      PiE = 0.;
-    if (MN > Mpi + Mmu)
-      PiMu = GammaPiMu(MN)*1.E13;
-    else
-      PiMu = 0.;
-
-    xMN[MN] = MN;
-    if (PiE >= 0.)
-      yGammaPiE[MN] = PiE;
-    if (PiMu >= 0.)
-      yGammaPiMu[MN] = PiMu;
-  }
-  
-  TGraph* gr5 = new TGraph(Mass, xMN, yGammaPiE);
-  gr5->SetName("gr5");
-
-  TGraph* gr6 = new TGraph(Mass, xMN, yGammaPiMu);
-  gr6->SetName("gr6");
   */
+  // HNL decay via two-body decay
+
+  MassScan(Me, Me, 0, 0);
+  //MassScan(Me, Mmu, 0, 0);
+  //MassScan(Mpi, Me, 0, 1);
+  //MassScan(Mmu, Mmu, 0, 0);
+  //MassScan(Mpi, Mmu, 0, 1);
+  //MassScan(Mrho, Me, 0, 1);
+  //MassScan(Mrho, Mmu, 0, 1);
+  //MassScan(Me, Mtau, 0, 0);
+  //MassScan(Mpi, Mtau, 0, 1);
+  //MassScan(Mmu, Mtau, 0, 0);
+  //MassScan(Mrho, Mtau, 0, 1);
+  //MassScan(Mtau, Mtau, 0, 0);
 
   f->Write();
 }
