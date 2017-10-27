@@ -65,15 +65,31 @@ Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double
 
 Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
-  Double_t r  = 4*Mass2*Mass3/(Mass1*Mass1);
-  Double_t a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
-  Double_t b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
-  Double_t f = a+b;
+  Double_t r, a, b, f;
   Double_t gamma_l_l_nu = 0.;
-
-  if (Mass1 >= (Mass2+Mass3))
-    gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
-
+  
+  if (Mass1 >= (Mass2+Mass3)) {
+    if (Mass2 == Mass3) {
+      r  = 4*Mass2*Mass3/(Mass1*Mass1);
+      a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
+      b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
+      f = a+b;
+      gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+    }
+    else if (Mass2 != Mass3) {
+      if (Mass2 > Mass3)
+	r = Mass2;
+      else if (Mass2 < Mass3)
+	r = Mass3;
+      else {
+	cout<<"[GammaLeptonNu3] N 3-body decay mode should have equal masses"<<endl;
+	exit(1);
+      }
+      a = (GF*GF*TMath::Power(Mass1, 5))/(192*TMath::Power(TMath::Pi(), 3));
+      b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) -12.*TMath::Power(r, 4)*TMath::Log(r*r);
+      gamma_l_l_nu = a*b;
+  }
+  
   return gamma_l_l_nu;
 }
 /*// from Tommaso
@@ -120,8 +136,10 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       f = c - d + e;
       gamma_2 = a*b*f;
     }
-    else
+    else {
       cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
+      exit(1);
+    }
   }
   
   return gamma_2;
@@ -185,8 +203,10 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 	  brt = DSt2BR*Factor;
 	else if (Mass1 == tau && Mass3 == pi)
 	  brt = TauPi2BR*Factor*DSt2BR*PhaseSpaceFactor(DS, 0., tau, PhaseSpace(DS, 0., tau, TwoBody), TwoBody);
-	else
+	else {
 	  cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	  exit(1);
+	}
       }
     }
     else if (TwoBody == kFALSE) {
@@ -196,16 +216,20 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 	    brt = De3BR*Factor;
 	  else if (Mass4 == mu)
 	    brt = Dmu3BR*Factor;
-	  else
+	  else {
 	    cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	    exit(1);
+	  }
 	}
 	else if (Mass1 == D0 && Mass3 == K) {
 	  if (Mass4 == e)
 	    brt = D0e3BR*Factor;
 	  else if (Mass4 == mu)
 	    brt = D0mu3BR*Factor;
-	  else
+	  else {
 	    cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	    exit(1);
+	  }
 	}
       }
     }
@@ -220,16 +244,20 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 	brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
       else if ((Mass2 == rho || Mass3 == rho) && Gamma2(Mass1, Mass2, Mass3, fRho) == 0.)
 	brt = 0.;
-      else
+      else {
 	cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	exit(1);
+      }
     }
     else if (TwoBody == kFALSE) {
       if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
 	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
       else if (GammaLeptonNu3(Mass1, Mass2, Mass3) == 0. || GammaTot(Mass1) == 0.)
 	brt = 0.;
-      else
+      else {
           cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	  exit(1);
+      }
     }
   }
 
