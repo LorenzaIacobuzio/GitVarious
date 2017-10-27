@@ -8,15 +8,19 @@ Double_t pi = 139.57;
 Double_t rho = 775.4;
 Double_t D = 1869.62;
 Double_t DS = 1968.28;
+Double_t D0 = 1864.84;
+Double_t K = 493.68;
+Double_t K0 = 497.61;
 Double_t De2BR = 9.2E-9;
 Double_t Dm2BR = 3.74E-4;
 Double_t DSe2BR = 1.4E-7;
 Double_t DSm2BR = 5.56E-3;
 Double_t DSt2BR = 5.48E-2;
 Double_t TauPi2BR = 10.82E-2;
-Double_t D0 = 1864.84;
-Double_t K = 493.68;
-Double_t K0 = 497.61;
+Double_t De3BR = ;
+Double_t Dmu3BR = ;
+Double_t D0e3BR = ;
+Double_t D0mu3BR = ;
 const int InitialMass = 100;
 const int Mass = 10000;
 const int step = 1;
@@ -29,7 +33,7 @@ Double_t PiMu = 0.;
 
 
 
-Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t TwoBody) {
+Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Bool_t TwoBody) {
 
   Double_t phaseSpace = 0.;
 
@@ -41,7 +45,7 @@ Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t TwoBo
   return phaseSpace;
 }
 
-Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t phaseSpace, Bool_t TwoBody) {
+Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Double_t phaseSpace, Bool_t TwoBody) {
 
   Double_t factor = 0.;
 
@@ -72,14 +76,54 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   return gamma_l_l_nu;
 }
-
+/*// from Tommaso
 Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
 
   Double_t gamma_2 = 0.;
   
-  if (Mass1 >= (Mass2+Mass3)) 
-    gamma_2 = (GF*GF*form*form/(8*TMath::Pi()*Mass1*Mass1)*(Mass3*Mass3 + Mass1*Mass1)*(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3)*TMath::Power(Mass1*Mass1*Mass1*Mass1 + Mass2*Mass2*Mass2*Mass2 + Mass3*Mass3*Mass3*Mass3 - 2.*Mass1*Mass3*Mass1*Mass3 - 2.*Mass1*Mass2*Mass1*Mass2 - 2.*Mass2*Mass3*Mass2*Mass3,0.5))/(2*Mass1);
+  if (Mass1 >= (Mass2+Mass3)) {
+    if (Mass2 == pi) {
+      gamma_2 = (GF*GF*form*form/(8*TMath::Pi()*Mass1*Mass1)*(Mass3*Mass3 + Mass1*Mass1)*(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3)*TMath::Power(Mass1*Mass1*Mass1*Mass1 + Mass2*Mass2*Mass2*Mass2 + Mass3*Mass3*Mass3*Mass3 - 2.*Mass1*Mass3*Mass1*Mass3 - 2.*Mass1*Mass2*Mass1*Mass2 - 2.*Mass2*Mass3*Mass2*Mass3,0.5))/(2*Mass1);
+    }
+    else if (Mass2 == rho) {
+      gamma_2 = 
+    }
+    else
+      cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
+  }
 
+  return gamma_2;
+}
+*/
+// from shaposhnikov
+
+Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
+
+  Double_t gamma_2 = 0.;
+  Double_t a, b, c, d, e, f;
+  
+  if (Mass1 >= (Mass2+Mass3)) {
+    if (Mass2 == pi) {
+      a = (GF*GF*form*form*Mass1*Mass1*Mass1)/(16*TMath::Pi());
+      b = TMath::Power(Mass1*Mass1*Mass1*Mass1 + Mass2*Mass2*Mass2*Mass2 + Mass3*Mass3*Mass3*Mass3 - 2.*Mass1*Mass3*Mass1*Mass3 - 2.*Mass1*Mass2*Mass1*Mass2 - 2.*Mass2*Mass3*Mass2*Mass3, 0.5);
+      c = TMath::Power(1 - (Mass3*Mass3)/(Mass1*Mass1), 2);
+      d = (Mass2*Mass2)/(Mass1*Mass1)*(1 + (Mass3*Mass3)/(Mass1*Mass1));
+      e = c - d;
+      gamma_2 = a*b*e;
+    }
+    else if (Mass2 == rho) {
+      a = (GF*GF*form*form*Mass1*Mass1*Mass1)/(8*TMath::Pi()*Mass2*Mass2);
+      b = TMath::Power(Mass1*Mass1*Mass1*Mass1 + Mass2*Mass2*Mass2*Mass2 + Mass3*Mass3*Mass3*Mass3 - 2.*Mass1*Mass3*Mass1*Mass3 - 2.*Mass1*Mass2*Mass1*Mass2 - 2.*Mass2*Mass3*Mass2*Mass3, 0.5);
+      c = (1 + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
+      d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
+      e = TMath::Power(1 - (Mass3*Mass3)/(Mass1*Mass1), 2);
+      f = c - d + e;
+      gamma_2 = a*b*f;
+    }
+    else
+      cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
+  }
+  
   return gamma_2;
 }
 
@@ -122,13 +166,13 @@ Double_t GammaTot(Double_t MN) {
   return gammaTot;
 }
 
-Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
+Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
 
   Double_t brt = 0.;
   
   if (Prod == kTRUE) {
-    if (Factor > 0. && Mass1 >= (Mass2+Mass3)) {
-      if (TwoBody == kTRUE) {
+    if (TwoBody == kTRUE) {
+      if (Factor > 0. && Mass1 >= (Mass2+Mass3)) {
 	if (Mass1 == D && Mass3 == e)
 	  brt = De2BR*Factor;
 	else if (Mass1 == D && Mass3 == mu)
@@ -141,12 +185,30 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Fact
 	  brt = DSt2BR*Factor;
 	else if (Mass1 == tau && Mass3 == pi)
 	  brt = TauPi2BR*Factor*DSt2BR*PhaseSpaceFactor(DS, 0., tau, PhaseSpace(DS, 0., tau, TwoBody), TwoBody);
+	else
+	  cout<<"[ComputeBR] Unknown N production mode"<<endl;
       }
-      else if (TwoBody == kFALSE)
-	brt = 0.;
     }
-    else
-      brt = 0.;
+    else if (TwoBody == kFALSE) {
+      if (Factor > 0. && Mass1 >= (Mass2+Mass3+Mass4)) {
+	if (Mass1 == D && Mass3 == K0) {
+	  if (Mass4 == e)
+	    brt = De3BR*Factor;
+	  else if (Mass4 == mu)
+	    brt = Dmu3BR*Factor;
+	  else
+	    cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	}
+	else if (Mass1 == D0 && Mass3 == K) {
+	  if (Mass4 == e)
+	    brt = D0e3BR*Factor;
+	  else if (Mass4 == mu)
+	    brt = D0mu3BR*Factor;
+	  else
+	    cout<<"[ComputeBR] Unknown N production mode"<<endl;
+	}
+      }
+    }
   }      
   else if (Prod == kFALSE) {
     if (TwoBody == kTRUE) {
@@ -158,12 +220,16 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Fact
 	brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
       else if ((Mass2 == rho || Mass3 == rho) && Gamma2(Mass1, Mass2, Mass3, fRho) == 0.)
 	brt = 0.;
+      else
+	cout<<"[ComputeBR] Unknown N production mode"<<endl;
     }
     else if (TwoBody == kFALSE) {
       if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
 	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
       else if (GammaLeptonNu3(Mass1, Mass2, Mass3) == 0. || GammaTot(Mass1) == 0.)
 	brt = 0.;
+      else
+          cout<<"[ComputeBR] Unknown N production mode"<<endl;
     }
   }
 
@@ -191,7 +257,7 @@ Double_t ComputeTotalBR(Double_t mesonMass, Double_t MN) {
   return brt;
 }
 */
-void MassScan(Double_t Mass1, Double_t Mass2, Bool_t Prod, Bool_t TwoBody, std::string Title) {
+void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title) {
 
   Double_t PS = 0.;
   Double_t PSF = 0.;
@@ -200,18 +266,28 @@ void MassScan(Double_t Mass1, Double_t Mass2, Bool_t Prod, Bool_t TwoBody, std::
   Double_t yBR[Masses];
 
   if (Prod == kTRUE) {
-    for (Int_t MN = InitialMass; MN < Mass; MN += step) {
-      PS = PhaseSpace(Mass1, MN, Mass2, TwoBody);
-      PSF = PhaseSpaceFactor(Mass1, MN, Mass2, PS, TwoBody);
-      BR = ComputeBR(Mass1, MN, Mass2, PSF, Prod, TwoBody);
-      xMN[MN] = MN/1000.;
-      yBR[MN] = BR;
+    if (TwoBody == kTRUE) {
+      for (Int_t MN = InitialMass; MN < Mass; MN += step) {
+	PS = PhaseSpace(Mass1, MN, Mass2, 0, TwoBody);
+	PSF = PhaseSpaceFactor(Mass1, MN, Mass2, 0, PS, TwoBody);
+	BR = ComputeBR(Mass1, MN, Mass2, 0, PSF, Prod, TwoBody);
+	xMN[MN] = MN/1000.;
+	yBR[MN] = BR;
+      }
+    }
+    else if (TwoBody == kFALSE) {
+      for (Int_t MN = InitialMass; MN < Mass; MN += step) {
+        PS = PhaseSpace(Mass1, MN, Mass2, Mass3, TwoBody);
+        PSF = PhaseSpaceFactor(Mass1, MN, Mass2, Mass3, PS, TwoBody);
+        BR = ComputeBR(Mass1, MN, Mass2, Mass3, PSF, Prod, TwoBody);
+        xMN[MN] = MN/1000.;
+        yBR[MN] = BR;
+      }
     }
   }
-
   else if (Prod == kFALSE) {
     for (Int_t MN = InitialMass; MN < Mass; MN += step) {
-      BR = ComputeBR(MN, Mass1, Mass2, PSF, Prod, TwoBody);
+      BR = ComputeBR(MN, Mass1, Mass2, 0, PSF, Prod, TwoBody);
       xMN[MN] = MN/1000.;
       yBR[MN] = BR;
     }
@@ -259,33 +335,32 @@ void GeneralPlotsNew() {
   TFile *f = new TFile("/home/li/Desktop/Plots.root","RECREATE");
 
   // HNL production via two-body decay
-  /*
-  MassScan(D, e, 1, 1, "D->Ne");
-  MassScan(D, mu, 1, 1, "D->Nmu");
-  MassScan(DS, e, 1, 1, "DS->Ne");
-  MassScan(DS, mu, 1, 1, "DS->Nmu");
-  MassScan(DS, tau, 1, 1, "DS->Ntau");
-  MassScan(tau, pi, 1, 1, "DS->taunu; tau->Npi");
-  */
+
+  MassScan(D, e, 0, 1, 1, "D->Ne");
+  MassScan(D, mu, 0, 1, 1, "D->Nmu");
+  MassScan(DS, e, 0, 1, 1, "DS->Ne");
+  MassScan(DS, mu, 0, 1, 1, "DS->Nmu");
+  MassScan(DS, tau, 0, 1, 1, "DS->Ntau");
+  MassScan(tau, pi, 0, 1, 1, "DS->taunu; tau->Npi");
 
   // HNL production via three-body decay
 
-  
+  //MassScan(D, K0, e, 1, 0, "D->K0eN");
   
   // HNL decay via two- and three-body decay
-  /*
-  MassScan(e, e, 0, 0, "N->eenu");
-  MassScan(e, mu, 0, 0, "N->emunu");
-  MassScan(pi, e, 0, 1, "N->pie");
-  MassScan(mu, mu, 0, 0, "N->mumunu");
-  MassScan(pi, mu, 0, 1, "N->pimu");
-  MassScan(rho, e, 0, 1, "N->rhoe");
-  MassScan(rho, mu, 0, 1, "N->rhomu");
-  MassScan(e, tau, 0, 0, "N->etaunu");
-  MassScan(pi, tau, 0, 1, "N->pitau");
-  MassScan(mu, tau, 0, 0, "N->mutaunu");
-  MassScan(rho, tau, 0, 1, "N->rhotau");
-  MassScan(tau, tau, 0, 0, "N->tautaunu");
-  */
+
+  MassScan(e, e, 0, 0, 0, "N->eenu");
+  MassScan(e, mu, 0, 0, 0, "N->emunu");
+  MassScan(pi, e, 0, 0, 1, "N->pie");
+  MassScan(mu, mu, 0, 0, 0, "N->mumunu");
+  MassScan(pi, mu, 0, 0, 1, "N->pimu");
+  MassScan(rho, e, 0, 0, 1, "N->rhoe");
+  MassScan(rho, mu, 0, 0, 1, "N->rhomu");
+  MassScan(e, tau, 0, 0, 0, "N->etaunu");
+  MassScan(pi, tau, 0, 0, 1, "N->pitau");
+  MassScan(mu, tau, 0, 0, 0, "N->mutaunu");
+  MassScan(rho, tau, 0, 0, 1, "N->rhotau");
+  MassScan(tau, tau, 0, 0, 0, "N->tautaunu");
+
   f->Write();
 }
