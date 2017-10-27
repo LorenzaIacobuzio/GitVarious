@@ -18,7 +18,7 @@ Double_t KMass = 493.68;
 Double_t K0Mass = 497.61;
 Double_t Mrho = 775.4;
 const int InitialMass = 100;
-const int Mass = 10000;
+const int Mass = 100000;
 const int step = 1;
 const int Masses = Mass/step;
 TString name = "";
@@ -232,9 +232,13 @@ void MassScan(Double_t Mass1, Double_t Mass2, Bool_t Prod, Bool_t TwoBody) {
   //gr->GetYaxis()->SetLabelSize(labelSize);
   TGaxis::SetMaxDigits(2);
   gr->Draw("AC");
-  //gPad->SetLogx();
-  //gPad->SetLogy();
-  //gPad->Update();
+  gPad->SetLogx();
+  gPad->SetLogy();
+  gr->SetMinimum(1.E-15);
+  gr->SetMaximum(1.5);
+  gPad->Update();
+  gPad->Modified();
+  gPad->Write();
   gr->Write();  
 }
 
@@ -243,28 +247,28 @@ void GeneralPlotsNew() {
   TFile *f = new TFile("/home/li/Desktop/Plots.root","RECREATE");
 
   // HNL production via two-body decay
-  /*  
+
   MassScan(DMass, Me, 1, 1);
   MassScan(DMass, Mmu, 1, 1);
   MassScan(DSMass, Me, 1, 1);
   MassScan(DSMass, Mmu, 1, 1);
   MassScan(DSMass, Mtau, 1, 1);
   MassScan(Mtau, Mpi, 1, 1);
-  */
+
   // HNL decay via two-body decay
 
   MassScan(Me, Me, 0, 0);
-  //MassScan(Me, Mmu, 0, 0);
-  //MassScan(Mpi, Me, 0, 1);
-  //MassScan(Mmu, Mmu, 0, 0);
-  //MassScan(Mpi, Mmu, 0, 1);
-  //MassScan(Mrho, Me, 0, 1);
-  //MassScan(Mrho, Mmu, 0, 1);
-  //MassScan(Me, Mtau, 0, 0);
-  //MassScan(Mpi, Mtau, 0, 1);
-  //MassScan(Mmu, Mtau, 0, 0);
-  //MassScan(Mrho, Mtau, 0, 1);
-  //MassScan(Mtau, Mtau, 0, 0);
+  MassScan(Me, Mmu, 0, 0);
+  MassScan(Mpi, Me, 0, 1);
+  MassScan(Mmu, Mmu, 0, 0);
+  MassScan(Mpi, Mmu, 0, 1);
+  MassScan(Mrho, Me, 0, 1);
+  MassScan(Mrho, Mmu, 0, 1);
+  MassScan(Me, Mtau, 0, 0);
+  MassScan(Mpi, Mtau, 0, 1);
+  MassScan(Mmu, Mtau, 0, 0);
+  MassScan(Mrho, Mtau, 0, 1);
+  MassScan(Mtau, Mtau, 0, 0);
 
   f->Write();
 }
