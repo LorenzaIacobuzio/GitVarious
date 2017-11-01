@@ -28,6 +28,9 @@ Double_t labelSize = 0.05;
 Double_t titleSize = 0.07;
 Double_t PiE = 0.;
 Double_t PiMu = 0.;
+Int_t counterProd = 0;
+Int_t counterDecay = 0;
+Int_t colors[10] = {434, 600, 882, 880, 632, 634, 797, 402, 419}; // cyan+2, blue, violet+2, violet, red, red+2, orange-3, yellow+2, green+3
 
 
 
@@ -289,7 +292,7 @@ Double_t ComputeTotalBR(Double_t Mass1, Double_t MN) {
   return brt;
 }
 */
-void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title) {
+void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title, TMultiGraph* M, TLegend* L) {
 
   Double_t PS = 0.;
   Double_t PSF = 0.;
@@ -332,74 +335,101 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
     }
   }
 
-  TCanvas *c1 = new TCanvas();
   TGraph* gr = new TGraph(Mass, xMN, yBR);
-  Int_t color = (Int_t)(rand() % 8 + 2);
-  
-  gr->SetLineColor(color);
   gr->SetLineWidth(3);
-
   if (Prod == kTRUE) {
-    string title = string("F*BR(") + Title + string(")");
-    gr->GetYaxis()->SetTitle(title.c_str());
-    gr->SetTitle("N production BR vs N mass");
+    gr->SetLineColor(colors[counterProd]);
+    counterProd++;
   }
-  else {
-    string title = string("BR(") + Title + string(")");
-    gr->GetYaxis()->SetTitle(title.c_str());
-    gr->SetTitle("N decay BR vs N mass");
+  else if (Prod == kFALSE) {
+    gr->SetLineColor(colors[counterDecay]);
+    counterDecay++;
   }
-
-  gr->GetXaxis()->SetTitle("N mass [GeV]");
-  gr->GetXaxis()->SetTitleOffset(1.2);
-  gr->GetXaxis()->SetTitleSize(labelSize);
-  gr->GetYaxis()->SetTitleSize(labelSize);
-  gr->GetXaxis()->SetLabelSize(labelSize);
-  gr->GetYaxis()->SetLabelSize(labelSize);
-  TGaxis::SetMaxDigits(2);
-  gr->Draw("AC");
-  gPad->SetLogx();
-  gPad->SetLogy();
-  gr->SetMinimum(1.E-15);
-  gr->SetMaximum(1.5);
-  c1->SetLeftMargin(0.2);
-  c1->SetBottomMargin(0.2);
-  gPad->Update();
-  gPad->Modified();
-  c1->Write();
+  L->AddEntry(gr, Title.c_str(), "l");
+  M->Add(gr);
 }
 
-void GeneralPlotsNew() {
+void GeneralPlotsNewMultigraph() {
 
   TFile *f = new TFile("/home/li/Desktop/Plots.root","RECREATE");
-
+  TMultiGraph* Mprod = new TMultiGraph("Mprod", "N production modes vs N mass");
+  Mprod->SetName("Mprod");
+  TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "N decay modes vs N mass");
+  Mdecay->SetName("Mdecay");
+  auto Lprod = new TLegend(0.1,0.65,0.4,0.9);
+  auto Ldecay = new TLegend(0.1,0.65,0.4,0.9);
+  TCanvas *cProd = new TCanvas();
+  TCanvas *cDecay = new TCanvas();
+  
   // HNL production via two-body decay
 
-  MassScan(D,   e,   0., 1, 1, "D->Ne");
-  MassScan(D,   mu,  0., 1, 1, "D->Nmu");
-  MassScan(DS,  e,   0., 1, 1, "DS->Ne");
-  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu");
-  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau");
-  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi");
+  MassScan(D,   e,   0., 1, 1, "D->Ne",               Mprod, Lprod);
+  MassScan(D,   mu,  0., 1, 1, "D->Nmu",              Mprod, Lprod);
+  MassScan(DS,  e,   0., 1, 1, "DS->Ne",              Mprod, Lprod);
+  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",             Mprod, Lprod);
+  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",            Mprod, Lprod);
+  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi", Mprod, Lprod);
 
   // HNL production via three-body decay
 
   //MassScan(D, K0, e, 1, 0, "D->K0eN");
   
   // HNL decay via two- and three-body decay
+    
+  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, Ldecay);
+  //MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, Ldecay);
+  //MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, Ldecay);
+  //MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, Ldecay);
+  //MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, Ldecay);
+  //MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, Ldecay);
+  //MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, Ldecay);
+  //MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, Ldecay);
+  //MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, Ldecay);
+  //MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, Ldecay);
+  //MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, Ldecay);
+  //MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, Ldecay);
+  
+  TGaxis::SetMaxDigits(2);
+  
+  Mprod->Draw("AC");
+  Mprod->GetXaxis()->SetTitle("N mass [GeV]");
+  Mprod->GetYaxis()->SetTitle("BR*F");
+  Mprod->GetXaxis()->SetTitleOffset(1.2);
+  Mprod->GetXaxis()->SetTitleSize(labelSize);
+  Mprod->GetYaxis()->SetTitleSize(labelSize);
+  Mprod->GetXaxis()->SetLabelSize(labelSize);
+  Mprod->GetYaxis()->SetLabelSize(labelSize);
+  gPad->SetLogx();
+  gPad->SetLogy();
+  Mprod->SetMinimum(1.E-15);
+  Mprod->SetMaximum(1.5);
+  cProd->SetLeftMargin(0.2);
+  cProd->SetBottomMargin(0.2);
+  gPad->Update();
+  gPad->Modified();
+  Lprod->Draw();
+  cProd->Write();
+  
+  Mdecay->Draw("AC");
+  Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
+  Mdecay->GetYaxis()->SetTitle("BR*F");
+  Mdecay->GetXaxis()->SetTitleOffset(1.2);
+  Mdecay->GetXaxis()->SetTitleSize(labelSize);
+  Mdecay->GetYaxis()->SetTitleSize(labelSize);
+  Mdecay->GetXaxis()->SetLabelSize(labelSize);
+  Mdecay->GetYaxis()->SetLabelSize(labelSize);
+  gPad->SetLogx();
+  gPad->SetLogy();
+  Mdecay->SetMinimum(1.E-15);
+  Mdecay->SetMaximum(1.5);
+  cDecay->SetLeftMargin(0.2);
+  cDecay->SetBottomMargin(0.2);
+  gPad->Update();
+  gPad->Modified();
+  Ldecay->Draw();
+  cDecay->Write();
 
-  MassScan(e,   e,   0., 0, 0, "N->eenu");
-  MassScan(e,   mu,  0., 0, 0, "N->emunu");
-  MassScan(pi,  e,   0., 0, 1, "N->pie");
-  MassScan(mu,  mu,  0., 0, 0, "N->mumunu");
-  MassScan(pi,  mu,  0., 0, 1, "N->pimu");
-  MassScan(rho, e,   0., 0, 1, "N->rhoe");
-  MassScan(rho, mu,  0., 0, 1, "N->rhomu");
-  MassScan(e,   tau, 0., 0, 0, "N->etaunu");
-  MassScan(pi,  tau, 0., 0, 1, "N->pitau");
-  MassScan(mu,  tau, 0., 0, 0, "N->mutaunu");
-  MassScan(rho, tau, 0., 0, 1, "N->rhotau");
-  MassScan(tau, tau, 0., 0, 0, "N->tautaunu");
-
+  //Mprod->Write();
+  //Mdecay->Write();
   f->Write();
 }
