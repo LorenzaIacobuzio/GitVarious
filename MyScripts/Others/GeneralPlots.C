@@ -30,7 +30,7 @@ Double_t PiE = 0.;
 Double_t PiMu = 0.;
 Int_t counterProd = 0;
 Int_t counterDecay = 0;
-Int_t colors[10] = {434, 600, 882, 880, 632, 634, 797, 402, 419}; // cyan+2, blue, violet+2, violet, red, red+2, orange-3, yellow+2, green+3
+Int_t colors[13] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 923}; //blue+2, cyan+2, violet+7, azure+1, red-9, red, orange-3, orange+3, yellow+2, green+3, green, black, grey+3
 
 
 
@@ -354,7 +354,6 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
 
 void GeneralPlots() {
 
-  TFile *f = new TFile("/home/li/Desktop/Plots.root","RECREATE");
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "N production modes vs N mass");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "N decay modes vs N mass");
@@ -378,16 +377,16 @@ void GeneralPlots() {
     
   MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay);
   MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay);
-  //MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay);
-  //MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay);
-  //MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay);
-  //MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay);
-  //MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay);
-  //MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay);
-  //MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay);
-  //MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay);
-  //MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay);
-  //MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay);
+  MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay);
+  MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay);
+  MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay);
+  MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay);
+  MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay);
+  MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay);
+  MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay);
+  MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay);
+  MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay);
+  MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay);
   
   TGaxis::SetMaxDigits(2);
   
@@ -405,10 +404,14 @@ void GeneralPlots() {
   Mprod->SetMaximum(1.5);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  gPad->BuildLegend();
+  gPad->BuildLegend(0.3, 0.25, 0.59, 0.46);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
+
+  TImage *img = TImage::Create();
+  img->FromPad(gPad);
+  img->WriteImage("/home/li/GitVarious/HeavyNeutrino/Graphs/NProdGraph.png");
 
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
@@ -424,10 +427,12 @@ void GeneralPlots() {
   Mdecay->SetMaximum(1.5);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  gPad->BuildLegend();
+  gPad->BuildLegend(0.24, 0.25, 0.42, 0.56);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
 
-  f->Write();
+  TImage *img1 = TImage::Create();
+  img1->FromPad(gPad);
+  img1->WriteImage("/home/li/GitVarious/HeavyNeutrino/Graphs/NDecayGraph.png");
 }
