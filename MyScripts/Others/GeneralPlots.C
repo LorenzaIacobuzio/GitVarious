@@ -13,6 +13,16 @@ Double_t DS = 1968.28;
 Double_t D0 = 1864.84;
 Double_t K = 493.68;
 Double_t K0 = 497.61;
+//Double_t Dlife = 1.04E-12;
+//Double_t D0life = 4.101E-13;
+Double_t Dlife = 1.04E-3;
+Double_t D0life = 4.101E-4;
+Double_t Vcs = 0.9734;
+Double_t Vcd = 0.2252;
+Double_t fDK0 = 0.725;
+Double_t fDpi0 = 0.146;
+Double_t fD0K = 0.736;
+Double_t fD0pi = 0.637;
 Double_t De2BR = 9.2E-9;
 Double_t Dm2BR = 3.74E-4;
 Double_t DSe2BR = 1.4E-7;
@@ -26,8 +36,6 @@ const int Masses = Mass/step;
 TString name = "";
 Double_t labelSize = 0.05;
 Double_t titleSize = 0.07;
-Double_t PiE = 0.;
-Double_t PiMu = 0.;
 Int_t counterProd = 0;
 Int_t counterDecay = 0;
 Int_t colors[13] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 923}; //blue+2, cyan+2, violet+7, azure+1, red-9, red, orange-3, orange+3, yellow+2, green+3, green, black, grey+3
@@ -50,8 +58,81 @@ Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double
   if(phaseSpace > 0.) {
     factor = (Mass1*Mass1*(Mass2*Mass2 + Mass3*Mass3)-TMath::Power(Mass2*Mass2-Mass3*Mass3,2))*TMath::Power(phaseSpace,0.5)/(Mass3*Mass3*TMath::Power(Mass1*Mass1-Mass3*Mass3,2));
   }
+  else {
+    //cout<<"[PhaseSpaceFactor] Warning: phasespace < 0."<<endl;
+    factor = 0.;
+  }
   
   return factor;
+}
+
+Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4) {
+
+  Double_t ENmin = Mass2; // N at rest, K and e back to back
+  Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
+  Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
+  Double_t q2max = 3.*Mass2*Mass2+Mass4*Mass4; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
+  Double_t tau, V, f, a, b;
+  Double_t br = 0.;
+
+  if (Mass1 >= (Mass2+Mass3+Mass4)) {
+    if (Mass1 == D) {
+      tau = Dlife;
+      if (Mass3 == K0) {
+	V = Vcs;
+	f = fDK0;
+      }
+      else if (Mass3 == pi0) {
+	V = Vcd;
+	f = fDpi0;
+      }
+      else {
+	cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+	exit(1);
+      }
+    }
+    else if (Mass1 == D0) {
+      tau = D0life;
+      if (Mass3 == K) {
+        V = Vcs;
+	f = fD0K;
+      }
+      else if (Mass3 == pi) {
+        V = Vcd;
+	f = fD0pi;
+      }
+      else {
+        cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+        exit(1);
+      }
+    }
+
+    a = tau*V*V*GF*GF/(64*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+
+    //(f*f*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*f*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
+    
+    TF1 *func = new TF1("func", "([0]*[0]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*[5]*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*[5]*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*[5]*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*[5]*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))", q2min, q2max);
+    
+    func->SetParameter(0, f);
+    func->SetParameter(2, Mass2);
+    func->SetParameter(4, Mass4);
+    func->SetParameter(1, Mass1);
+    func->SetParameter(3, Mass3);
+    func->SetParameter(5, ENmax);
+
+    ROOT::Math::WrappedTF1 wf1(*func);
+    ROOT::Math::GaussLegendreIntegrator ig;
+    ig.SetFunction(wf1);
+    b = ig.Integral(q2min, q2max);
+    br = a*b;
+    cout<<Mass2<<" "<<q2min<<" "<<q2max<<endl;
+  }
+  else {
+    //cout<<"[ThreeBodyBR] Warning: mother mass smaller than daughter masses"<<endl;
+    br = 0.;
+  }
+  
+  return br;
 }
 
 Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
@@ -80,6 +161,10 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
       b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) -12.*TMath::Power(r, 4)*TMath::Log(r*r);
       gamma_l_l_nu = a*b;
     }
+  }
+  else {
+    //cout<<"[GammaLeptonNu3] Warning: mother mass smaller than daughter masses"<<endl;
+    gamma_l_l_nu = 0.;
   }
   
   return gamma_l_l_nu;
@@ -113,6 +198,10 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       exit(1);
     }
   }
+  else {
+    //cout<<"[Gamma2] Warning: mother mass smaller than daughter masses"<<endl;
+    gamma_2 = 0.;
+  }
   
   return gamma_2;
 }
@@ -120,7 +209,7 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
 Double_t GammaTot(Double_t MN) {
 
   Double_t gammaTot = 0.;
-
+  
   if (MN < 2*e) 
     gammaTot = 0.;
   else if (MN >= 2*e && MN < (e+mu)) 
@@ -213,45 +302,31 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 	  exit(1);
 	}
       }
-    }
-    else if (TwoBody == kFALSE) {
-      if (Factor > 0. && Mass1 >= (Mass2+Mass3+Mass4)) {
-	if (Mass1 == D && Mass3 == K0) {
-	  if (Mass4 == e)
-	    brt = 0.;
-	  else if (Mass4 == mu)
-	    brt = 0.;
-	  else {
-	    cout<<"[ComputeBR] Unknown N 3-body production mode"<<endl;
-	    exit(1);
-	  }
-	}
-	else if (Mass1 == D0 && Mass3 == K) {
-	  if (Mass4 == e)
-	    brt = 0.;
-	  else if (Mass4 == mu)
-	    brt = 0.;
-	  else {
-	    cout<<"[ComputeBR] Unknown N 3-body production mode"<<endl;
-	    exit(1);
-	  }
-	}
+      else {
+	//cout<<"[ComputeBR] Warning: phasespace factor < 0. or mother mass smaller than daughter masses"<<endl;
+	brt = 0.;
       }
     }
-  }      
+    else if (TwoBody == kFALSE) 
+      brt = ThreeBodyBR(Mass1, Mass2, Mass3, Mass4);
+  }
   else if (Prod == kFALSE) {
     if (TwoBody == kTRUE) {
       if (Mass2 == pi || Mass3 == pi) {
 	if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
 	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
-	else
+	else {
+	  //cout<<"[ComputeBR] Warning: two-body decay width or total decay width might be 0 or negative"<<endl;
 	  brt = 0.;
+	}
       }
       else if (Mass2 == rho || Mass3 == rho) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
 	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
-	else
+	else {
+	  //cout<<"[ComputeBR] Warning: two-body decay width or total decay width might be 0 or negative"<<endl;
 	  brt = 0.;
+	}
       }
       else {
 	cout<<"[ComputeBR] Unknown N 2-body decay mode"<<endl;
@@ -262,8 +337,7 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
       if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
 	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
       else {
-	GammaLeptonNu3(Mass1, Mass2, Mass3);
-	GammaTot(Mass1);
+	//cout<<"[ComputeBR] Warning: three-body decay width or total decay width might be 0 or negative"<<endl;
 	brt = 0.;
       }
     }
@@ -305,9 +379,11 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
       for (Int_t MN = InitialMass; MN < Mass; MN += step) {
 	PS = PhaseSpace(Mass1, MN, Mass2);
 	PSF = PhaseSpaceFactor(Mass1, MN, Mass2, PS);
-	BR = ComputeBR(Mass1, MN, Mass2, 0, PSF, Prod, TwoBody);
+	BR = ComputeBR(Mass1, MN, Mass2, 0., PSF, Prod, TwoBody);
 	xMN[MN] = MN/1000.;
 	yBR[MN] = BR;
+	if (MN == 500)
+	  cout<<BR<<endl;
       }
     }
     else if (TwoBody == kFALSE) {
@@ -338,7 +414,7 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
   TGraph* gr = new TGraph(Mass, xMN, yBR);
 
   gr->SetNameTitle(Title.c_str(), Title.c_str());
-  gr->SetLineWidth(3);
+  gr->SetLineWidth(4);
   
   if (Prod == kTRUE) {
     gr->SetLineColor(colors[counterProd]);
@@ -348,7 +424,7 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
     gr->SetLineColor(colors[counterDecay]);
     counterDecay++;
   }
-
+  gr->Draw();
   M->Add(gr);
 }
 
@@ -363,18 +439,25 @@ void GeneralPlots() {
   // HNL production via two-body decay
 
   MassScan(D,   e,   0., 1, 1, "D->Ne",               Mprod);
-  MassScan(D,   mu,  0., 1, 1, "D->Nmu",              Mprod);
-  MassScan(DS,  e,   0., 1, 1, "DS->Ne",              Mprod);
-  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",             Mprod);
-  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",            Mprod);
-  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi", Mprod);
+  //MassScan(D,   mu,  0., 1, 1, "D->Nmu",              Mprod);
+  //MassScan(DS,  e,   0., 1, 1, "DS->Ne",              Mprod);
+  //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",             Mprod);
+  //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",            Mprod);
+  //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi", Mprod);
 
   // HNL production via three-body decay
 
-  //MassScan(D, K0, e, 1, 0, "D->K0eN");
+  MassScan(D,  K0,  e,  1, 0, "D->K0eN",   Mprod);
+  //MassScan(D,  pi0, e,  1, 0, "D->pi0eN",  Mprod);
+  //MassScan(D0, K,   e,  1, 0, "D0->KeN",   Mprod);
+  //MassScan(D0, pi,  e,  1, 0, "D0->pieN",  Mprod);
+  //MassScan(D,  K0,  mu, 1, 0, "D->K0muN",  Mprod);
+  //MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
+  //MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
+  //MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
   
   // HNL decay via two- and three-body decay
-    
+  /*
   MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay);
   MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay);
   MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay);
@@ -387,12 +470,12 @@ void GeneralPlots() {
   MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay);
   MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay);
   MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay);
-  
+  */  
   TGaxis::SetMaxDigits(2);
   
   Mprod->Draw("AC");
   Mprod->GetXaxis()->SetTitle("N mass [GeV]");
-  Mprod->GetYaxis()->SetTitle("BR*F");
+  Mprod->GetYaxis()->SetTitle("BR");
   Mprod->GetXaxis()->SetTitleOffset(1.2);
   Mprod->GetXaxis()->SetTitleSize(labelSize);
   Mprod->GetYaxis()->SetTitleSize(labelSize);
@@ -400,8 +483,9 @@ void GeneralPlots() {
   Mprod->GetYaxis()->SetLabelSize(labelSize);
   gPad->SetLogx();
   gPad->SetLogy();
-  Mprod->SetMinimum(1.E-15);
+  Mprod->SetMinimum(1.E-20);
   Mprod->SetMaximum(1.5);
+  Mprod->GetXaxis()->SetLimits(0.01, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   gPad->BuildLegend(0.3, 0.25, 0.59, 0.46);
@@ -412,10 +496,10 @@ void GeneralPlots() {
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage("/home/li/GitVarious/HeavyNeutrino/Graphs/NProdGraph.png");
-
+  /*
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
-  Mdecay->GetYaxis()->SetTitle("BR*F");
+  Mdecay->GetYaxis()->SetTitle("BR");
   Mdecay->GetXaxis()->SetTitleOffset(1.2);
   Mdecay->GetXaxis()->SetTitleSize(labelSize);
   Mdecay->GetYaxis()->SetTitleSize(labelSize);
@@ -425,6 +509,7 @@ void GeneralPlots() {
   gPad->SetLogy();
   Mdecay->SetMinimum(1.E-15);
   Mdecay->SetMaximum(1.5);
+  Mdecay->GetXaxis()->SetLimits(0.01, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   gPad->BuildLegend(0.24, 0.25, 0.42, 0.56);
@@ -435,4 +520,5 @@ void GeneralPlots() {
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
   img1->WriteImage("/home/li/GitVarious/HeavyNeutrino/Graphs/NDecayGraph.png");
+  */
 }
