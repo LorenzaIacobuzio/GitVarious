@@ -13,6 +13,8 @@ Double_t DS = 1968.28;
 Double_t D0 = 1864.84;
 Double_t K = 493.68;
 Double_t K0 = 497.61;
+Double_t KStar = 891.76;
+Double_t K0Star = 895.55;
 Double_t Dlife = 1.04E-3;
 Double_t D0life = 4.101E-4;
 Double_t DSlife = 5.E-4;
@@ -26,6 +28,14 @@ Double_t fDK0 = 0.745;
 Double_t fDpi0 = 0.648;
 Double_t fD0K = 0.736;
 Double_t fD0pi = 0.637;
+Double_t fA0D = 0.398;
+Double_t fA1D = 0.47;
+Double_t fA2D = -1.24;
+Double_t fVD = 0.66;
+Double_t fA0D0 = 0.4;
+Double_t fA1D0 = 0.47;
+Double_t fA2D0 = -1.24;
+Double_t fVD0 = 0.66;
 Double_t De2BR = 9.2E-9;
 Double_t Dm2BR = 3.74E-4;
 Double_t DSe2BR = 1.4E-7;
@@ -127,74 +137,136 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 
   Double_t br = 0.;
 
-  if (Mass1 == D || Mass1 == D0) { 
-    Double_t ENmin = Mass2; // N at rest, K and e back to back
-    Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
-    Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
-    Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
-    Double_t tau, V, f, a, b;
+  if (Mass3 == K || Mass3 == K0) {
+    if (Mass1 == D || Mass1 == D0) { 
+      Double_t ENmin = Mass2; // N at rest, K and e back to back
+      Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
+      Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
+      Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
+      Double_t tau, V, f, a, b;
     
-    if (Mass1 >= (Mass2+Mass3+Mass4)) {
-      if (Mass1 == D) {
-	tau = Dlife;
-	if (Mass3 == K0) {
-	  V = Vcs;
-	  f = fDK0;
+      if (Mass1 >= (Mass2+Mass3+Mass4)) {
+	if (Mass1 == D) {
+	  tau = Dlife;
+	  if (Mass3 == K0) {
+	    V = Vcs;
+	    f = fDK0;
+	  }
+	  else if (Mass3 == pi0) {
+	    V = Vcd;
+	    f = fDpi0;
+	  }
+	  else {
+	    cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+	    exit(1);
+	  }
 	}
-	else if (Mass3 == pi0) {
-	  V = Vcd;
-	  f = fDpi0;
+	else if (Mass1 == D0) {
+	  tau = D0life;
+	  if (Mass3 == K) {
+	    V = Vcs;
+	    f = fD0K;
+	  }
+	  else if (Mass3 == pi) {
+	    V = Vcd;
+	    f = fD0pi;
+	  }
+	  else {
+	    cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+	    exit(1);
+	  }
 	}
-	else {
-	  cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
-	  exit(1);
-	}
+      
+	a = tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+      
+	//(f*f*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*f*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
+      
+	TF1 *func = new TF1("func", "([0]*[0]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*[5]*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*[5]*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*[5]*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*[5]*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))", q2min, q2max);
+      
+	func->SetParameter(0, f);
+	func->SetParameter(2, Mass2);
+	func->SetParameter(4, Mass4);
+	func->SetParameter(1, Mass1);
+	func->SetParameter(3, Mass3);
+	func->SetParameter(5, ENmax);
+      
+	ROOT::Math::WrappedTF1 wf1(*func);
+	ROOT::Math::GaussLegendreIntegrator ig;
+	ig.SetFunction(wf1);
+	b = ig.Integral(q2min, q2max);
+	br = a*b;
       }
-      else if (Mass1 == D0) {
-	tau = D0life;
-	if (Mass3 == K) {
-	  V = Vcs;
-	  f = fD0K;
-	}
-	else if (Mass3 == pi) {
-	  V = Vcd;
-	  f = fD0pi;
-	}
-	else {
-	  cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
-	  exit(1);
-	}
+      else {
+	//cout<<"[ThreeBodyBR] Warning: mother mass smaller than daughter masses"<<endl;
+	br = 0.;
       }
-      
-      a = tau*V*V*GF*GF/(64*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
-      
-      //(f*f*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*f*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*ENmax*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*ENmax*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
-      
-      TF1 *func = new TF1("func", "([0]*[0]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*[5]*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*[5]*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*[5]*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*[5]*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))", q2min, q2max);
-      
-      func->SetParameter(0, f);
-      func->SetParameter(2, Mass2);
-      func->SetParameter(4, Mass4);
-      func->SetParameter(1, Mass1);
-      func->SetParameter(3, Mass3);
-      func->SetParameter(5, ENmax);
-      
-      ROOT::Math::WrappedTF1 wf1(*func);
-      ROOT::Math::GaussLegendreIntegrator ig;
-      ig.SetFunction(wf1);
-      b = ig.Integral(q2min, q2max);
-      br = a*b;
     }
-    else {
-      //cout<<"[ThreeBodyBR] Warning: mother mass smaller than daughter masses"<<endl;
-      br = 0.;
+  }
+  else if (Mass3 == KStar || Mass3 == K0Star) {
+    if (Mass1 == D || Mass1 == D0) { 
+      Double_t ENmin = Mass2; // N at rest, K and e back to back
+      Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
+      Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
+      Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
+      Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, a, b;
+      
+      if (Mass1 >= (Mass2+Mass3+Mass4)) {
+	if (Mass1 == D) {
+	  tau = Dlife;
+	  V = Vcs;
+	  f1 = fVD/(Mass1+Mass3);
+	  f2 = (Mass1+Mass3)*fA1D;
+	  f3 = -fA2D/(Mass1+Mass3);
+	  f4 = Mass3*(2.*fA0D-fA1D-fA2D) + Mass1*(fA2D-fA1D); // to be multiplied by 1/q^2
+	}
+	else if (Mass1 == D0) {
+	  tau = D0life;
+	  V = Vcs;
+	  f1 = fVD0/(Mass1+Mass3);
+	  f2 = (Mass1+Mass3)*fA1D0;
+	  f3 = -fA2D0/(Mass1+Mass3);
+	  f4 = Mass3*(2.*fA0D0-fA1D0-fA2D0) + Mass1*(fA2D0-fA1D0); // to be multiplied by 1/x
+	}
+
+	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4 - 2.*Mass1*EN;
+	Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
+	a = tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+      
+	// (f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + omega2*(Omega2 - x - omega2)/(Mass3*Mass3))
+	// + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
+	// + 2.*f3*f3*Mass3*Mass3*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)*(Mass2*Mass2 + Mass4*Mass4 - x + omega2*(Omega2 - x - omega2)/(Mass3*Mass3))
+	// + 2.*f3*(f3+f4*1./x)*(Mass2*Mass2*omega2 + (Omega2 - x - omega2)*Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
+	// + 2.*f1*f2*(x*(2.*omega2 - Omega2 - x) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4))
+	// + (f2*(f3+f4*1./x)/2.)*(omega2*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4))
+	// + f2*f3*((Omega2 - x)*omega2*(Omega2 - x - omega2)/(Mass3*Mass3) + 2.*omega2*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
+	// + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*omega2*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*omega2*omega2*x)
+      
+	TF1 *func = new TF1("func", "(f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + omega2*(Omega2 - x - omega2)/(Mass3*Mass3)) + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x) + 2.*f3*f3*Mass3*Mass3*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)*(Mass2*Mass2 + Mass4*Mass4 - x + omega2*(Omega2 - x - omega2)/(Mass3*Mass3)) + 2.*f3*(f3+f4*1./x)*(Mass2*Mass2*omega2 + (Omega2 - x - omega2)*Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x) + 2.*f1*f2*(x*(2.*omega2 - Omega2 - x) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4)) + (f2*(f3+f4*1./x)/2.)*(omega2*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4)) + f2*f3*((Omega2 - x)*omega2*(Omega2 - x - omega2)/(Mass3*Mass3) + 2.*omega2*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x)) + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*omega2*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*omega2*omega2*x)", q2min, q2max);
+      
+	func->SetParameter(0, f);
+	func->SetParameter(2, Mass2);
+	func->SetParameter(4, Mass4);
+	func->SetParameter(1, Mass1);
+	func->SetParameter(3, Mass3);
+	func->SetParameter(5, ENmax);
+      
+	ROOT::Math::WrappedTF1 wf1(*func);
+	ROOT::Math::GaussLegendreIntegrator ig;
+	ig.SetFunction(wf1);
+	b = ig.Integral(q2min, q2max);
+	br = a*b;
+      }
+      else {
+	//cout<<"[ThreeBodyBR] Warning: mother mass smaller than daughter masses"<<endl;
+	br = 0.;
+      }
     }
   }
   else if (Mass1 == tau) {
     if (Mass1 >= (Mass2+Mass3+Mass4)) {
       Double_t a, b, c, d;
       Double_t life = taulife;
-      Double_t EN = 5.;
+      Double_t EN = 0.;
 	
       if (Mass3 == 0.1) {
 	a = life*GF*GF*Mass1*Mass1*EN/(2.*TMath::Power(TMath::Pi(), 3.));
@@ -215,12 +287,16 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	exit(1);
       }
     }
+    else {
+      //cout<<"[ThreeBodyBR] Warning: mother mass smaller than daughter masses"<<endl;               
+      br = 0.;
+    }
   }
   else {
     cout<<"[ThreeBodyBR] Unknown N 3-body production mode"<<endl;
     exit(1);
   }
-  
+
   return br;
 }
 
@@ -543,13 +619,13 @@ void GeneralPlots() {
   
   // HNL production via two-body decay
 
-  MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
-  MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
-  MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
-  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
-  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
-  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
-  MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
+  //MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
+  //MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
+  //MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
+  //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
+  //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
+  //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
+  //MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
   
   // HNL production via three-body decay
 
@@ -562,9 +638,9 @@ void GeneralPlots() {
   //MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
   //MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
   MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
-  MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
-  MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
-  MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
+  //MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
+  //MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
+  //MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
   
   // HNL decay via two- and three-body decay
 
