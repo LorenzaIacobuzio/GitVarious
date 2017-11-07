@@ -228,7 +228,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  f4 = Mass3*(2.*fA0D0-fA1D0-fA2D0) + Mass1*(fA2D0-fA1D0); // to be multiplied by 1/x
 	}
 
-	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4 - 2.*Mass1*EN;
+	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4 - 2.*Mass1*ENmax;
 	Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
 	a = tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
       
@@ -240,15 +240,18 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	// + (f2*(f3+f4*1./x)/2.)*(omega2*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4))
 	// + f2*f3*((Omega2 - x)*omega2*(Omega2 - x - omega2)/(Mass3*Mass3) + 2.*omega2*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
 	// + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*omega2*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*omega2*omega2*x)
+	
+	TF1 *func = new TF1("func", "([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + [0]*([1] - x - [0])/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + [0]*([1] - x - [0])/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*[0] + ([1] - x - [0])*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*[0] - [1] - x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*([0]*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*[0]*([1] - x - [0])/([3]*[3]) + 2.*[0]*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*[0]*[0]*x)", q2min, q2max);
       
-	TF1 *func = new TF1("func", "(f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + omega2*(Omega2 - x - omega2)/(Mass3*Mass3)) + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x) + 2.*f3*f3*Mass3*Mass3*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)*(Mass2*Mass2 + Mass4*Mass4 - x + omega2*(Omega2 - x - omega2)/(Mass3*Mass3)) + 2.*f3*(f3+f4*1./x)*(Mass2*Mass2*omega2 + (Omega2 - x - omega2)*Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x) + 2.*f1*f2*(x*(2.*omega2 - Omega2 - x) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4)) + (f2*(f3+f4*1./x)/2.)*(omega2*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4)) + f2*f3*((Omega2 - x)*omega2*(Omega2 - x - omega2)/(Mass3*Mass3) + 2.*omega2*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x)) + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*omega2*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*omega2*omega2*x)", q2min, q2max);
-      
-	func->SetParameter(0, f);
+	func->SetParameter(0, omega2);
+	func->SetParameter(1, Omega2);
 	func->SetParameter(2, Mass2);
 	func->SetParameter(4, Mass4);
-	func->SetParameter(1, Mass1);
 	func->SetParameter(3, Mass3);
-	func->SetParameter(5, ENmax);
+	func->SetParameter(5, f1);
+	func->SetParameter(6, f2);
+	func->SetParameter(7, f3);
+	func->SetParameter(8, f4);
       
 	ROOT::Math::WrappedTF1 wf1(*func);
 	ROOT::Math::GaussLegendreIntegrator ig;
@@ -624,6 +627,7 @@ void GeneralPlots() {
   //MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
   //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
   //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
+
   //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
   //MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
   
@@ -637,7 +641,13 @@ void GeneralPlots() {
   //MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
   //MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
   //MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
-  MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
+
+  MassScan(D,  K0Star,  e,  1, 0, "D->K0*eN",   Mprod);
+  //MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
+  //MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
+  //MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
+
+  //MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
   //MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
   //MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
   //MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
