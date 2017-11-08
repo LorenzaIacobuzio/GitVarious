@@ -51,7 +51,7 @@ Double_t labelSize = 0.05;
 Double_t titleSize = 0.07;
 Int_t counterProd = 0;
 Int_t counterDecay = 0;
-Int_t colors[14] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 923, 886}; //blue+2, cyan+2, violet+7, azure+1, red-9, red, orange-3, orange+3, yellow+2, green+3, green, black, grey+3, violet+6
+Int_t colors[14] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 922, 886}; //blue+2, cyan+2, violet+7, azure+1, red-9, red, orange-3, orange+3, yellow+2, green+3, green, black, grey+2, violet+6
 
 
 
@@ -137,10 +137,11 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 
   Double_t br = 0.;
 
-  if (Mass3 == K || Mass3 == K0) {
+  if (Mass3 == K || Mass3 == K0 || Mass3 == pi || Mass3 == pi0) {
     if (Mass1 == D || Mass1 == D0) { 
       Double_t ENmin = Mass2; // N at rest, K and e back to back
       Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
+      Double_t EN = ENmax;
       Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
       Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
       Double_t tau, V, f, a, b;
@@ -188,7 +189,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	func->SetParameter(4, Mass4);
 	func->SetParameter(1, Mass1);
 	func->SetParameter(3, Mass3);
-	func->SetParameter(5, ENmax);
+	func->SetParameter(5, EN);
       
 	ROOT::Math::WrappedTF1 wf1(*func);
 	ROOT::Math::GaussLegendreIntegrator ig;
@@ -206,6 +207,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
     if (Mass1 == D || Mass1 == D0) { 
       Double_t ENmin = Mass2; // N at rest, K and e back to back
       Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
+      Double_t EN = ENmax;
       Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
       Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
       Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, a, b;
@@ -217,7 +219,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  f1 = fVD/(Mass1+Mass3);
 	  f2 = (Mass1+Mass3)*fA1D;
 	  f3 = -fA2D/(Mass1+Mass3);
-	  f4 = Mass3*(2.*fA0D-fA1D-fA2D) + Mass1*(fA2D-fA1D); // to be multiplied by 1/q^2
+	  f4 = Mass3*(2.*fA0D-fA1D-fA2D) + Mass1*(fA2D-fA1D); // to be multiplied by 1/x
 	}
 	else if (Mass1 == D0) {
 	  tau = D0life;
@@ -228,7 +230,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  f4 = Mass3*(2.*fA0D0-fA1D0-fA2D0) + Mass1*(fA2D0-fA1D0); // to be multiplied by 1/x
 	}
 
-	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4 - 2.*Mass1*ENmax;
+	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4 - 2.*Mass1*EN;
 	Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
 	a = tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
       
@@ -241,7 +243,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	// + f2*f3*((Omega2 - x)*omega2*(Omega2 - x - omega2)/(Mass3*Mass3) + 2.*omega2*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
 	// + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*omega2*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*omega2*omega2*x)
 	
-	TF1 *func = new TF1("func", "([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + [0]*([1] - x - [0])/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + [0]*([1] - x - [0])/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*[0] + ([1] - x - [0])*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*[0] - [1] - x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*([0]*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*[0]*([1] - x - [0])/([3]*[3]) + 2.*[0]*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*[0]*[0]*x)", q2min, q2max);
+	TF1 *func = new TF1("func", "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + [0]*([1] - x - [0])/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + [0]*([1] - x - [0])/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*[0] + ([1] - x - [0])*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*[0] - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*([0]*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*[0]*([1] - x - [0])/([3]*[3]) + 2.*[0]*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[0]*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*[0]*[0]*x))", q2min, q2max);
       
 	func->SetParameter(0, omega2);
 	func->SetParameter(1, Omega2);
@@ -267,11 +269,14 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
   }
   else if (Mass1 == tau) {
     if (Mass1 >= (Mass2+Mass3+Mass4)) {
-      Double_t a, b, c, d;
+      Double_t a, b, c, d, ENmin, ENmax, EN;
       Double_t life = taulife;
-      Double_t EN = 0.;
 	
       if (Mass3 == 0.1) {
+	Mass3 = 0.;
+	ENmin = Mass2; // N at rest, l and nu back to back
+	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
+	EN = ENmax;
 	a = life*GF*GF*Mass1*Mass1*EN/(2.*TMath::Power(TMath::Pi(), 3.));
 	b = 1. + (Mass2*Mass2 - Mass4*Mass4)/(Mass1*Mass1) - 2.*EN/Mass1;
 	c = 1. - Mass4*Mass4/(Mass1*Mass1 + Mass2*Mass2 - 2.*EN*Mass1);
@@ -279,6 +284,10 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	br = a*b*c*d;
       }
       else if (Mass3 == 0.01) {
+	Mass3 = 0.;
+	ENmin = Mass2; // N at rest, l and nu back to back
+	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
+	EN = ENmax;
 	a = life*GF*GF*Mass1*Mass1/(4.*TMath::Power(TMath::Pi(), 3.));
 	b = TMath::Power(1. - Mass4*Mass4/(Mass1*Mass1 + Mass2*Mass2 - 2.*EN*Mass1), 2.)*TMath::Sqrt(EN*EN - Mass2*Mass2);
 	c = (Mass1 - EN)*(1. - (Mass2*Mass2 + Mass4*Mass4)/(Mass1*Mass1));
@@ -599,15 +608,30 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
 
   gr->SetNameTitle(Title.c_str(), Title.c_str());
   gr->SetLineWidth(4);
-  
+
   if (Prod == kTRUE) {
-    gr->SetLineColor(colors[counterProd]);
-    counterProd++;
+    if (counterProd < 14) {
+      gr->SetLineColor(colors[counterProd]);
+      counterProd++;
+    }
+    else {
+      gr->SetLineColor(colors[counterProd-14]);
+      gr->SetLineStyle(7);
+      counterProd++;
+    }
   }
   else if (Prod == kFALSE) {
-    gr->SetLineColor(colors[counterDecay]);
-    counterDecay++;
+    if (counterDecay < 14) {
+      gr->SetLineColor(colors[counterDecay]);
+      counterDecay++;
+    }
+    else {
+      gr->SetLineColor(colors[counterDecay-14]);
+      gr->SetLineStyle(7);
+      counterDecay++;
+    }
   }
+  
   gr->Draw();
   M->Add(gr);
 }
@@ -627,26 +651,23 @@ void GeneralPlots() {
   //MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
   //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
   //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
-
   //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
   //MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
   
   // HNL production via three-body decay
 
-  //MassScan(D,  K0,  e,  1, 0, "D->K0eN",   Mprod);
-  //MassScan(D,  pi0, e,  1, 0, "D->pi0eN",  Mprod);
-  //MassScan(D0, K,   e,  1, 0, "D0->KeN",   Mprod);
-  //MassScan(D0, pi,  e,  1, 0, "D0->pieN",  Mprod);
-  //MassScan(D,  K0,  mu, 1, 0, "D->K0muN",  Mprod);
-  //MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
-  //MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
-  //MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
-
+  MassScan(D,  K0,  e,  1, 0, "D->K0eN",   Mprod);
+  MassScan(D,  pi0, e,  1, 0, "D->pi0eN",  Mprod);
+  MassScan(D0, K,   e,  1, 0, "D0->KeN",   Mprod);
+  MassScan(D0, pi,  e,  1, 0, "D0->pieN",  Mprod);
+  MassScan(D,  K0,  mu, 1, 0, "D->K0muN",  Mprod);
+  MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
+  MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
+  MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
   MassScan(D,  K0Star,  e,  1, 0, "D->K0*eN",   Mprod);
-  //MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
-  //MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
-  //MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
-
+  MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
+  MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
+  MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
   //MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
   //MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
   //MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
@@ -682,11 +703,11 @@ void GeneralPlots() {
   gPad->SetGridx();
   gPad->SetGridy();
   Mprod->SetMinimum(1.E-20);
-  Mprod->SetMaximum(1.5);
-  Mprod->GetXaxis()->SetLimits(0.01, 5.);
+  Mprod->SetMaximum(1.E-12);
+  Mprod->GetXaxis()->SetLimits(0.1, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  gPad->BuildLegend(0.26, 0.61, 0.55, 0.82);
+  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
@@ -705,9 +726,9 @@ void GeneralPlots() {
   Mdecay->GetYaxis()->SetLabelSize(labelSize);
   gPad->SetLogx();
   gPad->SetLogy();
-  Mdecay->SetMinimum(1.E-15);
+  Mdecay->SetMinimum(1.E-10);
   Mdecay->SetMaximum(1.5);
-  Mdecay->GetXaxis()->SetLimits(0.01, 5.);
+  Mdecay->GetXaxis()->SetLimits(0.1, 10.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   gPad->BuildLegend(0.24, 0.25, 0.42, 0.56);
