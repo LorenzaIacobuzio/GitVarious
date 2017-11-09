@@ -142,7 +142,8 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
       Double_t ENmin = Mass2; // N at rest, K and e back to back
       Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
       Double_t EN = ENmax;
-      Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
+      //Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
+      Double_t q2min = Mass4*Mass4 + Mass2*Mass1; // sum of masses of lepton pair
       Double_t q2max = Mass2*Mass2 + Mass4*Mass4 + 4.*ENmax*ENmax; // sum of 4momenta of lepton pair, when K at rest and N and e back to back
       Double_t tau, V, f, a, b;
     
@@ -276,23 +277,39 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	Mass3 = 0.;
 	ENmin = Mass2; // N at rest, l and nu back to back
 	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
-	EN = ENmax;
-	a = life*GF*GF*Mass1*Mass1*EN/(2.*TMath::Power(TMath::Pi(), 3.));
-	b = 1. + (Mass2*Mass2 - Mass4*Mass4)/(Mass1*Mass1) - 2.*EN/Mass1;
-	c = 1. - Mass4*Mass4/(Mass1*Mass1 + Mass2*Mass2 - 2.*EN*Mass1);
-	d = TMath::Sqrt(EN*EN - Mass2*Mass2);
-	br = a*b*c*d;
+
+	TF1 *func = new TF1("func", "([0]*[3]*[3]*[1]*[1]*x/(2.*TMath::Power(TMath::Pi(), 3.)))*(1. + ([2]*[2] - [4]*[4])/([1]*[1]) - 2.*x/[1])*(1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(TMath::Sqrt(x*x - [2]*[2]))");
+      
+	func->SetParameter(0, life);
+	func->SetParameter(1, Mass1);
+	func->SetParameter(2, Mass2);
+	func->SetParameter(3, GF);
+	func->SetParameter(4, Mass4);
+      
+	ROOT::Math::WrappedTF1 wf1(*func);
+	ROOT::Math::GaussLegendreIntegrator ig;
+	ig.SetFunction(wf1);
+	b = ig.Integral(ENmin, ENmax);
+	br = b;
       }
       else if (Mass3 == 0.01) {
 	Mass3 = 0.;
 	ENmin = Mass2; // N at rest, l and nu back to back
 	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
-	EN = ENmax;
-	a = life*GF*GF*Mass1*Mass1/(4.*TMath::Power(TMath::Pi(), 3.));
-	b = TMath::Power(1. - Mass4*Mass4/(Mass1*Mass1 + Mass2*Mass2 - 2.*EN*Mass1), 2.)*TMath::Sqrt(EN*EN - Mass2*Mass2);
-	c = (Mass1 - EN)*(1. - (Mass2*Mass2 + Mass4*Mass4)/(Mass1*Mass1));
-	d = (1. - Mass4*Mass4/(Mass1*Mass1 + Mass2*Mass2 - 2.*EN*Mass1))*((Mass1 - EN)*(Mass1 - EN)/Mass1 + (EN*EN - Mass2*Mass2)/(3.*Mass1));
-	br = a*b*(c-d);
+	
+	TF1 *func = new TF1("func", "([0]*[3]*[3]*[1]*[1]/(4.*TMath::Power(TMath::Pi(), 3.)))*(TMath::Power((1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1])), 2.)*TMath::Sqrt(x*x - [2]*[2]))*(([1] - x)*(1. - ([2]*[2] + [4]*[4])/([1]*[1])) - (1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(([1] - x)*([1] - x)/[1] + (x*x - [2]*[2])/(3.*[1])))");
+      
+	func->SetParameter(0, life);
+	func->SetParameter(1, Mass1);
+	func->SetParameter(2, Mass2);
+	func->SetParameter(3, GF);
+	func->SetParameter(4, Mass4);
+      
+	ROOT::Math::WrappedTF1 wf1(*func);
+	ROOT::Math::GaussLegendreIntegrator ig;
+	ig.SetFunction(wf1);
+	b = ig.Integral(ENmin, ENmax);
+	br = b;
       }
       else {
 	cout<<"[ThreeBodyBR] Unknown neutrino type in N 3-body production mode"<<endl;
@@ -646,13 +663,13 @@ void GeneralPlots() {
   
   // HNL production via two-body decay
 
-  //MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
-  //MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
-  //MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
-  //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
-  //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
-  //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
-  //MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
+  MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
+  MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
+  MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
+  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
+  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
+  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
+  MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
   
   // HNL production via three-body decay
 
@@ -668,10 +685,10 @@ void GeneralPlots() {
   MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
   MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
   MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
-  //MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
-  //MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
-  //MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
-  //MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
+  MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
+  MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
+  MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
+  MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
   
   // HNL decay via two- and three-body decay
 
