@@ -663,32 +663,32 @@ void GeneralPlots() {
   
   // HNL production via two-body decay
 
-  MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
-  MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
-  MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
-  MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
-  MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
-  MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
-  MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
+  //MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);
+  //MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
+  //MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
+  //MassScan(DS,  mu,  0., 1, 1, "DS->Nmu",              Mprod);
+  //MassScan(DS,  tau, 0., 1, 1, "DS->Ntau",             Mprod);
+  //MassScan(tau, pi,  0., 1, 1, "DS->taunu; tau->Npi",  Mprod);
+  //MassScan(tau, rho, 0., 1, 1, "DS->taunu; tau->Nrho", Mprod);
   
   // HNL production via three-body decay
 
   MassScan(D,  K0,  e,  1, 0, "D->K0eN",   Mprod);
-  MassScan(D,  pi0, e,  1, 0, "D->pi0eN",  Mprod);
-  MassScan(D0, K,   e,  1, 0, "D0->KeN",   Mprod);
-  MassScan(D0, pi,  e,  1, 0, "D0->pieN",  Mprod);
-  MassScan(D,  K0,  mu, 1, 0, "D->K0muN",  Mprod);
-  MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
-  MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
-  MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
-  MassScan(D,  K0Star,  e,  1, 0, "D->K0*eN",   Mprod);
-  MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
-  MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
-  MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
-  MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
-  MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
-  MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
-  MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
+  //MassScan(D,  pi0, e,  1, 0, "D->pi0eN",  Mprod);
+  //MassScan(D0, K,   e,  1, 0, "D0->KeN",   Mprod);
+  //MassScan(D0, pi,  e,  1, 0, "D0->pieN",  Mprod);
+  //MassScan(D,  K0,  mu, 1, 0, "D->K0muN",  Mprod);
+  //MassScan(D,  pi0, mu, 1, 0, "D->pi0muN", Mprod);
+  //MassScan(D0, K,   mu, 1, 0, "D0->KmuN",  Mprod);
+  //MassScan(D0, pi,  mu, 1, 0, "D0->pimuN", Mprod);
+  //MassScan(D,  K0Star,  e,  1, 0, "D->K0*eN",   Mprod);
+  //MassScan(D0, KStar,   e,  1, 0, "D0->K*eN",   Mprod);
+  //MassScan(D,  K0Star,  mu, 1, 0, "D->K0*muN",  Mprod);
+  //MassScan(D0, KStar,   mu, 1, 0, "D0->K*muN",  Mprod);
+  //MassScan(tau, 0.1,   e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod);
+  //MassScan(tau, 0.01,  e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod);
+  //MassScan(tau, 0.1,   mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod);
+  //MassScan(tau, 0.01,  mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod);
   
   // HNL decay via two- and three-body decay
 
