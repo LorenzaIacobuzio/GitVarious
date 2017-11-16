@@ -697,16 +697,14 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   Mass4 = Mass4/1000.;
 
   for (Double_t Mass2 = 0.1; Mass2 < (Mass1-Mass3-Mass4); Mass2 += 0.1) {
-    Int_t N = 0;
 
-    if (Mass2 < Mass1-Mass3-Mass4-1.1 || (Mass2 > 1.1 && Mass2 < Mass1-Mass3-Mass4-0.1))
-      N = (Int_t)(Mass2*3000.);
-    else if (Mass2 >= Mass1-Mass3-Mass4-1.1 && Mass2 <= 1.1)
-      N = (Int_t)(Mass2*500.);
-    else
-      N = (Int_t)(Mass2*4000.);
+    Int_t N = 100;
+    Double_t xmin = (Mass2+Mass3)*(Mass2+Mass3);
+    Double_t xmax = (Mass1-Mass4)*(Mass1-Mass4);
+    Double_t ymin = (Mass2+Mass4)*(Mass2+Mass4);
+    Double_t ymax = (Mass1-Mass3)*(Mass1-Mass3);
     
-    TH2D* h2 = new TH2D(Form("%s_%.1f",Title.c_str(), Mass2), "", N, 0., 5., N, -1., 5.);
+    TH2D* h2 = new TH2D(Form("%s_%.1f",Title.c_str(), Mass2), "", N, xmin, xmax, N, ymin, ymax);
     TLorentzVector Mother(0., 0., 0., Mass1);
     Double_t Daughters[3] = {Mass2, Mass3, Mass4} ;  
     TGenPhaseSpace Event;
@@ -720,7 +718,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       TLorentzVector *p3 = Event.GetDecay(2);
       TLorentzVector p12 = *p1 + *p2;
       TLorentzVector p13 = *p1 + *p3;
-      
+
       h2->Fill(p12.M2(), p13.M2(), W);
     }
 
