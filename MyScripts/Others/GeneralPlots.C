@@ -738,7 +738,6 @@ void GeneralPlots() {
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "N decay modes vs N mass");
   Mdecay->SetName("Mdecay");
-  TH2D* Dalitz = new TH2D();
   TCanvas *c = new TCanvas();
 
   TGaxis::SetMaxDigits(2);
@@ -759,7 +758,7 @@ void GeneralPlots() {
   PhaseSpace(D0, KStar,  mu, "D0->K*muN");
   */
   // HNL production
-  
+  /*  
   MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);  // HNL production via two-body decay
   MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
   MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
@@ -852,4 +851,5 @@ void GeneralPlots() {
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
   img1->WriteImage("/home/li/GitVarious/HeavyNeutrino/BRs/NDecayGraph.png");
+  */
 }
