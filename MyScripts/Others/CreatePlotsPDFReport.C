@@ -8,7 +8,7 @@ void CreatePlotsPDFReport() {
   Double_t titleSize = 0.07;
   TH1D* hh1 = new TH1D();
   TH1D* hhh1 = new TH1D();      
-  TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
+  TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
   
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
@@ -124,7 +124,7 @@ void CreatePlotsPDFReport() {
 	  h12->Draw();
 	}
 
-	TString path = "/home/li/GitVarious/HeavyNeutrino/Plots/";
+	TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
 	c2->SaveAs(path + key2->GetName() + ".png");
       }
     }

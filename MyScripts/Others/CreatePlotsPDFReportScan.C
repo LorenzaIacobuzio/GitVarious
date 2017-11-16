@@ -44,7 +44,7 @@ void CreatePlotsPDFReportScan() {
       h2->Draw("colz");    
     }
    
-    TString path = "~/GitVarious/HeavyNeutrino/ScanCouplingPlots/";
+    TString path = "~/Desktop/HeavyNeutrino/ScanPlots/";
     c1->SaveAs(path + key->GetName() + ".png");
   }
 }

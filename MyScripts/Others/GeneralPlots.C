@@ -728,7 +728,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     h2->GetYaxis()->SetTitle("Neutrino-meson invariant mass [GeV^2]");
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
-    gPad->SaveAs(Form("/home/li/GitVarious/HeavyNeutrino/DalitzPlots/%s_%.1f.png", Title.c_str(), Mass2));
+    gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/%s_%.1f.png", Title.c_str(), Mass2));
   }
 }
 
@@ -808,7 +808,7 @@ void GeneralPlots() {
 
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage("/home/li/GitVarious/HeavyNeutrino/BRs/NProdGraph.png");
+  img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph.png");
 
   // HNL decay
 
@@ -850,6 +850,6 @@ void GeneralPlots() {
 
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
-  img1->WriteImage("/home/li/GitVarious/HeavyNeutrino/BRs/NDecayGraph.png");
+  img1->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph.png");
   */
 }
