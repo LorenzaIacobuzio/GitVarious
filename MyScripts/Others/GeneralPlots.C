@@ -661,7 +661,7 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
   TGraph* gr = new TGraph(Mass, xMN, yBR);
 
   gr->SetNameTitle(Title.c_str(), Title.c_str());
-  gr->SetLineWidth(4);
+  gr->SetLineWidth(5);
 
   if (Prod == kTRUE) {
     if (counterProd < 14) {
@@ -744,7 +744,7 @@ void GeneralPlots() {
   TGaxis::SetMaxDigits(2);
 
   // Dalitz plots
-    
+  /*    
   PhaseSpace(D,  K0,     e,  "D->K0eN");  // 3-body HNL production: Dalitz plots
   PhaseSpace(D,  pi0,    e,  "D->pi0eN");
   PhaseSpace(D0, K,      e,  "D0->KeN");
@@ -757,9 +757,9 @@ void GeneralPlots() {
   PhaseSpace(D0, KStar,  e,  "D0->K*eN");
   PhaseSpace(D,  K0Star, mu, "D->K0*muN");
   PhaseSpace(D0, KStar,  mu, "D0->K*muN");
-  
+  */
   // HNL production
-  /*  
+  
   MassScan(D,   e,   0., 1, 1, "D->Ne",                Mprod);  // HNL production via two-body decay
   MassScan(D,   mu,  0., 1, 1, "D->Nmu",               Mprod);
   MassScan(DS,  e,   0., 1, 1, "DS->Ne",               Mprod);
@@ -852,5 +852,4 @@ void GeneralPlots() {
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
   img1->WriteImage("/home/li/GitVarious/HeavyNeutrino/BRs/NDecayGraph.png");
-  */
 }
