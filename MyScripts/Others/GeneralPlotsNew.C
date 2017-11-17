@@ -758,7 +758,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
 
 // Main
 
-void GeneralPlotsNew() {
+void GeneralPlots() {
 
   Int_t model = 2;
   
@@ -773,7 +773,7 @@ void GeneralPlotsNew() {
   TGaxis::SetMaxDigits(2);
 
   // Dalitz plots
-  /*    
+  /*  
   PhaseSpace(D,  K0,     e,  "D->K0eN");  // 3-body HNL production: Dalitz plots
   PhaseSpace(D,  pi0,    e,  "D->pi0eN");
   PhaseSpace(D0, K,      e,  "D0->KeN");
@@ -788,7 +788,7 @@ void GeneralPlotsNew() {
   PhaseSpace(D0, KStar,  mu, "D0->K*muN");
   */
   // HNL production
-  /*
+  
   MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
   MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
   MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
@@ -839,21 +839,21 @@ void GeneralPlotsNew() {
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph.png");
-  */
+
   // HNL decay
-  
-  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 2.);  // HNL decay via two- and three-body decay
-  //MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 2.);
-  //MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 2.);
-  //MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, 2.);
-  //MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, 2.);
-  //MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, 2.);
-  //MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, 2.);
-  //MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, 2.);
-  //MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, 2.);
-  //MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, 2.);
-  //MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, 2.);
-  //MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 2.);
+
+  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 1.);  // HNL decay via two- and three-body decay
+  MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
+  MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 1.);
+  MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, 1.);
+  MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, 1.);
+  MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, 1.);
+  MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, 1.);
+  MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, 1.);
+  MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, 1.);
+  MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, 1.);
+  MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, 1.);
+  MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 1.);
   
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
