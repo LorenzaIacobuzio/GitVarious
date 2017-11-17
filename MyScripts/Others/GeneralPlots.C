@@ -758,7 +758,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
 
 // Main
 
-void GeneralPlotsNew() {
+void GeneralPlots() {
 
   Int_t model = 2;
   
@@ -788,7 +788,7 @@ void GeneralPlotsNew() {
   PhaseSpace(D0, KStar,  mu, "D0->K*muN");
   */
   // HNL production
-  
+  /*  
   MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
   MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
   MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
@@ -830,7 +830,7 @@ void GeneralPlotsNew() {
   Mprod->GetXaxis()->SetLimits(0.1, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  //c->SetWindowSize(20000., 12000.);
+  c->SetWindowSize(20000., 12000.);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
@@ -839,9 +839,9 @@ void GeneralPlotsNew() {
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph.png");
-
+  */
   // HNL decay
-
+  
   MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 1.);  // HNL decay via two- and three-body decay
   MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
   MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 1.);
@@ -872,7 +872,7 @@ void GeneralPlotsNew() {
   Mdecay->GetXaxis()->SetLimits(0.1, 10.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  //c->SetWindowSize(20000., 12000.);
+  c->SetWindowSize(20000., 12000.);
   gPad->BuildLegend(0.24, 0.25, 0.42, 0.56);
   gPad->Update();
   gPad->Modified();
