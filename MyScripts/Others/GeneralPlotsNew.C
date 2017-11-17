@@ -6,6 +6,7 @@ Double_t fPi = 130.41; // MeV
 Double_t fRho = 1.04E5; // MeV^2
 Double_t fD = 222.6;
 Double_t fDS = 280.1;
+Double_t sigmacc = 75.; //mubarn
 
 // masses
 
@@ -66,6 +67,12 @@ Double_t DSe2BR = 1.4E-7;
 Double_t DSm2BR = 5.56E-3;
 Double_t DSt2BR = 5.48E-2;
 Double_t TauPi2BR = 10.82E-2;
+
+// fragmentation fractions
+
+Double_t ffD = 0.246;
+Double_t ffD0 = 0.565;
+Double_t ffDS = 0.08;
 
 // variables for macro
 
@@ -697,7 +704,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   }
 }
 
-void GeneralPlots() {
+void GeneralPlotsNew() {
 
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "N production modes vs N mass");
   Mprod->SetName("Mprod");
@@ -724,29 +731,29 @@ void GeneralPlots() {
   */
   // HNL production
 
-  MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, 2.);  // HNL production via two-body decay
-  MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, 2.);
-  MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, 2.);
-  MassScan(DS,  mu,     0., 1, 1, "DS->Nmu",                   Mprod, 2.);
-  MassScan(DS,  tau,    0., 1, 1, "DS->Ntau",                  Mprod, 2.);
-  MassScan(tau, pi,     0., 1, 1, "DS->taunu; tau->Npi",       Mprod, 2.);
-  MassScan(tau, rho,    0., 1, 1, "DS->taunu; tau->Nrho",      Mprod, 2.);
-  MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, 2.);           // HNL production via three-body decay
-  MassScan(D,   pi0,    e,  1, 0, "D->pi0eN",                  Mprod, 2.);
-  MassScan(D0,  K,      e,  1, 0, "D0->KeN",                   Mprod, 2.);
-  MassScan(D0,  pi,     e,  1, 0, "D0->pieN",                  Mprod, 2.);
-  MassScan(D,   K0,     mu, 1, 0, "D->K0muN",                  Mprod, 2.);
-  MassScan(D,   pi0,    mu, 1, 0, "D->pi0muN",                 Mprod, 2.);
-  MassScan(D0,  K,      mu, 1, 0, "D0->KmuN",                  Mprod, 2.);
-  MassScan(D0,  pi,     mu, 1, 0, "D0->pimuN",                 Mprod, 2.);
-  MassScan(D,   K0Star, e,  1, 0, "D->K0*eN",                  Mprod, 2.);
-  MassScan(D0,  KStar,  e,  1, 0, "D0->K*eN",                  Mprod, 2.);
-  MassScan(D,   K0Star, mu, 1, 0, "D->K0*muN",                 Mprod, 2.);
-  MassScan(D0,  KStar,  mu, 1, 0, "D0->K*muN",                 Mprod, 2.);
-  MassScan(tau, 0.1,    e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod, 2.);
-  MassScan(tau, 0.01,   e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod, 2.);
-  MassScan(tau, 0.1,    mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod, 2.);
-  MassScan(tau, 0.01,   mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod, 2.);
+  MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
+  MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
+  MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
+  MassScan(DS,  mu,     0., 1, 1, "DS->Nmu",                   Mprod, sigmacc*2.*ffDS);
+  MassScan(DS,  tau,    0., 1, 1, "DS->Ntau",                  Mprod, sigmacc*2.*ffDS);
+  MassScan(tau, pi,     0., 1, 1, "DS->taunu; tau->Npi",       Mprod, sigmacc*2.*ffDS);
+  MassScan(tau, rho,    0., 1, 1, "DS->taunu; tau->Nrho",      Mprod, sigmacc*2.*ffDS);
+  MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, sigmacc*2.*ffD);           // HNL production via three-body decay
+  MassScan(D,   pi0,    e,  1, 0, "D->pi0eN",                  Mprod, sigmacc*2.*ffD);
+  MassScan(D0,  K,      e,  1, 0, "D0->KeN",                   Mprod, sigmacc*2.*ffD0);
+  MassScan(D0,  pi,     e,  1, 0, "D0->pieN",                  Mprod, sigmacc*2.*ffD0);
+  MassScan(D,   K0,     mu, 1, 0, "D->K0muN",                  Mprod, sigmacc*2.*ffD);
+  MassScan(D,   pi0,    mu, 1, 0, "D->pi0muN",                 Mprod, sigmacc*2.*ffD);
+  MassScan(D0,  K,      mu, 1, 0, "D0->KmuN",                  Mprod, sigmacc*2.*ffD0);
+  MassScan(D0,  pi,     mu, 1, 0, "D0->pimuN",                 Mprod, sigmacc*2.*ffD0);
+  MassScan(D,   K0Star, e,  1, 0, "D->K0*eN",                  Mprod, sigmacc*2.*ffD);
+  MassScan(D0,  KStar,  e,  1, 0, "D0->K*eN",                  Mprod, sigmacc*2.*ffD0);
+  MassScan(D,   K0Star, mu, 1, 0, "D->K0*muN",                 Mprod, sigmacc*2.*ffD);
+  MassScan(D0,  KStar,  mu, 1, 0, "D0->K*muN",                 Mprod, sigmacc*2.*ffD0);
+  MassScan(tau, 0.1,    e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod, sigmacc*2.*ffDS);
+  MassScan(tau, 0.01,   e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod, sigmacc*2.*ffDS);
+  MassScan(tau, 0.1,    mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod, sigmacc*2.*ffDS);
+  MassScan(tau, 0.01,   mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod, sigmacc*2.*ffDS);
 
   Mprod->Draw("AC");
   Mprod->GetXaxis()->SetTitle("N mass [GeV]");
@@ -761,7 +768,7 @@ void GeneralPlots() {
   gPad->SetGridx();
   gPad->SetGridy();
   Mprod->SetMinimum(1.E-20);
-  Mprod->SetMaximum(1.E-12);
+  Mprod->SetMaximum(1.E-10);
   Mprod->GetXaxis()->SetLimits(0.1, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
