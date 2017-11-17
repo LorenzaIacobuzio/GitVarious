@@ -1,3 +1,29 @@
+// couplings according to model I, II, III
+
+Double_t USquared = 1.;
+Double_t UeSquared = 0.;
+Double_t UmuSquared = 0.;
+Double_t UtauSquared = 0.;
+
+void SetModel(Int_t model) {
+	      
+if (model == 1) {
+  UmuSquared = USquared/54.;
+  UtauSquared = UmuSquared;
+  UeSquared = 52.*UmuSquared;
+ }
+ else if (model == 2) {
+   UeSquared = USquared/20.8;
+   UmuSquared = 16.*UeSquared;
+   UtauSquared = 3.8*UeSquared;
+ }
+ else if (model == 3) {
+   UmuSquared = USquared/5.361;
+   UeSquared = 0.061*UmuSquared;
+   UtauSquared = 4.3*UmuSquared;
+ }
+}
+
 // physical constants
 
 Double_t GF = 1.17E-11; // MeV^-2                             
@@ -6,7 +32,7 @@ Double_t fPi = 130.41; // MeV
 Double_t fRho = 1.04E5; // MeV^2
 Double_t fD = 222.6;
 Double_t fDS = 280.1;
-Double_t sigmacc = 75.; //mubarn
+Double_t sigmacc = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note
 
 // masses
 
@@ -91,6 +117,8 @@ Int_t colors[14] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 92
 
 
 
+// phasespace for 2-body N production
+
 Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t phaseSpace = 0.;
@@ -99,6 +127,8 @@ Double_t PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   
   return phaseSpace;
 }
+
+// phasespace factor for 2-body N production
 
 Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t phaseSpace) {
 
@@ -114,10 +144,19 @@ Double_t PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double
   return factor;
 }
 
+// BR for 2-body N production
+
 Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
-  Double_t brt, life, V, f, a, b, c, d;
+  Double_t brt, life, U, V, f, a, b, c, d;
 
+  if (Mass3 == e)
+    U = UeSquared;
+  else if (Mass3 == mu)
+    U = UmuSquared;
+  else if (Mass3 == tau || Mass3 == pi || Mass3 == rho)
+    U = UtauSquared;
+  
   if (Mass1 == D) {
     life = Dlife;
     V = Vcd;
@@ -144,21 +183,21 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   }
 
   if (Mass1 != tau) {
-    a = life*GF*GF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
+    a = U*life*GF*GF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
     b = 1. - Mass2*Mass2/(Mass1*Mass1) + 2.*Mass3*Mass3/(Mass1*Mass1);
     c = (1. - Mass3*Mass3/(Mass1*Mass1))*Mass3*Mass3/(Mass2*Mass2);
     d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
     brt = a*(b+c)*TMath::Sqrt(d);
   }
   else if (Mass1 == tau && Mass3 == pi) {
-    a = life*GF*GF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
+    a = U*life*GF*GF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
     b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
     c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
     d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
     brt = a*b*TMath::Sqrt(c*d);
   }
   else if (Mass1 == tau && Mass3 == rho) {
-    a = life*fRho*fRho*GF*GF*V*V*Mass1*Mass1*Mass1/(8.*TMath::Pi()*Mass3*Mass3);
+    a = U*life*fRho*fRho*GF*GF*V*V*Mass1*Mass1*Mass1/(8.*TMath::Pi()*Mass3*Mass3);
     b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) + (1. + (Mass2*Mass2 - 2.*Mass3*Mass3)/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
     c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
     d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
@@ -168,9 +207,19 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   return brt;
 }
 
+// BR for 3-body N production
+
 Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4) {
 
   Double_t br = 0.;
+  Double_t U = 0.;
+  
+  if (Mass4 == e)
+    U = UeSquared;
+  else if (Mass4 == mu)
+    U = UmuSquared;
+  else if (Mass4 == tau)
+    U = UtauSquared;
 
   if (Mass3 == K || Mass3 == K0 || Mass3 == pi || Mass3 == pi0) {
     if (Mass1 == D || Mass1 == D0) { 
@@ -216,7 +265,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  }
 	}
       
-	a = tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
       
 	//(g*g*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*g*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
       
@@ -271,7 +320,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	
 	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;
 	Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
-	a = tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	a = U*tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
       
 	// (f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
 	// + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
@@ -314,18 +363,26 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
       Double_t a, b, c, d, ENmin, ENmax, EN;
       Double_t life = taulife;
 	
-      if (Mass3 == 0.1) {
+      if (Mass3 == 0.1) { //nu_tau
+	if (Mass4 == e)
+	  U = UeSquared;
+	else if (Mass4 == mu)
+	  U = UmuSquared;
+	else if (Mass4 == tau)
+	  U = UtauSquared;
+
 	Mass3 = 0.;
 	ENmin = Mass2; // N at rest, l and nu back to back
 	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
 
-	TF1 *func = new TF1("func", "([0]*[3]*[3]*[1]*[1]*x/(2.*TMath::Power(TMath::Pi(), 3.)))*(1. + ([2]*[2] - [4]*[4])/([1]*[1]) - 2.*x/[1])*(1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(TMath::Sqrt(x*x - [2]*[2]))");
+	TF1 *func = new TF1("func", "([5]*[0]*[3]*[3]*[1]*[1]*x/(2.*TMath::Power(TMath::Pi(), 3.)))*(1. + ([2]*[2] - [4]*[4])/([1]*[1]) - 2.*x/[1])*(1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(TMath::Sqrt(x*x - [2]*[2]))");
       
 	func->SetParameter(0, life);
 	func->SetParameter(1, Mass1);
 	func->SetParameter(2, Mass2);
 	func->SetParameter(3, GF);
 	func->SetParameter(4, Mass4);
+	func->SetParameter(5, U);
       
 	ROOT::Math::WrappedTF1 wf1(*func);
 	ROOT::Math::GaussLegendreIntegrator ig;
@@ -333,19 +390,21 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	b = ig.Integral(ENmin, ENmax);
 	br = b;
       }
-      else if (Mass3 == 0.01) {
+      else if (Mass3 == 0.01) { //nu_e or nu_mu
+	U = UtauSquared;
 	Mass3 = 0.;
 	ENmin = Mass2; // N at rest, l and nu back to back
 	ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one
 	
-	TF1 *func = new TF1("func", "([0]*[3]*[3]*[1]*[1]/(4.*TMath::Power(TMath::Pi(), 3.)))*(TMath::Power((1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1])), 2.)*TMath::Sqrt(x*x - [2]*[2]))*(([1] - x)*(1. - ([2]*[2] + [4]*[4])/([1]*[1])) - (1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(([1] - x)*([1] - x)/[1] + (x*x - [2]*[2])/(3.*[1])))");
+	TF1 *func = new TF1("func", "([5]*[0]*[3]*[3]*[1]*[1]/(4.*TMath::Power(TMath::Pi(), 3.)))*(TMath::Power((1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1])), 2.)*TMath::Sqrt(x*x - [2]*[2]))*(([1] - x)*(1. - ([2]*[2] + [4]*[4])/([1]*[1])) - (1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(([1] - x)*([1] - x)/[1] + (x*x - [2]*[2])/(3.*[1])))");
       
 	func->SetParameter(0, life);
 	func->SetParameter(1, Mass1);
 	func->SetParameter(2, Mass2);
 	func->SetParameter(3, GF);
 	func->SetParameter(4, Mass4);
-      
+      	func->SetParameter(5, U);
+	
 	ROOT::Math::WrappedTF1 wf1(*func);
 	ROOT::Math::GaussLegendreIntegrator ig;
 	ig.SetFunction(wf1);
@@ -369,48 +428,21 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
   return br;
 }
 
-Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
-
-  Double_t r, a, b, f;
-  Double_t gamma_l_l_nu = 0.;
-
-  if (Mass1 >= (Mass2+Mass3)) {
-    if (Mass2 == Mass3) {
-      r  = 4*Mass2*Mass3/(Mass1*Mass1);
-      a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
-      b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
-      f = a+b;
-      gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
-    }
-    else if (Mass2 != Mass3) {
-      if (Mass2 > Mass3)
-	r = Mass2/Mass1;
-      else if (Mass2 < Mass3)
-	r = Mass3/Mass1;
-      else {
-	cout<<"[GammaLeptonNu3] N 3-body decay mode should have equal masses"<<endl;
-	exit(1);
-      }
-      a = (GF*GF*TMath::Power(Mass1, 5))/(192*TMath::Power(TMath::Pi(), 3));
-      b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) -12.*TMath::Power(r, 4)*TMath::Log(r*r);
-      gamma_l_l_nu = a*b;
-    }
-  }
-  else {
-    gamma_l_l_nu = 0.;
-  }
-  
-  return gamma_l_l_nu;
- }
+// Decay width for 2-body N decay
 
 Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
 
   Double_t gamma_2 = 0.;
-  Double_t a, b, c, d, f, g;
+  Double_t U, a, b, c, d, f, g;
 
   if (Mass1 >= (Mass2+Mass3)) {
     if (Mass2 == pi || Mass3 == pi) {
-      a = (cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(16.*TMath::Pi());
+      if (Mass2 == e || Mass3 == e)
+	U = UeSquared;
+      else if (Mass2 == mu || Mass3 == mu)
+	U = UmuSquared;
+      
+      a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(16.*TMath::Pi());
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = 1. - (Mass3*Mass3)/(Mass1*Mass1);
       d = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2)/(Mass1*Mass1);
@@ -418,7 +450,12 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       gamma_2 = a*TMath::Sqrt(b)*f;
     }
     else if (Mass2 == rho || Mass3 == rho) {
-      a = (cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
+      if (Mass2 == e || Mass3 == e)
+        U = UeSquared;
+      else if (Mass2 == mu || Mass3 == mu)
+        U = UmuSquared;
+      
+      a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
       d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
@@ -437,6 +474,52 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
   
   return gamma_2;
 }
+
+// Decay width for 3-body N decay
+
+Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
+
+  Double_t U, r, a, b, f;
+  Double_t gamma_l_l_nu = 0.;
+
+  if (Mass1 >= (Mass2+Mass3)) {
+    if (Mass2 == Mass3) {
+      U = USquared;
+      r  = 4*U*Mass3*Mass3/(Mass1*Mass1);
+      a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
+      b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
+      f = a+b;
+      gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+    }
+    else if (Mass2 != Mass3) {
+      if (Mass2 > Mass3)
+	r = Mass2/Mass1;
+      else if (Mass2 < Mass3)
+	r = Mass3/Mass1;
+      else {
+	cout<<"[GammaLeptonNu3] N 3-body decay mode should have equal masses"<<endl;
+	exit(1);
+      }
+      if ((Mass2 == e || Mass3 == e) && (Mass2 == mu || Mass3 == mu))
+	U = UeSquared*UeSquared + UmuSquared*UmuSquared;
+      else if ((Mass2 == e || Mass3 == e) && (Mass2 == tau || Mass3 == tau))
+	U = UeSquared*UeSquared + UtauSquared*UtauSquared;
+      else if ((Mass2 == mu || Mass3 == mu) && (Mass2 == tau || Mass3 == tau))
+	U = UmuSquared*UmuSquared + UtauSquared*UtauSquared;
+      
+      a = (U*GF*GF*TMath::Power(Mass1, 5))/(192*TMath::Power(TMath::Pi(), 3));
+      b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) -12.*TMath::Power(r, 4)*TMath::Log(r*r);
+      gamma_l_l_nu = a*b;
+    }
+  }
+  else {
+    gamma_l_l_nu = 0.;
+  }
+  
+  return gamma_l_l_nu;
+ }
+
+// Total N decay width
 
 Double_t GammaTot(Double_t MN) {
 
@@ -472,43 +555,7 @@ Double_t GammaTot(Double_t MN) {
   return gammaTot;
 }
 
-Double_t GammaTotUSquared(Double_t MN) {
-
-  Double_t USquared = 1.E-6;
-  Double_t UeSquared = USquared/20.8;
-  Double_t UmuSquared = 16.*UeSquared;
-  Double_t UtauSquared = 3.8*UeSquared;
-  Double_t gammaTot = 0.;
-  
-  if (MN < 2*e) 
-    gammaTot = 0.;
-  else if (MN >= 2*e && MN < (e+mu))
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared;
-  else if (MN >= (e+mu) && MN < (e+pi)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared);
-  else if (MN >= (e+pi) && MN < 2*mu) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared;
-  else if (MN >= 2*mu && MN < (mu+pi)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared;
-  else if (MN >= (mu+pi) && MN < (rho+e)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared;
-  else if (MN >= (rho+e) && MN < (rho+mu)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared;
-  else if (MN >= (mu+rho) && MN < (e+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared;
-  else if (MN >= (e+tau) && MN < (pi+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared + GammaLeptonNu3(MN, e, tau)*(UeSquared + UtauSquared);
-  else if (MN >= (pi+tau) && MN < (mu+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared + GammaLeptonNu3(MN, e, tau)*(UeSquared + UtauSquared) + Gamma2(MN, pi, tau, fPi)*UtauSquared;
-  else if (MN >= (mu+tau) && MN < (rho+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared + GammaLeptonNu3(MN, e, tau)*(UeSquared + UtauSquared) + Gamma2(MN, pi, tau, fPi)*UtauSquared + GammaLeptonNu3(MN, mu, tau)*(UmuSquared + UtauSquared);
-  else if (MN >= (rho+tau) && MN < 2*tau) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared + GammaLeptonNu3(MN, e, tau)*(UeSquared + UtauSquared) + Gamma2(MN, pi, tau, fPi)*UtauSquared + GammaLeptonNu3(MN, mu, tau)*(UmuSquared + UtauSquared) + Gamma2(MN, rho, tau, fRho)*UtauSquared;
-  else if (MN >= 2*tau) 
-    gammaTot = GammaLeptonNu3(MN, e, e)*USquared + GammaLeptonNu3(MN, e, mu)*(UeSquared + UmuSquared) + Gamma2(MN, pi, e, fPi)*UeSquared + GammaLeptonNu3(MN, mu, mu)*USquared + Gamma2(MN, pi, mu, fPi)*UmuSquared + Gamma2(MN, rho, e, fRho)*UeSquared + Gamma2(MN, rho, mu, fRho)*UmuSquared + GammaLeptonNu3(MN, e, tau)*(UeSquared + UtauSquared) + Gamma2(MN, pi, tau, fPi)*UtauSquared + GammaLeptonNu3(MN, mu, tau)*(UmuSquared + UtauSquared) + Gamma2(MN, rho, tau, fRho)*UtauSquared; + GammaLeptonNu3(MN, tau, tau)*USquared;
-
-  return gammaTot;
-}
+// Function to distinguish between production/decay and 2-body/3-body
 
 Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
 
@@ -587,6 +634,9 @@ Double_t ComputeTotalBR(Double_t Mass1, Double_t MN) {
   return brt;
 }
 */
+
+// Function for scan on N mass
+
 void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title, TMultiGraph* M, Double_t factor) {
 
   Double_t PS = 0.;
@@ -662,6 +712,8 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
   M->Add(gr);
 }
 
+// Function for Dalitz plots of 3-body N production
+
 void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Title) {
 
   Mass1 = Mass1/1000.;
@@ -704,8 +756,14 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   }
 }
 
+// Main
+
 void GeneralPlotsNew() {
 
+  Int_t model = 2;
+  
+  SetModel(model);
+  
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "N production modes vs N mass");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "N decay modes vs N mass");
@@ -730,7 +788,7 @@ void GeneralPlotsNew() {
   PhaseSpace(D0, KStar,  mu, "D0->K*muN");
   */
   // HNL production
-
+  /*
   MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
   MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
   MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
@@ -781,21 +839,21 @@ void GeneralPlotsNew() {
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph.png");
-
+  */
   // HNL decay
-  /*
-  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 6.);  // HNL decay via two- and three-body decay
-  MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 4.);
-  MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 2.);
-  MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, 6.);
-  MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, 2.);
-  MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, 2.);
-  MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, 2.);
-  MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, 4.);
-  MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, 2.);
-  MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, 4.);
-  MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, 2.);
-  MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 6.);
+  
+  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 2.);  // HNL decay via two- and three-body decay
+  //MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 2.);
+  //MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 2.);
+  //MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, 2.);
+  //MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, 2.);
+  //MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, 2.);
+  //MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, 2.);
+  //MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, 2.);
+  //MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, 2.);
+  //MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, 2.);
+  //MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, 2.);
+  //MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 2.);
   
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
@@ -823,5 +881,4 @@ void GeneralPlotsNew() {
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
   img1->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph.png");
-  */
 }
