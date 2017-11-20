@@ -461,7 +461,7 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
       f = TMath::Power(1. - (Mass3*Mass3)/(Mass1*Mass1), 2.);
       g = c - d + f;
-      gamma_2 = a*TMath::Sqrt(b)*f;
+      gamma_2 = a*TMath::Sqrt(b)*g;
     }
     else {
       cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
@@ -613,27 +613,6 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 
   return brt;
 }
-/*
-Double_t ComputeTotalBR(Double_t Mass1, Double_t MN) {
-
-  Double_t brt = 0.;
-
-  Double_t phaseSpaceE = PhaseSpace2(mesonMass, MN, e);
-  Double_t phaseSpaceMu = PhaseSpace2(mesonMass, MN, mu);
-  Double_t FactorE = PhaseSpaceFactor2(mesonMass, MN, e, phaseSpaceE);
-  Double_t FactorMu = PhaseSpaceFactor2(mesonMass, MN, mu, phaseSpaceMu);
-  
-  if (FactorE > 0. && FactorMu > 0.) {
-    if (mesonMass == D)
-      brt = De2BR*FactorE/(De2BR*FactorE+Dm2BR*FactorMu);
-    
-    else if (mesonMass == DS)
-      brt = DSe2BR*FactorE/(DSe2BR*FactorE+DSm2BR*FactorMu);
-  }
-  
-  return brt;
-}
-*/
 
 // Function for scan on N mass
 
@@ -914,6 +893,10 @@ Int_t GeneralPlots(Int_t mode, Int_t model) {
   }
   else if (mode == 2) {
     AllDecay(model, Mdecay);
+  }
+  else if (mode == 3) {
+    cout<<"[GeneralPlots] Test printout"<<endl;
+    exit(1);
   }
   else {
     cout<<"[GeneralPlots] Unknown mode:"<<endl;
