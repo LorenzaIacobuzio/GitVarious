@@ -714,7 +714,7 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
 
 // Function for Dalitz plots of 3-body N production
 
-void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Title) {
+void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Title, Int_t model) {
 
   Mass1 = Mass1/1000.;
   Mass3 = Mass3/1000.;
@@ -747,48 +747,45 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     }
 
     h2->Draw("colz");
-    h2->SetTitle(Form("%s_%.1f",Title.c_str(), Mass2));
-    h2->GetXaxis()->SetTitle("Neutrino-meson invariant mass [GeV^2]");
-    h2->GetYaxis()->SetTitle("Neutrino-lepton invariant mass [GeV^2]");
+    h2->SetTitle(Form("%s, mN = %.1f GeV, model %i",Title.c_str(), Mass2, model));
+    h2->GetXaxis()->SetTitle("Neutrino-meson invariant mass [GeV^2/c^4]");
+    h2->GetYaxis()->SetTitle("Neutrino-lepton invariant mass [GeV^2/c^4]");
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
-    gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/%s_%.1f.png", Title.c_str(), Mass2));
+
+    if (model == 1)
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+    else if (model == 2)
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+    else if (model == 3)
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
   }
 }
 
-// Main
+// Function to call al Dalitz plots
 
-void GeneralPlots() {
+void AllDalitz(Int_t model) {
 
-  Int_t model = 2;
-  
-  SetModel(model);
-  
-  TMultiGraph* Mprod = new TMultiGraph("Mprod", "N production modes vs N mass");
-  Mprod->SetName("Mprod");
-  TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "N decay modes vs N mass");
-  Mdecay->SetName("Mdecay");
+  PhaseSpace(D,  K0,     e,  "D->K0eN"  , model);  // 3-body HNL production: Dalitz plots
+  PhaseSpace(D,  pi0,    e,  "D->pi0eN" , model);
+  PhaseSpace(D0, K,      e,  "D0->KeN"  , model);
+  PhaseSpace(D0, pi,     e,  "D0->pieN" , model);
+  PhaseSpace(D,  K0,     mu, "D->K0muN" , model);
+  PhaseSpace(D,  pi0,    mu, "D->pi0muN", model);
+  PhaseSpace(D0, K,      mu, "D0->KmuN" , model);
+  PhaseSpace(D0, pi,     mu, "D0->pimuN", model);
+  PhaseSpace(D,  K0Star, e,  "D->K0*eN" , model);
+  PhaseSpace(D0, KStar,  e,  "D0->K*eN" , model);
+  PhaseSpace(D,  K0Star, mu, "D->K0*muN", model);
+  PhaseSpace(D0, KStar,  mu, "D0->K*muN", model);
+}
+
+// Function to call all N production modes
+
+void AllProd (Int_t model, TMultiGraph* Mprod) {
+
   TCanvas *c = new TCanvas();
 
-  TGaxis::SetMaxDigits(2);
-
-  // Dalitz plots
-  /*  
-  PhaseSpace(D,  K0,     e,  "D->K0eN");  // 3-body HNL production: Dalitz plots
-  PhaseSpace(D,  pi0,    e,  "D->pi0eN");
-  PhaseSpace(D0, K,      e,  "D0->KeN");
-  PhaseSpace(D0, pi,     e,  "D0->pieN");
-  PhaseSpace(D,  K0,     mu, "D->K0muN");
-  PhaseSpace(D,  pi0,    mu, "D->pi0muN");
-  PhaseSpace(D0, K,      mu, "D0->KmuN");
-  PhaseSpace(D0, pi,     mu, "D0->pimuN");
-  PhaseSpace(D,  K0Star, e,  "D->K0*eN");
-  PhaseSpace(D0, KStar,  e,  "D0->K*eN");
-  PhaseSpace(D,  K0Star, mu, "D->K0*muN");
-  PhaseSpace(D0, KStar,  mu, "D0->K*muN");
-  */
-  // HNL production
-  /*  
   MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
   MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
   MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
@@ -796,7 +793,7 @@ void GeneralPlots() {
   MassScan(DS,  tau,    0., 1, 1, "DS->Ntau",                  Mprod, sigmacc*2.*ffDS);
   MassScan(tau, pi,     0., 1, 1, "DS->taunu; tau->Npi",       Mprod, sigmacc*2.*ffDS);
   MassScan(tau, rho,    0., 1, 1, "DS->taunu; tau->Nrho",      Mprod, sigmacc*2.*ffDS);
-  MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, sigmacc*2.*ffD);           // HNL production via three-body decay
+  MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, sigmacc*2.*ffD);  // HNL production via three-body decay
   MassScan(D,   pi0,    e,  1, 0, "D->pi0eN",                  Mprod, sigmacc*2.*ffD);
   MassScan(D0,  K,      e,  1, 0, "D0->KeN",                   Mprod, sigmacc*2.*ffD0);
   MassScan(D0,  pi,     e,  1, 0, "D0->pieN",                  Mprod, sigmacc*2.*ffD0);
@@ -814,8 +811,8 @@ void GeneralPlots() {
   MassScan(tau, 0.01,   mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod, sigmacc*2.*ffDS);
 
   Mprod->Draw("AC");
-  Mprod->GetXaxis()->SetTitle("N mass [GeV]");
-  Mprod->GetYaxis()->SetTitle("BR");
+  Mprod->GetXaxis()->SetTitle("N mass [GeV/c^2]");
+  Mprod->GetYaxis()->SetTitle("f*BR [mubarn]");
   Mprod->GetXaxis()->SetTitleOffset(1.2);
   Mprod->GetXaxis()->SetTitleSize(labelSize);
   Mprod->GetYaxis()->SetTitleSize(labelSize);
@@ -835,13 +832,18 @@ void GeneralPlots() {
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-
+    
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph.png");
-  */
-  // HNL decay
-  
+  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph_model%i.png", model));
+}
+
+// Function to call all N decay modes
+
+void AllDecay(Int_t model, TMultiGraph* Mdecay) {
+
+  TCanvas *c = new TCanvas();
+
   MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 1.);  // HNL decay via two- and three-body decay
   MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
   MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 1.);
@@ -856,8 +858,8 @@ void GeneralPlots() {
   MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 1.);
   
   Mdecay->Draw("AC");
-  Mdecay->GetXaxis()->SetTitle("N mass [GeV]");
-  Mdecay->GetYaxis()->SetTitle("BR");
+  Mdecay->GetXaxis()->SetTitle("N mass [GeV/c^2]");
+  Mdecay->GetYaxis()->SetTitle("f*BR [mubarn]");
   Mdecay->GetXaxis()->SetTitleOffset(1.2);
   Mdecay->GetXaxis()->SetTitleSize(labelSize);
   Mdecay->GetYaxis()->SetTitleSize(labelSize);
@@ -880,5 +882,46 @@ void GeneralPlots() {
 
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
-  img1->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph.png");
+  img1->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph_model%i.png", model));
+}
+
+// Main
+
+Int_t GeneralPlots(Int_t mode, Int_t model) {
+
+  if (model == 1 || model == 2 || model == 3)
+    SetModel(model);
+  else {
+    cout<<"[GeneralPlots] Unknown model:"<<endl;
+    cout<<"1: 52:1:1"<<endl;
+    cout<<"2: 1:16:3.8"<<endl;
+    cout<<"3: 0.061:1:4.3"<<endl;
+    exit(1);
+  }
+    
+  TMultiGraph* Mprod = new TMultiGraph("Mprod", Form("N production modes vs N mass, model %i", model));
+  Mprod->SetName("Mprod");
+  TMultiGraph* Mdecay = new TMultiGraph("Mdecay", Form("N decay modes vs N mass, model %i", model));
+  Mdecay->SetName("Mdecay");
+
+  TGaxis::SetMaxDigits(2);
+
+  if (mode == 0) {
+    AllDalitz(model);
+  }
+  else if (mode == 1) {
+    AllProd(model, Mprod);
+  }
+  else if (mode == 2) {
+    AllDecay(model, Mdecay);
+  }
+  else {
+    cout<<"[GeneralPlots] Unknown mode:"<<endl;
+    cout<<"0: Dalitz plots for 3-body N production"<<endl;
+    cout<<"1: BR plots for N production modes"<<endl;
+    cout<<"2: BR plots for N decay modes"<<endl;
+    exit(1);
+  }
+  
+  return 0;
 }
