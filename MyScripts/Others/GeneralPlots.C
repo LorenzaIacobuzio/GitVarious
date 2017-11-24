@@ -7,21 +7,21 @@ Double_t UtauSquared = 0.;
 
 void SetModel(Int_t model) {
 	      
-if (model == 1) {
-  UmuSquared = USquared/54.;
-  UtauSquared = UmuSquared;
-  UeSquared = 52.*UmuSquared;
- }
- else if (model == 2) {
-   UeSquared = USquared/20.8;
-   UmuSquared = 16.*UeSquared;
-   UtauSquared = 3.8*UeSquared;
- }
- else if (model == 3) {
-   UmuSquared = USquared/5.361;
-   UeSquared = 0.061*UmuSquared;
-   UtauSquared = 4.3*UmuSquared;
- }
+  if (model == 1) {
+    UmuSquared = USquared/54.;
+    UtauSquared = UmuSquared;
+    UeSquared = 52.*UmuSquared;
+  }
+  else if (model == 2) {
+    UeSquared = USquared/20.8;
+    UmuSquared = 16.*UeSquared;
+    UtauSquared = 3.8*UeSquared;
+  }
+  else if (model == 3) {
+    UmuSquared = USquared/5.361;
+    UeSquared = 0.061*UmuSquared;
+    UtauSquared = 4.3*UmuSquared;
+  }
 }
 
 // physical constants
@@ -32,7 +32,10 @@ Double_t fPi = 130.41; // MeV
 Double_t fRho = 1.04E5; // MeV^2
 Double_t fD = 222.6;
 Double_t fDS = 280.1;
-Double_t sigmacc = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note
+Double_t fK = 159.8;
+Double_t fEta = 1.2*fPi;
+Double_t fEtaprime = -0.45*fPi;
+Double_t sigmacc = 2.3*9.; // Taken from Gaia's note. sigmacc = f*sigma, where sigma is in mubarn at sqrt(s) = 82 GeV (400 GeV proton on p/n (m_p = 1 GeV) and f is fragmentation fraction
 
 // masses
 
@@ -42,6 +45,9 @@ Double_t tau = 1776.82;
 Double_t pi = 139.57;
 Double_t pi0 = 134.98;
 Double_t rho = 775.4;
+Double_t rho0 = 775.49;
+Double_t eta = 547.86;
+Double_t etaprime = 957.78;  
 Double_t D = 1869.62;
 Double_t DS = 1968.28;
 Double_t D0 = 1864.84;
@@ -433,27 +439,36 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
 
   Double_t gamma_2 = 0.;
-  Double_t U, a, b, c, d, f, g;
+  Double_t U, V, a, b, c, d, f, g;
 
   if (Mass1 >= (Mass2+Mass3)) {
-    if (Mass2 == pi || Mass3 == pi) {
-      if (Mass2 == e || Mass3 == e)
-	U = UeSquared;
-      else if (Mass2 == mu || Mass3 == mu)
-	U = UmuSquared;
+    if (Mass2 == pi || Mass2 == K) {
+      if (Mass2 == pi)
+	V = Vcd;
+      else if (Mass2 == K)
+	V = Vcs;
       
-      a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(16.*TMath::Pi());
-      b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
-      c = 1. - (Mass3*Mass3)/(Mass1*Mass1);
-      d = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2)/(Mass1*Mass1);
-      f = c*c - d;
-      gamma_2 = a*TMath::Sqrt(b)*f;
+      if (Mass3 == e)
+	U = UeSquared;
+      else if (Mass3 == mu)
+	U = UmuSquared;
+      else if (Mass3 == tau)
+	U = UtauSquared;
+      
+      a = (U*GF*GF*V*V*form*form*Mass1*Mass1*Mass1)/(16.*TMath::Pi());
+      b = TMath::Power(1. - Mass3*Mass3/(Mass1*Mass1), 2.);
+      c = (1. + Mass3*Mass3/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
+      d = 1. - (Mass2 - Mass3)*(Mass2 - Mass3)/(Mass1*Mass1);
+      f = 1. - (Mass2 + Mass3)*(Mass2 + Mass3)/(Mass1*Mass1);
+      gamma_2 = a*(b - c)*TMath::Sqrt(d*f);
     }
-    else if (Mass2 == rho || Mass3 == rho) {
-      if (Mass2 == e || Mass3 == e)
-        U = UeSquared;
-      else if (Mass2 == mu || Mass3 == mu)
-        U = UmuSquared;
+    else if (Mass2 == rho) {
+      if (Mass3 == e)
+	U = UeSquared;
+      else if (Mass3 == mu)
+	U = UmuSquared;
+      else if (Mass3 == tau)
+	U = UtauSquared;
       
       a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
@@ -462,6 +477,25 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       f = TMath::Power(1. - (Mass3*Mass3)/(Mass1*Mass1), 2.);
       g = c - d + f;
       gamma_2 = a*TMath::Sqrt(b)*g;
+    }
+    else if (Mass2 == pi0) {
+      U = USquared;
+      a = (U*GF*GF*form*form*Mass1*Mass1*Mass1)/(32.*TMath::Pi());
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b;
+    }
+    else if (Mass2 == eta || Mass2 == etaprime) {
+      U = USquared;
+      a = (U*GF*GF*form*form*Mass1*Mass1*Mass1)/(32.*TMath::Pi());
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b;
+    }
+    else if (Mass2 == rho0) {
+      U= USquared;
+      a = (U*form*form*GF*GF*Mass1*Mass1*Mass1)/(16.*TMath::Pi()*Mass2*Mass2);
+      b = 1. + 2.*Mass2*Mass2/(Mass1*Mass1);
+      c = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b*c;
     }
     else {
       cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
@@ -483,13 +517,18 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   Double_t gamma_l_l_nu = 0.;
 
   if (Mass1 >= (Mass2+Mass3)) {
-    if (Mass2 == Mass3) {
+    if (Mass2 == Mass3 && Mass2 != 0.) {
       U = USquared;
       r  = 4*U*Mass3*Mass3/(Mass1*Mass1);
       a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
       b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
       f = a+b;
       gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+    }
+    else if (Mass2 == Mass3 && Mass2 == 0.) {
+      U = USquared;
+      a = GF*GF*TMath::Power(Mass1, 5.)/(192.*TMath::Power(TMath::Pi(), 3.));
+      gamma_l_l_nu = a;
     }
     else if (Mass2 != Mass3) {
       if (Mass2 > Mass3)
@@ -526,31 +565,46 @@ Double_t GammaTot(Double_t MN) {
   Double_t gammaTot = 0.;
   
   if (MN < 2*e) 
-    gammaTot = 0.;
+    gammaTot = GammaLeptonNu3(MN, 0., 0.);
   else if (MN >= 2*e && MN < (e+mu)) 
-    gammaTot = GammaLeptonNu3(MN, e, e);
-  else if (MN >= (e+mu) && MN < (e+pi)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu);
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e);
+  else if (MN >= (e+mu) && MN < (pi0)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu);
+  else if (MN >= (pi0) && MN < (e+pi))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi);
   else if (MN >= (e+pi) && MN < 2*mu) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi);
   else if (MN >= 2*mu && MN < (mu+pi)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu);
-  else if (MN >= (mu+pi) && MN < (rho+e)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, mu, pi, fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu);
+  else if (MN >= (mu+pi) && MN < (K+e)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi);
+  else if (MN >= (K+e) && MN < (eta))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK);
+  else if (MN >= (eta) && MN < (K+mu))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta);
+  else if (MN >= (K+mu) && MN < (rho0))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK);
+  else if (MN >= (rho0) && MN < (rho+e))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho);
   else if (MN >= (rho+e) && MN < (rho+mu)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho);
-  else if (MN >= (mu+rho) && MN < (e+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho);
-  else if (MN >= (e+tau) && MN < (pi+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + GammaLeptonNu3(MN, e, tau);
-  else if (MN >= (pi+tau) && MN < (mu+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + GammaLeptonNu3(MN, e, tau) + Gamma2(MN, pi, tau, fPi);
-  else if (MN >= (mu+tau) && MN < (rho+tau)) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + GammaLeptonNu3(MN, e, tau) + Gamma2(MN, pi, tau, fPi) + GammaLeptonNu3(MN, mu, tau);
-  else if (MN >= (rho+tau) && MN < 2*tau) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + GammaLeptonNu3(MN, e, tau) + Gamma2(MN, pi, tau, fPi) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, rho, tau, fRho);
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho);
+  else if (MN >= (mu+rho) && MN < (etaprime))
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho);
+  else if (MN >= (etaprime) && MN < (e+tau)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime);
+  
+  else if (MN >= (e+tau) && MN < (mu+tau)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau);
+  else if (MN >= (mu+tau) && MN < (pi+tau)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau) + GammaLeptonNu3(MN, mu, tau);
+  else if (MN >= (pi+tau) && MN < (K+tau)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, pi, tau, fPi);
+  else if (MN >= (K+tau) && MN < (rho+tau)) 
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, pi, tau, fPi) + Gamma2(MN, K, tau, fK);
+  else if (MN >= (rho+tau) && MN < 2*tau)
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, pi, tau, fPi) + Gamma2(MN, K, tau, fK) + Gamma2(MN, rho, tau, fRho);
   else if (MN >= 2*tau) 
-    gammaTot = GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + GammaLeptonNu3(MN, e, tau) + Gamma2(MN, pi, tau, fPi) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, rho, tau, fRho) + GammaLeptonNu3(MN, tau, tau);
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau) + GammaLeptonNu3(MN, mu, tau) + Gamma2(MN, pi, tau, fPi) + Gamma2(MN, rho, tau, fRho) + GammaLeptonNu3(MN, tau, tau);
 
   return gammaTot;
 }
@@ -583,14 +637,49 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
   }
   else if (Prod == kFALSE) {
     if (TwoBody == kTRUE) {
-      if (Mass2 == pi || Mass3 == pi) {
+      if (Mass2 == pi) {
 	if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
 	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
 	else {
 	  brt = 0.;
 	}
       }
-      else if (Mass2 == rho || Mass3 == rho) {
+      else if (Mass2 == rho) {
+	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
+	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
+	else {
+	  brt = 0.;
+	}
+      }
+      else if (Mass2 == pi0) {
+        if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
+          brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
+        else {
+          brt = 0.;
+        }
+      }
+      else if (Mass2 == K) {
+        if (Gamma2(Mass1, Mass2, Mass3, fK) > 0.)
+          brt = Gamma2(Mass1, Mass2, Mass3, fK)/GammaTot(Mass1);
+        else {
+          brt = 0.;
+        }
+      }
+      else if (Mass2 == eta) {
+        if (Gamma2(Mass1, Mass2, Mass3, fEta) > 0.)
+          brt = Gamma2(Mass1, Mass2, Mass3, fEta)/GammaTot(Mass1);
+        else {
+          brt = 0.;
+        }
+      }
+      else if (Mass2 == etaprime) {
+        if (Gamma2(Mass1, Mass2, Mass3, fEtaprime) > 0.)
+          brt = Gamma2(Mass1, Mass2, Mass3, fEtaprime)/GammaTot(Mass1);
+        else {
+          brt = 0.;
+        }
+      }
+      else if (Mass2 == rho0) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
 	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
 	else {
@@ -802,7 +891,7 @@ void AllProd (Int_t model, TMultiGraph* Mprod) {
   gPad->SetGridx();
   gPad->SetGridy();
   Mprod->SetMinimum(1.E-20);
-  Mprod->SetMaximum(1.E-10);
+  Mprod->SetMaximum(1.E-11);
   Mprod->GetXaxis()->SetLimits(0.1, 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
@@ -811,7 +900,7 @@ void AllProd (Int_t model, TMultiGraph* Mprod) {
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-    
+
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NProdGraph_model%i.png", model));
@@ -823,22 +912,30 @@ void AllDecay(Int_t model, TMultiGraph* Mdecay) {
 
   TCanvas *c = new TCanvas();
 
-  MassScan(e,   e,   0., 0, 0, "N->eenu",     Mdecay, 1.);  // HNL decay via two- and three-body decay
-  MassScan(e,   mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
-  MassScan(pi,  e,   0., 0, 1, "N->pie",      Mdecay, 1.);
-  MassScan(mu,  mu,  0., 0, 0, "N->mumunu",   Mdecay, 1.);
-  MassScan(pi,  mu,  0., 0, 1, "N->pimu",     Mdecay, 1.);
-  MassScan(rho, e,   0., 0, 1, "N->rhoe",     Mdecay, 1.);
-  MassScan(rho, mu,  0., 0, 1, "N->rhomu",    Mdecay, 1.);
-  MassScan(e,   tau, 0., 0, 0, "N->etaunu",   Mdecay, 1.);
-  MassScan(pi,  tau, 0., 0, 1, "N->pitau",    Mdecay, 1.);
-  MassScan(mu,  tau, 0., 0, 0, "N->mutaunu",  Mdecay, 1.);
-  MassScan(rho, tau, 0., 0, 1, "N->rhotau",   Mdecay, 1.);
-  MassScan(tau, tau, 0., 0, 0, "N->tautaunu", Mdecay, 1.);
+  MassScan(0.,        0.,  0., 0, 0, "N->nununu",   Mdecay, 1.);  // HNL decay via two- and three-body decay
+  MassScan(e,         e,   0., 0, 0, "N->eenu",     Mdecay, 1.);
+  MassScan(e,         mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
+  MassScan(pi0,       0.,  0., 0, 1, "N->pi0nu",    Mdecay, 1.);
+  MassScan(pi,        e,   0., 0, 1, "N->pie",      Mdecay, 1.);
+  MassScan(mu,        mu,  0., 0, 0, "N->mumunu",   Mdecay, 1.);
+  MassScan(pi,        mu,  0., 0, 1, "N->pimu",     Mdecay, 1.);
+  MassScan(K,         e,   0., 0, 1, "N->Ke",       Mdecay, 1.);
+  MassScan(eta,       0.,  0., 0, 1, "N->etanu",    Mdecay, 1.);
+  MassScan(K,         mu,  0., 0, 1, "N->Kmu",      Mdecay, 1.);
+  MassScan(rho0,      0.,  0., 0, 1, "N->rho0nu",   Mdecay, 1.);
+  MassScan(rho,       e,   0., 0, 1, "N->rhoe",     Mdecay, 1.);
+  MassScan(rho,       mu,  0., 0, 1, "N->rhomu",    Mdecay, 1.);
+  MassScan(etaprime,  0.,  0., 0, 1, "N->eta'nu",   Mdecay, 1.);
+  MassScan(e,         tau, 0., 0, 0, "N->etaunu",   Mdecay, 1.);
+  MassScan(mu,        tau, 0., 0, 0, "N->mutaunu",  Mdecay, 1.);
+  MassScan(pi,        tau, 0., 0, 1, "N->pitau",    Mdecay, 1.);
+  MassScan(K,         tau, 0., 0, 1, "N->Ktau",     Mdecay, 1.);
+  MassScan(rho,       tau, 0., 0, 1, "N->rhotau",   Mdecay, 1.);
+  MassScan(tau,       tau, 0., 0, 0, "N->tautaunu", Mdecay, 1.);
   
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV/c^2]");
-  Mdecay->GetYaxis()->SetTitle("f*BR [mubarn]");
+  Mdecay->GetYaxis()->SetTitle("BR");
   Mdecay->GetXaxis()->SetTitleOffset(1.2);
   Mdecay->GetXaxis()->SetTitleSize(labelSize);
   Mdecay->GetYaxis()->SetTitleSize(labelSize);
@@ -878,11 +975,22 @@ Int_t GeneralPlots(Int_t mode, Int_t model) {
     exit(1);
   }
     
-  TMultiGraph* Mprod = new TMultiGraph("Mprod", Form("N production modes vs N mass, model %i", model));
+  TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
-  TMultiGraph* Mdecay = new TMultiGraph("Mdecay", Form("N decay modes vs N mass, model %i", model));
+  TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
   Mdecay->SetName("Mdecay");
+  std::string HistoTitle = "";
+  
+  if (model == 1) 
+    HistoTitle = "I (52:1:1)";
+  else if (model == 2)
+    HistoTitle = "II (1:16:3.8)";
+  else if (model == 3)
+    HistoTitle = "III (0.061:1:4.3)";
 
+  Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
+  Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
+    
   TGaxis::SetMaxDigits(2);
 
   if (mode == 0) {
