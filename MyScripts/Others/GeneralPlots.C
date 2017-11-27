@@ -43,7 +43,8 @@ Double_t e = 0.511;
 Double_t mu = 105.66;
 Double_t tau = 1776.82;
 Double_t pi = 139.57;
-Double_t pi0 = 134.98;
+//Double_t pi0 = 134.98;
+Double_t pi0 = 500.;
 Double_t rho = 775.4;
 Double_t rho0 = 775.49;
 Double_t eta = 547.86;
@@ -527,7 +528,7 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
     }
     else if (Mass2 == Mass3 && Mass2 == 0.) {
       U = USquared;
-      a = GF*GF*TMath::Power(Mass1, 5.)/(192.*TMath::Power(TMath::Pi(), 3.));
+      a = U*GF*GF*TMath::Power(Mass1, 5.)/(192.*TMath::Power(TMath::Pi(), 3.));
       gamma_l_l_nu = a;
     }
     else if (Mass2 != Mass3) {
@@ -703,16 +704,89 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
   return brt;
 }
 
+// Function for partial decay widths
+
+Double_t DecayWidth(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t TwoBody) {
+
+  Double_t gamma = 0.;
+  
+  if (TwoBody == kTRUE) {
+    if (Mass2 == pi) {
+      if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fPi);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == rho) {
+      if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fRho);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == pi0) {
+      if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fPi);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == K) {
+      if (Gamma2(Mass1, Mass2, Mass3, fK) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fK);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == eta) {
+      if (Gamma2(Mass1, Mass2, Mass3, fEta) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fEta);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == etaprime) {
+      if (Gamma2(Mass1, Mass2, Mass3, fEtaprime) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fEtaprime);
+      else {
+	gamma = 0.;
+      }
+    }
+    else if (Mass2 == rho0) {
+      if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
+	gamma = Gamma2(Mass1, Mass2, Mass3, fRho);
+      else {
+	gamma = 0.;
+      }
+    }
+    else {
+      cout<<"[ComputeBR] Unknown N 2-body decay mode"<<endl;
+      exit(1);
+    }
+  }
+  else if (TwoBody == kFALSE) {
+    if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0.)
+      gamma = GammaLeptonNu3(Mass1, Mass2, Mass3);
+    else {
+      gamma = 0.;
+    }
+  }
+
+  return gamma;
+}
+
 // Function for scan on N mass
 
-void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title, TMultiGraph* M, Double_t factor) {
+void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_t TwoBody, std::string Title, TMultiGraph* M, TMultiGraph* M1, Double_t factor) {
 
   Double_t PS = 0.;
   Double_t PSF = 0.;
   Double_t BR = 0.;
   Double_t xMN[Masses];
   Double_t yBR[Masses];
-
+  Double_t yGamma[Masses];
+  
   if (Prod == kTRUE) {
     if (TwoBody == kTRUE) {
       for (Int_t MN = InitialMass; MN < Mass; MN += step) {
@@ -732,6 +806,11 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
     }
   }
   else if (Prod == kFALSE) {
+    for (Int_t MN = InitialMass; MN < Mass; MN += step) {
+      BR = DecayWidth(MN, Mass1, Mass2, TwoBody);
+      xMN[MN] = MN/1000.;
+      yGamma[MN] = BR;
+    }
     if (TwoBody == kTRUE) {
       for (Int_t MN = InitialMass; MN < Mass; MN += step) {
 	BR = factor*ComputeBR(MN, Mass1, Mass2, 0., 0., Prod, TwoBody);
@@ -747,11 +826,14 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
       }
     }
   }
-
+  
   TGraph* gr = new TGraph(Mass, xMN, yBR);
-
+  TGraph* gr1 = new TGraph(Mass, xMN, yGamma);
+  
   gr->SetNameTitle(Title.c_str(), Title.c_str());
   gr->SetLineWidth(5);
+  gr1->SetNameTitle(Title.c_str(), Title.c_str());
+  gr1->SetLineWidth(5);
 
   if (Prod == kTRUE) {
     if (counterProd < 14) {
@@ -767,17 +849,22 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
   else if (Prod == kFALSE) {
     if (counterDecay < 14) {
       gr->SetLineColor(colors[counterDecay]);
+      gr1->SetLineColor(colors[counterDecay]);
       counterDecay++;
     }
     else {
       gr->SetLineColor(colors[counterDecay-14]);
       gr->SetLineStyle(7);
+      gr1->SetLineColor(colors[counterDecay-14]);
+      gr1->SetLineStyle(7);
       counterDecay++;
     }
   }
   
   gr->Draw();
+  gr1->Draw();
   M->Add(gr);
+  M1->Add(gr1);
 }
 
 // Function for Dalitz plots of 3-body N production
@@ -811,7 +898,8 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       TLorentzVector p12 = *p1 + *p2;
       TLorentzVector p13 = *p1 + *p3;
 
-      h2->Fill(p12.M2(), p13.M2(), W);
+      //h2->Fill(p12.M2(), p13.M2(), W);
+      h2->Fill(p12.M2(), p13.M2());
     }
 
     h2->Draw("colz");
@@ -820,7 +908,8 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     h2->GetYaxis()->SetTitle("Neutrino-lepton invariant mass [GeV^2/c^4]");
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
-
+    gPad->SetLogz();
+    
     if (model == 1)
       gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 2)
@@ -850,33 +939,33 @@ void AllDalitz(Int_t model) {
 
 // Function to call all N production modes
 
-void AllProd (Int_t model, TMultiGraph* Mprod) {
+void AllProd (Int_t model, TMultiGraph* Mprod, TMultiGraph* Mnull) {
 
   TCanvas *c = new TCanvas();
 
-  MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, sigmacc*2.*ffD);  // HNL production via two-body decay
-  MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, sigmacc*2.*ffD);
-  MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, sigmacc*2.*ffDS);
-  MassScan(DS,  mu,     0., 1, 1, "DS->Nmu",                   Mprod, sigmacc*2.*ffDS);
-  MassScan(DS,  tau,    0., 1, 1, "DS->Ntau",                  Mprod, sigmacc*2.*ffDS);
-  MassScan(tau, pi,     0., 1, 1, "DS->taunu; tau->Npi",       Mprod, sigmacc*2.*ffDS);
-  MassScan(tau, rho,    0., 1, 1, "DS->taunu; tau->Nrho",      Mprod, sigmacc*2.*ffDS);
-  MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, sigmacc*2.*ffD);  // HNL production via three-body decay
-  MassScan(D,   pi0,    e,  1, 0, "D->pi0eN",                  Mprod, sigmacc*2.*ffD);
-  MassScan(D0,  K,      e,  1, 0, "D0->KeN",                   Mprod, sigmacc*2.*ffD0);
-  MassScan(D0,  pi,     e,  1, 0, "D0->pieN",                  Mprod, sigmacc*2.*ffD0);
-  MassScan(D,   K0,     mu, 1, 0, "D->K0muN",                  Mprod, sigmacc*2.*ffD);
-  MassScan(D,   pi0,    mu, 1, 0, "D->pi0muN",                 Mprod, sigmacc*2.*ffD);
-  MassScan(D0,  K,      mu, 1, 0, "D0->KmuN",                  Mprod, sigmacc*2.*ffD0);
-  MassScan(D0,  pi,     mu, 1, 0, "D0->pimuN",                 Mprod, sigmacc*2.*ffD0);
-  MassScan(D,   K0Star, e,  1, 0, "D->K0*eN",                  Mprod, sigmacc*2.*ffD);
-  MassScan(D0,  KStar,  e,  1, 0, "D0->K*eN",                  Mprod, sigmacc*2.*ffD0);
-  MassScan(D,   K0Star, mu, 1, 0, "D->K0*muN",                 Mprod, sigmacc*2.*ffD);
-  MassScan(D0,  KStar,  mu, 1, 0, "D0->K*muN",                 Mprod, sigmacc*2.*ffD0);
-  MassScan(tau, 0.1,    e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod, sigmacc*2.*ffDS);
-  MassScan(tau, 0.01,   e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod, sigmacc*2.*ffDS);
-  MassScan(tau, 0.1,    mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod, sigmacc*2.*ffDS);
-  MassScan(tau, 0.01,   mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod, sigmacc*2.*ffDS);
+  //MassScan(D,   e,      0., 1, 1, "D->Ne",                     Mprod, Mnull, sigmacc*2.*ffD);  // HNL production via two-body decay
+  //MassScan(D,   mu,     0., 1, 1, "D->Nmu",                    Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(DS,  e,      0., 1, 1, "DS->Ne",                    Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(DS,  mu,     0., 1, 1, "DS->Nmu",                   Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(DS,  tau,    0., 1, 1, "DS->Ntau",                  Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(tau, pi,     0., 1, 1, "DS->taunu; tau->Npi",       Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(tau, rho,    0., 1, 1, "DS->taunu; tau->Nrho",      Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(D,   K0,     e,  1, 0, "D->K0eN",                   Mprod, Mnull, sigmacc*2.*ffD);  // HNL production via three-body decay
+  MassScan(D,   pi0,    e,  1, 0, "D->pi0eN",                  Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(D0,  K,      e,  1, 0, "D0->KeN",                   Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(D0,  pi,     e,  1, 0, "D0->pieN",                  Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(D,   K0,     mu, 1, 0, "D->K0muN",                  Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(D,   pi0,    mu, 1, 0, "D->pi0muN",                 Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(D0,  K,      mu, 1, 0, "D0->KmuN",                  Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(D0,  pi,     mu, 1, 0, "D0->pimuN",                 Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(D,   K0Star, e,  1, 0, "D->K0*eN",                  Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(D0,  KStar,  e,  1, 0, "D0->K*eN",                  Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(D,   K0Star, mu, 1, 0, "D->K0*muN",                 Mprod, Mnull, sigmacc*2.*ffD);
+  //MassScan(D0,  KStar,  mu, 1, 0, "D0->K*muN",                 Mprod, Mnull, sigmacc*2.*ffD0);
+  //MassScan(tau, 0.1,    e,  1, 0, "DS->taunu; tau->Nenu_tau",  Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(tau, 0.01,   e,  1, 0, "DS->taunu; tau->Nenu_e",    Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(tau, 0.1,    mu, 1, 0, "DS->taunu; tau->Nmunu_tau", Mprod, Mnull, sigmacc*2.*ffDS);
+  //MassScan(tau, 0.01,   mu, 1, 0, "DS->taunu; tau->Nmunu_mu",  Mprod, Mnull, sigmacc*2.*ffDS);
 
   Mprod->Draw("AC");
   Mprod->GetXaxis()->SetTitle("N mass [GeV/c^2]");
@@ -892,7 +981,8 @@ void AllProd (Int_t model, TMultiGraph* Mprod) {
   gPad->SetGridy();
   Mprod->SetMinimum(1.E-20);
   Mprod->SetMaximum(1.E-11);
-  Mprod->GetXaxis()->SetLimits(0.1, 5.);
+  //Mprod->GetXaxis()->SetLimits(0.1, 5.);
+  Mprod->GetXaxis()->SetLimits(0., 5.);
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   c->SetWindowSize(20000., 12000.);
@@ -908,30 +998,30 @@ void AllProd (Int_t model, TMultiGraph* Mprod) {
 
 // Function to call all N decay modes
 
-void AllDecay(Int_t model, TMultiGraph* Mdecay) {
+void AllDecay(Int_t model, TMultiGraph* Mdecay, TMultiGraph* Mgamma) {
 
   TCanvas *c = new TCanvas();
 
-  MassScan(0.,        0.,  0., 0, 0, "N->nununu",   Mdecay, 1.);  // HNL decay via two- and three-body decay
-  MassScan(e,         e,   0., 0, 0, "N->eenu",     Mdecay, 1.);
-  MassScan(e,         mu,  0., 0, 0, "N->emunu",    Mdecay, 1.);
-  MassScan(pi0,       0.,  0., 0, 1, "N->pi0nu",    Mdecay, 1.);
-  MassScan(pi,        e,   0., 0, 1, "N->pie",      Mdecay, 1.);
-  MassScan(mu,        mu,  0., 0, 0, "N->mumunu",   Mdecay, 1.);
-  MassScan(pi,        mu,  0., 0, 1, "N->pimu",     Mdecay, 1.);
-  MassScan(K,         e,   0., 0, 1, "N->Ke",       Mdecay, 1.);
-  MassScan(eta,       0.,  0., 0, 1, "N->etanu",    Mdecay, 1.);
-  MassScan(K,         mu,  0., 0, 1, "N->Kmu",      Mdecay, 1.);
-  MassScan(rho0,      0.,  0., 0, 1, "N->rho0nu",   Mdecay, 1.);
-  MassScan(rho,       e,   0., 0, 1, "N->rhoe",     Mdecay, 1.);
-  MassScan(rho,       mu,  0., 0, 1, "N->rhomu",    Mdecay, 1.);
-  MassScan(etaprime,  0.,  0., 0, 1, "N->eta'nu",   Mdecay, 1.);
-  MassScan(e,         tau, 0., 0, 0, "N->etaunu",   Mdecay, 1.);
-  MassScan(mu,        tau, 0., 0, 0, "N->mutaunu",  Mdecay, 1.);
-  MassScan(pi,        tau, 0., 0, 1, "N->pitau",    Mdecay, 1.);
-  MassScan(K,         tau, 0., 0, 1, "N->Ktau",     Mdecay, 1.);
-  MassScan(rho,       tau, 0., 0, 1, "N->rhotau",   Mdecay, 1.);
-  MassScan(tau,       tau, 0., 0, 0, "N->tautaunu", Mdecay, 1.);
+  MassScan(0.,        0.,  0., 0, 0, "N->nununu",   Mdecay, Mgamma, 1.);  // HNL decay via two- and three-body decay
+  MassScan(e,         e,   0., 0, 0, "N->eenu",     Mdecay, Mgamma, 1.);
+  MassScan(e,         mu,  0., 0, 0, "N->emunu",    Mdecay, Mgamma, 1.);
+  MassScan(pi0,       0.,  0., 0, 1, "N->pi0nu",    Mdecay, Mgamma, 1.);
+  MassScan(pi,        e,   0., 0, 1, "N->pie",      Mdecay, Mgamma, 1.);
+  MassScan(mu,        mu,  0., 0, 0, "N->mumunu",   Mdecay, Mgamma, 1.);
+  MassScan(pi,        mu,  0., 0, 1, "N->pimu",     Mdecay, Mgamma, 1.);
+  MassScan(K,         e,   0., 0, 1, "N->Ke",       Mdecay, Mgamma, 1.);
+  MassScan(eta,       0.,  0., 0, 1, "N->etanu",    Mdecay, Mgamma, 1.);
+  MassScan(K,         mu,  0., 0, 1, "N->Kmu",      Mdecay, Mgamma, 1.);
+  MassScan(rho0,      0.,  0., 0, 1, "N->rho0nu",   Mdecay, Mgamma, 1.);
+  MassScan(rho,       e,   0., 0, 1, "N->rhoe",     Mdecay, Mgamma, 1.);
+  MassScan(rho,       mu,  0., 0, 1, "N->rhomu",    Mdecay, Mgamma, 1.);
+  MassScan(etaprime,  0.,  0., 0, 1, "N->eta'nu",   Mdecay, Mgamma, 1.);
+  MassScan(e,         tau, 0., 0, 0, "N->etaunu",   Mdecay, Mgamma, 1.);
+  MassScan(mu,        tau, 0., 0, 0, "N->mutaunu",  Mdecay, Mgamma, 1.);
+  MassScan(pi,        tau, 0., 0, 1, "N->pitau",    Mdecay, Mgamma, 1.);
+  MassScan(K,         tau, 0., 0, 1, "N->Ktau",     Mdecay, Mgamma, 1.);
+  MassScan(rho,       tau, 0., 0, 1, "N->rhotau",   Mdecay, Mgamma, 1.);
+  MassScan(tau,       tau, 0., 0, 0, "N->tautaunu", Mdecay, Mgamma, 1.);
   
   Mdecay->Draw("AC");
   Mdecay->GetXaxis()->SetTitle("N mass [GeV/c^2]");
@@ -956,9 +1046,36 @@ void AllDecay(Int_t model, TMultiGraph* Mdecay) {
   gPad->Modified();
   gPad->Write();
 
+  TImage *img = TImage::Create();
+  img->FromPad(gPad);
+  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph_model%i.png", model));
+
+  Mgamma->Draw("AC");
+  Mgamma->GetXaxis()->SetTitle("N mass [GeV/c^2]");
+  Mgamma->GetYaxis()->SetTitle("Partial decay width [MeV]");
+  Mgamma->GetXaxis()->SetTitleOffset(1.2);
+  Mgamma->GetXaxis()->SetTitleSize(labelSize);
+  Mgamma->GetYaxis()->SetTitleSize(labelSize);
+  Mgamma->GetXaxis()->SetLabelSize(labelSize);
+  Mgamma->GetYaxis()->SetLabelSize(labelSize);
+  gPad->SetLogx();
+  gPad->SetLogy();
+  gPad->SetGridx();
+  gPad->SetGridy();
+  Mgamma->SetMinimum(1.E-20);
+  Mgamma->SetMaximum(1.);
+  Mgamma->GetXaxis()->SetLimits(0.1, 10.);
+  c->SetLeftMargin(0.2);
+  c->SetBottomMargin(0.2);
+  c->SetWindowSize(20000., 12000.);
+  gPad->BuildLegend(0.22, 0.57, 0.40, 0.88);
+  gPad->Update();
+  gPad->Modified();
+  gPad->Write();
+
   TImage *img1 = TImage::Create();
   img1->FromPad(gPad);
-  img1->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NDecayGraph_model%i.png", model));
+  img1->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/NWidthGraph_model%i.png", model));
 }
 
 // Main
@@ -979,6 +1096,8 @@ Int_t GeneralPlots(Int_t mode, Int_t model) {
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
   Mdecay->SetName("Mdecay");
+  TMultiGraph* Mgamma = new TMultiGraph("Mgamma", "");
+  Mdecay->SetName("Mgamma");
   std::string HistoTitle = "";
   
   if (model == 1) 
@@ -990,6 +1109,7 @@ Int_t GeneralPlots(Int_t mode, Int_t model) {
 
   Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
+  Mgamma->SetTitle(("N partial decay widths vs N mass, model " + HistoTitle).c_str());
     
   TGaxis::SetMaxDigits(2);
 
@@ -997,10 +1117,10 @@ Int_t GeneralPlots(Int_t mode, Int_t model) {
     AllDalitz(model);
   }
   else if (mode == 1) {
-    AllProd(model, Mprod);
+    AllProd(model, Mprod, Mgamma);
   }
   else if (mode == 2) {
-    AllDecay(model, Mdecay);
+    AllDecay(model, Mdecay, Mgamma);
   }
   else if (mode == 3) {
     cout<<"[GeneralPlots] Test printout"<<endl;
