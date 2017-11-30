@@ -1,4 +1,4 @@
-void CreatePlotsPDFReportScan() {
+void ScanPlots() {
 
   TFile *f1 = TFile::Open("/home/li/Desktop/bla.root");
   TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelectionScanCoupling");  

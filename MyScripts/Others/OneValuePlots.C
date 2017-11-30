@@ -1,4 +1,4 @@
-void CreatePlotsPDFReport() {
+void OneValuePlots() {
   TFile *f1 = TFile::Open("/home/li/Desktop/prova.root");
   TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelection");  
   TIter next(dir1->GetListOfKeys());
