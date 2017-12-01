@@ -27,7 +27,6 @@ void SetModel(Int_t model) {
 // physical constants
 
 Double_t GF = 1.17E-11; // MeV^-2                             
-Double_t cos2ThetaC = 0.9471;
 Double_t fPi = 130.41; // MeV                                   
 Double_t fRho = 1.04E5; // MeV^2
 Double_t fD = 222.6;
@@ -155,59 +154,63 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t brt, life, U, V, f, a, b, c, d;
 
-  if (Mass3 == e)
-    U = UeSquared;
-  else if (Mass3 == mu)
-    U = UmuSquared;
-  else if (Mass3 == tau || Mass3 == pi || Mass3 == rho)
-    U = UtauSquared;
-  
-  if (Mass1 == D) {
-    life = Dlife;
-    V = Vcd;
-    f = fD;
+  if (Mass1>=(Mass2+Mass3)) {
+    if (Mass3 == e)
+      U = UeSquared;
+    else if (Mass3 == mu)
+      U = UmuSquared;
+    else if (Mass3 == tau || Mass3 == pi || Mass3 == rho)
+      U = UtauSquared;
+    
+    if (Mass1 == D) {
+      life = Dlife;
+      V = Vcd;
+      f = fD;
+    }
+    else if (Mass1 == DS) {
+      life = DSlife;
+      V = Vcs;
+      f = fDS;
+    }
+    else if (Mass1 == tau) {
+      life = taulife;
+      f = fPi;
+      V = Vud;
+    }
+    else {
+      cout<<"[TwoBodyBR] Unknown mother hadron"<<endl;
+      exit(1);
+    }
+    
+    if (Mass3 != e && Mass3 != mu && Mass3 != tau && Mass3 != pi && Mass3 != rho) {
+      cout<<"[TwoBodyBR] Unknown 2-body decay"<<endl;
+      exit(1);
+    }
+    
+    if (Mass1 != tau) {
+      a = U*life*GF*GF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
+      b = 1. - Mass2*Mass2/(Mass1*Mass1) + 2.*Mass3*Mass3/(Mass1*Mass1);
+      c = (1. - Mass3*Mass3/(Mass1*Mass1))*Mass3*Mass3/(Mass2*Mass2);
+      d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
+      brt = a*(b+c)*TMath::Sqrt(d);
+    }
+    else if (Mass1 == tau && Mass3 == pi) {
+      a = U*life*GF*GF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
+      c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
+      d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
+      brt = a*b*TMath::Sqrt(c*d);
+    }
+    else if (Mass1 == tau && Mass3 == rho) {
+      a = U*life*fRho*fRho*GF*GF*V*V*Mass1*Mass1*Mass1/(8.*TMath::Pi()*Mass3*Mass3);
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) + (1. + (Mass2*Mass2 - 2.*Mass3*Mass3)/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
+      c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
+      d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
+      brt = a*b*TMath::Sqrt(c*d);
+    }
   }
-  else if (Mass1 == DS) {
-    life = DSlife;
-    V = Vcs;
-    f = fDS;
-  }
-  else if (Mass1 == tau) {
-    life = taulife;
-    f = fPi;
-    V = Vud;
-  }
-  else {
-    cout<<"[TwoBodyBR] Unknown mother hadron"<<endl;
-    exit(1);
-  }
-
-  if (Mass3 != e && Mass3 != mu && Mass3 != tau && Mass3 != pi && Mass3 != rho) {
-    cout<<"[TwoBodyBR] Unknown 2-body decay"<<endl;
-    exit(1);
-  }
-
-  if (Mass1 != tau) {
-    a = U*life*GF*GF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
-    b = 1. - Mass2*Mass2/(Mass1*Mass1) + 2.*Mass3*Mass3/(Mass1*Mass1);
-    c = (1. - Mass3*Mass3/(Mass1*Mass1))*Mass3*Mass3/(Mass2*Mass2);
-    d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
-    brt = a*(b+c)*TMath::Sqrt(d);
-  }
-  else if (Mass1 == tau && Mass3 == pi) {
-    a = U*life*GF*GF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
-    b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
-    c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
-    d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
-    brt = a*b*TMath::Sqrt(c*d);
-  }
-  else if (Mass1 == tau && Mass3 == rho) {
-    a = U*life*fRho*fRho*GF*GF*V*V*Mass1*Mass1*Mass1/(8.*TMath::Pi()*Mass3*Mass3);
-    b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) + (1. + (Mass2*Mass2 - 2.*Mass3*Mass3)/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
-    c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
-    d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
-    brt = a*b*TMath::Sqrt(c*d);
-  }
+  else
+    brt = 0.;
     
   return brt;
 }
@@ -469,7 +472,7 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       else if (Mass3 == tau)
 	U = UtauSquared;
       
-      a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
+      a = (U*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
       d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
@@ -518,7 +521,7 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   if (Mass1 >= (Mass2+Mass3)) {
     if (Mass2 == Mass3 && Mass2 != 0.) {
       U = USquared;
-      r  = 4*U*Mass3*Mass3/(Mass1*Mass1);
+      r = 4*U*Mass3*Mass3/(Mass1*Mass1);
       a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
       b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
       f = a+b;
@@ -591,7 +594,6 @@ Double_t GammaTot(Double_t MN) {
     gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho);
   else if (MN >= (etaprime) && MN < (e+tau)) 
     gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime);
-  
   else if (MN >= (e+tau) && MN < (mu+tau)) 
     gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, e, e) + GammaLeptonNu3(MN, e, mu) + Gamma2(MN, pi0, 0., fPi) + Gamma2(MN, pi, e, fPi) + GammaLeptonNu3(MN, mu, mu) + Gamma2(MN, pi, mu, fPi) + Gamma2(MN, K, e, fK) + Gamma2(MN, eta, 0., fEta) + Gamma2(MN, K, mu, fK) + Gamma2(MN, rho0, 0., fRho) + Gamma2(MN, rho, e, fRho) + Gamma2(MN, rho, mu, fRho) + Gamma2(MN, etaprime, 0., fEtaprime) + GammaLeptonNu3(MN, e, tau);
   else if (MN >= (mu+tau) && MN < (pi+tau)) 
