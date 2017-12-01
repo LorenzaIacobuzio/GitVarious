@@ -67,6 +67,7 @@ Double_t taulife = 2.91E-4;
 Double_t Vcs = 0.9734;
 Double_t Vcd = 0.2252;
 Double_t Vud = 0.9743;
+Double_t Vus = 0.2253;
 
 //form factors, pseudoscalar meson
 
@@ -446,9 +447,9 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
   if (Mass1 >= (Mass2+Mass3)) {
     if (Mass2 == pi || Mass2 == K) {
       if (Mass2 == pi)
-	V = Vcd;
+	V = Vud;
       else if (Mass2 == K)
-	V = Vcs;
+	V = Vus;
       
       if (Mass3 == e)
 	U = UeSquared;
@@ -465,6 +466,8 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       gamma_2 = a*(b - c)*TMath::Sqrt(d*f);
     }
     else if (Mass2 == rho) {
+      V = Vud;
+      
       if (Mass3 == e)
 	U = UeSquared;
       else if (Mass3 == mu)
@@ -472,7 +475,7 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       else if (Mass3 == tau)
 	U = UtauSquared;
       
-      a = (U*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
+      a = (U*GF*GF*form*form*V*V*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
       d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
@@ -947,7 +950,7 @@ void PlotGraph(TMultiGraph* M, std::string Title, Bool_t Prod, Bool_t Gamma, std
 
   if (Gamma == kFALSE) {
     if (Prod == kTRUE) 
-      M->SetNameTitle("Mprod", Form("N production modes (%s), model %i", contribution.c_str(), model));
+      M->SetNameTitle("Mprod", Form("N production modes (%s = 1)", contribution.c_str()));
     else
       M->SetNameTitle("Mdecay", Form("N decay modes (%s), model %i", contribution.c_str(), model));
   }
@@ -972,31 +975,34 @@ void PlotGraph(TMultiGraph* M, std::string Title, Bool_t Prod, Bool_t Gamma, std
       M->SetMaximum(1.E-12);
       M->GetXaxis()->SetLimits(0.1, 2.2);
       gPad->BuildLegend(0.818, 0.573, 0.931, 0.881);
+      gPad->SetName("Prod");
     }
     else {
       M->SetMinimum(1.E-7);
       M->SetMaximum(1.5);
-      M->GetXaxis()->SetLimits(0., 7.);
+      M->GetXaxis()->SetLimits(0., 5.);
       gPad->BuildLegend(0.005, 0.199, 0.139, 0.482);
+      gPad->SetName("Decay");
     }
   }
   else {    
     M->SetMinimum(1.E-18);
     M->SetMaximum(1.E-4);
-    M->GetXaxis()->SetLimits(0., 10.);
+    M->GetXaxis()->SetLimits(0., 5.);
     gPad->BuildLegend(0.752, 0.212, 0.893, 0.505);
+    gPad->SetName("Gamma");
   }
 
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-
+  
   TImage *img = TImage::Create();
   img->FromPad(gPad);
 
   if (Gamma == kFALSE) {
     if (Prod == kTRUE)
-      img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/Prod/NProdGraph_%s_%i.png", contribution.c_str(), model));  
+      img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/Prod/NProdGraph_%s.png", contribution.c_str()));  
     else
       img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/Decay/NDecayGraph_%s_%i.png", contribution.c_str(), model));
   }
@@ -1148,14 +1154,14 @@ Int_t BRPlots(Int_t mode, Int_t model) {
   c->SetBottomMargin(0.2);
   c->SetWindowSize(20000., 12000.);
   TGaxis::SetMaxDigits(2);
-
+  
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
   Mdecay->SetName("Mdecay");
   TMultiGraph* Mgamma = new TMultiGraph("Mgamma", "");
   Mdecay->SetName("Mgamma");
-
+  
   if (model == 1 || model == 2 || model == 3)
     SetModel(model);
   else {
@@ -1170,6 +1176,9 @@ Int_t BRPlots(Int_t mode, Int_t model) {
     AllDalitz(model);
   }
   else if (mode == 1) {
+    UeSquared = 1.;
+    UmuSquared = 1.;
+    UtauSquared = 1.;
     AllProd(model, Mprod);
   }
   else if (mode == 2) {

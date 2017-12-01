@@ -27,7 +27,6 @@ void SetModel(Int_t model) {
 // physical constants
 
 Double_t GF = 1.17E-11; // MeV^-2                             
-Double_t cos2ThetaC = 0.9471;
 Double_t fPi = 130.41; // MeV                                   
 Double_t fRho = 1.04E5; // MeV^2
 Double_t fD = 222.6;
@@ -68,6 +67,7 @@ Double_t taulife = 2.91E-4;
 Double_t Vcs = 0.9734;
 Double_t Vcd = 0.2252;
 Double_t Vud = 0.9743;
+Double_t Vus = 0.2253;
 
 //form factors, pseudoscalar meson
 
@@ -444,9 +444,9 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
   if (Mass1 >= (Mass2+Mass3)) {
     if (Mass2 == pi || Mass2 == K) {
       if (Mass2 == pi)
-	V = Vcd;
+	V = Vud;
       else if (Mass2 == K)
-	V = Vcs;
+	V = Vus;
       
       if (Mass3 == e)
 	U = UeSquared;
@@ -463,6 +463,8 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       gamma_2 = a*(b - c)*TMath::Sqrt(d*f);
     }
     else if (Mass2 == rho) {
+      V = Vud;
+      
       if (Mass3 == e)
 	U = UeSquared;
       else if (Mass3 == mu)
@@ -470,7 +472,7 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
       else if (Mass3 == tau)
 	U = UtauSquared;
       
-      a = (U*cos2ThetaC*GF*GF*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
+      a = (U*GF*GF*V*V*form*form*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
       d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
@@ -970,17 +972,17 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
-  M->SetMinimum(1.E-20);
-  M->SetMaximum(1.E-11);
-  M->GetXaxis()->SetLimits(0.17, 2.3);
+  M->SetMinimum(1.E-18);
+  M->SetMaximum(1.E-12);
+  M->GetXaxis()->SetLimits(0.1, 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-
+  
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NProdGraph_%i.png", model));
+  img->WriteImage("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NProdGraph.png");
 }
 
 // Function to call all N decay modes
@@ -1019,14 +1021,14 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
-  M->SetMinimum(1.E-10);
+  M->SetMinimum(1.E-7);
   M->SetMaximum(1.5);
-  M->GetXaxis()->SetLimits(0.1, 10.);
+  M->GetXaxis()->SetLimits(0.1, 5.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-
+ 
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NDecayGraph_%i.png", model));
@@ -1068,14 +1070,14 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
-  M->SetMinimum(1.E-20);
-  M->SetMaximum(1.E-5);
+  M->SetMinimum(1.E-18);
+  M->SetMaximum(1.E-4);
   M->GetXaxis()->SetLimits(0.1, 10.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
-
+  
   TImage *img = TImage::Create();
   img->FromPad(gPad);
   img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NWidthGraph_%i.png", model));
@@ -1118,7 +1120,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   else if (model == 3)
     HistoTitle = "III (0.061:1:4.3)";
 
-  Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
+  Mprod->SetTitle("N production modes vs N mass");
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
   Mgamma->SetTitle(("N partial decay widths vs N mass, model " + HistoTitle).c_str());
     
@@ -1128,6 +1130,9 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
     AllDalitz(model);
   }
   else if (mode == 1) {
+    UeSquared = 1.;
+    UmuSquared = 1.;
+    UtauSquared = 1.;
     AllProd(model, Mprod);
   }
   else if (mode == 2) {
