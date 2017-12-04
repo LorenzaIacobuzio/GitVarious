@@ -948,14 +948,23 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
 
 void PlotGraph(TMultiGraph* M, std::string Title, Bool_t Prod, Bool_t Gamma, std::string contribution, Int_t model) {
 
+  std::string modelN = "";
+
+  if (model == 1)
+    modelN = "52:1:1";
+  else if (model == 2)
+    modelN = "1:16:3.8";
+  else if (model == 3)
+    modelN = "0.061:1:4.3";
+
   if (Gamma == kFALSE) {
     if (Prod == kTRUE) 
       M->SetNameTitle("Mprod", Form("N production modes (%s = 1)", contribution.c_str()));
     else
-      M->SetNameTitle("Mdecay", Form("N decay modes (%s), model %i", contribution.c_str(), model));
+      M->SetNameTitle("Mdecay", Form("N decay modes (%s), model %i (%s)", contribution.c_str(), model, modelN.c_str()));
   }
   else
-    M->SetNameTitle("Mgamma", Form("N partial decay widths (%s), model %i", contribution.c_str(), model));
+    M->SetNameTitle("Mgamma", Form("N partial decay widths (%s), model %i (%s)", contribution.c_str(), model, modelN.c_str()));
 
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1046,9 +1055,9 @@ void AllProd(Int_t model, TMultiGraph* M) {
   MassScan(D,   K0Star, e,  1, 0, 0, "D->K^{0*}eN",               M, sigmacc*2.*ffD);
   MassScan(D0,  KStar,  e,  1, 0, 0, "D^{0}->K^{*}eN",            M, sigmacc*2.*ffD0);
   MassScan(tau, 0.01,   e,  1, 0, 0, "#tau->Ne#nu_{e}",           M, sigmacc*2.*ffDS);
-
+  
   PlotGraph(M, "f*BR [#mubarn]", 1, 0, "U^{2}_{e}", model);
-
+  
   MassScan(D,   mu,     0., 1, 1, 0, "D->Nmu",              M, sigmacc*2.*ffD);
   MassScan(DS,  mu,     0., 1, 1, 0, "D_{S}->Nmu",          M, sigmacc*2.*ffDS);
   MassScan(D,   K0,     mu, 1, 0, 0, "D->K^{0}#muN",        M, sigmacc*2.*ffD);
@@ -1058,15 +1067,15 @@ void AllProd(Int_t model, TMultiGraph* M) {
   MassScan(D,   K0Star, mu, 1, 0, 0, "D->K^{0*}#muN",       M, sigmacc*2.*ffD);
   MassScan(D0,  KStar,  mu, 1, 0, 0, "D^{0}->K^{*}#muN",    M, sigmacc*2.*ffD0);
   MassScan(tau, 0.01,   mu, 1, 0, 0, "#tau->N#mu#nu_{#mu}", M, sigmacc*2.*ffDS);
-
+  
   PlotGraph(M, "f*BR [#mubarn]", 1, 0, "U^{2}_{#mu}", model);
-
+  
   MassScan(DS,  tau,    0., 1, 1, 0, "D_{S}->N#tau",         M, sigmacc*2.*ffDS);
   MassScan(tau, pi,     0., 1, 1, 0, "#tau->N#pi",           M, sigmacc*2.*ffDS);
   MassScan(tau, rho,    0., 1, 1, 0, "#tau->N#rho",          M, sigmacc*2.*ffDS);
   MassScan(tau, 0.1,    e,  1, 0, 0, "#tau->Ne#nu_{#tau}",   M, sigmacc*2.*ffDS);
   MassScan(tau, 0.1,    mu, 1, 0, 0, "#tau->N#mu#nu_{#tau}", M, sigmacc*2.*ffDS);
-
+  
   PlotGraph(M, "f*BR [#mubarn]", 1, 0, "U^{2}_{#tau}", model);
 }
 

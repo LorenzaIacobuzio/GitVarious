@@ -1114,11 +1114,11 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   std::string HistoTitle = "";
   
   if (model == 1) 
-    HistoTitle = "I (52:1:1)";
+    HistoTitle = "1 (52:1:1)";
   else if (model == 2)
-    HistoTitle = "II (1:16:3.8)";
+    HistoTitle = "2 (1:16:3.8)";
   else if (model == 3)
-    HistoTitle = "III (0.061:1:4.3)";
+    HistoTitle = "3 (0.061:1:4.3)";
 
   Mprod->SetTitle("N production modes vs N mass");
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
