@@ -1915,6 +1915,18 @@ Double_t PrimaryGeneratorAction::lambda(Double_t a, Double_t b, Double_t c) {
   return a*a + b*b + c*c - 2.*a*b - 2.*a*c - 2.*b*c;
 }
 
+Double_t PrimaryGeneratorAction::ComputeProd(KinePart* p, Double_t MN) {
+
+  Double_t br = 0.;
+
+  if (p->GetParticleName().Contains("DS")) {
+    
+}
+
+  Double_t PrimaryGeneratorAction::ComputeDecay(KinePart* p, Double_t MN) {
+
+}
+
 HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
   
   delete fCDAcomp;

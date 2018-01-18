@@ -45,13 +45,12 @@ public:
   Double_t ComputeNReachProb(KinePart*, Double_t, Double_t);
   Double_t PhaseSpace(Double_t, Double_t, Double_t);
   Double_t PhaseSpaceFactor(Double_t, Double_t, Double_t);
-  Double_t TwoBodyBR(Double_t, Double_t, Double_t, Int_t);
-  Double_t ThreeBodyBR(Double_t, Double_t, Double_t, Double_t, Bool_t, Bool_t, Double_t, Double_t, Int_t);
+  Double_t TwoBodyBR(Double_t, Double_t, Double_t, Int_t, Bool_t);
+  Double_t ThreeBodyBR(Double_t, Double_t, Double_t, Double_t, Int_t, Bool_t);
   std::string ThreeBodyFunction(Double_t, Double_t);
-  Double_t Gamma2(Double_t, Double_t, Double_t, Double_t);                                             
-  Double_t GammaLeptonNu3(Double_t, Double_t, Double_t);                                               
-  Double_t GammaTot(Double_t);                                                                         
-  void PhaseSpace(Double_t, Double_t, Double_t, Double_t, TLorentzVector*, TLorentzVector*, TLorentzVector*);                                                                                              
+  Double_t Gamma2(Double_t, Double_t, Double_t, Double_t, Bool_t);                          
+  Double_t GammaLeptonNu3(Double_t, Double_t, Double_t, Bool_t);                      
+  Double_t GammaTot(Double_t);                                               
   Double_t tauN(Double_t);                                                                             
   Double_t lambda(Double_t, Double_t, Double_t);
 

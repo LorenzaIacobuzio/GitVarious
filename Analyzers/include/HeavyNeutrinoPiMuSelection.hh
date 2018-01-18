@@ -53,7 +53,8 @@ public:
   Double_t GammaTot(Double_t);                                               
   Double_t tauN(Double_t);                                                                             
   Double_t lambda(Double_t, Double_t, Double_t);
-
+  Double_t ComputeProd(KinePart*);
+  Double_t ComputeDecay(KinePart*);
 protected:
 
   // Histos
