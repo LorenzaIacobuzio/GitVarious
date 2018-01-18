@@ -53,8 +53,8 @@ public:
   Double_t GammaTot(Double_t);                                               
   Double_t tauN(Double_t);                                                                             
   Double_t lambda(Double_t, Double_t, Double_t);
-  Double_t ComputeProd(KinePart*);
-  Double_t ComputeDecay(KinePart*);
+  Double_t ComputeProd(KinePart*, Double_t);
+  Double_t ComputeDecay(Double_t);
 protected:
 
   // Histos
@@ -239,7 +239,6 @@ protected:
   Double_t fDBeProdProb;
   Double_t fDCuProdProb;
   Double_t fDDecayProb;
-  Double_t fNPiMu;
   Double_t fUSquared;
   Double_t fUeSquared;
   Double_t fUmuSquared;

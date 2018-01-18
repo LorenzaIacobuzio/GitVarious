@@ -16,6 +16,12 @@
 #include "DownstreamTrack.hh"
 #include "GeometricAcceptance.hh"
 #include "TriggerConditions.hh"
+#include "Math/WrappedTF1.h"
+#include "Math/WrappedMultiTF1.h"
+#include "Math/AdaptiveIntegratorMultiDim.h"
+#include "Math/GaussLegendreIntegrator.h"
+#include "TF1.h"
+#include "TF2.h"
 
 using namespace std;
 using namespace NA62Analysis;
@@ -45,7 +51,6 @@ HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
   fDBeProdProb = 0.;
   fDCuProdProb = 0.;
   fDDecayProb = 0.;
-  fNPiMu = 0.;
 
   // Masses                                                                                           
 
@@ -154,7 +159,6 @@ HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
   fDBeProdProb = 0.00069;
   fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
   fDDecayProb = 1.;
-  fNPiMu = 0.;
   fUSquared = 1.E-6;
   fUeSquared = fUSquared/20.8;
   fUmuSquared = 16.*fUeSquared;
@@ -350,7 +354,8 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   Double_t NReachProb = 0.;
   Double_t LReach = 0.;
   Double_t LeptonUSquared = 0.;
-  Double_t BR = 0.;
+  Double_t ProdFactor = 0.;
+  Double_t DecayFactor = 0.;
   Double_t Weight = 0.;
   Int_t counter = 0;
   TVector3 point1;
@@ -404,10 +409,10 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	gammaTot = GammaTot(MN);
 	HNLTau = tauN(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
-	BR = ComputeBR(p, MN);
+	ProdFactor = ComputeProd(p, MN);
+	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-	fNPiMu = GammaPiMu(MN)*fUmuSquared/(GammaPiE(MN)*fUeSquared + GammaPiMu(MN)*fUmuSquared);
 
 	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
 	  LeptonUSquared = fUeSquared;
@@ -420,7 +425,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
 
-	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 
 	if (Weight >= 0. && Weight <= 10)
 	  fSumAll += Weight;
@@ -974,10 +979,10 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	gammaTot = GammaTot(MN);
 	HNLTau = tauN(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
-	BR = ComputeBR(p, MN);
+	ProdFactor = ComputeProd(p, MN);
+	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-	fNPiMu = GammaPiMu(MN)*fUmuSquared/(GammaPiE(MN)*fUeSquared + GammaPiMu(MN)*fUmuSquared);
 
 	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
 	  LeptonUSquared = fUeSquared;
@@ -990,7 +995,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	else if(p->GetProdPos().Z() >= fTAXDistance)
           DProdProb = fDCuProdProb;
 	
-        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*fNPiMu*BR*LeptonUSquared;
+        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	
 	if (Weight >= 0. && Weight <= 10)
 	  fSumGood += Weight;
@@ -1277,7 +1282,7 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeNReachProb(KinePart* p, Double_t tau
   return NProb;
 }
 
-Double_t PrimaryGeneratorAction::PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
+Double_t HeavyNeutrinoPiMuSelection::PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t phaseSpace = 0.;
 
@@ -1288,7 +1293,7 @@ Double_t PrimaryGeneratorAction::PhaseSpace(Double_t Mass1, Double_t Mass2, Doub
 
 // Phasespace factor for 2-body N production                                                            
 
-Double_t PrimaryGeneratorAction::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
+Double_t HeavyNeutrinoPiMuSelection::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t factor = 0.;
   Double_t phaseSpace = PhaseSpace(Mass1, Mass2, Mass3);
@@ -1305,7 +1310,7 @@ Double_t PrimaryGeneratorAction::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2
 
 // BR for 2-body N production                                                                           
 
-Double_t PrimaryGeneratorAction::TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin, Bool_t noU) {
+Double_t HeavyNeutrinoPiMuSelection::TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin, Bool_t noU) {
 
   Double_t brt = 0.;
   Double_t life = 0.;
@@ -1316,6 +1321,13 @@ Double_t PrimaryGeneratorAction::TwoBodyBR(Double_t Mass1, Double_t Mass2, Doubl
   Double_t c = 0.;
   Double_t d = 0.;
   Double_t U2 = 0.;
+
+  if (Mass1 == fMD) {
+    Dorigin = 0;
+  }
+  else if (Mass1 == fMDS) {
+    Dorigin = 1;
+  }
 
   if (Mass1 >= (Mass2 + Mass3) && PhaseSpaceFactor(Mass1, Mass2, Mass3) > 0.) {
     if (Mass1 == fMD) {
@@ -1397,10 +1409,17 @@ Double_t PrimaryGeneratorAction::TwoBodyBR(Double_t Mass1, Double_t Mass2, Doubl
 
 // BR for 3-body N production                                                                           
 
-Double_t PrimaryGeneratorAction::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Int_t Dorigin, Bool_t noU) {
+Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Int_t Dorigin, Bool_t noU) {
 
   Double_t br = 0.;
   Double_t U2 = 0.;
+
+  if (Mass1 == fMD) {
+    Dorigin = 0;
+  }
+  else if (Mass1 == fMDS) {
+    Dorigin = 1;
+  }
 	
   if (Mass1 >= (Mass2 + Mass3 + Mass4)) {
     if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) { // D,D0->NHl production     
@@ -1466,7 +1485,7 @@ Double_t PrimaryGeneratorAction::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Dou
         a = U2*tau*V*V*fGF*fGF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
 
 	std::string function = ThreeBodyFunction(Mass1, Mass3);
-        func = new TF2("func", function.c_str());
+        TF2* func = new TF2("func", function.c_str());
 
         func->SetParameter(0, f);
         func->SetParameter(1, Mass1);
@@ -1542,7 +1561,7 @@ Double_t PrimaryGeneratorAction::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Dou
         a = U2*tau*V*V*fGF*fGF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
 
 	std::string function = ThreeBodyFunction(Mass1, Mass3);
-        func = new TF2("func", function.c_str());
+        TF2* func = new TF2("func", function.c_str());
 
         func->SetParameter(0, omega2);
         func->SetParameter(1, Omega2);
@@ -1659,7 +1678,7 @@ Double_t PrimaryGeneratorAction::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Dou
 
 // Function for total BR of 3-body production                                                        
 
-std::string PrimaryGeneratorAction::ThreeBodyFunction(Double_t Mass1, Double_t Mass3) {
+std::string HeavyNeutrinoPiMuSelection::ThreeBodyFunction(Double_t Mass1, Double_t Mass3) {
 
   std::string function = "";
 
@@ -1685,7 +1704,7 @@ std::string PrimaryGeneratorAction::ThreeBodyFunction(Double_t Mass1, Double_t M
 
 // Decay width for 2-body N decay                                                                    
 
-Double_t PrimaryGeneratorAction::Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form, Bool_t noU) {
+Double_t HeavyNeutrinoPiMuSelection::Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form, Bool_t noU) {
 
   Double_t gamma_2 = 0.;
   Double_t V = 0.;
@@ -1724,7 +1743,7 @@ Double_t PrimaryGeneratorAction::Gamma2(Double_t Mass1, Double_t Mass2, Double_t
     }
     else if (Mass2 == fMrho) {
 
-      V = Vud;
+      V = fVud;
       a = (U2*fGF*fGF*form*form*V*V*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
       b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
       c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
@@ -1763,7 +1782,7 @@ Double_t PrimaryGeneratorAction::Gamma2(Double_t Mass1, Double_t Mass2, Double_t
 
 // Decay width for 3-body N decay                                                                       
 
-Double_t PrimaryGeneratorAction::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t noU) {
+Double_t HeavyNeutrinoPiMuSelection::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t noU) {
 
   Double_t r = 0.;
   Double_t a = 0.;
@@ -1783,7 +1802,7 @@ Double_t PrimaryGeneratorAction::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, 
       a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
       b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
       f = a+b;
-      gamma_l_l_nu = U2*GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+      gamma_l_l_nu = U2*fGF*fGF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
     }
     else if (Mass2 == Mass3 && Mass2 == 0.) {
       if (noU == true)
@@ -1831,69 +1850,69 @@ Double_t PrimaryGeneratorAction::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, 
 
 // Total N decay width                                                                              
 
-Double_t PrimaryGeneratorAction::GammaTot(Double_t MN) {
+Double_t HeavyNeutrinoPiMuSelection::GammaTot(Double_t MN) {
 
   Double_t gammaTot = 0.;
 
   if (MN < 2*fMe) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true);
   }
   else if (MN >= 2*fMe && MN < (fMe+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true);
   }
   else if (MN >= (fMe+fMmu) && MN < (fMpi0)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true);
   }
   else if (MN >= (fMpi0) && MN < (fMe+fMpi)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true);
   }
   else if (MN >= (fMe+fMpi) && MN < 2*fMmu) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true);
   }
   else if (MN >= 2*fMmu && MN < (fMmu+fMpi)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true);
   }
   else if (MN >= (fMmu+fMpi) && MN < (fMK+fMe)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true);
   }
   else if (MN >= (fMK+fMe) && MN < (fMeta)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true);
   }
   else if (MN >= (fMeta) && MN < (fMK+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true);
   }
   else if (MN >= (fMK+fMmu) && MN < (fMrho0)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true);
   }
   else if (MN >= (fMrho0) && MN < (fMrho+fMe)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true);
   }
   else if (MN >= (fMrho+fMe) && MN < (fMrho+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true);
   }
   else if (MN >= (fMmu+fMrho) && MN < (fMetaprime)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true);
   }
   else if (MN >= (fMetaprime) && MN < (fMe+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true);
   }
   else if (MN >= (fMe+fMtau) && MN < (fMmu+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true);
   }
   else if (MN >= (fMmu+fMtau) && MN < (fMpi+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true);
   }
   else if (MN >= (fMpi+fMtau) && MN < (fMK+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true);
   }
   else if (MN >= (fMK+fMtau) && MN < (fMrho+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMK, fMtau, fK);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMK, fMtau, fK, true);
   }
   else if (MN >= (fMrho+fMtau) && MN < 2*fMtau) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMK, fMtau, fK) + Gamma2(MN, fMrho, fMtau, fRho);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMK, fMtau, fK, true) + Gamma2(MN, fMrho, fMtau, fRho, true);
   }
   else if (MN >= 2*fMtau) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMrho, fMtau, fRho) + GammaLeptonNu3(MN, fMtau, fMtau);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMrho, fMtau, fRho, true) + GammaLeptonNu3(MN, fMtau, fMtau, true);
   }
 
   return gammaTot;
@@ -1901,7 +1920,7 @@ Double_t PrimaryGeneratorAction::GammaTot(Double_t MN) {
 
 // Lifetime
 
-Double_t PrimaryGeneratorAction::tauN(Double_t MN) {
+Double_t HeavyNeutrinoPiMuSelection::tauN(Double_t MN) {
 
   Double_t gammaN = GammaTot(MN);
 
@@ -1910,21 +1929,82 @@ Double_t PrimaryGeneratorAction::tauN(Double_t MN) {
 
 // Lambda function                                                                                   
 
-Double_t PrimaryGeneratorAction::lambda(Double_t a, Double_t b, Double_t c) {
+Double_t HeavyNeutrinoPiMuSelection::lambda(Double_t a, Double_t b, Double_t c) {
 
   return a*a + b*b + c*c - 2.*a*b - 2.*a*c - 2.*b*c;
 }
 
-Double_t PrimaryGeneratorAction::ComputeProd(KinePart* p, Double_t MN) {
+Double_t HeavyNeutrinoPiMuSelection::ComputeProd(KinePart* p, Double_t MN) {
 
   Double_t br = 0.;
+  Double_t Dorigin = -1;
 
+  if (p->GetParticleName().Contains("DS")) 
+    Dorigin = 1;
+  else if (p->GetParticleName().Contains("D0"))
+    Dorigin = -1;
+  else
+    Dorigin = 0;
+
+  Double_t BR2De     = TwoBodyBR(fMD,   MN, fMe,   Dorigin);
+  Double_t BR2Dmu    = TwoBodyBR(fMD,   MN, fMmu,  Dorigin);
+  Double_t BR2DSe    = TwoBodyBR(fMDS,  MN, fMe,   Dorigin);
+  Double_t BR2DSmu   = TwoBodyBR(fMDS,  MN, fMmu,  Dorigin);
+  Double_t BR2DStau  = TwoBodyBR(fMDS,  MN, fMtau, Dorigin);
+  Double_t BR2taupi  = TwoBodyBR(fMtau, MN, fMpi,  Dorigin);
+  Double_t BR2taurho = TwoBodyBR(fMtau, MN, fMrho, Dorigin);
+
+  Double_t BR3DK0e        = ThreeBodyBR(fMD,   MN, fMK0,     fMe,  Dorigin);
+  Double_t BR3Dpi0e       = ThreeBodyBR(fMD,   MN, fMpi0,    fMe,  Dorigin);
+  Double_t BR3D0Ke        = ThreeBodyBR(fMD0,  MN, fMK,      fMe,  Dorigin);
+  Double_t BR3D0pie       = ThreeBodyBR(fMD0,  MN, fMpi,     fMe,  Dorigin);
+  Double_t BR3DK0mu       = ThreeBodyBR(fMD,   MN, fMK0,     fMmu, Dorigin);
+  Double_t BR3Dpi0mu      = ThreeBodyBR(fMD,   MN, fMpi0,    fMmu, Dorigin);
+  Double_t BR3D0Kmu       = ThreeBodyBR(fMD0,  MN, fMK,      fMmu, Dorigin);
+  Double_t BR3D0pimu      = ThreeBodyBR(fMD0,  MN, fMpi,     fMmu, Dorigin);
+  Double_t BR3DK0Stare    = ThreeBodyBR(fMD,   MN, fMK0Star, fMe,  Dorigin);
+  Double_t BR3D0KStare    = ThreeBodyBR(fMD0,  MN, fMKStar,  fMe,  Dorigin);
+  Double_t BR3DK0Starmu   = ThreeBodyBR(fMD,   MN, fMK0Star, fMmu, Dorigin);
+  Double_t BR3D0KStarmu   = ThreeBodyBR(fMD0,  MN, fMKStar,  fMmu, Dorigin);
+  Double_t BR3tauenu_tau  = ThreeBodyBR(fMtau, MN, 0.1,      fMe,  Dorigin);
+  Double_t BR3tauenu_e    = ThreeBodyBR(fMtau, MN, 0.01,     fMe,  Dorigin);
+  Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin);
+  Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin);
+  Double_t BR2Dtot = BR2De + BR2Dmu + BR2taupi + BR2taurho;
+  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + BR2taupi + BR2taurho;
+  Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + BR3tauenu_tau + BR3taumunu_tau + BR3tauenu_e + BR3taumunu_mu;
+  Double_t BR3DStot = BR3tauenu_tau + BR3taumunu_tau + BR3tauenu_e + BR3taumunu_mu;
+  Double_t BR3D0tot = BR3D0Ke + BR3D0Kmu + BR3D0pie + BR3D0pimu + BR3D0KStare + BR3D0KStarmu;
+  
   if (p->GetParticleName().Contains("DS")) {
-    
+    if ((p->GetParticleName().Contains("taunu") && !(p->GetParticleName().Contains("nu_"))) || !(p->GetParticleName().Contains("taunu"))) // DS->Nl or DS->taunu; tau->NH
+      br = BR2DStot;
+    else // DS->taunu; tau->Nlnu
+      br = BR3DStot;
+  }
+  else if (p->GetParticleName().Contains("D0")) // D0->HNl
+    br = BR3D0tot;
+  else {
+    if ((p->GetParticleName().Contains("taunu") && !(p->GetParticleName().Contains("nu_"))) || !(p->GetParticleName().Contains("taunu"))) // D->Nl or D->taunu; tau->NH 
+      br = BR2Dtot;
+    else // D->HNl or D->taunu; tau->Nlnu
+      br = BR3Dtot;
+  }
+  return br;
 }
 
-  Double_t PrimaryGeneratorAction::ComputeDecay(KinePart* p, Double_t MN) {
+Double_t HeavyNeutrinoPiMuSelection::ComputeDecay(Double_t MN) {
 
+  Double_t br = 0.;
+  Double_t Gamma2pimu = Gamma2(MN, fMpi, fMmu, fPi, true);
+  Double_t gammaTot = GammaTot(MN);
+
+  if (Gamma2pimu > 0. && gammaTot > 0.) 
+    br = Gamma2pimu/gammaTot;
+  else 
+    br = 0.;
+
+  return br;
 }
 
 HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
