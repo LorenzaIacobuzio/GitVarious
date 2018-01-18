@@ -1,0 +1,120 @@
+/// \class FilterHNLVertex
+/// \Brief
+/// Filter events for pi-mu, pi-e, e-e and mu-mu exotics triggers
+/// \EndBrief
+
+#include <stdlib.h>
+#include <iostream>
+#include "FilterHNLVertex.hh"
+#include "DownstreamTrack.hh"
+#include "TriggerConditions.hh"
+#include "GeometricAcceptance.hh"
+#include "BeamParameters.hh"
+
+using namespace std;
+using namespace NA62Analysis;
+using namespace NA62Constants;
+
+FilterHNLVertex::FilterHNLVertex(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "FilterHNLVertex") {
+
+  RequestAllRecoTrees();
+  RequestL0Data();
+
+  fCDAcomp = new TwoLinesCDA();
+  fDistcomp = new PointLineDistance();
+  AddParam("con", &fcon, 0);
+  
+  fID1  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO1"); // muon exotic
+  fID2  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-M1"); // muon exotic
+  fID3  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO1-LKr10"); // muon exotic
+  fID4  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-M1-LKr20"); // muon exotic
+  fID5  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO2-nLKr20"); // di-muon exotic
+  fID6  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO2"); // di-muon exotics
+  fID7  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-M2-nLKr20"); // di-muon exotics
+  fID8  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-M2"); // di-muon exotics
+  fID9  = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-QX-LKr20"); // electron multi-track
+  fID10 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-LKr20"); // electron multi-track
+  fID11 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-nMUV-LKr20"); // electron multi-track
+  fID12 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO1-LKr20"); // muon exotic
+}
+
+void FilterHNLVertex::Process(Int_t) {
+
+  ///////////////////////////////////////////////////////
+  // Note that the trigger selection does not work for MC
+
+  L0TPData *L0TPData = GetL0Data();
+  Bool_t L0ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(L0TPData);
+
+  // Write downscaled control triggers
+  Int_t DW = 10;
+  if (L0ControlTrigger) {
+    fcon++;
+    if ((fcon%DW) == 0) {
+      FilterAccept();
+      return;
+    }
+  }
+
+  // Check for the physics triggers of interest
+  Int_t  RunNumber = GetRunID();
+  Bool_t On1  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID1);
+  Bool_t On2  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID2);
+  Bool_t On3  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID3);
+  Bool_t On4  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID4);
+  Bool_t On5  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID5);
+  Bool_t On6  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID6);
+  Bool_t On7  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID7);
+  Bool_t On8  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID8);
+  Bool_t On9  = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID9);
+  Bool_t On10 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID10);
+  Bool_t On11 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID11);
+  Bool_t On12 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID12);
+  Bool_t L0OK = On1 || On2 || On3 || On4 || On5 || On6 || On7 || On8 || On9 || On10 || On11 || On12;
+  if (!L0OK) return;
+
+  std::vector<DownstreamTrack> Tracks =
+    *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
+  if (Tracks.size()<2) return;
+  for (UInt_t i = 0; i < Tracks.size(); i++) {
+    if (GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kSpectrometer, 0) &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kSpectrometer, 1) &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kSpectrometer, 2) &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kSpectrometer, 3) &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kCHOD)            &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kMUV3)            &&
+	GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[i], kLKr)) {
+      for (UInt_t j = i+1; j < Tracks.size(); j++) {
+	if (GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kSpectrometer, 0) &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kSpectrometer, 1) &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kSpectrometer, 2) &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kSpectrometer, 3) &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kCHOD)            &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kMUV3)            &&
+	    GeometricAcceptance::GetInstance()->InAcceptance(&Tracks[j], kLKr)) {
+	  fCDAcomp->SetLine1Point1(Tracks[i].GetPositionBeforeMagnet());
+	  fCDAcomp->SetLine2Point1(Tracks[j].GetPositionBeforeMagnet());
+	  fCDAcomp->SetDir1(Tracks[i].GetMomentumBeforeMagnet());
+	  fCDAcomp->SetDir2(Tracks[j].GetMomentumBeforeMagnet());
+	  fCDAcomp->ComputeVertexCDA();
+	  if (fCDAcomp->GetCDA() < 50.) {
+	    fDistcomp->SetLinePoint1(0., 0., 101800.);
+	    fDistcomp->SetLineDir(BeamParameters::GetInstance()->GetNominalBeamThreeMomentum());
+	    fDistcomp->SetPoint(fCDAcomp->GetVertex());
+	    fDistcomp->ComputeDistance();
+	    if (fDistcomp->GetDistance() > 100.) {
+	      FilterAccept();
+	      return;
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
+FilterHNLVertex::~FilterHNLVertex() {
+  delete fCDAcomp;
+  delete fDistcomp;
+}

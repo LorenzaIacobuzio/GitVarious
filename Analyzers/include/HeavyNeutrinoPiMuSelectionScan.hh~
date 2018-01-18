@@ -1,5 +1,5 @@
-#ifndef HEAVYNEUTRINOPIMUSELECTIONSCANCOUPLING_HH
-#define HEAVYNEUTRINOPIMUSELECTIONSCANCOUPLING_HH
+#ifndef HEAVYNEUTRINOPIMUSELECTIONSCAN_HH
+#define HEAVYNEUTRINOPIMUSELECTIONSCAN_HH
 
 #include <stdlib.h>
 #include <fstream>
@@ -21,12 +21,12 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrinoPiMuSelectionScanCoupling : public NA62Analysis::Analyzer {
+class HeavyNeutrinoPiMuSelectionScan : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrinoPiMuSelectionScanCoupling(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrinoPiMuSelectionScanCoupling();
+  HeavyNeutrinoPiMuSelectionScan(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoPiMuSelectionScan();
   void InitHist();
   void InitOutput() {}
   void DefineMCSimple() {}
@@ -60,18 +60,15 @@ protected:
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
   SAVMatching *fSAVMatching;
-  Double_t fDBeProdProb;
-  Double_t fDCuProdProb;
-  Double_t fDDecayProb;
-  Double_t fNPiMu;
   Int_t fIndex;
+  Double_t fMN;
   static constexpr Double_t fCouplingStart = -10.;
   static constexpr Double_t fCouplingStop = 0.;
   static constexpr Double_t fCouplingStep = 0.1;
   static constexpr Int_t fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
+  Int_t fNevents[fN];
   Double_t fSumAll[fN];
   Double_t fSumGood[fN];
-  Int_t fNevents[fN];
   Double_t fAcc[fN];
   Double_t fGammaTot[fN];
   Double_t fTau[fN];
@@ -81,7 +78,6 @@ protected:
 
   TH2D *fhReach;
   TH2D *fhDecay;
-  TH2D *fhProdBR;
   TH2D *fhWeight;
 
   TGraph *fgAcc;

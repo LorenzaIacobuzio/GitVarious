@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <typeinfo>
 #include <TChain.h>
 #include <TStyle.h>
 #include <TROOT.h>
@@ -38,6 +39,7 @@ HeavyNeutrinoPiMuSelectionScan::HeavyNeutrinoPiMuSelectionScan(Core::BaseAnalysi
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
+  fMN = 0.;
 
   for (Int_t i = 0; i < fN; i++) {
     fSumGood[i] = 0.;
@@ -73,10 +75,6 @@ void HeavyNeutrinoPiMuSelectionScan::InitHist() {
   fgYield = new TGraph();
   fgYield->SetNameTitle("Yield", "Yield per POT vs coupling");
   BookHisto(fgYield);
-
-  fgExclusion = new TGraph();
-  fgExclusion->SetNameTitle("Exclusion", "Exclusion plot for heavy neutrinos at NA62");
-  BookHisto(fgExclusion);
 }
 
 void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
@@ -100,7 +98,6 @@ void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
   TLorentzVector mom2(0., 0., 0., 0.);
   Double_t mass1 = 0.;
   Double_t mass2 = 0.;
-  Double_t MN = 0.;
   Double_t HNLTau = 0.;
   Double_t gammaTot = 0.;
   Double_t NDecayProb = 0.;
@@ -122,6 +119,8 @@ void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
   Double_t DCuProdProb = DBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
   Double_t DDecayProb = 1.;
   Double_t NPiMu = 0.;
+  Double_t DProdProb = 0.;
+  Double_t TAXDistance = 24685.;
 
   // Scan on the coupling
 
@@ -159,16 +158,16 @@ void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
 	  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 	  point2.SetXYZ(0., 0., LInitialFV);
 	  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	  MN = ComputeHNLMass(p);
-	  gammaTot = GammaTot(mass1, mass2, MN, USquared);
+	  fMN = ComputeHNLMass(p);
+	  gammaTot = GammaTot(mass1, mass2, fMN, USquared);
 	  HNLTau = Tau(gammaTot);
 	  fGammaTot[fIndex] = gammaTot;
 	  fTau[fIndex] = HNLTau;
 	  LReach = ComputeL(point1, point2, momentum1);
-	  BR = ComputeBR(p, MN);
+	  BR = ComputeBR(p, fMN);
 	  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	  NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
-	  NPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
+	  NPiMu = GammaPiMu(fMN)*UmuSquared/(GammaPiE(fMN)*UeSquared + GammaPiMu(fMN)*UmuSquared);
 	  
 	  if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
 	    LeptonUSquared = UeSquared;
@@ -176,13 +175,12 @@ void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
 	  else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
 	    LeptonUSquared = UmuSquared;
 
-	  // HNL production in the Be target
+	  if (p->GetProdPos().Z() < TAXDistance)
+	    DProdProb = DBeProdProb;
+	  else if (p->GetProdPos().Z() >= TAXDistance)
+	    DProdProb = DCuProdProb;
 
-	  Weight = DBeProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
-
-	  // HNL production in the Cu TAXs
-
-	  //Weight = DCuProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
+	  Weight = DProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
 
 	  if (Weight >= 0. && Weight <= 10.)
 	    fSumAll[fIndex] += Weight;
@@ -441,28 +439,27 @@ void HeavyNeutrinoPiMuSelectionScan::Process(Int_t) {
 						      point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 						      point2.SetXYZ(0., 0., LInitialFV);
 						      momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-						      MN = ComputeHNLMass(p);
-						      gammaTot = GammaTot(mass1, mass2, MN, USquared);
+						      fMN = ComputeHNLMass(p);
+						      gammaTot = GammaTot(mass1, mass2, fMN, USquared);
 						      HNLTau = Tau(gammaTot);
 						      LReach = ComputeL(point1, point2, momentum1);
-						      BR = ComputeBR(p, MN);
+						      BR = ComputeBR(p, fMN);
 						      NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 						      NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
-						      NPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
+						      NPiMu = GammaPiMu(fMN)*UmuSquared/(GammaPiE(fMN)*UeSquared + GammaPiMu(fMN)*UmuSquared);
 						      
 						      if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
 							LeptonUSquared = UeSquared;
 						      
 						      else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
 							LeptonUSquared = UmuSquared;
+
+						      if (p->GetProdPos().Z() < TAXDistance)
+							DProdProb = DBeProdProb;
+						      else if(p->GetProdPos().Z() >= TAXDistance)
+							DProdProb = DCuProdProb;
 						      
-						      // HNL production in the Be target
-						      
-						      Weight = DBeProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
-						      
-						      // HNL production in the Cu TAXs
-						      
-						      //Weight = DCuProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
+						      Weight = DProdProb*DDecayProb*NReachProb*NDecayProb*NPiMu*BR*LeptonUSquared;
 						      
 						      if (Weight >= 0. && Weight <= 10.)
 							fSumGood[fIndex] += Weight;
@@ -524,8 +521,14 @@ void HeavyNeutrinoPiMuSelectionScan::EndOfJobUser() {
     fgYield->SetPoint(i, fCouplings[i], fYield[i]);
   }
 
-  Double_t MaxYield = *std::max_element(fYield, fYield[fN]);
-  Double_t MaxYieldIndex = std::max_element(fYield, fYield[fN]);
+  Double_t MaxYield = *std::max_element(fYield, fYield+fN);
+  Int_t MaxYieldIndex = std::max_element(fYield, fYield+fN) - fYield;
+
+  if (MaxYield*1.E18 > 2.3) {
+    ExclusionFile.open("ExclusionFile.txt", ios::app);
+    ExclusionFile <<TMath::Power(10,fCouplings[MaxYieldIndex])<<"\t"<<fMN/1000.<<"\n";
+    ExclusionFile.close();
+  }
 
   fgGammaTot->GetXaxis()->SetTitle("Log of coupling");
   fgTau     ->GetXaxis()->SetTitle("Log of coupling");

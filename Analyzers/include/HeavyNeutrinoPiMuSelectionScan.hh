@@ -60,11 +60,8 @@ protected:
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
   SAVMatching *fSAVMatching;
-  Double_t fDBeProdProb;
-  Double_t fDCuProdProb;
-  Double_t fDDecayProb;
-  Double_t fNPiMu;
   Int_t fIndex;
+  Double_t fMN;
   static constexpr Double_t fCouplingStart = -10.;
   static constexpr Double_t fCouplingStop = 0.;
   static constexpr Double_t fCouplingStep = 0.1;
@@ -78,6 +75,7 @@ protected:
   Double_t fProb[fN];
   Double_t fYield[fN];
   Double_t fCouplings[fN];
+  ofstream ExclusionFile;
 
   TH2D *fhReach;
   TH2D *fhDecay;
@@ -87,7 +85,6 @@ protected:
   TGraph *fgYield;
   TGraph *fgGammaTot;
   TGraph *fgTau;
-  TGraph *fgExclusion;
 };
 
 #endif

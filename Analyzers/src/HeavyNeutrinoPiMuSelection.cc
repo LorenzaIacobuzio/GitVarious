@@ -38,14 +38,206 @@ HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
-  
-  AddParam("SumGood", &fSumGood, 0.);
-  AddParam("Nevents", &fNevents, 0.);
-  AddParam("SumAll", &fSumAll, 0.);
-  AddParam("DBeProdProb", &fDBeProdProb, 0.);
-  AddParam("DCuProdProb", &fDCuProdProb, 0.);
-  AddParam("DDecayProb", &fDDecayProb, 0.);
-  AddParam("NPiMu", &fNPiMu, 0.);
+
+  fSumGood = 0.;
+  fNevents = 0.;
+  fSumAll = 0.;
+  fDBeProdProb = 0.;
+  fDCuProdProb = 0.;
+  fDDecayProb = 0.;
+  fNPiMu = 0.;
+
+  // Masses                                                                                           
+
+  fMe =        0.511;
+  fMmu =       105.66;
+  fMtau =      1776.82;
+  fMpi =       139.57;
+  fMpi0 =      134.98;
+  fMrho =      775.45;
+  fMrho0 =     775.49;
+  fMeta =      547.86;
+  fMetaprime = 957.78;
+  fMD =        1869.62;
+  fMDS =       1968.47;
+  fMD0 =       1864.84;
+  fMK =        493.68;
+  fMK0 =       497.65;
+  fMp =        938.27;
+  fMKStar =    891.76;
+  fMK0Star =   895.55;
+
+  // Lifetimes                                                                                         
+
+  fDlife   = 1.04E-3;
+  fDSlife  = 5.E-4;
+  fD0life  = 4.1E-4;
+  ftaulife = 2.91E-4;
+
+  // Constants                                                                                        
+
+  fhc = 197.327E-12; // MeV mm                                                                       
+  fcLight = 299.792; //mm/ns                                                                         
+  fGF  = 1.166E-11; // MeV^-2                                                                         
+  fPi = 130.41;  // MeV                                                                               
+  fcos2ThetaC = 0.9471;
+  fRho = 1.04E5; // MeV^2                                                                              
+  fD = 222.6;
+  fDS = 280.1;
+  fK = 159.8;
+  fEta = 1.2*fPi;
+  fEtaprime = -0.45*fPi;
+  fsigmacc = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note                                                                                             
+
+  // CKM                                                                                            
+ 
+  fVcs = 0.9734;
+  fVcd = 0.2252;
+  fVud = 0.9743;
+  fVus = 0.2253;
+
+  // Form factors, pseudoscalar and vector mesons                                            
+
+  fDK0 = 0.745; // f+                                                                      
+  fDpi0 = 0.648;
+  fD0K = 0.736;
+  fD0pi = 0.637;
+  fgDK0 = -0.495; // f-                                                                   
+  fgDpi0 = -0.435;
+  fgD0K = fgDK0;
+  fgD0pi = fgDpi0;
+
+  fA0D = 0.398;
+  fA1D = 0.47;
+  fA2D = -1.24;
+  fVD = 0.66;
+  fA0D0 = 0.4;
+  fA1D0 = 0.47;
+  fA2D0 = -1.24;
+  fVD0 = 0.66;
+
+  // Fragmentation fractions                                                                  
+
+  ffD = 0.246;
+  ffD0 = 0.565;
+  ffDS = 0.08;
+
+  // NA62 parameters                                                                    
+
+  fpMom = 400000.; // MeV                                                               
+  fBeA = 4;
+  fBeDensity = 1.85; // g/cm3                                                       
+  fpBeLambda = 421.; // mm                                                            
+  ftargetLength = 400.; // mm                                                              
+  fCuA = 29;
+  fCuDensity = 8.96; // g/cm3                                                              
+  fpCuLambda = 153.; // mm                                                                   
+  fTAXLength = 1615.; // mm                                                               
+  fTAXDistance = 24685.;
+  fbeamLength = 102500.0; // mm           
+  fzCHOD = 239009.0;
+  fzMUV3 = 246800.0;
+  fLFV = 77500.;
+  fLInitialFV = 102500.;
+
+  // Other parameters                                                                                   
+
+  fNSpecies = 4;
+  fPTotal = new Double_t[fNSpecies];
+  fmesonMass = new Double_t[fNSpecies];
+  fmesonTau = new Double_t[fNSpecies];
+  fPTotal[0] = 0.358484; //Probabilities for species: DPlus, DSPlus, DMinus, DSMinus from pp (np) interactions in the target                                                                                  
+  fPTotal[1] = 0.0978008;
+  fPTotal[2] = 0.427141;
+  fPTotal[3] = 0.116574;
+  //fPTotal[4] = 0.;     
+  fDBeProdProb = 0.00069;
+  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
+  fDDecayProb = 1.;
+  fNPiMu = 0.;
+  fUSquared = 1.E-6;
+  fUeSquared = fUSquared/20.8;
+  fUmuSquared = 16.*fUeSquared;
+  fUtauSquared = 3.8*fUeSquared;
+
+  fhNk3pi = nullptr;
+  fhNbursts = nullptr;
+  fhNEvents = nullptr;
+  fhN2tracks = nullptr;
+  fhNtracks = nullptr;
+
+  fhZDProd = nullptr;
+  fhZDDecay = nullptr;
+  fhDTheta = nullptr;
+  fhDLambda = nullptr;
+  fhDPath = nullptr;
+  fhDMom = nullptr;
+  fhZHNLDecay = nullptr;
+  fhHNLGamma = nullptr;
+  fhHNLDecayProb = nullptr;
+  fhHNLReachProb = nullptr;
+  fhHNLTheta = nullptr;
+  fhHNLMom = nullptr;
+  fhWeight = nullptr;
+  fhMomPi = nullptr;
+  fhMomMu = nullptr;
+
+  fhXYSpec0Reco = nullptr;
+  fhXYSpec1Reco = nullptr;
+  fhXYSpec2Reco = nullptr;
+  fhXYSpec3Reco = nullptr;
+  fhXYCHODReco = nullptr;
+  fhXYCHODTrue = nullptr;
+  fhXYMUV3True = nullptr;
+  fhP1vsP2 = nullptr;
+
+  fhPhysicsEventsVsCuts = nullptr;
+
+  fhCDAvsZVertex_TotMomToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineFinal = nullptr;
+
+  fhZvertexvsBeamlineDistInitial = nullptr;
+  fhZvertexvsBeamlineDistAfterDownstreamTrack = nullptr;
+  fhZvertexvsBeamlineDistAfterEnergyCuts = nullptr;
+  fhZvertexvsBeamlineDistAfterGeomCuts = nullptr;
+  fhZvertexvsBeamlineDistAfterVetoes = nullptr;
+  fhZvertexvsBeamlineDistFinal = nullptr;
+
+  fhCDAvsZVertex_TrackToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TrackToTrackInitial = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineAfterCut = nullptr;
+  fhCDAvsZVertex_TrackToTrackAfterCut = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineFinal = nullptr;
+  fhCDAvsZVertex_TrackToTrackFinal = nullptr;
+
+  fhBeamlineDistvsTargetDist_TotMomInitial = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomFinal = nullptr;
+
+  fhDeltaTimeFromCHOD = nullptr;
+  fhNMUV3CandAssocToTrack = nullptr;
+  fhNCHODCandAssocToTrack = nullptr;
+
+  fhEoP = nullptr;
+  fhEoPMuVsPi = nullptr;
+
+  fhSingleAddEnLKrHit = nullptr;
+  fhSingleAddEnLKrCand = nullptr;
+  fhAddEnLKrHit = nullptr;
+  fhAddEnLKrCand = nullptr;
+
+  fhInvMassMC = nullptr;
+  fhInvMassReco = nullptr;
+
+  fhAcc = nullptr;
+  fhYield = nullptr;    
 }
 
 void HeavyNeutrinoPiMuSelection::InitHist() {
@@ -147,8 +339,6 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 
   // Plots of kineParts from MC
 
-  Double_t zCHOD = 239009.0;
-  Double_t zMUV3 = 246800.0;
   TLorentzVector mom1;
   TLorentzVector mom2;
   Double_t mass1 = 0.;
@@ -158,13 +348,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   Double_t gammaTot = 0.;
   Double_t NDecayProb = 0.;
   Double_t NReachProb = 0.;
-  Double_t LFV = 77500.;
   Double_t LReach = 0.;
-  Double_t LInitialFV = 102500.;
-  Double_t USquared = 1.E-6;
-  Double_t UeSquared = USquared/20.8;
-  Double_t UmuSquared = 16.*UeSquared;
-  Double_t UtauSquared = 3.8*UeSquared;
   Double_t LeptonUSquared = 0.;
   Double_t BR = 0.;
   Double_t Weight = 0.;
@@ -174,12 +358,6 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   TVector3 momentum1;
   Double_t p1,p2;
   Double_t DProdProb = 0.;
-  Double_t fTAXDistance = 24685.;
-
-  fDBeProdProb = 0.00069;
-  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb = 1.;
-  fNPiMu = 0.;
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -188,10 +366,10 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
       KinePart *p = evt->GetKinePart(i);
       if (p->GetParentID() == 0) {
 	counter++;
-	Double_t xCHOD = p->xAt(zCHOD);                      
-	Double_t yCHOD = p->yAt(zCHOD); 
-	Double_t xMUV3 = p->xAt(zMUV3);
-	Double_t yMUV3 = p->yAt(zMUV3);
+	Double_t xCHOD = p->xAt(fzCHOD);                      
+	Double_t yCHOD = p->yAt(fzCHOD); 
+	Double_t xMUV3 = p->xAt(fzMUV3);
+	Double_t yMUV3 = p->yAt(fzMUV3);
 	FillHisto("hXYCHODTrue", xCHOD/1000., yCHOD/1000.);
 	FillHisto("hXYMUV3True", xMUV3/1000., yMUV3/1000.);
 	if (p->GetParticleName() == "pi+" || p->GetParticleName() == "pi-") {
@@ -220,22 +398,22 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
       if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
 	fNevents++;
 	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-	point2.SetXYZ(0., 0., LInitialFV);
+	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
-	gammaTot = GammaTot(mass1, mass2, MN, USquared);
-	HNLTau = Tau(gammaTot);
+	gammaTot = GammaTot(MN);
+	HNLTau = tauN(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
 	BR = ComputeBR(p, MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-	NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
-	fNPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
+	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
+	fNPiMu = GammaPiMu(MN)*fUmuSquared/(GammaPiE(MN)*fUeSquared + GammaPiMu(MN)*fUmuSquared);
 
 	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
-	  LeptonUSquared = UeSquared;
+	  LeptonUSquared = fUeSquared;
 
 	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
-	  LeptonUSquared = UmuSquared;
+	  LeptonUSquared = fUmuSquared;
 
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
@@ -790,22 +968,22 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
       KinePart *p = evt->GetKinePart(i);
       if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
 	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-	point2.SetXYZ(0., 0., LInitialFV);
+	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
-	gammaTot = GammaTot(mass1, mass2, MN, USquared);
-	HNLTau = Tau(gammaTot);
+	gammaTot = GammaTot(MN);
+	HNLTau = tauN(gammaTot);
 	LReach = ComputeL(point1, point2, momentum1);
 	BR = ComputeBR(p, MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-	NDecayProb = ComputeNDecayProb(p, HNLTau, LFV);
-	fNPiMu = GammaPiMu(MN)*UmuSquared/(GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared);
+	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
+	fNPiMu = GammaPiMu(MN)*fUmuSquared/(GammaPiE(MN)*fUeSquared + GammaPiMu(MN)*fUmuSquared);
 
 	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
-	  LeptonUSquared = UeSquared;
+	  LeptonUSquared = fUeSquared;
 
 	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
-	  LeptonUSquared = UmuSquared;
+	  LeptonUSquared = fUmuSquared;
 
         if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
@@ -1099,185 +1277,642 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeNReachProb(KinePart* p, Double_t tau
   return NProb;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::GammaPiE(Double_t MN) {
-
-  Double_t Mpi = 139.6;
-  Double_t Me = 0.511;
-  Double_t GF = 1.1E-11; // MeV^-2
-  Double_t fPi = 130.41; // MeV
-  Double_t gamma_pi_e = 0.;
-
-  gamma_pi_e = GF*GF*fPi*fPi/(8*TMath::Pi()*MN*MN)*(Me*Me + MN*MN)*(MN*MN - Mpi*Mpi - Me*Me)*TMath::Power(MN*MN*MN*MN + Mpi*Mpi*Mpi*Mpi + Me*Me*Me*Me - 2.*MN*Me*MN*Me - 2.*MN*Mpi*MN*Mpi - 2.*Mpi*Me*Mpi*Me,0.5)/(2*MN);
-  
-  return gamma_pi_e;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::GammaPiMu(Double_t MN) {
-
-  Double_t Mpi = 139.6;
-  Double_t Mmu = 105.;
-  Double_t GF = 1.1E-11; 
-  Double_t fPi = 130.41; 
-  Double_t gamma_pi_mu = 0.;
-
-  gamma_pi_mu = GF*GF*fPi*fPi/(8*TMath::Pi()*MN*MN)*(Mmu*Mmu + MN*MN)*(MN*MN - Mpi*Mpi - Mmu*Mmu)*TMath::Power(MN*MN*MN*MN + Mpi*Mpi*Mpi*Mpi + Mmu*Mmu*Mmu*Mmu - 2.*MN*Mmu*MN*Mmu - 2.*MN*Mpi*MN*Mpi - 2.*Mpi*Mmu*Mpi*Mmu,0.5)/(2*MN);
-  
-  return gamma_pi_mu;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::GammaENuNu(Double_t MN) {
-
-  Double_t GF = 1.1E-11;
-  Double_t Me = 0.511;
-  Double_t r  = 4*Me*Me/(MN*MN);
-  Double_t a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
-  Double_t b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
-  Double_t f = a+b;
-  Double_t gamma_e_nu_nu = 0.;
-
-  gamma_e_nu_nu = GF*GF*TMath::Power(MN,5)*f/(64.*TMath::Power(TMath::Pi(),3));
-  
-  return gamma_e_nu_nu;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::GammaTot(Double_t mass1, Double_t mass2, Double_t MN, Double_t USquared) {
-
-  Double_t UeSquared = USquared/20.8;
-  Double_t UmuSquared = 16.*UeSquared;
-  Double_t Mpi = 139.6;
-  Double_t Me = 0.511;
-  Double_t Mmu = 105.;
-  Double_t gammaTot = 0.;
-
-  if ((mass1 < 1. || mass2 < 1.) && MN < Mpi + Me)       // N->eenu                               
-    gammaTot = GammaENuNu(MN)*UeSquared;
-  else if ((mass1 < 1. || mass2 < 1.) && MN < Mpi + Mmu)  // N->epi                               
-    gammaTot = GammaENuNu(MN)*UeSquared + GammaPiE(MN)*UeSquared;
-  else if (((mass1 > 1. && mass1 < 120.) || (mass2 > 1. && mass2 < 120.)) && MN >= Mpi + Mmu)  // N->pimu                                                                      
-    gammaTot = GammaENuNu(MN)*UeSquared + GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared;
-
-  // For now
-
-  gammaTot = GammaPiE(MN)*UeSquared + GammaPiMu(MN)*UmuSquared;
-
-  return gammaTot;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::Tau(Double_t gammaTot) {
-
-  Double_t hc = 200.E-12; // MeV*mm
-  Double_t cLight = 299.9;
-  Double_t tau = 0.;
-
-  tau = hc/(gammaTot*cLight);
-
-  return tau;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::NIntoPiMuBR(Double_t USquared, Double_t MN, Double_t tau) {
-
-  Double_t UeSquared = USquared/20.8;
-  Double_t UmuSquared = 16.*UeSquared;
-  Double_t hc = 200.E-12;
-  Double_t cLight = 299.9;
-  Double_t nIntoPiMuBR = 0.;
-
-  nIntoPiMuBR = GammaPiMu(MN)*UmuSquared*tau*cLight/hc;
-
-  return nIntoPiMuBR;
-}
-
-Double_t HeavyNeutrinoPiMuSelection::PhaseSpace(Double_t mesonMass, Double_t MN, Double_t leptonMass) {
+Double_t PrimaryGeneratorAction::PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t phaseSpace = 0.;
 
-  phaseSpace = TMath::Power(mesonMass*mesonMass-MN*MN-leptonMass*leptonMass,2) - 4.*MN*MN*leptonMass*leptonMass;
+  phaseSpace = TMath::Power(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3, 2) - 4.*Mass2*Mass2*Mass3*Mass3;
 
   return phaseSpace;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::PhaseSpaceFactor(Double_t mesonMass, Double_t MN, Double_t leptonMass, Double_t phaseSpace) {
+// Phasespace factor for 2-body N production                                                            
+
+Double_t PrimaryGeneratorAction::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t factor = 0.;
+  Double_t phaseSpace = PhaseSpace(Mass1, Mass2, Mass3);
 
-  if(phaseSpace > 0.)
-    factor = (mesonMass*mesonMass*(MN*MN + leptonMass*leptonMass)-TMath::Power(MN*MN-leptonMass*leptonMass,2))*TMath::Power(phaseSpace,0.5)/(leptonMass*leptonMass*TMath::Power(mesonMass*mesonMass-leptonMass*leptonMass,2));
+  if(phaseSpace > 0.) {
+    factor = (Mass1*Mass1*(Mass2*Mass2 + Mass3*Mass3) - TMath::Power(Mass2*Mass2 - Mass3*Mass3,2))*TMath::Power(phaseSpace, 0.5)/(Mass3*Mass3*TMath::Power(Mass1*Mass1 - Mass3*Mass3, 2));
+  }
+  else {
+    factor = 0.;
+  }
 
   return factor;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeBR(KinePart* p, Double_t MN) {
+// BR for 2-body N production                                                                           
 
-  Double_t Me = 0.511;
-  Double_t Mmu = 105.;
-  Double_t DMass = 1870.;
-  Double_t DSMass = 1969.;
-  Double_t De2BR = 9.2E-9;
-  Double_t Dm2BR = 3.74E-4;
-  Double_t DSe2BR = 1.4E-7;
-  Double_t DSm2BR = 5.56E-3;
-  Double_t mesonMass = 0.;
+Double_t PrimaryGeneratorAction::TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin, Bool_t noU) {
 
-  if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-")
-    mesonMass = DMass;
- 
-  else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-")
-    mesonMass = DMass;
-
-  else if(p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-")
-    mesonMass = DSMass;
-  
-  else if (p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
-    mesonMass = DSMass;
-   
-  Double_t phaseSpaceE = PhaseSpace(mesonMass, MN, Me);
-  Double_t phaseSpaceMu = PhaseSpace(mesonMass, MN, Mmu);
-  Double_t FactorE = PhaseSpaceFactor(mesonMass, MN, Me, phaseSpaceE);
-  Double_t FactorMu = PhaseSpaceFactor(mesonMass, MN, Mmu, phaseSpaceMu);
   Double_t brt = 0.;
+  Double_t life = 0.;
+  Double_t V = 0.;
+  Double_t f = 0.;
+  Double_t a = 0.;
+  Double_t b = 0.;
+  Double_t c = 0.;
+  Double_t d = 0.;
+  Double_t U2 = 0.;
 
-  if (mesonMass == DMass)
-    brt = De2BR*FactorE + Dm2BR*FactorMu;
+  if (Mass1 >= (Mass2 + Mass3) && PhaseSpaceFactor(Mass1, Mass2, Mass3) > 0.) {
+    if (Mass1 == fMD) {
+      life = fDlife;
+      V = fVcd;
+      f = fD;
+    }
+    else if (Mass1 == fMDS) {
+      life = fDSlife;
+      V = fVcs;
+      f = fDS;
+    }
+    else if (Mass1 == fMtau) {
+      life = ftaulife;
+      f = fPi;
+      V = fVud;
+    }
+    else {
+      cout<<"[TwoBodyBR] Unknown mother hadron"<<endl;
+      _exit(1);
+    }
 
-  else if (mesonMass == DSMass)
-    brt = DSe2BR*FactorE + DSm2BR*FactorMu;
+    if (Mass3 != fMe && Mass3 != fMmu && Mass3 != fMtau && Mass3 != fMpi && Mass3 != fMrho) {
+      cout<<"[TwoBodyBR] Unknown 2-body decay"<<endl;
+      _exit(1);
+    }
+
+    if (noU == true)
+      U2 = 1.;
+    else {
+      if (Mass3 == fMe)
+	U2 = fUeSquared;
+      else if (Mass3 == fMmu)
+	U2 = fUmuSquared;
+      else if (Mass3 == fMtau)
+	U2 = fUtauSquared;
+      else if (Mass3 == fMpi || Mass3 == fMrho)
+	U2 = fUtauSquared;
+    }
+
+    if (Mass1 != fMtau) { // D,DS production                                                         
+      a = U2*life*fGF*fGF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
+      b = 1. - Mass2*Mass2/(Mass1*Mass1) + 2.*Mass3*Mass3/(Mass1*Mass1);
+      c = (1. - Mass3*Mass3/(Mass1*Mass1))*Mass3*Mass3/(Mass2*Mass2);
+      d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
+      brt = a*(b+c)*TMath::Sqrt(d);
+    }
+    else if (Mass1 == fMtau) { // D,DS->taunu; tau->NX production                                       
+      if ((Dorigin == 0 && PhaseSpaceFactor(fMD, fMtau, 0.) > 0.) || (Dorigin == 1 && PhaseSpaceFactor(fMDS, fMtau, 0.))) {
+        if (Mass3 == fMpi) {
+          a = U2*life*fGF*fGF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
+          b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
+          c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
+          d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
+          brt = a*b*TMath::Sqrt(c*d);
+        }
+        else if (Mass3 == fMrho) {
+          a = U2*life*fRho*fRho*fGF*fGF*V*V*Mass1*Mass1*Mass1/(8.*TMath::Pi()*Mass3*Mass3);
+          b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) + (1. + (Mass2*Mass2 - 2.*Mass3*Mass3)/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
+          c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
+          d = 1. - ((Mass3 + Mass2)*(Mass3 + Mass2)/(Mass1*Mass1));
+          brt = a*b*TMath::Sqrt(c*d);
+        }
+      }
+      else {
+        brt = 0.;
+      }
+    }
+    else {
+      brt = 0.;
+    }
+  }
+  else {
+    brt = 0.;
+  }
 
   return brt;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeTotalBR(KinePart* p, Double_t USquared, Double_t MN) {
+// BR for 3-body N production                                                                           
 
-  Double_t UeSquared = USquared/20.8;
-  Double_t UmuSquared = 16.*UeSquared;
-  Double_t Me = 0.511;
-  Double_t Mmu = 105.;
-  Double_t DMass = 1870.;
-  Double_t DSMass = 1969.;
-  Double_t De2BR = 9.2E-9;
-  Double_t Dm2BR = 3.82E-4;
-  Double_t DSe2BR = 1.4E-7;
-  Double_t DSm2BR = 5.9E-3;
-  Double_t mesonMass = 0.;
-  Double_t totalBR = 0.;
+Double_t PrimaryGeneratorAction::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Int_t Dorigin, Bool_t noU) {
 
-  if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-")
-    mesonMass = DMass;
+  Double_t br = 0.;
+  Double_t U2 = 0.;
+	
+  if (Mass1 >= (Mass2 + Mass3 + Mass4)) {
+    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) { // D,D0->NHl production     
+      if (Mass1 == fMD || Mass1 == fMD0) {
+        Double_t ENmin = Mass2; // N at rest, K and e back to back                                     
+        Double_t ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way,K and e other way, their momenta summed equal to the N one                                      
+	Double_t q2min = TMath::Power(Mass2 + Mass4, 2.); // sum of masses of lepton pair           
+	Double_t q2max = TMath::Power(Mass1 - Mass3, 2.); // sum of 4momenta of lepton pair, when K at rest and N and e back to back                                              
+	
+	Double_t tau = 0.;
+	Double_t V = 0.;
+	Double_t f = 0.;
+	Double_t a = 0.;
+	Double_t b = 0.;
+	Double_t g = 0.;
 
-  else if(p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-")
-    mesonMass = DSMass;
+	if (noU == true)
+	  U2 = 1.;
+	else {
+	  if (Mass4 == fMe)
+	    U2 = fUeSquared;
+	  else if (Mass4 == fMmu)
+	    U2 = fUmuSquared;
+	  else if (Mass4 == fMtau)
+	    U2 = fUtauSquared;
+	}
 
-  Double_t phaseSpaceE = PhaseSpace(mesonMass, MN, Me);
-  Double_t phaseSpaceMu = PhaseSpace(mesonMass, MN, Mmu);
-  Double_t FactorE = PhaseSpaceFactor(mesonMass, MN, Me, phaseSpaceE);
-  Double_t FactorMu = PhaseSpaceFactor(mesonMass, MN, Mmu, phaseSpaceMu);
+        if (Mass1 == fMD) {
+          tau = fDlife;
+          if (Mass3 == fMK0) {
+            V = fVcs;
+            f = fDK0;
+            g = fgDK0;
+          }
+          else if (Mass3 == fMpi0) {
+            V = fVcd;
+            f = fDpi0;
+            g = fgDpi0;
+          }
+          else {
+            cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+            _exit(1);
+          }
+        }
+        else if (Mass1 == fMD0) {
+          tau = fD0life;
+          if (Mass3 == fMK) {
+            V = fVcs;
+            f = fD0K;
+            g = fgD0K;
+          }
+          else if (Mass3 == fMpi) {
+            V = fVcd;
+            f = fD0pi;
+            g = fgD0pi;
+          }
+          else {
+            cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+            _exit(1);
+          }
+        }
 
-  if (mesonMass == DMass)
-    totalBR = De2BR*FactorE*UeSquared + Dm2BR*FactorMu*UmuSquared;
+        a = U2*tau*V*V*fGF*fGF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
 
-  else if (mesonMass == DSMass)
-    totalBR = DSe2BR*FactorE*UeSquared + DSm2BR*FactorMu*UmuSquared;
+	std::string function = ThreeBodyFunction(Mass1, Mass3);
+        func = new TF2("func", function.c_str());
 
-  return totalBR;
+        func->SetParameter(0, f);
+        func->SetParameter(1, Mass1);
+        func->SetParameter(2, Mass2);
+        func->SetParameter(3, Mass3);
+        func->SetParameter(4, Mass4);
+        func->SetParameter(5, g);
+
+	ROOT::Math::WrappedMultiTF1 wf1(*func, 2);
+	ROOT::Math::AdaptiveIntegratorMultiDim ig;
+	ig.SetFunction(wf1);
+	ig.SetRelTolerance(0.001);
+	double xmin[] = {q2min, ENmin};
+	double xmax[] = {q2max, ENmax};
+	b = ig.Integral(xmin, xmax);
+	br = a*b;
+	
+	delete func;
+	func = nullptr;
+      }
+      else {
+        br = 0.;
+      }
+    }
+    else if (Mass3 == fMKStar || Mass3 == fMK0Star) { // D,D0->NK*l                          
+      if (Mass1 == fMD || Mass1 == fMD0) {
+        Double_t ENmin = Mass2; // N at rest, K and e back to back                      
+        Double_t ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one                                 
+	Double_t q2min = TMath::Power(Mass2 + Mass4, 2.); // sum of masses of lepton pair  
+        Double_t q2max = TMath::Power(Mass1 - Mass3, 2.); // sum of 4momenta of lepton pair, when K at rest and N and e back to back                                                         
+	
+	Double_t tau = 0.;
+	Double_t V = 0.;
+	Double_t f1 = 0.;
+	Double_t f2 = 0.;
+	Double_t f3 = 0.;
+	Double_t f4 = 0.;
+	Double_t a = 0.;
+	Double_t b = 0.;
+	Double_t omega2 = 0.;
+	Double_t Omega2 = 0.;
+
+	if (noU == true)
+	  U2 = 1.;
+	else {
+	  if (Mass4 == fMe)
+	    U2 = fUeSquared;
+	  else if (Mass4 == fMmu)
+	    U2 = fUmuSquared;
+	  else if (Mass4 == fMtau)
+	    U2 = fUtauSquared;
+	}
+
+        if (Mass1 == fMD) {
+          tau = fDlife;
+          V = fVcs;
+          f1 = fVD/(Mass1 + Mass3);
+          f2 = (Mass1 + Mass3)*fA1D;
+          f3 = -fA2D/(Mass1 + Mass3);
+          f4 = Mass3*(2.*fA0D - fA1D - fA2D) + Mass1*(fA2D - fA1D); // to be multiplied by 1/x      
+        }
+        else if (Mass1 == fMD0) {
+          tau = fD0life;
+          V = fVcs;
+          f1 = fVD0/(Mass1 + Mass3);
+          f2 = (Mass1 + Mass3)*fA1D0;
+          f3 = -fA2D0/(Mass1 + Mass3);
+          f4 = Mass3*(2.*fA0D0 - fA1D0 - fA2D0) + Mass1*(fA2D0 - fA1D0); // to be multiplied by 1/x 
+        }
+
+        omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;           
+        Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x                                            
+        a = U2*tau*V*V*fGF*fGF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+
+	std::string function = ThreeBodyFunction(Mass1, Mass3);
+        func = new TF2("func", function.c_str());
+
+        func->SetParameter(0, omega2);
+        func->SetParameter(1, Omega2);
+        func->SetParameter(2, Mass2);
+        func->SetParameter(4, Mass4);
+        func->SetParameter(3, Mass3);
+        func->SetParameter(5, f1);
+        func->SetParameter(6, f2);
+        func->SetParameter(7, f3);
+        func->SetParameter(8, f4);
+        func->SetParameter(9, Mass1);
+
+	ROOT::Math::WrappedMultiTF1 wf1(*func, 2);
+	ROOT::Math::AdaptiveIntegratorMultiDim ig;
+	ig.SetFunction(wf1);
+	ig.SetRelTolerance(0.001);
+	double xmin[] = {q2min, ENmin};
+	double xmax[] = {q2max, ENmax};
+	b = ig.Integral(xmin, xmax);
+	br = a*b;
+	
+	delete func;
+	func = nullptr;
+      }
+      else {
+        br = 0.;
+      }
+    }
+    else if (Mass1 == fMtau) {
+      if ((Dorigin == 0 && PhaseSpaceFactor(fMD, fMtau, 0.) > 0.) || (Dorigin == 1 && PhaseSpaceFactor(fMDS, fMtau, 0.))) {
+        Double_t b = 0.;
+        Double_t ENmin = 0.;
+        Double_t ENmax = 0.;
+        Double_t life = ftaulife;
+
+        if (Mass3 == 0.1) { //nu_tau                                                                 
+	  std::string function = ThreeBodyFunction(Mass1, Mass3);
+
+	  if (noU == true)
+	    U2 = 1.;
+	  else {
+	    if (Mass4 == fMe)
+	      U2 = fUeSquared;
+	    else if (Mass4 == fMmu)
+	      U2 = fUmuSquared;
+	    else if (Mass4 == fMtau)
+	      U2 = fUtauSquared;
+	  }
+
+          Mass3 = 0.;
+          ENmin = Mass2; // N at rest, l and nu back to back                           
+          ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one                                           
+	  
+	  TF1 func("func", function.c_str());
+
+          func.SetParameter(0, life);
+          func.SetParameter(1, Mass1);
+          func.SetParameter(2, Mass2);
+          func.SetParameter(3, fGF);
+          func.SetParameter(4, Mass4);
+
+	  ROOT::Math::WrappedTF1 wf1(func);
+	  ROOT::Math::GaussLegendreIntegrator ig;
+	  ig.SetFunction(wf1);
+	  b = ig.Integral(ENmin, ENmax);
+	  br = U2*b;
+	}
+        else if (Mass3 == 0.01) { //nu_e or nu_mu                                                    
+	  std::string function = ThreeBodyFunction(Mass1, Mass3);
+
+	  if (noU == true)
+	    U2 = 1.;
+	  else 
+	    U2 = fUtauSquared;
+
+          Mass3 = 0.;
+          ENmin = Mass2; // N at rest, l and nu back to back                                       
+          ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way, l and nu other way, their momenta summed equal to the N one                                          
+	  
+	  TF1 func("func", function.c_str());
+
+          func.SetParameter(0, life);
+          func.SetParameter(1, Mass1);
+          func.SetParameter(2, Mass2);
+          func.SetParameter(3, fGF);
+          func.SetParameter(4, Mass4);
+
+	  ROOT::Math::WrappedTF1 wf1(func);
+	  ROOT::Math::GaussLegendreIntegrator ig;
+	  ig.SetFunction(wf1);
+	  b = ig.Integral(ENmin, ENmax);
+	  br = U2*b;
+        }
+        else {
+          cout<<"[ThreeBodyBR] Unknown neutrino type in N 3-body production mode"<<endl;
+          _exit(1);
+        }
+      }
+      else {
+        br = 0.;
+      }
+    }
+    else {
+      cout<<"[ThreeBodyBR] Unknown N 3-body production mode"<<endl;
+      _exit(1);
+    }
+  }
+  else {
+    br = 0.;
+  }
+
+  return br;
+}
+
+// Function for total BR of 3-body production                                                        
+
+std::string PrimaryGeneratorAction::ThreeBodyFunction(Double_t Mass1, Double_t Mass3) {
+
+  std::string function = "";
+
+  if (Mass1 == fMD || Mass1 == fMD0) {
+    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) {
+      function = "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*y*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*y*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*y*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*y*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))";
+    }
+    else if (Mass3 == fMKStar || Mass3 == fMK0Star) {
+      function = "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*y) + ([1] - x - ([0] - 2.*[9]*y))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*y) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*y)*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3]) + 2.*([0] - 2.*[9]*y)*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*y)*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*y)*([0] - 2.*[9]*y)*x))";
+    }
+  }
+  else if (Mass1 == fMtau) {
+    if (Mass3 == 0.1) { //nu_tau                                                                      
+      function = "([0]*[3]*[3]*[1]*[1]*x/(2.*TMath::Power(TMath::Pi(), 3.)))*(1. + ([2]*[2] - [4]*[4])/([1]*[1]) - 2.*x/[1])*(1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(TMath::Sqrt(x*x - [2]*[2]))";
+    }
+    else if (Mass3 == 0.01) { //nu_e or nu_mu                                                       
+      function = "([0]*[3]*[3]*[1]*[1]/(4.*TMath::Power(TMath::Pi(), 3.)))*(TMath::Power((1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1])), 2.)*TMath::Sqrt(x*x - [2]*[2]))*(([1] - x)*(1. - ([2]*[2] + [4]*[4])/([1]*[1])) - (1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(([1] - x)*([1] - x)/[1] + (x*x - [2]*[2])/(3.*[1])))";
+    }
+  }
+
+  return function;
+}
+
+// Decay width for 2-body N decay                                                                    
+
+Double_t PrimaryGeneratorAction::Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form, Bool_t noU) {
+
+  Double_t gamma_2 = 0.;
+  Double_t V = 0.;
+  Double_t a = 0.;
+  Double_t b = 0.;
+  Double_t c = 0.;
+  Double_t d = 0.;
+  Double_t f = 0.;
+  Double_t g = 0.;
+  Double_t U2 = 0.;
+
+  if (noU == true)
+    U2 = 1.;
+  else {
+    if (Mass3 == fMe)
+      U2 = fUeSquared;
+    else if (Mass3 == fMmu)
+      U2 = fUmuSquared;
+    else if (Mass3 == fMtau)
+      U2 = fUtauSquared;
+  }
+
+  if (Mass1 >= (Mass2 + Mass3)) {
+    if (Mass2 == fMpi || Mass2 == fMK) {
+      if (Mass2 == fMpi)
+	V = fVud;
+      else if (Mass2 == fMK)
+	V = fVus;
+
+      a = (U2*fGF*fGF*V*V*form*form*Mass1*Mass1*Mass1)/(16.*TMath::Pi());
+      b = TMath::Power(1. - Mass3*Mass3/(Mass1*Mass1), 2.);
+      c = (1. + Mass3*Mass3/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
+      d = 1. - (Mass2 - Mass3)*(Mass2 - Mass3)/(Mass1*Mass1);
+      f = 1. - (Mass2 + Mass3)*(Mass2 + Mass3)/(Mass1*Mass1);
+      gamma_2 = a*(b - c)*TMath::Sqrt(d*f);
+    }
+    else if (Mass2 == fMrho) {
+
+      V = Vud;
+      a = (U2*fGF*fGF*form*form*V*V*Mass1*Mass1*Mass1)/(8.*TMath::Pi()*Mass2*Mass2);
+      b = (1. - TMath::Power(Mass2/Mass1 - Mass3/Mass1, 2.))*(1. - TMath::Power(Mass2/Mass1 + Mass3/Mass1, 2.));
+      c = (1. + (Mass3*Mass3)/(Mass1*Mass1))*(Mass2*Mass2/(Mass1*Mass1));
+      d = 2*Mass2*Mass2*Mass2*Mass2/(Mass1*Mass1*Mass1*Mass1);
+      f = TMath::Power(1. - (Mass3*Mass3)/(Mass1*Mass1), 2.);
+      g = c - d + f;
+      gamma_2 = a*TMath::Sqrt(b)*g;
+    }
+    else if (Mass2 == fMpi0) {
+      a = (U2*fGF*fGF*form*form*Mass1*Mass1*Mass1)/(32.*TMath::Pi());
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b;
+    }
+    else if (Mass2 == fMeta || Mass2 == fMetaprime) {
+      a = (U2*fGF*fGF*form*form*Mass1*Mass1*Mass1)/(32.*TMath::Pi());
+      b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b;
+    }
+    else if (Mass2 == fMrho0) {
+      a = (U2*form*form*fGF*fGF*Mass1*Mass1*Mass1)/(16.*TMath::Pi()*Mass2*Mass2);
+      b = 1. + 2.*Mass2*Mass2/(Mass1*Mass1);
+      c = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.);
+      gamma_2 = a*b*c;
+    }
+    else {
+      cout<<"[Gamma2] Unknown N two-body decay mode"<<endl;
+      _exit(1);
+    }
+  }
+  else {
+    gamma_2 = 0.;
+  }
+
+  return gamma_2;
+}
+
+// Decay width for 3-body N decay                                                                       
+
+Double_t PrimaryGeneratorAction::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t noU) {
+
+  Double_t r = 0.;
+  Double_t a = 0.;
+  Double_t b = 0.;
+  Double_t f = 0.;
+  Double_t U2 = 0.;
+  Double_t gamma_l_l_nu = 0.;
+
+  if (Mass1 >= (Mass2 + Mass3)) {
+    if (Mass2 == Mass3 && Mass2 != 0.) {
+      if (noU == true)
+	U2 = 1.;
+      else 
+	U2 = fUSquared;
+
+      r = 4*Mass3*Mass3/(Mass1*Mass1);
+      a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
+      b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
+      f = a+b;
+      gamma_l_l_nu = U2*GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+    }
+    else if (Mass2 == Mass3 && Mass2 == 0.) {
+      if (noU == true)
+	U2 = 1.;
+      else 
+	U2 = fUSquared;
+
+      a = U2*fGF*fGF*TMath::Power(Mass1, 5.)/(192.*TMath::Power(TMath::Pi(), 3.));
+      gamma_l_l_nu = a;
+    }
+    else if (Mass2 != Mass3) {
+      if (Mass2 > Mass3) {
+        r = Mass2/Mass1;
+      }
+      else if (Mass2 < Mass3) {
+        r = Mass3/Mass1;
+      }
+      else {
+        cout<<"[GammaLeptonNu3] N 3-body decay mode should have equal masses"<<endl;
+        _exit(1);
+      }
+
+      if (noU == true)
+	U2 = 1.;
+      else {
+	if (Mass2 == fMe)
+	  U2 = fUeSquared;
+	else if (Mass2 == fMmu)
+	  U2 = fUmuSquared;
+	else if (Mass2 == fMtau)
+	  U2 = fUtauSquared;
+      }
+
+      a = (U2*fGF*fGF*TMath::Power(Mass1, 5))/(192*TMath::Power(TMath::Pi(), 3));
+      b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) - 12.*TMath::Power(r, 4)*TMath::Log(r*r);
+      gamma_l_l_nu = a*b;
+    }
+  }
+  else {
+    gamma_l_l_nu = 0.;
+  }
+
+  return gamma_l_l_nu;
+}
+
+// Total N decay width                                                                              
+
+Double_t PrimaryGeneratorAction::GammaTot(Double_t MN) {
+
+  Double_t gammaTot = 0.;
+
+  if (MN < 2*fMe) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.);
+  }
+  else if (MN >= 2*fMe && MN < (fMe+fMmu)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe);
+  }
+  else if (MN >= (fMe+fMmu) && MN < (fMpi0)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu);
+  }
+  else if (MN >= (fMpi0) && MN < (fMe+fMpi)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi);
+  }
+  else if (MN >= (fMe+fMpi) && MN < 2*fMmu) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi);
+  }
+  else if (MN >= 2*fMmu && MN < (fMmu+fMpi)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu);
+  }
+  else if (MN >= (fMmu+fMpi) && MN < (fMK+fMe)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi);
+  }
+  else if (MN >= (fMK+fMe) && MN < (fMeta)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK);
+  }
+  else if (MN >= (fMeta) && MN < (fMK+fMmu)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta);
+  }
+  else if (MN >= (fMK+fMmu) && MN < (fMrho0)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK);
+  }
+  else if (MN >= (fMrho0) && MN < (fMrho+fMe)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho);
+  }
+  else if (MN >= (fMrho+fMe) && MN < (fMrho+fMmu)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho);
+  }
+  else if (MN >= (fMmu+fMrho) && MN < (fMetaprime)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho);
+  }
+  else if (MN >= (fMetaprime) && MN < (fMe+fMtau)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime);
+  }
+  else if (MN >= (fMe+fMtau) && MN < (fMmu+fMtau)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau);
+  }
+  else if (MN >= (fMmu+fMtau) && MN < (fMpi+fMtau)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau);
+  }
+  else if (MN >= (fMpi+fMtau) && MN < (fMK+fMtau)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi);
+  }
+  else if (MN >= (fMK+fMtau) && MN < (fMrho+fMtau)) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMK, fMtau, fK);
+  }
+  else if (MN >= (fMrho+fMtau) && MN < 2*fMtau) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMK, fMtau, fK) + Gamma2(MN, fMrho, fMtau, fRho);
+  }
+  else if (MN >= 2*fMtau) {
+    gammaTot = GammaLeptonNu3(MN, 0., 0.) + GammaLeptonNu3(MN, fMe, fMe) + GammaLeptonNu3(MN, fMe, fMmu) + Gamma2(MN, fMpi0, 0., fPi) + Gamma2(MN, fMpi, fMe, fPi) + GammaLeptonNu3(MN, fMmu, fMmu) + Gamma2(MN, fMpi, fMmu, fPi) + Gamma2(MN, fMK, fMe, fK) + Gamma2(MN, fMeta, 0., fEta) + Gamma2(MN, fMK, fMmu, fK) + Gamma2(MN, fMrho0, 0., fRho) + Gamma2(MN, fMrho, fMe, fRho) + Gamma2(MN, fMrho, fMmu, fRho) + Gamma2(MN, fMetaprime, 0., fEtaprime) + GammaLeptonNu3(MN, fMe, fMtau) + GammaLeptonNu3(MN, fMmu, fMtau) + Gamma2(MN, fMpi, fMtau, fPi) + Gamma2(MN, fMrho, fMtau, fRho) + GammaLeptonNu3(MN, fMtau, fMtau);
+  }
+
+  return gammaTot;
+}
+
+// Lifetime
+
+Double_t PrimaryGeneratorAction::tauN(Double_t MN) {
+
+  Double_t gammaN = GammaTot(MN);
+
+  return fhc/(gammaN*fcLight);
+}
+
+// Lambda function                                                                                   
+
+Double_t PrimaryGeneratorAction::lambda(Double_t a, Double_t b, Double_t c) {
+
+  return a*a + b*b + c*c - 2.*a*b - 2.*a*c - 2.*b*c;
 }
 
 HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
@@ -1286,4 +1921,87 @@ HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
   delete fDistcomp;
   delete fLAVMatching;
   delete fSAVMatching;
+
+  delete [] fPTotal;
+  delete [] fmesonMass;
+  delete [] fmesonTau;
+
+  fhNk3pi = nullptr;
+  fhNbursts = nullptr;
+  fhNEvents = nullptr;
+  fhN2tracks = nullptr;
+  fhNtracks = nullptr;
+
+  fhZDProd = nullptr;
+  fhZDDecay = nullptr;
+  fhDTheta = nullptr;
+  fhDLambda = nullptr;
+  fhDPath = nullptr;
+  fhDMom = nullptr;
+  fhZHNLDecay = nullptr;
+  fhHNLGamma = nullptr;
+  fhHNLDecayProb = nullptr;
+  fhHNLReachProb = nullptr;
+  fhHNLTheta = nullptr;
+  fhHNLMom = nullptr;
+  fhWeight = nullptr;
+  fhMomPi = nullptr;
+  fhMomMu = nullptr;
+
+  fhXYSpec0Reco = nullptr;
+  fhXYSpec1Reco = nullptr;
+  fhXYSpec2Reco = nullptr;
+  fhXYSpec3Reco = nullptr;
+  fhXYCHODReco = nullptr;
+  fhXYCHODTrue = nullptr;
+  fhXYMUV3True = nullptr;
+  fhP1vsP2 = nullptr;
+
+  fhPhysicsEventsVsCuts = nullptr;
+
+  fhCDAvsZVertex_TotMomToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineFinal = nullptr;
+
+  fhZvertexvsBeamlineDistInitial = nullptr;
+  fhZvertexvsBeamlineDistAfterDownstreamTrack = nullptr;
+  fhZvertexvsBeamlineDistAfterEnergyCuts = nullptr;
+  fhZvertexvsBeamlineDistAfterGeomCuts = nullptr;
+  fhZvertexvsBeamlineDistAfterVetoes = nullptr;
+  fhZvertexvsBeamlineDistFinal = nullptr;
+
+  fhCDAvsZVertex_TrackToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TrackToTrackInitial = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineAfterCut = nullptr;
+  fhCDAvsZVertex_TrackToTrackAfterCut = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineFinal = nullptr;
+  fhCDAvsZVertex_TrackToTrackFinal = nullptr;
+
+  fhBeamlineDistvsTargetDist_TotMomInitial = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomFinal = nullptr;
+
+  fhDeltaTimeFromCHOD = nullptr;
+  fhNMUV3CandAssocToTrack = nullptr;
+  fhNCHODCandAssocToTrack = nullptr;
+
+  fhEoP = nullptr;
+  fhEoPMuVsPi = nullptr;
+
+  fhSingleAddEnLKrHit = nullptr;
+  fhSingleAddEnLKrCand = nullptr;
+  fhAddEnLKrHit = nullptr;
+  fhAddEnLKrCand = nullptr;
+
+  fhInvMassMC = nullptr;
+  fhInvMassReco = nullptr;
+
+  fhAcc = nullptr;
+  fhYield = nullptr;    
 }
