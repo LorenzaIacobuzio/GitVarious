@@ -1,5 +1,5 @@
-#ifndef HEAVYNEUTRINOPIMUSELECTION_HH
-#define HEAVYNEUTRINOPIMUSELECTION_HH
+#ifndef HEAVYNEUTRINOSCAN_HH
+#define HEAVYNEUTRINOSCAN_HH
 
 #include <stdlib.h>
 #include <fstream>
@@ -21,18 +21,18 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrinoPiMuSelection : public NA62Analysis::Analyzer {
+class HeavyNeutrinoScan : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrinoPiMuSelection(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrinoPiMuSelection();
+  HeavyNeutrinoScan(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoScan();
   void InitHist();
   void InitOutput() {}
   void DefineMCSimple() {}
   void Process(Int_t);
   void StartOfBurstUser() {}
-  void EndOfBurstUser();
+  void EndOfBurstUser() {}
   void StartOfRunUser() {}
   void EndOfRunUser() {}
   void EndOfJobUser();
@@ -55,88 +55,19 @@ public:
   Double_t lambda(Double_t, Double_t, Double_t);
   Double_t ComputeProd(KinePart*, Double_t);
   Double_t ComputeDecay(Double_t);
+
 protected:
 
   // Histos
 
-  TH1D *fhNk3pi;
-  TH1D *fhNbursts;
-  TH1D *fhNEvents;
-  TH1D *fhN2tracks;
-  TH1D *fhNtracks;
+  TH2D *fhReach;
+  TH2D *fhDecay;
+  TH2D *fhWeight;
 
-  TH1D *fhZDProd;
-  TH1D *fhZDDecay;
-  TH1D *fhDTheta;
-  TH1D *fhDLambda;
-  TH1D *fhDPath;
-  TH1D *fhDMom;
-  TH1D *fhZHNLDecay;
-  TH1D *fhHNLGamma;
-  TH1D *fhHNLDecayProb;
-  TH1D *fhHNLReachProb;
-  TH1D *fhHNLTheta;
-  TH1D *fhHNLMom;
-  TH1D *fhWeight;
-  TH1D *fhMomPi;
-  TH1D *fhMomMu;
-
-  TH2D *fhXYSpec0Reco;
-  TH2D *fhXYSpec1Reco;
-  TH2D *fhXYSpec2Reco;
-  TH2D *fhXYSpec3Reco;
-  TH2D *fhXYCHODReco;
-  TH2D *fhXYCHODTrue;
-  TH2D *fhXYMUV3True;
-  TH2D *fhP1vsP2;
-
-  TH1D *fhPhysicsEventsVsCuts;
-
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineInitial;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterVetoes;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineFinal;
-
-  TH2D *fhZvertexvsBeamlineDistInitial;
-  TH2D *fhZvertexvsBeamlineDistAfterDownstreamTrack;
-  TH2D *fhZvertexvsBeamlineDistAfterEnergyCuts;
-  TH2D *fhZvertexvsBeamlineDistAfterGeomCuts;
-  TH2D *fhZvertexvsBeamlineDistAfterVetoes;
-  TH2D *fhZvertexvsBeamlineDistFinal;
-
-  TH2D *fhCDAvsZVertex_TrackToBeamlineInitial;
-  TH2D *fhCDAvsZVertex_TrackToTrackInitial;
-  TH2D *fhCDAvsZVertex_TrackToBeamlineAfterCut;
-  TH2D *fhCDAvsZVertex_TrackToTrackAfterCut;
-  TH2D *fhCDAvsZVertex_TrackToBeamlineFinal;
-  TH2D *fhCDAvsZVertex_TrackToTrackFinal;
-
-  TH2D *fhBeamlineDistvsTargetDist_TotMomInitial;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterVetoes;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomFinal;
-
-  TH1D *fhDeltaTimeFromCHOD;
-  TH1D *fhNMUV3CandAssocToTrack;
-  TH1D *fhNCHODCandAssocToTrack;
-
-  TH1D *fhEoP;
-  TH2D *fhEoPMuVsPi;
-
-  TH2D *fhSingleAddEnLKrHit;
-  TH2D *fhSingleAddEnLKrCand;
-  TH2D *fhAddEnLKrHit;
-  TH2D *fhAddEnLKrCand;
-
-  TH1D *fhInvMassMC;
-  TH1D *fhInvMassReco;
-
-  TH1D *fhAcc;
-  TH1D *fhYield;
+  TGraph *fgAcc;
+  TGraph *fgYield;
+  TGraph *fgGammaTot;
+  TGraph *fgTau;
 
   // Masses                                                                                        
 
@@ -228,13 +159,13 @@ protected:
   Double_t fzMUV3;
   Double_t fLFV;
   Double_t fLInitialFV;
-  Double_t* zStraw;
-  Double_t* xStrawChamberCentre;
-  Double_t rMinStraw;
-  Double_t rMaxStraw;
-  Double_t zCHODPlane;
-  Double_t rMinCHOD;
-  Double_t rMaxCHOD;
+  Double_t frMinStraw;
+  Double_t frMaxStraw;
+  Double_t fzCHODPlane;
+  Double_t frMinCHOD;
+  Double_t frMaxCHOD;
+  Double_t* fzStraw;
+  Double_t* fxStrawChamberCentre;
 
   // Other parameters                                                                                   
 
@@ -245,13 +176,32 @@ protected:
   Double_t fUeSquared;
   Double_t fUmuSquared;
   Double_t fUtauSquared;
+
+  // Scan variables
+
+  Int_t fIndex;
+  Double_t fMN;
+  static constexpr Double_t fCouplingStart = -10.;
+  static constexpr Double_t fCouplingStop = 0.;
+  static constexpr Double_t fCouplingStep = 0.1;
+  static constexpr Int_t fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
+  Int_t fNevents[fN];
+  Double_t fSumAll[fN];
+  Double_t fSumGood[fN];
+  Double_t fAcc[fN];
+  Double_t fGammaTot[fN];
+  Double_t fTau[fN];
+  Double_t fProb[fN];
+  Double_t fYield[fN];
+  Double_t fCouplings[fN];
+  ofstream ExclusionFile;
+
+  // Other variables
+
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
   SAVMatching *fSAVMatching;
-  Double_t fNevents;
-  Double_t fSumAll;
-  Double_t fSumGood;
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
 };

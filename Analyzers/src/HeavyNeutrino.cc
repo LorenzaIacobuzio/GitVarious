@@ -7,7 +7,7 @@
 #include <TStyle.h>
 #include <TROOT.h>
 #include <TPad.h>
-#include "HeavyNeutrinoPiMuSelection.hh"
+#include "HeavyNeutrino.hh"
 #include "MCSimple.hh"
 #include "functions.hh"
 #include "Event.hh"
@@ -31,46 +31,52 @@ using namespace NA62Constants;
 #define MCTriggerMask 0xFF
 #define LabelSize 0.05
 
-/// \class HeavyNeutrinoPiMuSelection
+/// \class HeavyNeutrino
 
-HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrinoPiMuSelection") {
+HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrino") {
   
   RequestAllMCTrees();
   RequestAllRecoTrees();
   RequestL0Data();
-  
+  RequestL1Data();
+
+  AddParam("USquared", &fUSquared, 1.E-6);
+  AddParam("UeSquaredRatio", &fUeSquaredRatio, 1.);
+  AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
+  AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
+
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
 
-  fSumGood = 0.;
-  fNevents = 0.;
-  fSumAll = 0.;
+  fSumGood     = 0.;
+  fNevents     = 0.;
+  fSumAll      = 0.;
   fDBeProdProb = 0.;
   fDCuProdProb = 0.;
-  fDDecayProb = 0.;
+  fDDecayProb  = 0.;
 
   // Masses                                                                                           
 
-  fMe =        0.511;
-  fMmu =       105.66;
-  fMtau =      1776.82;
-  fMpi =       139.57;
-  fMpi0 =      134.98;
-  fMrho =      775.45;
-  fMrho0 =     775.49;
-  fMeta =      547.86;
+  fMe        = 0.511;
+  fMmu       = 105.66;
+  fMtau      = 1776.82;
+  fMpi       = 139.57;
+  fMpi0      = 134.98;
+  fMrho      = 775.45;
+  fMrho0     = 775.49;
+  fMeta      = 547.86;
   fMetaprime = 957.78;
-  fMD =        1869.62;
-  fMDS =       1968.47;
-  fMD0 =       1864.84;
-  fMK =        493.68;
-  fMK0 =       497.65;
-  fMp =        938.27;
-  fMKStar =    891.76;
-  fMK0Star =   895.55;
+  fMD        = 1869.62;
+  fMDS       = 1968.47;
+  fMD0       = 1864.84;
+  fMK        = 493.68;
+  fMK0       = 497.65;
+  fMp        = 938.27;
+  fMKStar    = 891.76;
+  fMK0Star   = 895.55;
 
   // Lifetimes                                                                                         
 
@@ -81,18 +87,17 @@ HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
 
   // Constants                                                                                        
 
-  fhc = 197.327E-12; // MeV mm                                                                       
-  fcLight = 299.792; //mm/ns                                                                         
-  fGF  = 1.166E-11; // MeV^-2                                                                         
-  fPi = 130.41;  // MeV                                                                               
-  fcos2ThetaC = 0.9471;
-  fRho = 1.04E5; // MeV^2                                                                              
-  fD = 222.6;
-  fDS = 280.1;
-  fK = 159.8;
-  fEta = 1.2*fPi;
+  fhc       = 197.327E-12; // MeV mm                                                    
+  fcLight   = 299.792; //mm/ns                                                                         
+  fGF       = 1.166E-11; // MeV^-2                                                           
+  fPi       = 130.41;  // MeV                                                          
+  fRho      = 1.04E5; // MeV^2                                                                      
+  fD        = 222.6;
+  fDS       = 280.1;
+  fK        = 159.8;
+  fEta      = 1.2*fPi;
   fEtaprime = -0.45*fPi;
-  fsigmacc = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note                                                                                             
+  fsigmacc  = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note                                                                                 
 
   // CKM                                                                                            
  
@@ -103,157 +108,170 @@ HeavyNeutrinoPiMuSelection::HeavyNeutrinoPiMuSelection(Core::BaseAnalysis *ba) :
 
   // Form factors, pseudoscalar and vector mesons                                            
 
-  fDK0 = 0.745; // f+                                                                      
-  fDpi0 = 0.648;
-  fD0K = 0.736;
-  fD0pi = 0.637;
-  fgDK0 = -0.495; // f-                                                                   
+  fDK0   = 0.745; // f+                                                                      
+  fDpi0  = 0.648;
+  fD0K   = 0.736;
+  fD0pi  = 0.637;
+  fgDK0  = -0.495; // f-                                                                   
   fgDpi0 = -0.435;
-  fgD0K = fgDK0;
+  fgD0K  = fgDK0;
   fgD0pi = fgDpi0;
 
-  fA0D = 0.398;
-  fA1D = 0.47;
-  fA2D = -1.24;
-  fVD = 0.66;
+  fA0D  = 0.398;
+  fA1D  = 0.47;
+  fA2D  = -1.24;
+  fVD   = 0.66;
   fA0D0 = 0.4;
   fA1D0 = 0.47;
   fA2D0 = -1.24;
-  fVD0 = 0.66;
+  fVD0  = 0.66;
 
   // Fragmentation fractions                                                                  
 
-  ffD = 0.246;
+  ffD  = 0.246;
   ffD0 = 0.565;
   ffDS = 0.08;
 
   // NA62 parameters                                                                    
 
-  fpMom = 400000.; // MeV                                                               
-  fBeA = 4;
-  fBeDensity = 1.85; // g/cm3                                                       
-  fpBeLambda = 421.; // mm                                                            
-  ftargetLength = 400.; // mm                                                              
-  fCuA = 29;
-  fCuDensity = 8.96; // g/cm3                                                              
-  fpCuLambda = 153.; // mm                                                                   
-  fTAXLength = 1615.; // mm                                                               
-  fTAXDistance = 24685.;
-  fbeamLength = 102500.0; // mm           
-  fzCHOD = 239009.0;
-  fzMUV3 = 246800.0;
-  fLFV = 77500.;
-  fLInitialFV = 102500.;
+  fpMom                   = 400000.; // MeV                                                
+  fBeA                    = 4;
+  fBeDensity              = 1.85; // g/cm3                                                       
+  fpBeLambda              = 421.; // mm                                                            
+  ftargetLength           = 400.; // mm                                                              
+  fCuA                    = 29;
+  fCuDensity              = 8.96; // g/cm3                                                              
+  fpCuLambda              = 153.; // mm                                                   
+  fTAXLength              = 1615.; // mm                                                               
+  fTAXDistance            = 24685.;
+  fbeamLength             = 102500.0; // mm           
+  fzCHOD                  = 239009.0;
+  fzMUV3                  = 246800.0;
+  fLFV                    = 77500.;
+  fLInitialFV             = 102500.;
+  fzStraw[0]              = 183508.0;
+  fzStraw[1]              = 194066.0;
+  fzStraw[2]              = 204459.0;
+  fzStraw[3]              = 218885.0;
+  fxStrawChamberCentre[0] = 101.2;
+  fxStrawChamberCentre[1] = 114.4;
+  fxStrawChamberCentre[2] = 92.4;
+  fxStrawChamberCentre[3] = 52.8;
+  frMinStraw              = 60.0; 
+  frMaxStraw              = 1010.0;
+  fzCHODPlane             = 239009.0;
+  frMinCHOD               = 120.0;
+  frMaxCHOD               = 1110.0;
 
   // Other parameters                                                                                   
 
-  fNSpecies = 4;
-  fPTotal = new Double_t[fNSpecies];
-  fmesonMass = new Double_t[fNSpecies];
-  fmesonTau = new Double_t[fNSpecies];
-  fPTotal[0] = 0.358484; //Probabilities for species: DPlus, DSPlus, DMinus, DSMinus from pp (np) interactions in the target                                                                                  
-  fPTotal[1] = 0.0978008;
-  fPTotal[2] = 0.427141;
-  fPTotal[3] = 0.116574;
-  //fPTotal[4] = 0.;     
   fDBeProdProb = 0.00069;
   fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb = 1.;
-  fUSquared = 1.E-6;
-  fUeSquared = fUSquared/20.8;
-  fUmuSquared = 16.*fUeSquared;
-  fUtauSquared = 3.8*fUeSquared;
+  fDDecayProb  = 1.;
+  fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio);
+  fUmuSquared  = fUmuSquaredRatio*fUeSquared;
+  fUtauSquared = fUtauSquaredRatio*fUeSquared;
 
-  fhNk3pi = nullptr;
-  fhNbursts = nullptr;
-  fhNEvents = nullptr;
+  // Parameters for L0 trigger conditions
+
+  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30"};
+
+  for (UInt_t i = 0; i < fStream.size(); i++) {
+    fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
+  }
+
+  // Histos
+
+  fhNk3pi    = nullptr;
+  fhNbursts  = nullptr;
+  fhNEvents  = nullptr;
   fhN2tracks = nullptr;
-  fhNtracks = nullptr;
+  fhNtracks  = nullptr;
 
-  fhZDProd = nullptr;
-  fhZDDecay = nullptr;
-  fhDTheta = nullptr;
-  fhDLambda = nullptr;
-  fhDPath = nullptr;
-  fhDMom = nullptr;
-  fhZHNLDecay = nullptr;
-  fhHNLGamma = nullptr;
+  fhZDProd       = nullptr;
+  fhZDDecay      = nullptr;
+  fhDTheta       = nullptr;
+  fhDLambda      = nullptr;
+  fhDPath        = nullptr;
+  fhDMom         = nullptr;
+  fhZHNLDecay    = nullptr;
+  fhHNLGamma     = nullptr;
   fhHNLDecayProb = nullptr;
   fhHNLReachProb = nullptr;
-  fhHNLTheta = nullptr;
-  fhHNLMom = nullptr;
-  fhWeight = nullptr;
-  fhMomPi = nullptr;
-  fhMomMu = nullptr;
+  fhHNLTheta     = nullptr;
+  fhHNLMom       = nullptr;
+  fhWeight       = nullptr;
+  fhMomPi        = nullptr;
+  fhMomMu        = nullptr;
 
   fhXYSpec0Reco = nullptr;
   fhXYSpec1Reco = nullptr;
   fhXYSpec2Reco = nullptr;
   fhXYSpec3Reco = nullptr;
-  fhXYCHODReco = nullptr;
-  fhXYCHODTrue = nullptr;
-  fhXYMUV3True = nullptr;
-  fhP1vsP2 = nullptr;
+  fhXYCHODReco  = nullptr;
+  fhXYCHODTrue  = nullptr;
+  fhXYMUV3True  = nullptr;
+  fhP1vsP2      = nullptr;
 
   fhPhysicsEventsVsCuts = nullptr;
 
-  fhCDAvsZVertex_TotMomToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineInitial              = nullptr;
   fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineFinal = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts      = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts        = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes          = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineFinal                = nullptr;
 
-  fhZvertexvsBeamlineDistInitial = nullptr;
+  fhZvertexvsBeamlineDistInitial              = nullptr;
   fhZvertexvsBeamlineDistAfterDownstreamTrack = nullptr;
-  fhZvertexvsBeamlineDistAfterEnergyCuts = nullptr;
-  fhZvertexvsBeamlineDistAfterGeomCuts = nullptr;
-  fhZvertexvsBeamlineDistAfterVetoes = nullptr;
-  fhZvertexvsBeamlineDistFinal = nullptr;
+  fhZvertexvsBeamlineDistAfterEnergyCuts      = nullptr;
+  fhZvertexvsBeamlineDistAfterGeomCuts        = nullptr;
+  fhZvertexvsBeamlineDistAfterVetoes          = nullptr;
+  fhZvertexvsBeamlineDistFinal                = nullptr;
 
-  fhCDAvsZVertex_TrackToBeamlineInitial = nullptr;
-  fhCDAvsZVertex_TrackToTrackInitial = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineInitial  = nullptr;
+  fhCDAvsZVertex_TrackToTrackInitial     = nullptr;
   fhCDAvsZVertex_TrackToBeamlineAfterCut = nullptr;
-  fhCDAvsZVertex_TrackToTrackAfterCut = nullptr;
-  fhCDAvsZVertex_TrackToBeamlineFinal = nullptr;
-  fhCDAvsZVertex_TrackToTrackFinal = nullptr;
+  fhCDAvsZVertex_TrackToTrackAfterCut    = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineFinal    = nullptr;
+  fhCDAvsZVertex_TrackToTrackFinal       = nullptr;
 
-  fhBeamlineDistvsTargetDist_TotMomInitial = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomInitial              = nullptr;
   fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterVetoes = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomFinal = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts      = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts        = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes          = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomFinal                = nullptr;
 
-  fhDeltaTimeFromCHOD = nullptr;
+  fhDeltaTimeFromCHOD     = nullptr;
   fhNMUV3CandAssocToTrack = nullptr;
   fhNCHODCandAssocToTrack = nullptr;
 
-  fhEoP = nullptr;
+  fhEoP       = nullptr;
   fhEoPMuVsPi = nullptr;
 
-  fhSingleAddEnLKrHit = nullptr;
+  fhSingleAddEnLKrHit  = nullptr;
   fhSingleAddEnLKrCand = nullptr;
-  fhAddEnLKrHit = nullptr;
-  fhAddEnLKrCand = nullptr;
+  fhAddEnLKrHit        = nullptr;
+  fhAddEnLKrCand       = nullptr;
 
-  fhInvMassMC = nullptr;
+  fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
 
-  fhAcc = nullptr;
+  fhAcc   = nullptr;
   fhYield = nullptr;    
 }
 
-void HeavyNeutrinoPiMuSelection::InitHist() {
+void HeavyNeutrino::InitHist() {
 
-  BookHisto("hNk3pi",    new TH1D("Nk3pi", "Total number of K3pi events", 1, 0., 1.));
-  BookHisto("hNbursts",  new TH1D("Nbursts", "Total number of processed bursts", 1, 0., 1.));
-  BookHisto("hNEvents",  new TH1D("NEvents", "Number of total processed events" , 1, 0., 1.));
-  BookHisto("hNtracks",  new TH1D("Ntracks",               "Number of tracks", 4, -0.5, 3.5));
-  BookHisto("hN2tracks", new TH1D("N2tracks",      "Number of two-tracks events", 1, 0., 1.));
+  BookHisto("hNk3pi",    new TH1D("Nk3pi",    "Total number of K3pi events",       1, 0., 1.));
+  BookHisto("hNbursts",  new TH1D("Nbursts",  "Total number of processed bursts",  1, 0., 1.));
+  BookHisto("hNEvents",  new TH1D("NEvents",  "Number of total processed events" , 1, 0., 1.));
+  BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  4, -0.5, 3.5));
+  BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
 
-  BookHisto("hZDProd",        new TH1D("ZDProd",  "Z of D meson production point", 20000., -250., 33000.));
-  BookHisto("hZDDecay",       new TH1D("ZDDecay",  "Z of D meson decay point",     20000., -250., 33000.));
+  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of D meson production point", 20000., -250., 33000.));
+  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of D meson decay point",     20000., -250., 33000.));
   BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100,  0., 0.3));
   BookHisto("hDLambda",       new TH1D("DLambda",    "D meson decay length",       100, -1., 40.));
   BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 50.));
@@ -269,13 +287,13 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hMomPi",         new TH1D("MomPi",        "Pion momentum",                  100, -0.5, 200.));
   BookHisto("hMomMu",         new TH1D("MomMu",        "Muon momentum",                  100, -0.5, 200.));
 
-  BookHisto("hXYSpec0Reco", new TH2D("XYSpec0Reco", "Two-track reconstructed events at CH1",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYSpec1Reco", new TH2D("XYSpec1Reco", "Two-track reconstructed events at CH2",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYSpec2Reco", new TH2D("XYSpec2Reco", "Two-track reconstructed events at CH3",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYSpec3Reco", new TH2D("XYSpec3Reco", "Two-track reconstructed events at CH4",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYCHODReco",  new TH2D("XYCHODReco",  "Two-track reconstructed events at CHOD", 100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",  "X,Y of HNL daughters at CHOD, from MC", 100, -2., 2., 100, -2., 2.));
-  BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",  "X,Y of HNL daughters at MUV3, from MC", 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Reco", new TH2D("XYSpec0Reco",        "Two-track reconstructed events at CH1",  100, -1.5, 1.5, 100, -1.5, 1.5)); 
+  BookHisto("hXYSpec1Reco", new TH2D("XYSpec1Reco",        "Two-track reconstructed events at CH2",  100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYSpec2Reco", new TH2D("XYSpec2Reco",        "Two-track reconstructed events at CH3",  100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYSpec3Reco", new TH2D("XYSpec3Reco",        "Two-track reconstructed events at CH4",  100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYCHODReco",  new TH2D("XYCHODReco",         "Two-track reconstructed events at CHOD", 100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",         "X,Y of HNL daughters at CHOD, from MC",  100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",         "X,Y of HNL daughters at MUV3, from MC",  100, -2., 2., 100, -2., 2.));
   BookHisto("hP1vsP2",      new TH2D("P1vsP2",      "Trimomentum of the two HNL daughters, from MC", 100, 0., 100., 100, 0., 100.));
 
   BookHisto("hPhysicsEventsVsCuts", new TH1D("PhysicsEventsVsCuts", "Physics events passing the selection cuts", 35, 0., 35.));
@@ -308,7 +326,7 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hBeamlineDistvsTargetDist_TotMomAfterGeomCuts",        new TH2D("BeamlineDistvsTargetDist_TotMomAfterGeomCuts",        "Two-track total momentum wrt beam axis, after geometrical cuts",     100, 0., 1., 100, 0., 1.));
   BookHisto("hBeamlineDistvsTargetDist_TotMomFinal",                new TH2D("BeamlineDistvsTargetDist_TotMomFinal",                "Two-track total momentum wrt beam axis, after all selections",       100, 0., 1., 100, 0., 1.));
   
-  BookHisto("hDeltaTimeFromCHOD",     new TH1D("DeltaTimeFromCHOD",     "Time difference of two tracks (CHOD candidates)",         200, -20., 20.));  
+  BookHisto("hDeltaTimeFromCHOD",     new TH1D("DeltaTimeFromCHOD",     "Time difference of two tracks (CHOD candidates)",    200, -20., 20.));  
   BookHisto("hNMUV3CandAssocToTrack", new TH1D("NMUV3CandAssocToTrack", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
   BookHisto("hNCHODCandAssocToTrack", new TH1D("NCHODCandAssocToTrack", "Number of CHOD candidates associated to each track", 10, 0., 10.));
   
@@ -320,16 +338,16 @@ void HeavyNeutrinoPiMuSelection::InitHist() {
   BookHisto("hAddEnLKrHit",        new TH2D("AddEnLKrHit", "Additional energy vs time, for LKr hits",                               250, -100., 100, 250, 0., 10.));
   BookHisto("hAddEnLKrCand",       new TH2D("AddEnLKrCand", "Additional energy vs time, for LKr candidates",                        250, -100., 100, 250, 0., 10.));
   
-  BookHisto("hInvMassMC",   new TH1D("InvMassMC",   "Invariant mass MC",                  100, 999., 1001.));
+  BookHisto("hInvMassMC",   new TH1D("InvMassMC",   "Invariant mass MC", 100, 999., 1001.));
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
 
   BookHisto("hAcc",   new TH1D("Acc",   "Acceptance", 50, 1.E-6, 5.E-5));
   BookHisto("hYield", new TH1D("Yield", "Yield",      50, 1.E-20, 1.E-18));
 }
 
-void HeavyNeutrinoPiMuSelection::Process(Int_t) {
+void HeavyNeutrino::Process(Int_t) {
 
-  TRecoLKrEvent*          LKrEvent  = (TRecoLKrEvent*)          GetEvent("LKr");
+  //TRecoLKrEvent*          LKrEvent  = (TRecoLKrEvent*)          GetEvent("LKr");
   TRecoLAVEvent*          LAVEvent  = (TRecoLAVEvent*)          GetEvent("LAV");
   TRecoIRCEvent*          IRCEvent  = (TRecoIRCEvent*)          GetEvent("IRC");
   TRecoSACEvent*          SACEvent  = (TRecoSACEvent*)          GetEvent("SAC");
@@ -341,28 +359,26 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
-  // Plots of kineParts from MC
-
+  Double_t MN             = 0.;
+  Double_t HNLTau         = 0.;
+  Double_t gammaTot       = 0.;
+  Double_t NDecayProb     = 0.;
+  Double_t NReachProb     = 0.;
+  Double_t LReach         = 0.;
+  Double_t LeptonUSquared = 0.;
+  Double_t ProdFactor     = 0.;
+  Double_t DecayFactor    = 0.;
+  Double_t Weight         = 0.;
+  Double_t DProdProb      = 0.;
+  Int_t counter           = 0;
   TLorentzVector mom1;
   TLorentzVector mom2;
-  Double_t mass1 = 0.;
-  Double_t mass2 = 0.;
-  Double_t MN = 0.;
-  Double_t HNLTau = 0.;
-  Double_t gammaTot = 0.;
-  Double_t NDecayProb = 0.;
-  Double_t NReachProb = 0.;
-  Double_t LReach = 0.;
-  Double_t LeptonUSquared = 0.;
-  Double_t ProdFactor = 0.;
-  Double_t DecayFactor = 0.;
-  Double_t Weight = 0.;
-  Int_t counter = 0;
   TVector3 point1;
   TVector3 point2;
   TVector3 momentum1;
   Double_t p1,p2;
-  Double_t DProdProb = 0.;
+
+  // Some plots of KinePart quantities
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -379,12 +395,10 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	FillHisto("hXYMUV3True", xMUV3/1000., yMUV3/1000.);
 	if (p->GetParticleName() == "pi+" || p->GetParticleName() == "pi-") {
 	  mom1 = p->GetInitial4Momentum();
-	  mass1 = TMath::Sqrt(mom1.E()*mom1.E() - mom1.P()*mom1.P());
 	  p1 = TMath::Sqrt(mom1.Px()*mom1.Px()+mom1.Py()*mom1.Py()+mom1.Pz()*mom1.Pz());
 	}
 	else if (p->GetParticleName() == "mu+" || p->GetParticleName() == "mu-") {
 	  mom2 = p->GetInitial4Momentum();
-	  mass2 = TMath::Sqrt(mom2.E()*mom2.E() - mom2.P()*mom2.P());
 	  p2 = TMath::Sqrt(mom2.Px()*mom2.Px()+mom2.Py()*mom2.Py()+mom2.Pz()*mom2.Pz());
 	}
 	if (counter == 2) {
@@ -396,7 +410,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
       }
     }
 
-    // Computation of coupling-related quantities of all HNLs in the MC event
+    // Computation of coupling-related quantities of all HNLs (good and bad)
 
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);      
@@ -414,21 +428,26 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 
-	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
+	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUeSquared;
-
-	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
+	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	  LeptonUSquared = fUtauSquared;
 
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
 
+	// Weight to be associated to each HNL
+
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 
-	if (Weight >= 0. && Weight <= 10)
-	  fSumAll += Weight;
+	//if (Weight >= 0. && Weight <= 10)
+	fSumAll += Weight;
+
+	// Some more plots of KinePart quantities
 
 	FillHisto("hZDProd", p->GetPosAtCheckPoint(0).z());
 	FillHisto("hZDDecay", p->GetProdPos().Z());
@@ -451,9 +470,9 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 
   FillHisto("hNEvents", 0.5);
   
-  // Count K3Pi
+  // K3Pi
   
-  Bool_t k3pi = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
+  Bool_t k3pi     = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
 
   if (k3pi && 0x10)
@@ -461,31 +480,45 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 
   // L0 data
   
-  L0TPData *L0TPData = GetL0Data();
-  UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
-  UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
+  L0TPData *L0TPData      = GetL0Data();
+  UChar_t L0DataType      = GetWithMC() ? 0x11 : L0TPData->GetDataType();
+  UInt_t L0TriggerFlags   = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
   Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
-  Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
-  Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
-      
-  // Select physics triggers and L0 trigger conditions
-  // IMPORTANTE!!!!!!!!!!!!!!!! aggiungi le trigger condition del 2017!!!!!!!!!!!!!!!!
-  
-  Int_t ID1 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-MO1");
-  Int_t ID2 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-Q2-M1");
-  Int_t ID3 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-QX-MO1");
-  Int_t ID4 = TriggerConditions::GetInstance()->GetL0TriggerID("RICH-QX-M1");
-  Bool_t On1 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, ID1);
-  Bool_t On2 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, ID2);
-  Bool_t On3 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, ID3);
-  Bool_t On4 = TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, ID4);
-  Bool_t TriggerStreamOK = (On1 || On2 || On3 || On4);
-  
+  Bool_t TriggerFlagsOK   = L0TriggerFlags & MCTriggerMask;
+  Bool_t TriggerOK        = PhysicsTriggerOK && TriggerFlagsOK;
+
   if (!TriggerOK)
     return;
-  if (!TriggerStreamOK && !GetWithMC())
-    return;
+      
+  // If real data
+  // Select physics triggers and L0 trigger conditions
 
+  if (!GetWithMC()) {  
+    Bool_t L0OK = kFALSE;
+    Bool_t L1OK = kFALSE;
+    
+    for (UInt_t i = 0; i < fID.size(); i++) {
+      L0OK |= TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID[i]);
+    }
+    
+    if (!L0OK) return;
+    
+    // Check for notKTAG o KTAG don't care at L1                                                      
+    
+    for (UInt_t i = 0; i < fID.size(); i++) {
+      std::string L1Algo       = (std::string)TriggerConditions::GetInstance()->GetL1TriggerConditionName(RunNumber, fID[i]);
+      std::size_t foundKTAG    = L1Algo.find("KTAG");
+      std::size_t foundnotKTAG = L1Algo.find("notKTAG");
+      if (L1Algo != "none") {
+	if (foundKTAG == std::string::npos || foundnotKTAG != std::string::npos) {
+	  L1OK = kTRUE;
+	}
+      }
+    }
+    
+    if (!L1OK) return;
+  }
+  
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
@@ -502,45 +535,37 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
-  // Features of the tracks
+  // Track features
     
-  Int_t Charge1 = Tracks[0].GetCharge();
-  Int_t Charge2 = Tracks[1].GetCharge();
-  Double_t ChiSquare1 = Tracks[0].GetChi2();
-  Double_t ChiSquare2 = Tracks[1].GetChi2();
+  Int_t Charge1                                 = Tracks[0].GetCharge();
+  Int_t Charge2                                 = Tracks[1].GetCharge();
+  Double_t ChiSquare1                           = Tracks[0].GetChi2();
+  Double_t ChiSquare2                           = Tracks[1].GetChi2();
   TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
   TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
-  TVector3 Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
-  TVector3 Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
-  TVector3 TotMom = Mom1 + Mom2;
+  TVector3 Mom1                                 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
+  TVector3 Mom2                                 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
+  TVector3 TotMom                               = Mom1 + Mom2;
   
   // (X,Y) of reconstructed tracks for all Spectrometer chambers
-  
-  Double_t zStraw[4] = {183508.0, 194066.0, 204459.0, 218885.0};
-  Double_t xStrawChamberCentre[4] = {101.2, 114.4, 92.4, 52.8};
-  Double_t rMinStraw = 60.0; 
-  Double_t rMaxStraw = 1010.0;
-  Double_t zCHODPlane = 239009.0;
-  Double_t rMinCHOD   = 120.0;
-  Double_t rMaxCHOD   = 1110.0;
-  
+    
   for (UInt_t i = 0; i < Tracks.size(); i++) {
     TRecoSpectrometerCandidate* Cand = Tracks[i].GetSpectrometerCandidate();
     for (Int_t j = 0; j < 4; j++) {
-      Double_t x = Cand->xAt(zStraw[j]);
-      Double_t y = Cand->yAt(zStraw[j]);
-      Double_t r = sqrt(x*x + y*y); 
-      Double_t rShifted = sqrt(pow(x-xStrawChamberCentre[j],2) + y*y); 
-      if (rShifted > rMinStraw && r < rMaxStraw) {
+      Double_t x        = Cand->xAt(fzStraw[j]);
+      Double_t y        = Cand->yAt(fzStraw[j]);
+      Double_t r        = sqrt(x*x + y*y); 
+      Double_t rShifted = sqrt(pow(x-fxStrawChamberCentre[j],2) + y*y); 
+      if (rShifted > frMinStraw && r < frMaxStraw) {
 	TString name = Form("hXYSpec%dReco",j);
 	FillHisto(name, x/1000., y/1000.);
       }
     }
-    Double_t x = Cand->xAtAfterMagnet(zCHODPlane);
-    Double_t y = Cand->yAtAfterMagnet(zCHODPlane);
-    Double_t r = sqrt(x*x+y*y);
-    Double_t r1 = rMinCHOD;
-    Double_t r2 = rMaxCHOD;
+    Double_t x  = Cand->xAtAfterMagnet(fzCHODPlane);
+    Double_t y  = Cand->yAtAfterMagnet(fzCHODPlane);
+    Double_t r  = sqrt(x*x+y*y);
+    Double_t r1 = frMinCHOD;
+    Double_t r2 = frMaxCHOD;
     if (r > r1 && r < r2)
 	FillHisto("hXYCHODReco", x/1000., y/1000.);
   }
@@ -554,14 +579,14 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   fCDAcomp->SetDir2(Mom1);
   fCDAcomp->ComputeVertexCDA();
   
-  Double_t CDA1 = fCDAcomp->GetCDA();
+  Double_t CDA1     = fCDAcomp->GetCDA();
   Double_t Zvertex1 = fCDAcomp->GetVertex().z();     // kaon axis-track1
   
   fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);     // track2
   fCDAcomp->SetDir2(Mom2);
   fCDAcomp->ComputeVertexCDA();
   
-  Double_t CDA2 = fCDAcomp->GetCDA();
+  Double_t CDA2     = fCDAcomp->GetCDA();
   Double_t Zvertex2 = fCDAcomp->GetVertex().z();     // kaon axis-track2
   
   fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);     // track1
@@ -570,25 +595,24 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   fCDAcomp->SetDir2(Mom2);
   fCDAcomp->ComputeVertexCDA();
   
-  Double_t CDA = fCDAcomp->GetCDA();
-  TVector3 Vertex = fCDAcomp->GetVertex();
+  Double_t CDA     = fCDAcomp->GetCDA();
+  TVector3 Vertex  = fCDAcomp->GetVertex();
   Double_t Zvertex = fCDAcomp->GetVertex().z();     // track1-track2
   
   fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);     // beam axis
   fCDAcomp->SetDir1(0., 0., 1.);
   
-  fCDAcomp->SetLine2Point1(Vertex);     // total momentum
+  fCDAcomp->SetLine2Point1(Vertex);     // total momentum of track1+track2
   fCDAcomp->SetDir2(TotMom);
   fCDAcomp->ComputeVertexCDA();
   
   Double_t CDAMom = fCDAcomp->GetCDA();
-  Double_t ZvertexMom = fCDAcomp->GetVertex().z();     // beam axis-total momentum
   
   // Compute distance of two-track momentum wrt target (extrapolation at target)
   
-  fDistcomp->SetLineDir(TotMom);     // total momentum
+  fDistcomp->SetLineDir(TotMom);    
   fDistcomp->SetLinePoint1(Vertex);
-  fDistcomp->SetPoint(0., 0., 0.);     // target
+  fDistcomp->SetPoint(0., 0., 0.);  
   fDistcomp->ComputeDistance();
   
   Double_t TargetDist = fDistcomp->GetDistance();
@@ -613,17 +637,17 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   // Track selection, CUT 1: Two tracks in Spectrometer acceptance
 
   for (Int_t i = 0; i < 4; i++) {
-      Double_t x1 = SpectrometerCand1->xAt(zStraw[i]);
-      Double_t y1 = SpectrometerCand1->yAt(zStraw[i]);
-      Double_t r1 = sqrt(x1*x1 + y1*y1);
-      Double_t rShifted1 = sqrt(pow(x1-xStrawChamberCentre[i],2) + y1*y1);
-      Double_t x2 = SpectrometerCand2->xAt(zStraw[i]);
-      Double_t y2 = SpectrometerCand2->yAt(zStraw[i]);
-      Double_t r2 = sqrt(x2*x2 + y2*y2);
-      Double_t rShifted2 = sqrt(pow(x2-xStrawChamberCentre[i],2) + y2*y2);
-      Bool_t inAcc = false;
+      Double_t x1        = SpectrometerCand1->xAt(fzStraw[i]);
+      Double_t y1        = SpectrometerCand1->yAt(fzStraw[i]);
+      Double_t r1        = sqrt(x1*x1 + y1*y1);
+      Double_t rShifted1 = sqrt(pow(x1-fxStrawChamberCentre[i],2) + y1*y1);
+      Double_t x2        = SpectrometerCand2->xAt(fzStraw[i]);
+      Double_t y2        = SpectrometerCand2->yAt(fzStraw[i]);
+      Double_t r2        = sqrt(x2*x2 + y2*y2);
+      Double_t rShifted2 = sqrt(pow(x2-fxStrawChamberCentre[i],2) + y2*y2);
+      Bool_t inAcc       = false;
 
-      if ((rShifted1 > rMinStraw && r1 < rMaxStraw) && (rShifted2 > rMinStraw && r2 < rMaxStraw))
+      if ((rShifted1 > frMinStraw && r1 < frMaxStraw) && (rShifted2 > frMinStraw && r2 < frMaxStraw))
 	inAcc = true;
       if (!inAcc) 
 	return;
@@ -654,7 +678,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
-  // Plot the number of candidates associated to each track, for MUV3, CHOD and NewCHOD
+  // Plot the number of candidates associated to each track, for MUV3 and CHOD
   
   FillHisto("hNMUV3CandAssocToTrack", Tracks[0].GetNMUV3AssociationRecords());
   FillHisto("hNMUV3CandAssocToTrack", Tracks[1].GetNMUV3AssociationRecords());
@@ -664,15 +688,15 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   // Downstream track selection, CUT 4: Extrapolation and association to CHOD
 
   Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
-  Double_t x1 = SpectrometerCand1->xAtAfterMagnet(zCHODPlane);
-  Double_t y1 = SpectrometerCand1->yAtAfterMagnet(zCHODPlane);
-  Double_t r1 = sqrt(x1*x1+y1*y1);
-  Double_t x2 = SpectrometerCand2->xAtAfterMagnet(zCHODPlane);
-  Double_t y2 = SpectrometerCand2->yAtAfterMagnet(zCHODPlane);
-  Double_t r2 = sqrt(x2*x2+y2*y2);
-  Bool_t inAcc = false;
+  Double_t x1      = SpectrometerCand1->xAtAfterMagnet(fzCHODPlane);
+  Double_t y1      = SpectrometerCand1->yAtAfterMagnet(fzCHODPlane);
+  Double_t r1      = sqrt(x1*x1+y1*y1);
+  Double_t x2      = SpectrometerCand2->xAtAfterMagnet(fzCHODPlane);
+  Double_t y2      = SpectrometerCand2->yAtAfterMagnet(fzCHODPlane);
+  Double_t r2      = sqrt(x2*x2+y2*y2);
+  Bool_t inAcc     = false;
 
-  if ((r1 > rMinCHOD && r1 < rMaxCHOD) && (r2 > rMinCHOD && r2 < rMaxCHOD))
+  if ((r1 > frMinCHOD && r1 < frMaxCHOD) && (r2 > frMinCHOD && r2 < frMaxCHOD))
     inAcc = true;
   if (!inAcc)
     return;
@@ -712,7 +736,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 
   Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
   Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
-  Int_t Assoc = 0;
+  Int_t Assoc   = 0;
   
   if (Assoc1 && !Assoc2)
     Assoc = 1;
@@ -749,8 +773,8 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   
   // Energy cuts, CUT 7: Cut on E/p in LKr
   
-  Double_t EoP1 = Tracks[0].GetLKrEoP();
-  Double_t EoP2 = Tracks[1].GetLKrEoP();
+  Double_t EoP1  = Tracks[0].GetLKrEoP();
+  Double_t EoP2  = Tracks[1].GetLKrEoP();
   Double_t MuEoP = 0.;
   Double_t PiEoP = 0.;
 
@@ -804,7 +828,7 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
   
   if (GetWithMC()) {
-    fSAVMatching->SetIRCTimeCuts(99999, 99999);
+    fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC
     fSAVMatching->SetSACTimeCuts(99999, 99999);
   } else {
     fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
@@ -941,13 +965,13 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
   FillHisto("hCDAvsZVertex_TotMomToBeamlineFinal",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 6
   FillHisto("hZvertexvsBeamlineDistFinal",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 6
   FillHisto("hBeamlineDistvsTargetDist_TotMomFinal", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 6
+
+  // Computation of invariant mass
   
   TVector3 threeMomPi;
   TVector3 threeMomMu;
   Double_t energyMu;
   Double_t energyPi;
-  Double_t massPi = 139.57;
-  Double_t massMu = 105.66;
   Double_t invMass = 0.;
 
   if (Assoc == 1) {
@@ -959,13 +983,13 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
     threeMomMu = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
   }
 
-  energyPi = TMath::Sqrt(threeMomPi.Px()*threeMomPi.Px() + threeMomPi.Py()*threeMomPi.Py() + threeMomPi.Pz()*threeMomPi.Pz() + massPi*massPi);
-  energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + massMu*massMu);
+  energyPi = TMath::Sqrt(threeMomPi.Px()*threeMomPi.Px() + threeMomPi.Py()*threeMomPi.Py() + threeMomPi.Pz()*threeMomPi.Pz() + fMpi*fMpi);
+  energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
   FillHisto("hInvMassReco", invMass);
 
-  // Computation of coupling-related quantities of good HNL in the MC event         
+  // Computation of coupling-related quantities of the only good HNL in each event
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -984,11 +1008,12 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 
-	if (p->GetParticleName() == "HNLD+e+" || p->GetParticleName() == "HNLD-e-" || p->GetParticleName() == "HNLDS+e+" || p->GetParticleName() == "HNLDS-e-") 
+	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUeSquared;
-
-	else if (p->GetParticleName() == "HNLD+mu+" || p->GetParticleName() == "HNLD-mu-" || p->GetParticleName() == "HNLDS+mu+" || p->GetParticleName() == "HNLDS-mu-") 
+	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	  LeptonUSquared = fUtauSquared;
 
         if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
@@ -997,19 +1022,19 @@ void HeavyNeutrinoPiMuSelection::Process(Int_t) {
 	
         Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	
-	if (Weight >= 0. && Weight <= 10)
-	  fSumGood += Weight;
+	//if (Weight >= 0. && Weight <= 10)
+	fSumGood += Weight;
       }
     }
   }
 }
 
-void HeavyNeutrinoPiMuSelection::EndOfBurstUser() {
+void HeavyNeutrino::EndOfBurstUser() {
   
   FillHisto("hNbursts", 0.5);
 }
 
-void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
+void HeavyNeutrino::EndOfJobUser() {
   
   // Retrieve histos
 
@@ -1232,6 +1257,8 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   FillHisto("hAcc", Acceptance);
   FillHisto("hYield", Yield);
 
+  // Plot residual number of events after each cut
+
   const int NCuts = 25;
   const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Straw0 acc", "Straw1 acc", "Straw2 acc", "Straw3 acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "LKr acc", "LKr assoc", "MUV3 acc", "MUV3 assoc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "LKr veto", "CDA tracks", "Beam distance", "Z vertex", "CDA beam"};
 
@@ -1245,14 +1272,18 @@ void HeavyNeutrinoPiMuSelection::EndOfJobUser() {
   return;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeHNLMass(KinePart* p) {
+// HNL mass
+
+Double_t HeavyNeutrino::ComputeHNLMass(KinePart* p) {
 
   Double_t MN = TMath::Sqrt(p->GetInitial4Momentum().E()*p->GetInitial4Momentum().E() - p->GetInitial4Momentum().P()*p->GetInitial4Momentum().P());
 
   return MN;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeL(TVector3 p1, TVector3 p2, TVector3 mom1) {
+// Distance between two points
+
+Double_t HeavyNeutrino::ComputeL(TVector3 p1, TVector3 p2, TVector3 mom1) {
  
   TVector3 r(p1.x() + mom1.Px()/mom1.Pz()*(p2.z()-p1.z()), p1.y() + mom1.Py()/mom1.Pz()*(p2.z()-p1.z()), p2.z());
   Double_t x = r.x()-p1.x();
@@ -1263,37 +1294,38 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeL(TVector3 p1, TVector3 p2, TVector3
   return L;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeNDecayProb(KinePart* p, Double_t tau, Double_t l) {
+// Probability of HNL decaying in FV
+
+Double_t HeavyNeutrino::ComputeNDecayProb(KinePart* p, Double_t tau, Double_t l) {
 
   Double_t cLight = 299.9; // mm/ns
-  Double_t NProb = 0.;
-  NProb = 1. - TMath::Exp(-l/(p->GetInitial4Momentum().Beta()*p->GetInitial4Momentum().Gamma()*cLight*tau));
+  Double_t NProb  = 1. - TMath::Exp(-l/(p->GetInitial4Momentum().Beta()*p->GetInitial4Momentum().Gamma()*cLight*tau));
 
   return NProb;
 }
 
+// Probability of HNL reaching FV
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeNReachProb(KinePart* p, Double_t tau, Double_t l) {
+Double_t HeavyNeutrino::ComputeNReachProb(KinePart* p, Double_t tau, Double_t l) {
 
   Double_t cLight = 299.9; // mm/ns
-  Double_t NProb = 0.;
-  NProb = TMath::Exp(-l/(p->GetInitial4Momentum().Beta()*p->GetInitial4Momentum().Gamma()*cLight*tau));
+  Double_t NProb = TMath::Exp(-l/(p->GetInitial4Momentum().Beta()*p->GetInitial4Momentum().Gamma()*cLight*tau));
 
   return NProb;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
+// Phasespace for 2-body HNL production mode
 
-  Double_t phaseSpace = 0.;
+Double_t HeavyNeutrino::PhaseSpace(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
-  phaseSpace = TMath::Power(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3, 2) - 4.*Mass2*Mass2*Mass3*Mass3;
+  Double_t phaseSpace = TMath::Power(Mass1*Mass1 - Mass2*Mass2 - Mass3*Mass3, 2) - 4.*Mass2*Mass2*Mass3*Mass3;
 
   return phaseSpace;
 }
 
-// Phasespace factor for 2-body N production                                                            
+// Phasespace factor for 2-body HNL production mode
 
-Double_t HeavyNeutrinoPiMuSelection::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
+Double_t HeavyNeutrino::PhaseSpaceFactor(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
   Double_t factor = 0.;
   Double_t phaseSpace = PhaseSpace(Mass1, Mass2, Mass3);
@@ -1301,16 +1333,13 @@ Double_t HeavyNeutrinoPiMuSelection::PhaseSpaceFactor(Double_t Mass1, Double_t M
   if(phaseSpace > 0.) {
     factor = (Mass1*Mass1*(Mass2*Mass2 + Mass3*Mass3) - TMath::Power(Mass2*Mass2 - Mass3*Mass3,2))*TMath::Power(phaseSpace, 0.5)/(Mass3*Mass3*TMath::Power(Mass1*Mass1 - Mass3*Mass3, 2));
   }
-  else {
-    factor = 0.;
-  }
 
   return factor;
 }
 
-// BR for 2-body N production                                                                           
+// Total BR for 2-body HNL production mode
 
-Double_t HeavyNeutrinoPiMuSelection::TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin, Bool_t noU) {
+Double_t HeavyNeutrino::TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin, Bool_t noU) {
 
   Double_t brt = 0.;
   Double_t life = 0.;
@@ -1368,14 +1397,14 @@ Double_t HeavyNeutrinoPiMuSelection::TwoBodyBR(Double_t Mass1, Double_t Mass2, D
 	U2 = fUtauSquared;
     }
 
-    if (Mass1 != fMtau) { // D,DS production                                                         
+    if (Mass1 != fMtau) { // D,DS->Nl
       a = U2*life*fGF*fGF*f*f*V*V*Mass1*Mass2*Mass2/(8.*TMath::Pi());
       b = 1. - Mass2*Mass2/(Mass1*Mass1) + 2.*Mass3*Mass3/(Mass1*Mass1);
       c = (1. - Mass3*Mass3/(Mass1*Mass1))*Mass3*Mass3/(Mass2*Mass2);
       d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
       brt = a*(b+c)*TMath::Sqrt(d);
     }
-    else if (Mass1 == fMtau) { // D,DS->taunu; tau->NX production                                       
+    else if (Mass1 == fMtau) { // D,DS->taunu; tau->NH (H = pi, rho)
       if ((Dorigin == 0 && PhaseSpaceFactor(fMD, fMtau, 0.) > 0.) || (Dorigin == 1 && PhaseSpaceFactor(fMDS, fMtau, 0.))) {
         if (Mass3 == fMpi) {
           a = U2*life*fGF*fGF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
@@ -1392,24 +1421,15 @@ Double_t HeavyNeutrinoPiMuSelection::TwoBodyBR(Double_t Mass1, Double_t Mass2, D
           brt = a*b*TMath::Sqrt(c*d);
         }
       }
-      else {
-        brt = 0.;
-      }
     }
-    else {
-      brt = 0.;
-    }
-  }
-  else {
-    brt = 0.;
   }
 
   return brt;
 }
 
-// BR for 3-body N production                                                                           
+// Total BR for 3-body HNL production mode
 
-Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Int_t Dorigin, Bool_t noU) {
+Double_t HeavyNeutrino::ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Int_t Dorigin, Bool_t noU) {
 
   Double_t br = 0.;
   Double_t U2 = 0.;
@@ -1422,7 +1442,7 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
   }
 	
   if (Mass1 >= (Mass2 + Mass3 + Mass4)) {
-    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) { // D,D0->NHl production     
+    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) { // D,D0->NHl (H = pi, pi0, K, K0)
       if (Mass1 == fMD || Mass1 == fMD0) {
         Double_t ENmin = Mass2; // N at rest, K and e back to back                                     
         Double_t ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way,K and e other way, their momenta summed equal to the N one                                      
@@ -1506,11 +1526,8 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
 	delete func;
 	func = nullptr;
       }
-      else {
-        br = 0.;
-      }
     }
-    else if (Mass3 == fMKStar || Mass3 == fMK0Star) { // D,D0->NK*l                          
+    else if (Mass3 == fMKStar || Mass3 == fMK0Star) { // D,D0->NVl (V = K*, K0*)  
       if (Mass1 == fMD || Mass1 == fMD0) {
         Double_t ENmin = Mass2; // N at rest, K and e back to back                      
         Double_t ENmax = (Mass1*Mass1 + Mass2*Mass2 - TMath::Power(Mass4 + Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one                                 
@@ -1545,7 +1562,7 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
           f1 = fVD/(Mass1 + Mass3);
           f2 = (Mass1 + Mass3)*fA1D;
           f3 = -fA2D/(Mass1 + Mass3);
-          f4 = Mass3*(2.*fA0D - fA1D - fA2D) + Mass1*(fA2D - fA1D); // to be multiplied by 1/x      
+          f4 = Mass3*(2.*fA0D - fA1D - fA2D) + Mass1*(fA2D - fA1D); // multiply by 1/x
         }
         else if (Mass1 == fMD0) {
           tau = fD0life;
@@ -1553,7 +1570,7 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
           f1 = fVD0/(Mass1 + Mass3);
           f2 = (Mass1 + Mass3)*fA1D0;
           f3 = -fA2D0/(Mass1 + Mass3);
-          f4 = Mass3*(2.*fA0D0 - fA1D0 - fA2D0) + Mass1*(fA2D0 - fA1D0); // to be multiplied by 1/x 
+          f4 = Mass3*(2.*fA0D0 - fA1D0 - fA2D0) + Mass1*(fA2D0 - fA1D0); // multiply by 1/x 
         }
 
         omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;           
@@ -1586,9 +1603,6 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
 	delete func;
 	func = nullptr;
       }
-      else {
-        br = 0.;
-      }
     }
     else if (Mass1 == fMtau) {
       if ((Dorigin == 0 && PhaseSpaceFactor(fMD, fMtau, 0.) > 0.) || (Dorigin == 1 && PhaseSpaceFactor(fMDS, fMtau, 0.))) {
@@ -1597,7 +1611,7 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
         Double_t ENmax = 0.;
         Double_t life = ftaulife;
 
-        if (Mass3 == 0.1) { //nu_tau                                                                 
+        if (Mass3 == 0.1) { // D,DS->taunu_tau; tau->Nlnu_tau
 	  std::string function = ThreeBodyFunction(Mass1, Mass3);
 
 	  if (noU == true)
@@ -1629,7 +1643,7 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
 	  b = ig.Integral(ENmin, ENmax);
 	  br = U2*b;
 	}
-        else if (Mass3 == 0.01) { //nu_e or nu_mu                                                    
+        else if (Mass3 == 0.01) { // D,DS->taunu_tau; tau->Nlnu_l
 	  std::string function = ThreeBodyFunction(Mass1, Mass3);
 
 	  if (noU == true)
@@ -1660,37 +1674,31 @@ Double_t HeavyNeutrinoPiMuSelection::ThreeBodyBR(Double_t Mass1, Double_t Mass2,
           _exit(1);
         }
       }
-      else {
-        br = 0.;
-      }
     }
     else {
       cout<<"[ThreeBodyBR] Unknown N 3-body production mode"<<endl;
       _exit(1);
     }
   }
-  else {
-    br = 0.;
-  }
 
   return br;
 }
 
-// Function for total BR of 3-body production                                                        
+// Create string function for 3-body total BR of HNL production mode
 
-std::string HeavyNeutrinoPiMuSelection::ThreeBodyFunction(Double_t Mass1, Double_t Mass3) {
+std::string HeavyNeutrino::ThreeBodyFunction(Double_t Mass1, Double_t Mass3) {
 
   std::string function = "";
 
   if (Mass1 == fMD || Mass1 == fMD0) {
-    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) {
+    if (Mass3 == fMK || Mass3 == fMK0 || Mass3 == fMpi || Mass3 == fMpi0) { // D,D0->NHl
       function = "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*y*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*y*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*y*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*y*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))";
     }
-    else if (Mass3 == fMKStar || Mass3 == fMK0Star) {
+    else if (Mass3 == fMKStar || Mass3 == fMK0Star) { // D,D0->NVl
       function = "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*y) + ([1] - x - ([0] - 2.*[9]*y))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*y) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*y)*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3]) + 2.*([0] - 2.*[9]*y)*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*y)*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*y)*([0] - 2.*[9]*y)*x))";
     }
   }
-  else if (Mass1 == fMtau) {
+  else if (Mass1 == fMtau) { // D,DS->taunu_tau; tau->Nlnu
     if (Mass3 == 0.1) { //nu_tau                                                                      
       function = "([0]*[3]*[3]*[1]*[1]*x/(2.*TMath::Power(TMath::Pi(), 3.)))*(1. + ([2]*[2] - [4]*[4])/([1]*[1]) - 2.*x/[1])*(1. - [4]*[4]/([1]*[1] + [2]*[2] - 2.*x*[1]))*(TMath::Sqrt(x*x - [2]*[2]))";
     }
@@ -1702,9 +1710,9 @@ std::string HeavyNeutrinoPiMuSelection::ThreeBodyFunction(Double_t Mass1, Double
   return function;
 }
 
-// Decay width for 2-body N decay                                                                    
+// Decay width for 2-body HNL decay mode 
 
-Double_t HeavyNeutrinoPiMuSelection::Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form, Bool_t noU) {
+Double_t HeavyNeutrino::Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form, Bool_t noU) {
 
   Double_t gamma_2 = 0.;
   Double_t V = 0.;
@@ -1773,16 +1781,13 @@ Double_t HeavyNeutrinoPiMuSelection::Gamma2(Double_t Mass1, Double_t Mass2, Doub
       _exit(1);
     }
   }
-  else {
-    gamma_2 = 0.;
-  }
 
   return gamma_2;
 }
 
-// Decay width for 3-body N decay                                                                       
+// Decay width for 3-body HNL decay mode 
 
-Double_t HeavyNeutrinoPiMuSelection::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t noU) {
+Double_t HeavyNeutrino::GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t noU) {
 
   Double_t r = 0.;
   Double_t a = 0.;
@@ -1841,86 +1846,83 @@ Double_t HeavyNeutrinoPiMuSelection::GammaLeptonNu3(Double_t Mass1, Double_t Mas
       gamma_l_l_nu = a*b;
     }
   }
-  else {
-    gamma_l_l_nu = 0.;
-  }
 
   return gamma_l_l_nu;
 }
 
-// Total N decay width                                                                              
+// Total HNL decay width                                                                              
 
-Double_t HeavyNeutrinoPiMuSelection::GammaTot(Double_t MN) {
+Double_t HeavyNeutrino::GammaTot(Double_t MN) {
 
   Double_t gammaTot = 0.;
 
   if (MN < 2*fMe) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false);
   }
   else if (MN >= 2*fMe && MN < (fMe+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false);
   }
   else if (MN >= (fMe+fMmu) && MN < (fMpi0)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false);
   }
   else if (MN >= (fMpi0) && MN < (fMe+fMpi)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false);
   }
   else if (MN >= (fMe+fMpi) && MN < 2*fMmu) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false);
   }
   else if (MN >= 2*fMmu && MN < (fMmu+fMpi)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false);
   }
   else if (MN >= (fMmu+fMpi) && MN < (fMK+fMe)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false);
   }
   else if (MN >= (fMK+fMe) && MN < (fMeta)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false);
   }
   else if (MN >= (fMeta) && MN < (fMK+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false);
   }
   else if (MN >= (fMK+fMmu) && MN < (fMrho0)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false);
   }
   else if (MN >= (fMrho0) && MN < (fMrho+fMe)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false);
   }
   else if (MN >= (fMrho+fMe) && MN < (fMrho+fMmu)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false);
   }
   else if (MN >= (fMmu+fMrho) && MN < (fMetaprime)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false);
   }
   else if (MN >= (fMetaprime) && MN < (fMe+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false);
   }
   else if (MN >= (fMe+fMtau) && MN < (fMmu+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false);
   }
   else if (MN >= (fMmu+fMtau) && MN < (fMpi+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false) + GammaLeptonNu3(MN, fMmu, fMtau, false);
   }
   else if (MN >= (fMpi+fMtau) && MN < (fMK+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false) + GammaLeptonNu3(MN, fMmu, fMtau, false) + Gamma2(MN, fMpi, fMtau, fPi, false);
   }
   else if (MN >= (fMK+fMtau) && MN < (fMrho+fMtau)) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMK, fMtau, fK, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false) + GammaLeptonNu3(MN, fMmu, fMtau, false) + Gamma2(MN, fMpi, fMtau, fPi, false) + Gamma2(MN, fMK, fMtau, fK, false);
   }
   else if (MN >= (fMrho+fMtau) && MN < 2*fMtau) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMK, fMtau, fK, true) + Gamma2(MN, fMrho, fMtau, fRho, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false) + GammaLeptonNu3(MN, fMmu, fMtau, false) + Gamma2(MN, fMpi, fMtau, fPi, false) + Gamma2(MN, fMK, fMtau, fK, false) + Gamma2(MN, fMrho, fMtau, fRho, false);
   }
   else if (MN >= 2*fMtau) {
-    gammaTot = GammaLeptonNu3(MN, 0., 0., true) + GammaLeptonNu3(MN, fMe, fMe, true) + GammaLeptonNu3(MN, fMe, fMmu, true) + Gamma2(MN, fMpi0, 0., fPi, true) + Gamma2(MN, fMpi, fMe, fPi, true) + GammaLeptonNu3(MN, fMmu, fMmu, true) + Gamma2(MN, fMpi, fMmu, fPi, true) + Gamma2(MN, fMK, fMe, fK, true) + Gamma2(MN, fMeta, 0., fEta, true) + Gamma2(MN, fMK, fMmu, fK, true) + Gamma2(MN, fMrho0, 0., fRho, true) + Gamma2(MN, fMrho, fMe, fRho, true) + Gamma2(MN, fMrho, fMmu, fRho, true) + Gamma2(MN, fMetaprime, 0., fEtaprime, true) + GammaLeptonNu3(MN, fMe, fMtau, true) + GammaLeptonNu3(MN, fMmu, fMtau, true) + Gamma2(MN, fMpi, fMtau, fPi, true) + Gamma2(MN, fMrho, fMtau, fRho, true) + GammaLeptonNu3(MN, fMtau, fMtau, true);
+    gammaTot = GammaLeptonNu3(MN, 0., 0., false) + GammaLeptonNu3(MN, fMe, fMe, false) + GammaLeptonNu3(MN, fMe, fMmu, false) + Gamma2(MN, fMpi0, 0., fPi, false) + Gamma2(MN, fMpi, fMe, fPi, false) + GammaLeptonNu3(MN, fMmu, fMmu, false) + Gamma2(MN, fMpi, fMmu, fPi, false) + Gamma2(MN, fMK, fMe, fK, false) + Gamma2(MN, fMeta, 0., fEta, false) + Gamma2(MN, fMK, fMmu, fK, false) + Gamma2(MN, fMrho0, 0., fRho, false) + Gamma2(MN, fMrho, fMe, fRho, false) + Gamma2(MN, fMrho, fMmu, fRho, false) + Gamma2(MN, fMetaprime, 0., fEtaprime, false) + GammaLeptonNu3(MN, fMe, fMtau, false) + GammaLeptonNu3(MN, fMmu, fMtau, false) + Gamma2(MN, fMpi, fMtau, fPi, false) + Gamma2(MN, fMrho, fMtau, fRho, false) + GammaLeptonNu3(MN, fMtau, fMtau, false);
   }
 
   return gammaTot;
 }
 
-// Lifetime
+// HNL lifetime
 
-Double_t HeavyNeutrinoPiMuSelection::tauN(Double_t MN) {
+Double_t HeavyNeutrino::tauN(Double_t MN) {
 
   Double_t gammaN = GammaTot(MN);
 
@@ -1929,12 +1931,14 @@ Double_t HeavyNeutrinoPiMuSelection::tauN(Double_t MN) {
 
 // Lambda function                                                                                   
 
-Double_t HeavyNeutrinoPiMuSelection::lambda(Double_t a, Double_t b, Double_t c) {
+Double_t HeavyNeutrino::lambda(Double_t a, Double_t b, Double_t c) {
 
   return a*a + b*b + c*c - 2.*a*b - 2.*a*c - 2.*b*c;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeProd(KinePart* p, Double_t MN) {
+// Factor related to HNL production
+
+Double_t HeavyNeutrino::ComputeProd(KinePart* p, Double_t MN) {
 
   Double_t br = 0.;
   Double_t Dorigin = -1;
@@ -1946,30 +1950,30 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeProd(KinePart* p, Double_t MN) {
   else
     Dorigin = 0;
 
-  Double_t BR2De     = TwoBodyBR(fMD,   MN, fMe,   Dorigin);
-  Double_t BR2Dmu    = TwoBodyBR(fMD,   MN, fMmu,  Dorigin);
-  Double_t BR2DSe    = TwoBodyBR(fMDS,  MN, fMe,   Dorigin);
-  Double_t BR2DSmu   = TwoBodyBR(fMDS,  MN, fMmu,  Dorigin);
-  Double_t BR2DStau  = TwoBodyBR(fMDS,  MN, fMtau, Dorigin);
-  Double_t BR2taupi  = TwoBodyBR(fMtau, MN, fMpi,  Dorigin);
-  Double_t BR2taurho = TwoBodyBR(fMtau, MN, fMrho, Dorigin);
+  Double_t BR2De     = TwoBodyBR(fMD,   MN, fMe,   Dorigin, true);
+  Double_t BR2Dmu    = TwoBodyBR(fMD,   MN, fMmu,  Dorigin, true);
+  Double_t BR2DSe    = TwoBodyBR(fMDS,  MN, fMe,   Dorigin, true);
+  Double_t BR2DSmu   = TwoBodyBR(fMDS,  MN, fMmu,  Dorigin, true);
+  Double_t BR2DStau  = TwoBodyBR(fMDS,  MN, fMtau, Dorigin, true);
+  Double_t BR2taupi  = TwoBodyBR(fMtau, MN, fMpi,  Dorigin, true);
+  Double_t BR2taurho = TwoBodyBR(fMtau, MN, fMrho, Dorigin, true);
 
-  Double_t BR3DK0e        = ThreeBodyBR(fMD,   MN, fMK0,     fMe,  Dorigin);
-  Double_t BR3Dpi0e       = ThreeBodyBR(fMD,   MN, fMpi0,    fMe,  Dorigin);
-  Double_t BR3D0Ke        = ThreeBodyBR(fMD0,  MN, fMK,      fMe,  Dorigin);
-  Double_t BR3D0pie       = ThreeBodyBR(fMD0,  MN, fMpi,     fMe,  Dorigin);
-  Double_t BR3DK0mu       = ThreeBodyBR(fMD,   MN, fMK0,     fMmu, Dorigin);
-  Double_t BR3Dpi0mu      = ThreeBodyBR(fMD,   MN, fMpi0,    fMmu, Dorigin);
-  Double_t BR3D0Kmu       = ThreeBodyBR(fMD0,  MN, fMK,      fMmu, Dorigin);
-  Double_t BR3D0pimu      = ThreeBodyBR(fMD0,  MN, fMpi,     fMmu, Dorigin);
-  Double_t BR3DK0Stare    = ThreeBodyBR(fMD,   MN, fMK0Star, fMe,  Dorigin);
-  Double_t BR3D0KStare    = ThreeBodyBR(fMD0,  MN, fMKStar,  fMe,  Dorigin);
-  Double_t BR3DK0Starmu   = ThreeBodyBR(fMD,   MN, fMK0Star, fMmu, Dorigin);
-  Double_t BR3D0KStarmu   = ThreeBodyBR(fMD0,  MN, fMKStar,  fMmu, Dorigin);
-  Double_t BR3tauenu_tau  = ThreeBodyBR(fMtau, MN, 0.1,      fMe,  Dorigin);
-  Double_t BR3tauenu_e    = ThreeBodyBR(fMtau, MN, 0.01,     fMe,  Dorigin);
-  Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin);
-  Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin);
+  Double_t BR3DK0e        = ThreeBodyBR(fMD,   MN, fMK0,     fMe,  Dorigin, true);
+  Double_t BR3Dpi0e       = ThreeBodyBR(fMD,   MN, fMpi0,    fMe,  Dorigin, true);
+  Double_t BR3D0Ke        = ThreeBodyBR(fMD0,  MN, fMK,      fMe,  Dorigin, true);
+  Double_t BR3D0pie       = ThreeBodyBR(fMD0,  MN, fMpi,     fMe,  Dorigin, true);
+  Double_t BR3DK0mu       = ThreeBodyBR(fMD,   MN, fMK0,     fMmu, Dorigin, true);
+  Double_t BR3Dpi0mu      = ThreeBodyBR(fMD,   MN, fMpi0,    fMmu, Dorigin, true);
+  Double_t BR3D0Kmu       = ThreeBodyBR(fMD0,  MN, fMK,      fMmu, Dorigin, true);
+  Double_t BR3D0pimu      = ThreeBodyBR(fMD0,  MN, fMpi,     fMmu, Dorigin, true);
+  Double_t BR3DK0Stare    = ThreeBodyBR(fMD,   MN, fMK0Star, fMe,  Dorigin, true);
+  Double_t BR3D0KStare    = ThreeBodyBR(fMD0,  MN, fMKStar,  fMe,  Dorigin, true);
+  Double_t BR3DK0Starmu   = ThreeBodyBR(fMD,   MN, fMK0Star, fMmu, Dorigin, true);
+  Double_t BR3D0KStarmu   = ThreeBodyBR(fMD0,  MN, fMKStar,  fMmu, Dorigin, true);
+  Double_t BR3tauenu_tau  = ThreeBodyBR(fMtau, MN, 0.1,      fMe,  Dorigin, true);
+  Double_t BR3tauenu_e    = ThreeBodyBR(fMtau, MN, 0.01,     fMe,  Dorigin, true);
+  Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin, true);
+  Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin, true);
   Double_t BR2Dtot = BR2De + BR2Dmu + BR2taupi + BR2taurho;
   Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + BR2taupi + BR2taurho;
   Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + BR3tauenu_tau + BR3taumunu_tau + BR3tauenu_e + BR3taumunu_mu;
@@ -1990,110 +1994,186 @@ Double_t HeavyNeutrinoPiMuSelection::ComputeProd(KinePart* p, Double_t MN) {
     else // D->HNl or D->taunu; tau->Nlnu
       br = BR3Dtot;
   }
+
   return br;
 }
 
-Double_t HeavyNeutrinoPiMuSelection::ComputeDecay(Double_t MN) {
+// Factor related to HNL decay
+
+Double_t HeavyNeutrino::ComputeDecay(Double_t MN) {
 
   Double_t br = 0.;
-  Double_t Gamma2pimu = Gamma2(MN, fMpi, fMmu, fPi, true);
+  Double_t Gamma2pimu = Gamma2(MN, fMpi, fMmu, fPi, false);
   Double_t gammaTot = GammaTot(MN);
 
   if (Gamma2pimu > 0. && gammaTot > 0.) 
     br = Gamma2pimu/gammaTot;
-  else 
-    br = 0.;
 
   return br;
 }
 
-HeavyNeutrinoPiMuSelection::~HeavyNeutrinoPiMuSelection() {
+HeavyNeutrino::~HeavyNeutrino() {
   
   delete fCDAcomp;
   delete fDistcomp;
   delete fLAVMatching;
   delete fSAVMatching;
 
-  delete [] fPTotal;
-  delete [] fmesonMass;
-  delete [] fmesonTau;
+  delete fhNk3pi;
+  delete fhNbursts;
+  delete fhNEvents;
+  delete fhN2tracks;
+  delete fhNtracks ;
 
-  fhNk3pi = nullptr;
-  fhNbursts = nullptr;
-  fhNEvents = nullptr;
+  delete fhZDProd;
+  delete fhZDDecay;
+  delete fhDTheta;
+  delete fhDLambda;
+  delete fhDPath;
+  delete fhDMom;
+  delete fhZHNLDecay;
+  delete fhHNLGamma;
+  delete fhHNLDecayProb;
+  delete fhHNLReachProb;
+  delete fhHNLTheta;
+  delete fhHNLMom;
+  delete fhWeight;
+  delete fhMomPi;
+  delete fhMomMu;
+
+  delete fhXYSpec0Reco;
+  delete fhXYSpec1Reco;
+  delete fhXYSpec2Reco;
+  delete fhXYSpec3Reco;
+  delete fhXYCHODReco;
+  delete fhXYCHODTrue;
+  delete fhXYMUV3True;
+  delete fhP1vsP2;
+
+  delete fhPhysicsEventsVsCuts;
+
+  delete fhCDAvsZVertex_TotMomToBeamlineInitial;
+  delete fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack;
+  delete fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts;
+  delete fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts;
+  delete fhCDAvsZVertex_TotMomToBeamlineAfterVetoes;
+  delete fhCDAvsZVertex_TotMomToBeamlineFinal;
+
+  delete fhZvertexvsBeamlineDistInitial;
+  delete fhZvertexvsBeamlineDistAfterDownstreamTrack;
+  delete fhZvertexvsBeamlineDistAfterEnergyCuts;
+  delete fhZvertexvsBeamlineDistAfterGeomCuts;
+  delete fhZvertexvsBeamlineDistAfterVetoes;
+  delete fhZvertexvsBeamlineDistFinal;
+
+  delete fhCDAvsZVertex_TrackToBeamlineInitial;
+  delete fhCDAvsZVertex_TrackToTrackInitial;
+  delete fhCDAvsZVertex_TrackToBeamlineAfterCut;
+  delete fhCDAvsZVertex_TrackToTrackAfterCut;
+  delete fhCDAvsZVertex_TrackToBeamlineFinal;
+  delete fhCDAvsZVertex_TrackToTrackFinal;
+
+  delete fhBeamlineDistvsTargetDist_TotMomInitial;
+  delete fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack;
+  delete fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts;
+  delete fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts;
+  delete fhBeamlineDistvsTargetDist_TotMomAfterVetoes;
+  delete fhBeamlineDistvsTargetDist_TotMomFinal;
+
+  delete fhDeltaTimeFromCHOD;
+  delete fhNMUV3CandAssocToTrack;
+  delete fhNCHODCandAssocToTrack;
+
+  delete fhEoP;
+  delete fhEoPMuVsPi;
+
+  delete fhSingleAddEnLKrHit;
+  delete fhSingleAddEnLKrCand;
+  delete fhAddEnLKrHit;
+  delete fhAddEnLKrCand;
+
+  delete fhInvMassMC;
+  delete fhInvMassReco;
+
+  delete fhAcc;
+  delete fhYield;
+
+  fhNk3pi    = nullptr;
+  fhNbursts  = nullptr;
+  fhNEvents  = nullptr;
   fhN2tracks = nullptr;
-  fhNtracks = nullptr;
+  fhNtracks  = nullptr;
 
-  fhZDProd = nullptr;
-  fhZDDecay = nullptr;
-  fhDTheta = nullptr;
-  fhDLambda = nullptr;
-  fhDPath = nullptr;
-  fhDMom = nullptr;
-  fhZHNLDecay = nullptr;
-  fhHNLGamma = nullptr;
+  fhZDProd       = nullptr;
+  fhZDDecay      = nullptr;
+  fhDTheta       = nullptr;
+  fhDLambda      = nullptr;
+  fhDPath        = nullptr;
+  fhDMom         = nullptr;
+  fhZHNLDecay    = nullptr;
+  fhHNLGamma     = nullptr;
   fhHNLDecayProb = nullptr;
   fhHNLReachProb = nullptr;
-  fhHNLTheta = nullptr;
-  fhHNLMom = nullptr;
-  fhWeight = nullptr;
-  fhMomPi = nullptr;
-  fhMomMu = nullptr;
+  fhHNLTheta     = nullptr;
+  fhHNLMom       = nullptr;
+  fhWeight       = nullptr;
+  fhMomPi        = nullptr;
+  fhMomMu        = nullptr;
 
   fhXYSpec0Reco = nullptr;
   fhXYSpec1Reco = nullptr;
   fhXYSpec2Reco = nullptr;
   fhXYSpec3Reco = nullptr;
-  fhXYCHODReco = nullptr;
-  fhXYCHODTrue = nullptr;
-  fhXYMUV3True = nullptr;
-  fhP1vsP2 = nullptr;
+  fhXYCHODReco  = nullptr;
+  fhXYCHODTrue  = nullptr;
+  fhXYMUV3True  = nullptr;
+  fhP1vsP2      = nullptr;
 
   fhPhysicsEventsVsCuts = nullptr;
 
-  fhCDAvsZVertex_TotMomToBeamlineInitial = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineInitial              = nullptr;
   fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes = nullptr;
-  fhCDAvsZVertex_TotMomToBeamlineFinal = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts      = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts        = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineAfterVetoes          = nullptr;
+  fhCDAvsZVertex_TotMomToBeamlineFinal                = nullptr;
 
-  fhZvertexvsBeamlineDistInitial = nullptr;
+  fhZvertexvsBeamlineDistInitial              = nullptr;
   fhZvertexvsBeamlineDistAfterDownstreamTrack = nullptr;
-  fhZvertexvsBeamlineDistAfterEnergyCuts = nullptr;
-  fhZvertexvsBeamlineDistAfterGeomCuts = nullptr;
-  fhZvertexvsBeamlineDistAfterVetoes = nullptr;
-  fhZvertexvsBeamlineDistFinal = nullptr;
+  fhZvertexvsBeamlineDistAfterEnergyCuts      = nullptr;
+  fhZvertexvsBeamlineDistAfterGeomCuts        = nullptr;
+  fhZvertexvsBeamlineDistAfterVetoes          = nullptr;
+  fhZvertexvsBeamlineDistFinal                = nullptr;
 
-  fhCDAvsZVertex_TrackToBeamlineInitial = nullptr;
-  fhCDAvsZVertex_TrackToTrackInitial = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineInitial  = nullptr;
+  fhCDAvsZVertex_TrackToTrackInitial     = nullptr;
   fhCDAvsZVertex_TrackToBeamlineAfterCut = nullptr;
-  fhCDAvsZVertex_TrackToTrackAfterCut = nullptr;
-  fhCDAvsZVertex_TrackToBeamlineFinal = nullptr;
-  fhCDAvsZVertex_TrackToTrackFinal = nullptr;
+  fhCDAvsZVertex_TrackToTrackAfterCut    = nullptr;
+  fhCDAvsZVertex_TrackToBeamlineFinal    = nullptr;
+  fhCDAvsZVertex_TrackToTrackFinal       = nullptr;
 
-  fhBeamlineDistvsTargetDist_TotMomInitial = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomInitial              = nullptr;
   fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomAfterVetoes = nullptr;
-  fhBeamlineDistvsTargetDist_TotMomFinal = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts      = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts        = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes          = nullptr;
+  fhBeamlineDistvsTargetDist_TotMomFinal                = nullptr;
 
-  fhDeltaTimeFromCHOD = nullptr;
+  fhDeltaTimeFromCHOD     = nullptr;
   fhNMUV3CandAssocToTrack = nullptr;
   fhNCHODCandAssocToTrack = nullptr;
 
-  fhEoP = nullptr;
+  fhEoP       = nullptr;
   fhEoPMuVsPi = nullptr;
 
-  fhSingleAddEnLKrHit = nullptr;
+  fhSingleAddEnLKrHit  = nullptr;
   fhSingleAddEnLKrCand = nullptr;
-  fhAddEnLKrHit = nullptr;
-  fhAddEnLKrCand = nullptr;
+  fhAddEnLKrHit        = nullptr;
+  fhAddEnLKrCand       = nullptr;
 
-  fhInvMassMC = nullptr;
+  fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
 
-  fhAcc = nullptr;
+  fhAcc   = nullptr;
   fhYield = nullptr;    
 }

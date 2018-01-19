@@ -1,5 +1,5 @@
-#ifndef HEAVYNEUTRINOPIMUSELECTION_HH
-#define HEAVYNEUTRINOPIMUSELECTION_HH
+#ifndef HEAVYNEUTRINO_HH
+#define HEAVYNEUTRINO_HH
 
 #include <stdlib.h>
 #include <fstream>
@@ -21,12 +21,12 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrinoPiMuSelection : public NA62Analysis::Analyzer {
+class HeavyNeutrino : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrinoPiMuSelection(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrinoPiMuSelection();
+  HeavyNeutrino(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrino();
   void InitHist();
   void InitOutput() {}
   void DefineMCSimple() {}
@@ -55,6 +55,7 @@ public:
   Double_t lambda(Double_t, Double_t, Double_t);
   Double_t ComputeProd(KinePart*, Double_t);
   Double_t ComputeDecay(Double_t);
+
 protected:
 
   // Histos
@@ -233,8 +234,8 @@ protected:
   Double_t fzCHODPlane;
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
-  Double_t* fzStraw;
-  Double_t* fxStrawChamberCentre;
+  Double_t fzStraw[4];
+  Double_t fxStrawChamberCentre[4];
 
   // Other parameters                                                                                   
 
