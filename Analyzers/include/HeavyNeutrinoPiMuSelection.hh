@@ -171,7 +171,6 @@ protected:
   Double_t fcLight;
   Double_t fGF;
   Double_t fPi;
-  Double_t fcos2ThetaC;
   Double_t fRho;
   Double_t fD;
   Double_t fDS;
@@ -229,13 +228,16 @@ protected:
   Double_t fzMUV3;
   Double_t fLFV;
   Double_t fLInitialFV;
+  Double_t frMinStraw;
+  Double_t frMaxStraw;
+  Double_t fzCHODPlane;
+  Double_t frMinCHOD;
+  Double_t frMaxCHOD;
+  Double_t* fzStraw;
+  Double_t* fxStrawChamberCentre;
 
   // Other parameters                                                                                   
 
-  Int_t fNSpecies;
-  Double_t* fPTotal;
-  Double_t* fmesonMass;
-  Double_t* fmesonTau;
   Double_t fDBeProdProb;
   Double_t fDCuProdProb;
   Double_t fDDecayProb;
@@ -243,13 +245,15 @@ protected:
   Double_t fUeSquared;
   Double_t fUmuSquared;
   Double_t fUtauSquared;
+  Double_t fNevents;
+  Double_t fSumAll;
+  Double_t fSumGood;
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
   SAVMatching *fSAVMatching;
-  Double_t fNevents;
-  Double_t fSumAll;
-  Double_t fSumGood;
+  std::vector<Int_t> fID;
+  std::vector<std::string> fStream;
 };
 
 #endif
