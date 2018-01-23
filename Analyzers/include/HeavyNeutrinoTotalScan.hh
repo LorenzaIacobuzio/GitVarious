@@ -193,6 +193,7 @@ protected:
   Double_t fSumGood[fNcoupling][fNmass];
   Double_t fAcc[fNcoupling][fNmass];
   Double_t fYield[fNcoupling][fNmass];
+  Double_t fProb[fNcoupling][fNmass];
   Double_t fCouplings[fNcoupling];
   Double_t fMasses[fNmass];
 

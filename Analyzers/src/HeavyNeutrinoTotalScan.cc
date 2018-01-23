@@ -66,6 +66,7 @@ HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
       fNevents[i][j] = 0;
       fAcc[i][j]     = 0.;
       fYield[i][j]   = 0.;
+      fProb[i][j]    = 0.;
     }
   }
 
@@ -182,7 +183,7 @@ HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
 
   // Histos
 
-  fgExclusion = nullprt;
+  fgExclusion = nullptr;
 }
 
 void HeavyNeutrinoTotalScan::InitHist() {
@@ -263,7 +264,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  if (fTemp != fMN)
 	    fMasses[fMassIndex] = fMN;
 	  else
-	    fIndex = 0;
+	    fMassIndex = 0;
 
 	  fNevents[fCouplingIndex][fMassIndex]++;
 	  gammaTot = GammaTot(fMN);
@@ -290,7 +291,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  
 	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	  fSumAll[fCouplingIndex][fMassIndex] += Weight;
-	  fIndex++;
+	  fMassIndex++;
 	}
       }
     }
@@ -566,7 +567,7 @@ void HeavyNeutrinoTotalScan::EndOfJobUser() {
   for (Int_t i = 0; i < fNcoupling; i++) {
     for(Int_t j = 0; j < fNmass; j++) {
       if (fYield[i][j]*1.E18 > 2.3)
-	fgExclusion->SetPoint(i*10+j, fMasses[j], fCoupling[i]);
+	fgExclusion->SetPoint(i*10+j, fMasses[j]/1000., fCouplings[i]);
     }
   }
 
