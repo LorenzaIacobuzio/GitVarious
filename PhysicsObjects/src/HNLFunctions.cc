@@ -44,6 +44,8 @@ Double_t fK        = 159.8;
 Double_t fEta      = 1.2*fPi;
 Double_t fEtaprime = -0.45*fPi;
 Double_t fsigmacc  = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note                             
+Double_t fDtoTauNuBR  = 1.2E-3; // upper limit in PDG
+Double_t fDStoTauNuBR = 0.0555;
 
 // CKM                                                                          
 
@@ -786,12 +788,13 @@ Double_t ComputeProd(KinePart* p, Double_t MN) {
   Double_t BR3tauenu_e    = ThreeBodyBR(fMtau, MN, 0.01,     fMe,  Dorigin, true);
   Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin, true);
   Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin, true);
-  Double_t BR2Dtot = BR2De + BR2Dmu + BR2taupi + BR2taurho;
-  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + BR2taupi + BR2taurho;
-  Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + BR3tauenu_tau + BR3taumunu_tau + BR3tauenu_e + BR3taumunu_mu;
-  Double_t BR3DStot = BR3tauenu_tau + BR3taumunu_tau + BR3tauenu_e + BR3taumunu_mu;
-  Double_t BR3D0tot = BR3D0Ke + BR3D0Kmu + BR3D0pie + BR3D0pimu + BR3D0KStare + BR3D0KStarmu;
 
+  Double_t BR2Dtot = BR2De + BR2Dmu + fDtoTauNuBR*BR2taupi + fDtoTauNuBR*BR2taurho;
+  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + fDStoTauNuBR*BR2taupi + fDStoTauNuBR*BR2taurho;
+  Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + fDtoTauNuBR*BR3tauenu_tau + fDtoTauNuBR*BR3taumunu_tau + fDtoTauNuBR*BR3tauenu_e + fDtoTauNuBR*BR3taumunu_mu;
+  Double_t BR3DStot = fDStoTauNuBR*BR3tauenu_tau + fDStoTauNuBR*BR3taumunu_tau + fDStoTauNuBR*BR3tauenu_e + fDStoTauNuBR*BR3taumunu_mu;
+  Double_t BR3D0tot = BR3D0Ke + BR3D0Kmu + BR3D0pie + BR3D0pimu + BR3D0KStare + BR3D0KStarmu;
+  /*
   if (p->GetParticleName().Contains("DS")) {
     if ((p->GetParticleName().Contains("taunu") && !(p->GetParticleName().Contains("nu_"))) || !(p->GetParticleName().Contains("taunu"))) // DS->Nl or DS->taunu; tau->NH                             
       br = BR2DStot;
@@ -806,6 +809,13 @@ Double_t ComputeProd(KinePart* p, Double_t MN) {
     else // D->HNl or D->taunu; tau->Nlnu                                 
       br = BR3Dtot;
   }
+  */
+  if (p->GetParticleName().Contains("DS"))
+    br = BR2DStot + BR3DStot;
+  else if (p->GetParticleName().Contains("D0"))
+    br = BR3D0tot;
+  else
+    br = BR2Dtot + BR3Dtot;
 
   return br;
 }

@@ -109,4 +109,14 @@ extern Double_t ffD;
 extern Double_t ffD0;
 extern Double_t ffDS;
 
+// Other parameters
+
+extern Double_t fUSquared;
+extern Double_t fUeSquared;
+extern Double_t fUmuSquared;
+extern Double_t fUtauSquared;
+extern Double_t fUeSquaredRatio;
+extern Double_t fUmuSquaredRatio;
+extern Double_t fUtauSquaredRatio;
+
 #endif // HNLFUNCTIONS_HH

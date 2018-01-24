@@ -78,6 +78,16 @@ Double_t ffD  = 0.246;
 Double_t ffD0 = 0.565;
 Double_t ffDS = 0.08;
 
+// Other parameters
+
+Double_t fUSquared;
+Double_t fUeSquared;
+Double_t fUmuSquared;
+Double_t fUtauSquared;
+Double_t fUeSquaredRatio;
+Double_t fUmuSquaredRatio;
+Double_t fUtauSquaredRatio;
+
 // HNL mass                                                                                       
 
 Double_t ComputeHNLMass(KinePart* p) {
