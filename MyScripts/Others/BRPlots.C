@@ -160,7 +160,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
       U = UeSquared;
     else if (Mass3 == mu)
       U = UmuSquared;
-    else if (Mass3 == tau || Mass3 == pi || Mass3 == rho)
+    else if (Mass3 == tau || Mass3 == pi || Mass3 == rho || Mass3 == K)
       U = UtauSquared;
     
     if (Mass1 == D) {
@@ -183,7 +183,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
       exit(1);
     }
     
-    if (Mass3 != e && Mass3 != mu && Mass3 != tau && Mass3 != pi && Mass3 != rho) {
+    if (Mass3 != e && Mass3 != mu && Mass3 != tau && Mass3 != pi && Mass3 != rho && Mass3 != K) {
       cout<<"[TwoBodyBR] Unknown 2-body decay"<<endl;
       exit(1);
     }
@@ -195,7 +195,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
       d = TMath::Power(1. + Mass2*Mass2/(Mass1*Mass1) - Mass3*Mass3/(Mass1*Mass1), 2.) - 4.*Mass2*Mass2/(Mass1*Mass1);
       brt = a*(b+c)*TMath::Sqrt(d);
     }
-    else if (Mass1 == tau && Mass3 == pi) {
+    else if (Mass1 == tau && (Mass3 == pi || Mass3 == K)) {
       a = U*life*GF*GF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
       b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
       c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
@@ -627,7 +627,7 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
 	else
 	  brt = 0.;
       }
-      else if (Mass1 == tau && (Mass3 == pi || Mass3 == rho)) {
+      else if (Mass1 == tau && (Mass3 == pi || Mass3 == rho || Mass3 == K)) {
 	if (PhaseSpaceFactor(DS, 0., tau, PhaseSpace(DS, 0., tau)) > 0. && Factor > 0.)
 	  brt = TwoBodyBR(Mass1, Mass2, Mass3);
       }
@@ -1072,6 +1072,7 @@ void AllProd(Int_t model, TMultiGraph* M) {
   
   MassScan(DS,  tau,    0., 1, 1, 0, "D_{S}->N#tau",         M, sigmacc*2.*ffDS);
   MassScan(tau, pi,     0., 1, 1, 0, "#tau->N#pi",           M, sigmacc*2.*ffDS);
+  MassScan(tau, K,      0., 1, 1, 0, "#tau->NK",             M, sigmacc*2.*ffDS);
   MassScan(tau, rho,    0., 1, 1, 0, "#tau->N#rho",          M, sigmacc*2.*ffDS);
   MassScan(tau, 0.1,    e,  1, 0, 0, "#tau->Ne#nu_{#tau}",   M, sigmacc*2.*ffDS);
   MassScan(tau, 0.1,    mu, 1, 0, 0, "#tau->N#mu#nu_{#tau}", M, sigmacc*2.*ffDS);
