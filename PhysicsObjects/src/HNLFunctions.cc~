@@ -195,7 +195,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin
       _exit(1);
     }
 
-    if (Mass3 != fMe && Mass3 != fMmu && Mass3 != fMtau && Mass3 != fMpi && Mass3 != fMrho) {
+    if (Mass3 != fMe && Mass3 != fMmu && Mass3 != fMtau && Mass3 != fMpi && Mass3 != fMrho && Mass3 != fMK) {
       cout<<"[TwoBodyBR] Unknown 2-body decay"<<endl;
       _exit(1);
     }
@@ -209,7 +209,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin
         U2 = fUmuSquared;
       else if (Mass3 == fMtau)
         U2 = fUtauSquared;
-      else if (Mass3 == fMpi || Mass3 == fMrho)
+      else if (Mass3 == fMpi || Mass3 == fMrho || Mass3 == fMK)
         U2 = fUtauSquared;
     }
 
@@ -222,7 +222,7 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Int_t Dorigin
     }
     else if (Mass1 == fMtau) { // D,DS->taunu; tau->NH (H = pi, rho)                        
       if ((Dorigin == 0 && PhaseSpaceFactor(fMD, fMtau, 0.) > 0.) || (Dorigin == 1 && PhaseSpaceFactor(fMDS, fMtau, 0.))) {
-        if (Mass3 == fMpi) {
+        if (Mass3 == fMpi || Mass3 == fMK) {
           a = U2*life*fGF*fGF*V*V*f*f*Mass1*Mass1*Mass1/(16.*TMath::Pi());
           b = TMath::Power(1. - Mass2*Mass2/(Mass1*Mass1), 2.) - (1. + Mass2*Mass2/(Mass1*Mass1))*Mass3*Mass3/(Mass1*Mass1);
           c = 1. - ((Mass3 - Mass2)*(Mass3 - Mass2)/(Mass1*Mass1));
@@ -770,6 +770,7 @@ Double_t ComputeProd(KinePart* p, Double_t MN) {
   Double_t BR2DSmu   = TwoBodyBR(fMDS,  MN, fMmu,  Dorigin, true);
   Double_t BR2DStau  = TwoBodyBR(fMDS,  MN, fMtau, Dorigin, true);
   Double_t BR2taupi  = TwoBodyBR(fMtau, MN, fMpi,  Dorigin, true);
+  Double_t BR2tauK   = TwoBodyBR(fMtau, MN, fMK,   Dorigin, true);
   Double_t BR2taurho = TwoBodyBR(fMtau, MN, fMrho, Dorigin, true);
 
   Double_t BR3DK0e        = ThreeBodyBR(fMD,   MN, fMK0,     fMe,  Dorigin, true);
@@ -789,27 +790,12 @@ Double_t ComputeProd(KinePart* p, Double_t MN) {
   Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin, true);
   Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin, true);
 
-  Double_t BR2Dtot = BR2De + BR2Dmu + fDtoTauNuBR*BR2taupi + fDtoTauNuBR*BR2taurho;
-  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + fDStoTauNuBR*BR2taupi + fDStoTauNuBR*BR2taurho;
+  Double_t BR2Dtot = BR2De + BR2Dmu + fDtoTauNuBR*BR2taupi + fDtoTauNuBR*BR2tauK + fDtoTauNuBR*BR2taurho;
+  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + fDStoTauNuBR*BR2taupi + fDStoTauNuBR*BR2tauK + fDStoTauNuBR*BR2taurho;
   Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + fDtoTauNuBR*BR3tauenu_tau + fDtoTauNuBR*BR3taumunu_tau + fDtoTauNuBR*BR3tauenu_e + fDtoTauNuBR*BR3taumunu_mu;
   Double_t BR3DStot = fDStoTauNuBR*BR3tauenu_tau + fDStoTauNuBR*BR3taumunu_tau + fDStoTauNuBR*BR3tauenu_e + fDStoTauNuBR*BR3taumunu_mu;
   Double_t BR3D0tot = BR3D0Ke + BR3D0Kmu + BR3D0pie + BR3D0pimu + BR3D0KStare + BR3D0KStarmu;
-  /*
-  if (p->GetParticleName().Contains("DS")) {
-    if ((p->GetParticleName().Contains("taunu") && !(p->GetParticleName().Contains("nu_"))) || !(p->GetParticleName().Contains("taunu"))) // DS->Nl or DS->taunu; tau->NH                             
-      br = BR2DStot;
-    else // DS->taunu; tau->Nlnu                                                        
-      br = BR3DStot;
-  }
-  else if (p->GetParticleName().Contains("D0")) // D0->HNl                 
-    br = BR3D0tot;
-  else {
-    if ((p->GetParticleName().Contains("taunu") && !(p->GetParticleName().Contains("nu_"))) || !(p->GetParticleName().Contains("taunu"))) // D->Nl or D->taunu; tau->NH                            
-      br = BR2Dtot;
-    else // D->HNl or D->taunu; tau->Nlnu                                 
-      br = BR3Dtot;
-  }
-  */
+
   if (p->GetParticleName().Contains("DS"))
     br = BR2DStot + BR3DStot;
   else if (p->GetParticleName().Contains("D0"))

@@ -35,7 +35,7 @@ using namespace NA62Constants;
 
 HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   Analyzer(ba, "HeavyNeutrino") {
-  
+
   RequestAllMCTrees();
   RequestAllRecoTrees();
   RequestL0Data();
@@ -345,13 +345,12 @@ void HeavyNeutrino::Process(Int_t) {
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
 	gammaTot = GammaTot(MN);
-	HNLTau = tauN(gammaTot);
+	HNLTau = tauN(MN);
 	LReach = ComputeL(point1, point2, momentum1);
 	ProdFactor = ComputeProd(p, MN);
 	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-
 	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUeSquared;
 	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
@@ -925,7 +924,7 @@ void HeavyNeutrino::Process(Int_t) {
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
 	gammaTot = GammaTot(MN);
-	HNLTau = tauN(gammaTot);
+	HNLTau = tauN(MN);
 	LReach = ComputeL(point1, point2, momentum1);
 	ProdFactor = ComputeProd(p, MN);
 	DecayFactor = ComputeDecay(MN);
@@ -1197,90 +1196,6 @@ void HeavyNeutrino::EndOfJobUser() {
 }
 
 HeavyNeutrino::~HeavyNeutrino() {
-  
-  delete fCDAcomp;
-  delete fDistcomp;
-  delete fLAVMatching;
-  delete fSAVMatching;
-
-  delete fhNk3pi;
-  delete fhNbursts;
-  delete fhNEvents;
-  delete fhN2tracks;
-  delete fhNtracks ;
-
-  delete fhZDProd;
-  delete fhZDDecay;
-  delete fhDTheta;
-  delete fhDLambda;
-  delete fhDPath;
-  delete fhDMom;
-  delete fhZHNLDecay;
-  delete fhHNLGamma;
-  delete fhHNLDecayProb;
-  delete fhHNLReachProb;
-  delete fhHNLTheta;
-  delete fhHNLMom;
-  delete fhWeight;
-  delete fhMomPi;
-  delete fhMomMu;
-
-  delete fhXYSpec0Reco;
-  delete fhXYSpec1Reco;
-  delete fhXYSpec2Reco;
-  delete fhXYSpec3Reco;
-  delete fhXYCHODReco;
-  delete fhXYCHODTrue;
-  delete fhXYMUV3True;
-  delete fhP1vsP2;
-
-  delete fhPhysicsEventsVsCuts;
-
-  delete fhCDAvsZVertex_TotMomToBeamlineInitial;
-  delete fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack;
-  delete fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts;
-  delete fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts;
-  delete fhCDAvsZVertex_TotMomToBeamlineAfterVetoes;
-  delete fhCDAvsZVertex_TotMomToBeamlineFinal;
-
-  delete fhZvertexvsBeamlineDistInitial;
-  delete fhZvertexvsBeamlineDistAfterDownstreamTrack;
-  delete fhZvertexvsBeamlineDistAfterEnergyCuts;
-  delete fhZvertexvsBeamlineDistAfterGeomCuts;
-  delete fhZvertexvsBeamlineDistAfterVetoes;
-  delete fhZvertexvsBeamlineDistFinal;
-
-  delete fhCDAvsZVertex_TrackToBeamlineInitial;
-  delete fhCDAvsZVertex_TrackToTrackInitial;
-  delete fhCDAvsZVertex_TrackToBeamlineAfterCut;
-  delete fhCDAvsZVertex_TrackToTrackAfterCut;
-  delete fhCDAvsZVertex_TrackToBeamlineFinal;
-  delete fhCDAvsZVertex_TrackToTrackFinal;
-
-  delete fhBeamlineDistvsTargetDist_TotMomInitial;
-  delete fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack;
-  delete fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts;
-  delete fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts;
-  delete fhBeamlineDistvsTargetDist_TotMomAfterVetoes;
-  delete fhBeamlineDistvsTargetDist_TotMomFinal;
-
-  delete fhDeltaTimeFromCHOD;
-  delete fhNMUV3CandAssocToTrack;
-  delete fhNCHODCandAssocToTrack;
-
-  delete fhEoP;
-  delete fhEoPMuVsPi;
-
-  delete fhSingleAddEnLKrHit;
-  delete fhSingleAddEnLKrCand;
-  delete fhAddEnLKrHit;
-  delete fhAddEnLKrCand;
-
-  delete fhInvMassMC;
-  delete fhInvMassReco;
-
-  delete fhAcc;
-  delete fhYield;
 
   fhNk3pi    = nullptr;
   fhNbursts  = nullptr;
