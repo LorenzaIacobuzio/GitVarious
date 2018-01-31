@@ -47,42 +47,8 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // NA62 parameters                                                                    
-
-  fpMom                   = 400000.; // MeV                                                
-  fBeA                    = 4;
-  fBeDensity              = 1.85; // g/cm3                                                       
-  fpBeLambda              = 421.; // mm                                                            
-  ftargetLength           = 400.; // mm                                                              
-  fCuA                    = 29;
-  fCuDensity              = 8.96; // g/cm3                                                              
-  fpCuLambda              = 153.; // mm                                                   
-  fTAXLength              = 1615.; // mm                                                               
-  fTAXDistance            = 24685.;
-  fbeamLength             = 102500.0; // mm           
-  fzCHOD                  = 239009.0;
-  fzMUV3                  = 246800.0;
-  fLFV                    = 77500.;
-  fLInitialFV             = 102500.;
-  fzStraw[0]              = 183508.0;
-  fzStraw[1]              = 194066.0;
-  fzStraw[2]              = 204459.0;
-  fzStraw[3]              = 218885.0;
-  fxStrawChamberCentre[0] = 101.2;
-  fxStrawChamberCentre[1] = 114.4;
-  fxStrawChamberCentre[2] = 92.4;
-  fxStrawChamberCentre[3] = 52.8;
-  frMinStraw              = 60.0; 
-  frMaxStraw              = 1010.0;
-  fzCHODPlane             = 239009.0;
-  frMinCHOD               = 120.0;
-  frMaxCHOD               = 1110.0;
-
   // Other parameters                                                                                   
 
-  fDBeProdProb = 0.00069;
-  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb  = 1.;
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
@@ -92,8 +58,6 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   fSAVMatching = new SAVMatching();
 
   // Scan variables
-
-  fMN = 0.;
 
   for (Int_t i = 0; i < fN; i++) {
     fSumGood[i]   = 0.;
@@ -147,6 +111,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
   TRecoIRCEvent*          IRCEvent  = (TRecoIRCEvent*)          GetEvent("IRC");
   TRecoSACEvent*          SACEvent  = (TRecoSACEvent*)          GetEvent("SAC");
 
+  Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
   Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
@@ -163,9 +128,10 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
   TVector3 point2;
   TVector3 momentum1;
 
-  fIndex = 0;
-  fTemp = 0.;
-  fCounter = 0;
+  Int_t fIndex    = 0;
+  Int_t fCounter  = 0;
+  Double_t fTemp  = 0.;
+  Double_t fDelta = 0.;
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -180,60 +146,82 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 	}
       }
     }
-    
+
+    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
+      KinePart *p = evt->GetKinePart(i);
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
+	MN = ComputeHNLMass(p);
+    cout<<fDelta<<" "<<fCounter<<" "<<fTemp<<" "<<MN<<endl;
+
+	if (fTemp != MN) {
+	  fDelta = MN - fTemp;
+	  fCounter++;
+	  fTemp = MN;
+	}
+      }
+    }
+
     // Computation of coupling-related quantities of all HNLs (good and bad) + scan on the mass
-    
+
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);      
       if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
 	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	fMN = ComputeHNLMass(p);
-
-	if (fCounter == 0) {
-	  fTemp = fMN;
+	MN = ComputeHNLMass(p);
+	/*
+	if (fTemp != MN) {
+	  if (fCounter == 0) {
+	    fIndex = 0;
+	    fTemp = MN;
+	    fMasses[fIndex] = MN;
+	  }
+	  else if (fCounter == 1) {
+	    fDelta = MN - fTemp;
+	    fIndex = 1;
+	    fMasses[fIndex] = MN;
+	  }
+	  else {
+	    fIndex = (MN - fTemp)/fDelta;
+	    fMasses[fIndex] = MN;
+	  }
 	  fCounter++;
-	  fMasses[fIndex] = fMN;
 	}
-
-	if (fTemp != fMN)
-	  fMasses[fIndex] = fMN;
-	else
-	  fIndex = 0;
-
+	
+	cout<<"loop: "<<fIndex<<" "<<fTemp<<" "<<fMasses[fIndex]<<" "<<fCounter<<" "<<fDelta<<" "<<endl;
+	*/
 	fNevents[fIndex]++;
-	gammaTot = GammaTot(fMN);
-	HNLTau = tauN(gammaTot);
+	gammaTot = GammaTot(MN);
+	HNLTau = tauN(MN);
 	fGammaTot[fIndex] = gammaTot;
 	fTau[fIndex] = HNLTau;
 	LReach = ComputeL(point1, point2, momentum1);
-	ProdFactor = ComputeProd(p, fMN);
-	DecayFactor = ComputeDecay(fMN);
+	ProdFactor = ComputeProd(p, MN);
+	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-	  
+	
 	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUeSquared;
 	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
-	  
+	
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
-	  
+	
 	// Weight to be associated to each HNL
-	  
+	
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	fSumAll[fIndex] += Weight;
-	fIndex++;
-
-	FillHisto("hReach",  fMN, NReachProb);
-	FillHisto("hDecay",  fMN, NDecayProb);
-	FillHisto("hWeight", fMN, Weight);
+	
+	FillHisto("hReach",  MN, NReachProb);
+	FillHisto("hDecay",  MN, NDecayProb);
+	FillHisto("hWeight", MN, Weight);
       }
     }
   }
@@ -443,12 +431,12 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 						point2.SetXYZ(0., 0., fLInitialFV);
 						momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-						fMN = ComputeHNLMass(p);
-						gammaTot = GammaTot(fMN);
-						HNLTau = tauN(gammaTot);
+						MN = ComputeHNLMass(p);
+						gammaTot = GammaTot(MN);
+						HNLTau = tauN(MN);
 						LReach = ComputeL(point1, point2, momentum1);
-						ProdFactor = ComputeProd(p, fMN);
-						DecayFactor = ComputeDecay(fMN);
+						ProdFactor = ComputeProd(p, MN);
+						DecayFactor = ComputeDecay(MN);
 						NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 						NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 						  
@@ -456,7 +444,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						  LeptonUSquared = fUeSquared;
 						else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 						  LeptonUSquared = fUmuSquared;
-						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 						  LeptonUSquared = fUtauSquared;
 						  
 						if (p->GetProdPos().Z() < fTAXDistance)
@@ -510,6 +498,9 @@ void HeavyNeutrinoMassScan::EndOfJobUser() {
   // Acceptance computation
 
   for (Int_t i = 0; i < fN; i++) {
+    cout<<"arrays: "<<fMasses[i]<<" "<<fGammaTot[i]<<" "<<fTau[i]<<" "<<endl;
+  }
+  for (Int_t i = 0; i < fN; i++) {
     fAcc[i] = fSumGood[i]/fSumAll[i];
     fProb[i] = fSumAll[i]/fNevents[i];
     fYield[i] = fAcc[i]*fProb[i];
@@ -558,14 +549,6 @@ HeavyNeutrinoMassScan::~HeavyNeutrinoMassScan() {
   delete fDistcomp;
   delete fLAVMatching;
   delete fSAVMatching;
-
-  delete fhReach;
-  delete fhDecay;
-  delete fhWeight;
-  delete fgAcc;
-  delete fgYield;
-  delete fgGammaTot;
-  delete fgTau;
 
   fhReach    = nullptr;
   fhDecay    = nullptr;

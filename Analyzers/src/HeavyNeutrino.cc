@@ -46,48 +46,11 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // NA62 parameters                                                   
-
-  fpMom                   = 400000.; // MeV                              
-  fBeA                    = 4;
-  fBeDensity              = 1.85; // g/cm3                                
-  fpBeLambda              = 421.; // mm                                
-  ftargetLength           = 400.; // mm                                       
-  fCuA                    = 29;
-  fCuDensity              = 8.96; // g/cm3                                     
-  fpCuLambda              = 153.; // mm                                        
-  fTAXLength              = 1615.; // mm                                       
-  fTAXDistance            = 24685.;
-  fbeamLength             = 102500.0; // mm                                 
-  fzCHOD                  = 239009.0;
-  fzMUV3                  = 246800.0;
-  fLFV                    = 77500.;
-  fLInitialFV             = 102500.;
-  fzStraw[0]              = 183508.0;
-  fzStraw[1]              = 194066.0;
-  fzStraw[2]              = 204459.0;
-  fzStraw[3]              = 218885.0;
-  fxStrawChamberCentre[0] = 101.2;
-  fxStrawChamberCentre[1] = 114.4;
-  fxStrawChamberCentre[2] = 92.4;
-  fxStrawChamberCentre[3] = 52.8;
-  frMinStraw              = 60.0;
-  frMaxStraw              = 1010.0;
-  fzCHODPlane             = 239009.0;
-  frMinCHOD               = 120.0;
-  frMaxCHOD               = 1110.0;
-
   // Other parameters                                                                                   
 
   fSumGood     = 0.;
   fNevents     = 0.;
   fSumAll      = 0.;
-  fDBeProdProb = 0.;
-  fDCuProdProb = 0.;
-  fDDecayProb  = 0.;
-  fDBeProdProb = 0.00069;
-  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb  = 1.;
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
@@ -355,7 +318,7 @@ void HeavyNeutrino::Process(Int_t) {
 	  LeptonUSquared = fUeSquared;
 	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi")|| p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
 
 	if (p->GetProdPos().Z() < fTAXDistance)
@@ -366,8 +329,6 @@ void HeavyNeutrino::Process(Int_t) {
 	// Weight to be associated to each HNL
 
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-
-	//if (Weight >= 0. && Weight <= 10)
 	fSumAll += Weight;
 
 	// Some more plots of KinePart quantities
@@ -935,7 +896,7 @@ void HeavyNeutrino::Process(Int_t) {
 	  LeptonUSquared = fUeSquared;
 	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
 
         if (p->GetProdPos().Z() < fTAXDistance)
@@ -944,8 +905,6 @@ void HeavyNeutrino::Process(Int_t) {
           DProdProb = fDCuProdProb;
 	
         Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-	
-	//if (Weight >= 0. && Weight <= 10)
 	fSumGood += Weight;
       }
     }

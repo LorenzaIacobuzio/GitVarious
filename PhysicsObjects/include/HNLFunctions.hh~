@@ -76,6 +76,8 @@ extern Double_t fK;
 extern Double_t fEta;
 extern Double_t fEtaprime;
 extern Double_t fsigmacc;
+extern Double_t fDtoTauNuBR;
+extern Double_t fDStoTauNuBR;
 
 // CKM                                                                                                 
 

@@ -4,11 +4,11 @@ void D0() {
   TIter next(gDirectory->GetListOfKeys());
   TKey *key;
   Double_t Pl, Pt, val, sum, N;
-  ofstream outfile("PtVsPlD0.txt");
+  ofstream outfile("PtVsPlD0Bar.txt");
   
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (!strcmp(key->GetName(), "D0PlPt")) {
+    if (!strcmp(key->GetName(), "D0BarPlPt")) {
       TH2 *h2 = (TH2*)key->ReadObj();
       N = h2->GetEntries();
       for (Int_t i = 1; i < h2->GetNbinsX(); i++) {

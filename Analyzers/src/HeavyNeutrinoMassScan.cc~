@@ -22,6 +22,7 @@
 #include "Math/GaussLegendreIntegrator.h"
 #include "TF1.h"
 #include "TF2.h"
+#include "HNLFunctions.hh"
 
 using namespace std;
 using namespace NA62Analysis;

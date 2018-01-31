@@ -41,36 +41,8 @@ public:
 
 protected:
 
-  // NA62 parameters                                                                                    
-
-  Double_t fpMom;
-  Double_t fBeA;
-  Double_t fBeDensity;
-  Double_t fpBeLambda;
-  Double_t ftargetLength;
-  Double_t fCuA;
-  Double_t fCuDensity;
-  Double_t fpCuLambda;
-  Double_t fTAXLength;
-  Double_t fTAXDistance;
-  Double_t fbeamLength;
-  Double_t fzCHOD;
-  Double_t fzMUV3;
-  Double_t fLFV;
-  Double_t fLInitialFV;
-  Double_t frMinStraw;
-  Double_t frMaxStraw;
-  Double_t fzCHODPlane;
-  Double_t frMinCHOD;
-  Double_t frMaxCHOD;
-  Double_t fzStraw[4];
-  Double_t fxStrawChamberCentre[4];
-
   // Other parameters                                                                                   
 
-  Double_t fDBeProdProb;
-  Double_t fDCuProdProb;
-  Double_t fDDecayProb;
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
@@ -78,10 +50,6 @@ protected:
 
   // Scan variables
 
-  Int_t fIndex;
-  Int_t fCounter;
-  Double_t fTemp;
-  Double_t fMN;
   static constexpr Double_t fInitialMass = 100.;
   static constexpr Double_t fFinalMass = 2000.;
   static constexpr Double_t fMassStep = 100.;

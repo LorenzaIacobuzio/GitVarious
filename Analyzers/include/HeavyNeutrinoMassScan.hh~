@@ -41,17 +41,6 @@ public:
 
 protected:
 
-  // Histos
-
-  TH2D *fhReach;
-  TH2D *fhDecay;
-  TH2D *fhWeight;
-
-  TGraph *fgAcc;
-  TGraph *fgYield;
-  TGraph *fgGammaTot;
-  TGraph *fgTau;
-
   // NA62 parameters                                                                                    
 
   Double_t fpMom;
@@ -106,6 +95,17 @@ protected:
   Double_t fProb[fN];
   Double_t fYield[fN];
   Double_t fMasses[fN];
+
+  // Histos
+
+  TH2D *fhReach;
+  TH2D *fhDecay;
+  TH2D *fhWeight;
+
+  TGraph *fgAcc;
+  TGraph *fgYield;
+  TGraph *fgGammaTot;
+  TGraph *fgTau;
 };
 
 #endif
