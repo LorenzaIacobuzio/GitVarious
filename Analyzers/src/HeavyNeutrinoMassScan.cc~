@@ -47,42 +47,8 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // NA62 parameters                                                                    
-
-  fpMom                   = 400000.; // MeV                                                
-  fBeA                    = 4;
-  fBeDensity              = 1.85; // g/cm3                                                       
-  fpBeLambda              = 421.; // mm                                                            
-  ftargetLength           = 400.; // mm                                                              
-  fCuA                    = 29;
-  fCuDensity              = 8.96; // g/cm3                                                              
-  fpCuLambda              = 153.; // mm                                                   
-  fTAXLength              = 1615.; // mm                                                               
-  fTAXDistance            = 24685.;
-  fbeamLength             = 102500.0; // mm           
-  fzCHOD                  = 239009.0;
-  fzMUV3                  = 246800.0;
-  fLFV                    = 77500.;
-  fLInitialFV             = 102500.;
-  fzStraw[0]              = 183508.0;
-  fzStraw[1]              = 194066.0;
-  fzStraw[2]              = 204459.0;
-  fzStraw[3]              = 218885.0;
-  fxStrawChamberCentre[0] = 101.2;
-  fxStrawChamberCentre[1] = 114.4;
-  fxStrawChamberCentre[2] = 92.4;
-  fxStrawChamberCentre[3] = 52.8;
-  frMinStraw              = 60.0; 
-  frMaxStraw              = 1010.0;
-  fzCHODPlane             = 239009.0;
-  frMinCHOD               = 120.0;
-  frMaxCHOD               = 1110.0;
-
   // Other parameters                                                                                   
 
-  fDBeProdProb = 0.00069;
-  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb  = 1.;
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
@@ -90,22 +56,6 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
-
-  // Scan variables
-
-  fMN = 0.;
-
-  for (Int_t i = 0; i < fN; i++) {
-    fSumGood[i]   = 0.;
-    fSumAll[i]    = 0.;
-    fNevents[i]   = 0;
-    fMasses[i]    = 0.;
-    fAcc[i]       = 0.;
-    fGammaTot[i]  = 0.;
-    fTau[i]       = 0.;
-    fProb[i]      = 0.;
-    fYield[i]     = 0.;
-  }
 
   // Histos
 
@@ -120,9 +70,9 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrinoMassScan::InitHist() {
 
-  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    fN, fInitialMass, fFinalMass, 1000, -0.1, 1.1 ));
-  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", fN, fInitialMass, fFinalMass, 1000, -0.1, 1.1 ));
-  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           fN, fInitialMass, fFinalMass, 1000, 0., 1.E-8 ));
+  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    100, 0.2, 2., 1000, -0.1, 1.1));
+  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", 100, 0.2, 2., 1000, -0.1, 1.1));
+  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           100, 0.2, 2., 1000,  1.E-26, 1.E-22));
 
   fgGammaTot = new TGraph();
   fgGammaTot->SetNameTitle("GammaTot", "N total decay width vs N mass");
@@ -147,6 +97,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
   TRecoIRCEvent*          IRCEvent  = (TRecoIRCEvent*)          GetEvent("IRC");
   TRecoSACEvent*          SACEvent  = (TRecoSACEvent*)          GetEvent("SAC");
 
+  Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
   Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
@@ -162,10 +113,6 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
   TVector3 point1;
   TVector3 point2;
   TVector3 momentum1;
-
-  fIndex = 0;
-  fTemp = 0.;
-  fCounter = 0;
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -189,51 +136,41 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	fMN = ComputeHNLMass(p);
-
-	if (fCounter == 0) {
-	  fTemp = fMN;
-	  fCounter++;
-	  fMasses[fIndex] = fMN;
-	}
-
-	if (fTemp != fMN)
-	  fMasses[fIndex] = fMN;
-	else
-	  fIndex = 0;
-
-	fNevents[fIndex]++;
-	gammaTot = GammaTot(fMN);
-	HNLTau = tauN(gammaTot);
-	fGammaTot[fIndex] = gammaTot;
-	fTau[fIndex] = HNLTau;
+	MN = ComputeHNLMass(p);
+	fMasses[round(MN)] = round(MN);
+	if (fNevents.count(round(MN)) == 0)
+	  fNevents[round(MN)] = 0;
+	fNevents[round(MN)]++;
+	gammaTot = GammaTot(MN);
+	HNLTau = tauN(MN);
+	fGammaTot[round(MN)] = gammaTot;
+	fTau[round(MN)] = HNLTau;
 	LReach = ComputeL(point1, point2, momentum1);
-	ProdFactor = ComputeProd(p, fMN);
-	DecayFactor = ComputeDecay(fMN);
+	ProdFactor = ComputeProd(p, MN);
+	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-	  
+	
 	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUeSquared;
 	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
-	  
+	
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
-	  
+	
 	// Weight to be associated to each HNL
-	  
+	
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-	fSumAll[fIndex] += Weight;
-	fIndex++;
+	fSumAll[round(MN)] += Weight;
 
-	FillHisto("hReach",  fMN, NReachProb);
-	FillHisto("hDecay",  fMN, NDecayProb);
-	FillHisto("hWeight", fMN, Weight);
+	FillHisto("hReach",  MN/1000., NReachProb);
+	FillHisto("hDecay",  MN/1000., NDecayProb);
+	FillHisto("hWeight", MN/1000., Weight);
       }
     }
   }
@@ -443,12 +380,12 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 						point2.SetXYZ(0., 0., fLInitialFV);
 						momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-						fMN = ComputeHNLMass(p);
-						gammaTot = GammaTot(fMN);
-						HNLTau = tauN(gammaTot);
+						MN = ComputeHNLMass(p);
+						gammaTot = GammaTot(MN);
+						HNLTau = tauN(MN);
 						LReach = ComputeL(point1, point2, momentum1);
-						ProdFactor = ComputeProd(p, fMN);
-						DecayFactor = ComputeDecay(fMN);
+						ProdFactor = ComputeProd(p, MN);
+						DecayFactor = ComputeDecay(MN);
 						NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 						NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 						  
@@ -456,7 +393,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						  LeptonUSquared = fUeSquared;
 						else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 						  LeptonUSquared = fUmuSquared;
-						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 						  LeptonUSquared = fUtauSquared;
 						  
 						if (p->GetProdPos().Z() < fTAXDistance)
@@ -465,7 +402,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						  DProdProb = fDCuProdProb;
 						  
 						Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-						fSumGood[fIndex-1] += Weight;
+						fSumGood[round(MN)] += Weight;
 					      }
 					    }
 					  }
@@ -509,15 +446,19 @@ void HeavyNeutrinoMassScan::EndOfJobUser() {
 
   // Acceptance computation
 
-  for (Int_t i = 0; i < fN; i++) {
-    fAcc[i] = fSumGood[i]/fSumAll[i];
-    fProb[i] = fSumAll[i]/fNevents[i];
-    fYield[i] = fAcc[i]*fProb[i];
+  Double_t MN = 0.;
+  Int_t counter = 0;
 
-    fgGammaTot->SetPoint(i, fMasses[i]/1000., fGammaTot[i]);
-    fgTau     ->SetPoint(i, fMasses[i]/1000., fTau[i]);
-    fgAcc     ->SetPoint(i, fMasses[i]/1000., fAcc[i]);
-    fgYield   ->SetPoint(i, fMasses[i]/1000., fYield[i]);
+  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
+    MN = it->first;
+    fAcc[MN]   = fSumGood[MN]/fSumAll[MN];
+    fProb[MN]  = fSumAll[MN]/fNevents[MN];
+    fYield[MN] = fAcc[MN]*fProb[MN];
+    fgGammaTot->SetPoint(counter, MN/1000., fGammaTot[MN]);
+    fgTau     ->SetPoint(counter, MN/1000., fTau     [MN]);
+    fgAcc     ->SetPoint(counter, MN/1000., fAcc     [MN]);
+    fgYield   ->SetPoint(counter, MN/1000., fYield   [MN]);
+    counter++;
   }
 
   // Set titles, etc.
@@ -558,14 +499,6 @@ HeavyNeutrinoMassScan::~HeavyNeutrinoMassScan() {
   delete fDistcomp;
   delete fLAVMatching;
   delete fSAVMatching;
-
-  delete fhReach;
-  delete fhDecay;
-  delete fhWeight;
-  delete fgAcc;
-  delete fgYield;
-  delete fgGammaTot;
-  delete fgTau;
 
   fhReach    = nullptr;
   fhDecay    = nullptr;

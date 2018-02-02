@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <string>
+#include <iterator>
 #include <vector>
 #include <TCanvas.h>
 #include "Analyzer.hh"
@@ -41,8 +44,6 @@ public:
 
 protected:
 
-  // Other parameters                                                                                   
-
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   LAVMatching *fLAVMatching;
@@ -50,19 +51,15 @@ protected:
 
   // Scan variables
 
-  static constexpr Double_t fInitialMass = 100.;
-  static constexpr Double_t fFinalMass = 2000.;
-  static constexpr Double_t fMassStep = 100.;
-  static constexpr Int_t fN = round((std::abs(fFinalMass-fInitialMass))/fMassStep);
-  Int_t fNevents[fN];
-  Double_t fSumAll[fN];
-  Double_t fSumGood[fN];
-  Double_t fAcc[fN];
-  Double_t fGammaTot[fN];
-  Double_t fTau[fN];
-  Double_t fProb[fN];
-  Double_t fYield[fN];
-  Double_t fMasses[fN];
+  std::map<Double_t, Int_t>    fNevents;
+  std::map<Double_t, Double_t> fSumAll;
+  std::map<Double_t, Double_t> fSumGood;
+  std::map<Double_t, Double_t> fAcc;
+  std::map<Double_t, Double_t> fGammaTot;
+  std::map<Double_t, Double_t> fTau;
+  std::map<Double_t, Double_t> fProb;
+  std::map<Double_t, Double_t> fYield;
+  std::map<Double_t, Double_t> fMasses;
 
   // Histos
 

@@ -47,26 +47,10 @@ HeavyNeutrinoCouplingScan::HeavyNeutrinoCouplingScan(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // Other parameters                                                                                   
-
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
-
-  // Scan variables
-
-  for (Int_t i = 0; i < fN; i++) {
-    fSumGood[i]   = 0.;
-    fSumAll[i]    = 0.;
-    fNevents[i]   = 0;
-    fCouplings[i] = 0.;
-    fAcc[i]       = 0.;
-    fGammaTot[i]  = 0.;
-    fTau[i]       = 0.;
-    fProb[i]      = 0.;
-    fYield[i]     = 0.;
-  }
 
   // Histos
 
@@ -133,8 +117,7 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
     fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
     fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
     fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
-    fIndex = round((std::abs(fCouplingStart-fCoupling))/fCouplingStep);
-    fCouplings[fIndex] = fCoupling;
+    fCouplings[fCoupling] = fCoupling;
     
     if (GetWithMC()) {
       Event *evt = GetMCEvent();
@@ -155,15 +138,17 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
       for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
 	KinePart *p = evt->GetKinePart(i);      
 	if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	  fNevents[fIndex]++;
 	  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 	  point2.SetXYZ(0., 0., fLInitialFV);
 	  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
+	  if (fNevents.count(fCoupling) == 0)
+	    fNevents[fCoupling] = 0;
+	  fNevents[fCoupling]++;
 	  MN = ComputeHNLMass(p);
 	  gammaTot = GammaTot(MN);
 	  HNLTau = tauN(MN);
-	  fGammaTot[fIndex] = gammaTot;
-	  fTau[fIndex] = HNLTau;
+	  fGammaTot[fCoupling] = gammaTot;
+	  fTau[fCoupling] = HNLTau;
 	  LReach = ComputeL(point1, point2, momentum1);
 	  ProdFactor = ComputeProd(p, MN);
 	  DecayFactor = ComputeDecay(MN);
@@ -185,7 +170,7 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
 	  // Weight to be associated to each HNL
 	  
 	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-	  fSumAll[fIndex] += Weight;
+	  fSumAll[fCoupling] += Weight;
 
 	  FillHisto("hReach",  fCoupling, NReachProb);
 	  FillHisto("hDecay",  fCoupling, NDecayProb);
@@ -421,7 +406,7 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
 						    DProdProb = fDCuProdProb;
 						  
 						  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-						  fSumGood[fIndex] += Weight;
+						  fSumGood[fCoupling] += Weight;
 						}
 					      }
 					    }
@@ -466,15 +451,19 @@ void HeavyNeutrinoCouplingScan::EndOfJobUser() {
 
   // Acceptance computation
 
-  for (Int_t i = 0; i < fN; i++) {
-    fAcc[i] = fSumGood[i]/fSumAll[i];
-    fProb[i] = fSumAll[i]/fNevents[i];
-    fYield[i] = fAcc[i]*fProb[i];
+  Double_t Coupling = 0.;
+  Int_t counter = 0;
 
-    fgGammaTot->SetPoint(i, fCouplings[i], fGammaTot[i]);
-    fgTau     ->SetPoint(i, fCouplings[i], fTau[i]);
-    fgAcc     ->SetPoint(i, fCouplings[i], fAcc[i]);
-    fgYield   ->SetPoint(i, fCouplings[i], fYield[i]);
+  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
+    Coupling = it->first;
+    fAcc[Coupling] = fSumGood[Coupling]/fSumAll[Coupling];
+    fProb[Coupling] = fSumAll[Coupling]/fNevents[Coupling];
+    fYield[Coupling] = fAcc[Coupling]*fProb[Coupling];
+    fgGammaTot->SetPoint(counter, Coupling, fGammaTot[Coupling]);
+    fgTau     ->SetPoint(counter, Coupling, fTau     [Coupling]);
+    fgAcc     ->SetPoint(counter, Coupling, fAcc     [Coupling]);
+    fgYield   ->SetPoint(counter, Coupling, fYield   [Coupling]);
+    counter++;
   }
 
   // Set titles, etc.

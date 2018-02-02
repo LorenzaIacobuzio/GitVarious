@@ -46,8 +46,6 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // Other parameters                                                                                   
-
   fSumGood     = 0.;
   fNevents     = 0.;
   fSumAll      = 0.;

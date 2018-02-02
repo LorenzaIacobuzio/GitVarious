@@ -52,24 +52,11 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
+
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
-
-  // Scan variables
-
-  for (Int_t i = 0; i < fN; i++) {
-    fSumGood[i]   = 0.;
-    fSumAll[i]    = 0.;
-    fNevents[i]   = 0;
-    fMasses[i]    = 0.;
-    fAcc[i]       = 0.;
-    fGammaTot[i]  = 0.;
-    fTau[i]       = 0.;
-    fProb[i]      = 0.;
-    fYield[i]     = 0.;
-  }
 
   // Histos
 
@@ -84,9 +71,9 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrinoMassScan::InitHist() {
 
-  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    fN, fInitialMass, fFinalMass, 1000, -0.1, 1.1 ));
-  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", fN, fInitialMass, fFinalMass, 1000, -0.1, 1.1 ));
-  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           fN, fInitialMass, fFinalMass, 1000, 0., 1.E-8 ));
+  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    100, 0.2, 2., 1000, -0.1, 1.1));
+  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", 100, 0.2, 2., 1000, -0.1, 1.1));
+  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           100, 0.2, 2., 1000,  1.E-26, 1.E-22));
 
   fgGammaTot = new TGraph();
   fgGammaTot->SetNameTitle("GammaTot", "N total decay width vs N mass");
@@ -128,11 +115,6 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
   TVector3 point2;
   TVector3 momentum1;
 
-  Int_t fIndex    = 0;
-  Int_t fCounter  = 0;
-  Double_t fTemp  = 0.;
-  Double_t fDelta = 0.;
-
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
@@ -146,23 +128,9 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 	}
       }
     }
-
-    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-      KinePart *p = evt->GetKinePart(i);
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	MN = ComputeHNLMass(p);
-    cout<<fDelta<<" "<<fCounter<<" "<<fTemp<<" "<<MN<<endl;
-
-	if (fTemp != MN) {
-	  fDelta = MN - fTemp;
-	  fCounter++;
-	  fTemp = MN;
-	}
-      }
-    }
-
+    
     // Computation of coupling-related quantities of all HNLs (good and bad) + scan on the mass
-
+    
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);      
       if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
@@ -170,32 +138,14 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
-	/*
-	if (fTemp != MN) {
-	  if (fCounter == 0) {
-	    fIndex = 0;
-	    fTemp = MN;
-	    fMasses[fIndex] = MN;
-	  }
-	  else if (fCounter == 1) {
-	    fDelta = MN - fTemp;
-	    fIndex = 1;
-	    fMasses[fIndex] = MN;
-	  }
-	  else {
-	    fIndex = (MN - fTemp)/fDelta;
-	    fMasses[fIndex] = MN;
-	  }
-	  fCounter++;
-	}
-	
-	cout<<"loop: "<<fIndex<<" "<<fTemp<<" "<<fMasses[fIndex]<<" "<<fCounter<<" "<<fDelta<<" "<<endl;
-	*/
-	fNevents[fIndex]++;
+	fMasses[round(MN)] = round(MN);
+	if (fNevents.count(round(MN)) == 0)
+	  fNevents[round(MN)] = 0;
+	fNevents[round(MN)]++;
 	gammaTot = GammaTot(MN);
 	HNLTau = tauN(MN);
-	fGammaTot[fIndex] = gammaTot;
-	fTau[fIndex] = HNLTau;
+	fGammaTot[round(MN)] = gammaTot;
+	fTau[round(MN)] = HNLTau;
 	LReach = ComputeL(point1, point2, momentum1);
 	ProdFactor = ComputeProd(p, MN);
 	DecayFactor = ComputeDecay(MN);
@@ -217,11 +167,11 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 	// Weight to be associated to each HNL
 	
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-	fSumAll[fIndex] += Weight;
-	
-	FillHisto("hReach",  MN, NReachProb);
-	FillHisto("hDecay",  MN, NDecayProb);
-	FillHisto("hWeight", MN, Weight);
+	fSumAll[round(MN)] += Weight;
+
+	FillHisto("hReach",  MN/1000., NReachProb);
+	FillHisto("hDecay",  MN/1000., NDecayProb);
+	FillHisto("hWeight", MN/1000., Weight);
       }
     }
   }
@@ -453,7 +403,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 						  DProdProb = fDCuProdProb;
 						  
 						Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-						fSumGood[fIndex-1] += Weight;
+						fSumGood[round(MN)] += Weight;
 					      }
 					    }
 					  }
@@ -497,18 +447,19 @@ void HeavyNeutrinoMassScan::EndOfJobUser() {
 
   // Acceptance computation
 
-  for (Int_t i = 0; i < fN; i++) {
-    cout<<"arrays: "<<fMasses[i]<<" "<<fGammaTot[i]<<" "<<fTau[i]<<" "<<endl;
-  }
-  for (Int_t i = 0; i < fN; i++) {
-    fAcc[i] = fSumGood[i]/fSumAll[i];
-    fProb[i] = fSumAll[i]/fNevents[i];
-    fYield[i] = fAcc[i]*fProb[i];
+  Double_t MN = 0.;
+  Int_t counter = 0;
 
-    fgGammaTot->SetPoint(i, fMasses[i]/1000., fGammaTot[i]);
-    fgTau     ->SetPoint(i, fMasses[i]/1000., fTau[i]);
-    fgAcc     ->SetPoint(i, fMasses[i]/1000., fAcc[i]);
-    fgYield   ->SetPoint(i, fMasses[i]/1000., fYield[i]);
+  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
+    MN = it->first;
+    fAcc[MN]   = fSumGood[MN]/fSumAll[MN];
+    fProb[MN]  = fSumAll[MN]/fNevents[MN];
+    fYield[MN] = fAcc[MN]*fProb[MN];
+    fgGammaTot->SetPoint(counter, MN/1000., fGammaTot[MN]);
+    fgTau     ->SetPoint(counter, MN/1000., fTau     [MN]);
+    fgAcc     ->SetPoint(counter, MN/1000., fAcc     [MN]);
+    fgYield   ->SetPoint(counter, MN/1000., fYield   [MN]);
+    counter++;
   }
 
   // Set titles, etc.

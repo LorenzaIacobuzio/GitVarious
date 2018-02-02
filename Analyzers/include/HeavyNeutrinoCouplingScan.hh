@@ -48,20 +48,19 @@ protected:
 
   // Scan variables
 
-  Int_t fIndex;
   static constexpr Double_t fCouplingStart = -10.;
   static constexpr Double_t fCouplingStop = 0.;
   static constexpr Double_t fCouplingStep = 0.1;
   static constexpr Int_t fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
-  Int_t fNevents[fN];
-  Double_t fSumAll[fN];
-  Double_t fSumGood[fN];
-  Double_t fAcc[fN];
-  Double_t fGammaTot[fN];
-  Double_t fTau[fN];
-  Double_t fProb[fN];
-  Double_t fYield[fN];
-  Double_t fCouplings[fN];
+  std::map<Double_t, Int_t>    fNevents;
+  std::map<Double_t, Double_t> fSumAll;
+  std::map<Double_t, Double_t> fSumGood;
+  std::map<Double_t, Double_t> fAcc;
+  std::map<Double_t, Double_t> fGammaTot;
+  std::map<Double_t, Double_t> fTau;
+  std::map<Double_t, Double_t> fProb;
+  std::map<Double_t, Double_t> fYield;
+  std::map<Double_t, Double_t> fCouplings;
 
   // Histos
 

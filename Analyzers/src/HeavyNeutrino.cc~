@@ -330,7 +330,7 @@ void HeavyNeutrino::Process(Int_t) {
 
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	fSumAll += Weight;
-	cout<<"all: "<<Weight<<" "<<ProdFactor<<endl;
+
 	// Some more plots of KinePart quantities
 
 	FillHisto("hZDProd", p->GetPosAtCheckPoint(0).z());
@@ -906,7 +906,6 @@ void HeavyNeutrino::Process(Int_t) {
 	
         Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 	fSumGood += Weight;
-	cout<<"good: "<<Weight<<endl;
       }
     }
   }

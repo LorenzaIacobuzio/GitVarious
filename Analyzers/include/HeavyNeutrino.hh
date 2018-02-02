@@ -40,8 +40,6 @@ public:
 
 protected:
 
-  // Other parameters                                                                                   
-
   Double_t fSumAll;
   Double_t fSumGood;
   Int_t fNevents;
