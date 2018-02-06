@@ -67,7 +67,7 @@ void HeavyNeutrinoCouplingScan::InitHist() {
 
   BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs coupling",    fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("hWeight",   new TH2D("Weight", "N weight vs coupling",                           fN, fCouplingStart, fCouplingStop, 1000, 1.E-26, 1.E-21));
+  BookHisto("hWeight",   new TH2D("Weight", "N weight vs coupling",                           fN, fCouplingStart, fCouplingStop, 1000, 1.E-12, 1.E-9));
 
   fgGammaTot = new TGraph();
   fgGammaTot->SetNameTitle("GammaTot", "N total decay width vs coupling");

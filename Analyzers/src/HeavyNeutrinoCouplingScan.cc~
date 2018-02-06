@@ -94,6 +94,7 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
 
   Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
+  Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
   Double_t NReachProb     = 0.;
   Double_t LReach         = 0.;
@@ -143,6 +144,7 @@ void HeavyNeutrinoCouplingScan::Process(Int_t) {
 	    fNevents[fCoupling] = 0;
 	  fNevents[fCoupling]++;
 	  MN = ComputeHNLMass(p);
+	  gammaTot = GammaTot(MN);
 	  HNLTau = tauN(MN);
 	  fGammaTot[fCoupling] = gammaTot;
 	  fTau[fCoupling] = HNLTau;
