@@ -33,7 +33,6 @@ extern Double_t GammaLeptonNu3(Double_t, Double_t, Double_t, Bool_t);
 extern Double_t GammaTot(Double_t);
 extern Double_t tauN(Double_t);
 extern Double_t lambda(Double_t, Double_t, Double_t);
-extern Double_t ComputeProd(KinePart*, Double_t);
 extern Double_t ComputeDecay(Double_t);
 
 // Masses                                                                                              

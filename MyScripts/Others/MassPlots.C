@@ -1,7 +1,7 @@
-void ScanPlots() {
+void MassPlots() {
 
-  TFile *f1 = TFile::Open("/home/li/Desktop/bla.root");
-  TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelectionScanCoupling");  
+  TFile *f1 = TFile::Open("/home/li/Desktop/HNLMass.root");
+  TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoMassScan");  
   TIter next(dir1->GetListOfKeys());
   TKey *key;
   TCanvas *c1 = new TCanvas();
@@ -21,7 +21,7 @@ void ScanPlots() {
       g->GetYaxis()->SetLabelSize(labelSize);
       gStyle->SetOptStat(0);
       g->Draw("AC");
-      gPad->SetLogy();
+      gPad->Update();
       gPad->SetLogz();
       gPad->SetGridx();
       gPad->SetGridy();
@@ -36,7 +36,6 @@ void ScanPlots() {
       h2->GetYaxis()->SetLabelSize(labelSize);
       h2->GetZaxis()->SetLabelSize(labelSize);
       gStyle->SetOptStat(0);
-      gPad->SetLogy();
       gPad->SetLogz();
       gPad->SetGridx();
       gPad->SetGridy();
@@ -44,7 +43,7 @@ void ScanPlots() {
       h2->Draw("colz");    
     }
    
-    TString path = "~/Desktop/HeavyNeutrino/ScanPlots/";
+    TString path = "~/Desktop/HeavyNeutrino/ScanPlots/Mass/";
     c1->SaveAs(path + key->GetName() + ".png");
   }
 }

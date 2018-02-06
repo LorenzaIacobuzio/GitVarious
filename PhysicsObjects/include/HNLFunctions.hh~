@@ -111,8 +111,36 @@ extern Double_t ffD;
 extern Double_t ffD0;
 extern Double_t ffDS;
 
+// NA62 parameters                                                                                     
+
+extern Double_t fpMom;
+extern Double_t fBeA;
+extern Double_t fBeDensity;
+extern Double_t fpBeLambda;
+extern Double_t ftargetLength;
+extern Double_t fCuA;
+extern Double_t fCuDensity;
+extern Double_t fpCuLambda;
+extern Double_t fTAXLength;
+extern Double_t fTAXDistance;
+extern Double_t fbeamLength;
+extern Double_t fzCHOD;
+extern Double_t fzMUV3;
+extern Double_t fLFV;
+extern Double_t fLInitialFV;
+extern Double_t frMinStraw;
+extern Double_t frMaxStraw;
+extern Double_t fzCHODPlane;
+extern Double_t frMinCHOD;
+extern Double_t frMaxCHOD;
+extern Double_t fzStraw[4];
+extern Double_t fxStrawChamberCentre[4];
+
 // Other parameters
 
+extern Double_t fDBeProdProb;
+extern Double_t fDCuProdProb;
+extern Double_t fDDecayProb;
 extern Double_t fUSquared;
 extern Double_t fUeSquared;
 extern Double_t fUmuSquared;

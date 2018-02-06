@@ -778,62 +778,6 @@ Double_t lambda(Double_t a, Double_t b, Double_t c) {
   return a*a + b*b + c*c - 2.*a*b - 2.*a*c - 2.*b*c;
 }
 
-// Factor related to HNL production                                                    
-
-Double_t ComputeProd(KinePart* p, Double_t MN) {
-
-  Double_t br = 0.;
-  Double_t Dorigin = -1;
-
-  if (p->GetParticleName().Contains("DS"))
-    Dorigin = 1;
-  else if (p->GetParticleName().Contains("D0"))
-    Dorigin = -1;
-  else
-    Dorigin = 0;
-
-  Double_t BR2De     = TwoBodyBR(fMD,   MN, fMe,   Dorigin, true);
-  Double_t BR2Dmu    = TwoBodyBR(fMD,   MN, fMmu,  Dorigin, true);
-  Double_t BR2DSe    = TwoBodyBR(fMDS,  MN, fMe,   Dorigin, true);
-  Double_t BR2DSmu   = TwoBodyBR(fMDS,  MN, fMmu,  Dorigin, true);
-  Double_t BR2DStau  = TwoBodyBR(fMDS,  MN, fMtau, Dorigin, true);
-  Double_t BR2taupi  = TwoBodyBR(fMtau, MN, fMpi,  Dorigin, true);
-  Double_t BR2tauK   = TwoBodyBR(fMtau, MN, fMK,   Dorigin, true);
-  Double_t BR2taurho = TwoBodyBR(fMtau, MN, fMrho, Dorigin, true);
-
-  Double_t BR3DK0e        = ThreeBodyBR(fMD,   MN, fMK0,     fMe,  Dorigin, true);
-  Double_t BR3Dpi0e       = ThreeBodyBR(fMD,   MN, fMpi0,    fMe,  Dorigin, true);
-  Double_t BR3D0Ke        = ThreeBodyBR(fMD0,  MN, fMK,      fMe,  Dorigin, true);
-  Double_t BR3D0pie       = ThreeBodyBR(fMD0,  MN, fMpi,     fMe,  Dorigin, true);
-  Double_t BR3DK0mu       = ThreeBodyBR(fMD,   MN, fMK0,     fMmu, Dorigin, true);
-  Double_t BR3Dpi0mu      = ThreeBodyBR(fMD,   MN, fMpi0,    fMmu, Dorigin, true);
-  Double_t BR3D0Kmu       = ThreeBodyBR(fMD0,  MN, fMK,      fMmu, Dorigin, true);
-  Double_t BR3D0pimu      = ThreeBodyBR(fMD0,  MN, fMpi,     fMmu, Dorigin, true);
-  Double_t BR3DK0Stare    = ThreeBodyBR(fMD,   MN, fMK0Star, fMe,  Dorigin, true);
-  Double_t BR3D0KStare    = ThreeBodyBR(fMD0,  MN, fMKStar,  fMe,  Dorigin, true);
-  Double_t BR3DK0Starmu   = ThreeBodyBR(fMD,   MN, fMK0Star, fMmu, Dorigin, true);
-  Double_t BR3D0KStarmu   = ThreeBodyBR(fMD0,  MN, fMKStar,  fMmu, Dorigin, true);
-  Double_t BR3tauenu_tau  = ThreeBodyBR(fMtau, MN, 0.1,      fMe,  Dorigin, true);
-  Double_t BR3tauenu_e    = ThreeBodyBR(fMtau, MN, 0.01,     fMe,  Dorigin, true);
-  Double_t BR3taumunu_tau = ThreeBodyBR(fMtau, MN, 0.1,      fMmu, Dorigin, true);
-  Double_t BR3taumunu_mu  = ThreeBodyBR(fMtau, MN, 0.01,     fMmu, Dorigin, true);
-
-  Double_t BR2Dtot = BR2De + BR2Dmu + fDtoTauNuBR*BR2taupi + fDtoTauNuBR*BR2tauK + fDtoTauNuBR*BR2taurho;
-  Double_t BR2DStot = BR2DSe + BR2DSmu + BR2DStau + fDStoTauNuBR*BR2taupi + fDStoTauNuBR*BR2tauK + fDStoTauNuBR*BR2taurho;
-  Double_t BR3Dtot = BR3DK0e + BR3DK0mu + BR3Dpi0e + BR3Dpi0mu + BR3DK0Stare + BR3DK0Starmu + fDtoTauNuBR*BR3tauenu_tau + fDtoTauNuBR*BR3taumunu_tau + fDtoTauNuBR*BR3tauenu_e + fDtoTauNuBR*BR3taumunu_mu;
-  Double_t BR3DStot = fDStoTauNuBR*BR3tauenu_tau + fDStoTauNuBR*BR3taumunu_tau + fDStoTauNuBR*BR3tauenu_e + fDStoTauNuBR*BR3taumunu_mu;
-  Double_t BR3D0tot = BR3D0Ke + BR3D0Kmu + BR3D0pie + BR3D0pimu + BR3D0KStare + BR3D0KStarmu;
-
-  if (p->GetParticleName().Contains("DS"))
-    br = BR2DStot + BR3DStot;
-  else if (p->GetParticleName().Contains("D0"))
-    br = BR3D0tot;
-  else
-    br = BR2Dtot + BR3Dtot;
-
-  return br;
-}
-
 // Factor related to HNL decay                                                 
 
 Double_t ComputeDecay(Double_t MN) {

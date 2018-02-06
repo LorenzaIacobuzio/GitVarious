@@ -71,12 +71,10 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 
   Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
-  Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
   Double_t NReachProb     = 0.;
   Double_t LReach         = 0.;
   Double_t LeptonUSquared = 0.;
-  Double_t ProdFactor     = 0.;
   Double_t DecayFactor    = 0.;
   Double_t Weight         = 0.;
   Double_t DProdProb      = 0.;
@@ -123,10 +121,8 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  if (fNevents[round(MN)].count(fCoupling) == 0)
             fNevents[round(MN)][fCoupling] = 0;
           fNevents[round(MN)][fCoupling]++;
-	  gammaTot = GammaTot(MN);
-	  HNLTau = tauN(gammaTot);
+	  HNLTau = tauN(MN);
 	  LReach = ComputeL(point1, point2, momentum1);
-	  ProdFactor = ComputeProd(p, MN);
 	  DecayFactor = ComputeDecay(MN);
 	  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	  NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
@@ -145,7 +141,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  
 	  // Weight to be associated to each HNL
 	  
-	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
 	  fSumAll[round(MN)][fCoupling] += Weight;
 	}
       }
@@ -357,10 +353,8 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						  point2.SetXYZ(0., 0., fLInitialFV);
 						  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 						  MN = ComputeHNLMass(p);
-						  gammaTot = GammaTot(MN);
-						  HNLTau = tauN(gammaTot);
+						  HNLTau = tauN(MN);
 						  LReach = ComputeL(point1, point2, momentum1);
-						  ProdFactor = ComputeProd(p, MN);
 						  DecayFactor = ComputeDecay(MN);
 						  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 						  NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
@@ -377,7 +371,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						  else if(p->GetProdPos().Z() >= fTAXDistance)
 						    DProdProb = fDCuProdProb;
 						  
-						  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+						  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
 						  fSumGood[round(MN)][fCoupling] += Weight;
 						}
 					      }

@@ -168,7 +168,7 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hHNLReachProb",  new TH1D("HNLReachProb", "HNL probability of reaching FV", 100., 0.99, 1.001));
   BookHisto("hHNLTheta",      new TH1D("HNLTheta",     "HNL theta",                      100., 0., 0.5));
   BookHisto("hHNLMom",        new TH1D("HNLMom",       "HNL momentum",                   100., -0.5, 200.));
-  BookHisto("hWeight",        new TH1D("Weight",       "Weight",                         1000, 0., 0.08E-12));
+  BookHisto("hWeight",        new TH1D("Weight",       "Weight",                         1000, 1.E-15, 1.E-12));
   BookHisto("hMomPi",         new TH1D("MomPi",        "Pion momentum",                  100, -0.5, 200.));
   BookHisto("hMomMu",         new TH1D("MomMu",        "Muon momentum",                  100, -0.5, 200.));
 
@@ -227,7 +227,7 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
 
   BookHisto("hAcc",   new TH1D("Acc",   "Acceptance", 50, 1.E-6, 5.E-5));
-  BookHisto("hYield", new TH1D("Yield", "Yield",      50, 1.E-20, 1.E-18));
+  BookHisto("hYield", new TH1D("Yield", "Yield",      50, 1.E-17, 1.E-15));
 }
 
 void HeavyNeutrino::Process(Int_t) {
@@ -246,12 +246,10 @@ void HeavyNeutrino::Process(Int_t) {
 
   Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
-  Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
   Double_t NReachProb     = 0.;
   Double_t LReach         = 0.;
   Double_t LeptonUSquared = 0.;
-  Double_t ProdFactor     = 0.;
   Double_t DecayFactor    = 0.;
   Double_t Weight         = 0.;
   Double_t DProdProb      = 0.;
@@ -305,10 +303,8 @@ void HeavyNeutrino::Process(Int_t) {
 	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
-	gammaTot = GammaTot(MN);
 	HNLTau = tauN(MN);
 	LReach = ComputeL(point1, point2, momentum1);
-	ProdFactor = ComputeProd(p, MN);
 	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
@@ -326,7 +322,7 @@ void HeavyNeutrino::Process(Int_t) {
 
 	// Weight to be associated to each HNL
 
-	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
 	fSumAll += Weight;
 
 	// Some more plots of KinePart quantities
@@ -882,10 +878,8 @@ void HeavyNeutrino::Process(Int_t) {
 	point2.SetXYZ(0., 0., fLInitialFV);
 	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	MN = ComputeHNLMass(p);
-	gammaTot = GammaTot(MN);
 	HNLTau = tauN(MN);
 	LReach = ComputeL(point1, point2, momentum1);
-	ProdFactor = ComputeProd(p, MN);
 	DecayFactor = ComputeDecay(MN);
 	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
@@ -902,7 +896,7 @@ void HeavyNeutrino::Process(Int_t) {
 	else if(p->GetProdPos().Z() >= fTAXDistance)
           DProdProb = fDCuProdProb;
 	
-        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
 	fSumGood += Weight;
       }
     }

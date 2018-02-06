@@ -46,66 +46,10 @@ HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  // NA62 parameters
-
-  fpMom                   = 400000.; // MeV                                                
-  fBeA                    = 4;
-  fBeDensity              = 1.85; // g/cm3                                                       
-  fpBeLambda              = 421.; // mm                                                            
-  ftargetLength           = 400.; // mm                                                              
-  fCuA                    = 29;
-  fCuDensity              = 8.96; // g/cm3                                                              
-  fpCuLambda              = 153.; // mm                                                   
-  fTAXLength              = 1615.; // mm                                                               
-  fTAXDistance            = 24685.;
-  fbeamLength             = 102500.0; // mm           
-  fzCHOD                  = 239009.0;
-  fzMUV3                  = 246800.0;
-  fLFV                    = 77500.;
-  fLInitialFV             = 102500.;
-  fzStraw[0]              = 183508.0;
-  fzStraw[1]              = 194066.0;
-  fzStraw[2]              = 204459.0;
-  fzStraw[3]              = 218885.0;
-  fxStrawChamberCentre[0] = 101.2;
-  fxStrawChamberCentre[1] = 114.4;
-  fxStrawChamberCentre[2] = 92.4;
-  fxStrawChamberCentre[3] = 52.8;
-  frMinStraw              = 60.0; 
-  frMaxStraw              = 1010.0;
-  fzCHODPlane             = 239009.0;
-  frMinCHOD               = 120.0;
-  frMaxCHOD               = 1110.0;
-
-  // Other parameters                                                                                   
-
-  fDBeProdProb = 0.00069;
-  fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe
-  fDDecayProb  = 1.;
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
-
-  // Scan variables
-
-  fMN = 0.;
-
-  for (Int_t i = 0; i < fNcoupling; i++) {
-    fCouplings[i] = 0.;
-    fMasses[i] = 0.;
-  }
-
-  for (Int_t i = 0; i < fNcoupling; i++) {
-    for (Int_t j = 0; j < fNmass; j++) {
-      fSumGood[i][j] = 0.;
-      fSumAll[i][j]  = 0.;
-      fNevents[i][j] = 0;
-      fAcc[i][j]     = 0.;
-      fYield[i][j]   = 0.;
-      fProb[i][j]    = 0.;
-    }
-  }
 
   // Histos
 
@@ -115,7 +59,7 @@ HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
 void HeavyNeutrinoTotalScan::InitHist() {
 
   fgExclusion = new TGraph();
-  fgExclusion->SetNameTitle("Exclusion", "Sensitivity as a function of N mass and coupling");
+  fgExclusion->SetNameTitle("Exclusion", "Sensitivity vs N mass and coupling");
   BookHisto(fgExclusion);
 }
 
@@ -125,6 +69,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
   TRecoIRCEvent*          IRCEvent  = (TRecoIRCEvent*)          GetEvent("IRC");
   TRecoSACEvent*          SACEvent  = (TRecoSACEvent*)          GetEvent("SAC");
 
+  Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
   Double_t gammaTot       = 0.;
   Double_t NDecayProb     = 0.;
@@ -143,18 +88,13 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 
   // Scan on the coupling                                                               
 
-  fMassIndex = 0;
-  fTemp = 0.;
-  fCounter = 0;
-
   for(Double_t fCoupling = fCouplingStart; fCoupling < fCouplingStop-fCouplingStep; fCoupling += fCouplingStep) {
     
     fUSquared = TMath::Power(10, fCoupling);
     fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
     fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
     fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
-    fCouplingIndex = round((std::abs(fCouplingStart-fCoupling))/fCouplingStep);
-    fCouplings[fCouplingIndex] = fCoupling;
+    fCouplings[fCoupling] = fCoupling;
     
     if (GetWithMC()) {
       Event *evt = GetMCEvent();
@@ -175,29 +115,19 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
       for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
 	KinePart *p = evt->GetKinePart(i);      
 	if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	  fNevents[fCouplingIndex][fMassIndex]++;
 	  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 	  point2.SetXYZ(0., 0., fLInitialFV);
 	  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	  fMN = ComputeHNLMass(p);
-
-	  if (fCounter == 0) {
-	    fTemp = fMN;
-	    fCounter++;
-	    fMasses[fMassIndex] = fMN;
-	  }
-
-	  if (fTemp != fMN)
-	    fMasses[fMassIndex] = fMN;
-	  else
-	    fMassIndex = 0;
-
-	  fNevents[fCouplingIndex][fMassIndex]++;
-	  gammaTot = GammaTot(fMN);
+	  MN = ComputeHNLMass(p);
+	  fMasses[round(MN)] = round(MN);
+	  if (fNevents[round(MN)].count(fCoupling) == 0)
+            fNevents[round(MN)][fCoupling] = 0;
+          fNevents[round(MN)][fCoupling]++;
+	  gammaTot = GammaTot(MN);
 	  HNLTau = tauN(gammaTot);
 	  LReach = ComputeL(point1, point2, momentum1);
-	  ProdFactor = ComputeProd(p, fMN);
-	  DecayFactor = ComputeDecay(fMN);
+	  ProdFactor = ComputeProd(p, MN);
+	  DecayFactor = ComputeDecay(MN);
 	  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 	  NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 	  
@@ -205,7 +135,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	    LeptonUSquared = fUeSquared;
 	  else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 	    LeptonUSquared = fUmuSquared;
-	  else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+	  else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 	    LeptonUSquared = fUtauSquared;
 	  
 	  if (p->GetProdPos().Z() < fTAXDistance)
@@ -216,8 +146,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  // Weight to be associated to each HNL
 	  
 	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-	  fSumAll[fCouplingIndex][fMassIndex] += Weight;
-	  fMassIndex++;
+	  fSumAll[round(MN)][fCoupling] += Weight;
 	}
       }
     }
@@ -427,12 +356,12 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
 						  point2.SetXYZ(0., 0., fLInitialFV);
 						  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-						  fMN = ComputeHNLMass(p);
-						  gammaTot = GammaTot(fMN);
+						  MN = ComputeHNLMass(p);
+						  gammaTot = GammaTot(MN);
 						  HNLTau = tauN(gammaTot);
 						  LReach = ComputeL(point1, point2, momentum1);
-						  ProdFactor = ComputeProd(p, fMN);
-						  DecayFactor = ComputeDecay(fMN);
+						  ProdFactor = ComputeProd(p, MN);
+						  DecayFactor = ComputeDecay(MN);
 						  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
 						  NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 						  
@@ -449,7 +378,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						    DProdProb = fDCuProdProb;
 						  
 						  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-						  fSumGood[fCouplingIndex][fMassIndex-1] += Weight;
+						  fSumGood[round(MN)][fCoupling] += Weight;
 						}
 					      }
 					    }
@@ -477,23 +406,37 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 }
 
 void HeavyNeutrinoTotalScan::EndOfJobUser() {
-  
+
   // Acceptance computation
 
-  for (Int_t i = 0; i < fNcoupling; i++) {
-    for (Int_t j = 0; j < fNmass; j++) {
-      fAcc[i][j] = fSumGood[i][j]/fSumAll[i][j];
-      fProb[i][j] = fSumAll[i][j]/fNevents[i][j];
-      fYield[i][j] = fAcc[i][j]*fProb[i][j];
+  Double_t Coupling = 0.;
+  Double_t MN = 0.;
+  Int_t couplingCounter = 0;
+  Int_t massCounter = 0;
+
+  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
+    Coupling = it->first;
+    for (auto it1 = fMasses.begin(); it1 != fMasses.end(); it1++) {
+      MN = it1->first;
+      fAcc[MN][Coupling] = fSumGood[MN][Coupling]/fSumAll[MN][Coupling];
+      fProb[MN][Coupling] = fSumAll[MN][Coupling]/fNevents[MN][Coupling];
+      fYield[MN][Coupling] = fAcc[MN][Coupling]*fProb[MN][Coupling];
+      couplingCounter++;
+      massCounter++;
     }
   }
-
+  
   // Exclusion plot
-
-  for (Int_t i = 0; i < fNcoupling; i++) {
-    for(Int_t j = 0; j < fNmass; j++) {
-      if (fYield[i][j]*1.E18 > 2.3)
-	fgExclusion->SetPoint(i*10+j, fMasses[j]/1000., fCouplings[i]);
+  
+  couplingCounter = 0;
+  massCounter = 0;
+  
+  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
+    Coupling = it->first;
+    for (auto it1 = fMasses.begin(); it1 != fMasses.end(); it1++) {
+      MN = it1->first;
+      if (fYield[MN][Coupling]*1.E18 > 2.3)
+	fgExclusion->SetPoint(10*couplingCounter + massCounter, MN/1000., Coupling);
     }
   }
 
@@ -517,8 +460,6 @@ HeavyNeutrinoTotalScan::~HeavyNeutrinoTotalScan() {
   delete fDistcomp;
   delete fLAVMatching;
   delete fSAVMatching;
-
-  delete fgExclusion;
 
   fgExclusion = nullptr;
 }

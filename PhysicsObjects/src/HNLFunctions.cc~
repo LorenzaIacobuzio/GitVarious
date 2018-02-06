@@ -80,8 +80,36 @@ Double_t ffD  = 0.246;
 Double_t ffD0 = 0.565;
 Double_t ffDS = 0.08;
 
+// NA62 parameters                                                                                     
+
+Double_t fpMom                   = 400000.; // MeV                                     
+Double_t fBeA                    = 4;
+Double_t fBeDensity              = 1.85; // g/cm3                                       
+Double_t fpBeLambda              = 421.; // mm                                            
+Double_t ftargetLength           = 400.; // mm                                       
+Double_t fCuA                    = 29;
+Double_t fCuDensity              = 8.96; // g/cm3                                       
+Double_t fpCuLambda              = 153.; // mm                                         
+Double_t fTAXLength              = 1615.; // mm                                             
+Double_t fTAXDistance            = 24685.;
+Double_t fbeamLength             = 102500.0; // mm                                           
+Double_t fzCHOD                  = 239009.0;
+Double_t fzMUV3                  = 246800.0;
+Double_t fLFV                    = 77500.;
+Double_t fLInitialFV             = 102500.;
+Double_t fzStraw[4]              = {183508.0, 194066.0, 204459.0, 218885.0};
+Double_t fxStrawChamberCentre[4] = {101.2, 114.4, 92.4, 52.8};
+Double_t frMinStraw              = 60.0;
+Double_t frMaxStraw              = 1010.0;
+Double_t fzCHODPlane             = 239009.0;
+Double_t frMinCHOD               = 120.0;
+Double_t frMaxCHOD               = 1110.0;
+
 // Other parameters
 
+Double_t fDBeProdProb = 0.00209;
+Double_t fDCuProdProb = fDBeProdProb*TMath::Power((29./4.),1./3.); // ACu/ABe                       
+Double_t fDDecayProb  = 1.;
 Double_t fUSquared;
 Double_t fUeSquared;
 Double_t fUmuSquared;

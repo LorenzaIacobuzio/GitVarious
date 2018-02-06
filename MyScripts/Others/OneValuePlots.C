@@ -1,6 +1,6 @@
 void OneValuePlots() {
-  TFile *f1 = TFile::Open("/home/li/Desktop/prova.root");
-  TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrinoPiMuSelection");  
+  TFile *f1 = TFile::Open("/home/li/Desktop/HNL1GeVAnalysis.root");
+  TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrino");  
   TIter next(dir1->GetListOfKeys());
   TKey *key;
   TCanvas *c1 = new TCanvas();
@@ -96,7 +96,7 @@ void OneValuePlots() {
   }
   /*  
   TFile *f2 = TFile::Open("/home/li/Desktop/HNLMCAnalysisAccYield.root");
-  TDirectory * dir2 = (TDirectory*)f2->Get("HeavyNeutrinoPiMuSelection");
+  TDirectory * dir2 = (TDirectory*)f2->Get("HeavyNeutrino");
   TIter next2(dir2->GetListOfKeys());
   TKey *key2;
   TCanvas *c2 = new TCanvas();
