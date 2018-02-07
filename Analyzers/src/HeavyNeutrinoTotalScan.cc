@@ -1,3 +1,38 @@
+// ---------------------------------------------------------------                                      
+//                                                                                                      
+// History:                                                                                             
+//                                                                                                      
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                               
+//                                                                                                      
+// ---------------------------------------------------------------                                      
+/// \class HeavyNeutrinoTotalScan                                                              
+/// \Brief                                                                                              
+/// Scan on the mass and coupling of the heavy neutral leptons. It includes selection, weight and yield
+/// computation as a function of the HNL mass                                                           
+/// \EndBrief                                                                                           
+/// \Detailed                                                                                           
+/// If the analyzer is run on MC samples, it produces a weight to be associated                         
+/// to each heavy neutral lepton in the sample. After applying selection cuts,                          
+/// acceptance and yield per POT are also computed. Moreover, an expected exclusion plot is produced as
+/// a function of the HNL mass and its coupling to SM leptons.                         
+/// All couplings are expressed as Log(U2).
+/// For this reason, the analyzer is able to run either on MC samples of just one HNL mass or on samples
+/// containing HNLs of different masses.                                                                
+/// If the analyzer is run on data samples, only the selection is applied.                              
+/// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.  
+/// The values of the ratios between specific-flavour couplings can be either set as external
+/// parameters from command line or taken as default values.    
+/// For example, if the user sets UeRatio = 5., UmuRatio = 1., UtauRatio = 3.5,        
+/// the specific-flavour coupling values will be: Ue2 = 5.25E-11, Umu2 = 1.05E-11, Utau2 = 3.68E-11.
+/// The values of the initial and final coupling and the scan step can be either set as external
+/// parameters from command line or taken as default values.
+/// For example, if the user assigns -3. to the starting coupling, -2. to the final one            
+/// and 0.5 to the step, the scan will be performed for Log(U2) = [-3., -2.5, -2.], this meaning      
+/// U2 = [1.E-3., 1.E-2.5, 1.E-2.].     
+///                                                                                                     
+/// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)                                               
+/// \EndDetailed          
+
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -36,6 +71,8 @@ using namespace NA62Constants;
 
 HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
   Analyzer(ba, "HeavyNeutrinoTotalScan") {
+
+  if (!GetIsTree()) return;
   
   RequestAllMCTrees();
   RequestAllRecoTrees();
@@ -45,6 +82,11 @@ HeavyNeutrinoTotalScan::HeavyNeutrinoTotalScan(Core::BaseAnalysis *ba) :
   AddParam("UeSquaredRatio", &fUeSquaredRatio, 1.);
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
+  AddParam("CouplingStart", &fCouplingStart, -10.);
+  AddParam("CouplingStop", &fCouplingStop, 0.);
+  AddParam("CouplingStep", &fCouplingStep, 0.1);
+
+  fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
 
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
@@ -201,6 +243,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
       fDistcomp->ComputeDistance();
   
       Double_t BeamlineDist = fDistcomp->GetDistance();
+      Bool_t inAcc       = false;
 
       // Track selection, CUT 1: Two tracks in Spectrometer acceptance
       
@@ -213,167 +256,168 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	Double_t y2        = SpectrometerCand2->yAt(fzStraw[i]);
 	Double_t r2        = sqrt(x2*x2 + y2*y2);
 	Double_t rShifted2 = sqrt(pow(x2-fxStrawChamberCentre[i],2) + y2*y2);
-	Bool_t inAcc       = false;
 	
 	if ((rShifted1 > frMinStraw && r1 < frMaxStraw) && (rShifted2 > frMinStraw && r2 < frMaxStraw))
-	inAcc = true;
-	if (inAcc)  {
+	  inAcc &= true;
+      }
+
+      if (inAcc)  {
 	  
-	  // Track selection, CUT 2: Chi2 and momentum cuts
+	// Track selection, CUT 2: Chi2 and momentum cuts
 	  
-	  if (ChiSquare1 <= 20. && ChiSquare2 <= 20.) {
-	    if (SpectrometerCand1->GetNChambers() >= 3 && SpectrometerCand2->GetNChambers() >= 3) {
+	if (ChiSquare1 <= 20. && ChiSquare2 <= 20.) {
+	  if (SpectrometerCand1->GetNChambers() >= 3 && SpectrometerCand2->GetNChambers() >= 3) {
 	      
-	      // Track selection, CUT 3: Opposite-charged tracks
+	    // Track selection, CUT 3: Opposite-charged tracks
   
-	      if (Charge1 + Charge2 == 0) {
+	    if (Charge1 + Charge2 == 0) {
 		
-		// Downstream track selection, CUT 4: Extrapolation and association to CHOD
+	      // Downstream track selection, CUT 4: Extrapolation and association to CHOD
 		
-		Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
-		x1      = SpectrometerCand1->xAtAfterMagnet(fzCHODPlane);
-		y1      = SpectrometerCand1->yAtAfterMagnet(fzCHODPlane);
-		r1      = sqrt(x1*x1+y1*y1);
-		x2      = SpectrometerCand2->xAtAfterMagnet(fzCHODPlane);
-		y2      = SpectrometerCand2->yAtAfterMagnet(fzCHODPlane);
-		r2      = sqrt(x2*x2+y2*y2);
-		inAcc     = false;
+	      Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
+	      Double_t x1      = SpectrometerCand1->xAtAfterMagnet(fzCHODPlane);
+	      Double_t y1      = SpectrometerCand1->yAtAfterMagnet(fzCHODPlane);
+	      Double_t r1      = sqrt(x1*x1+y1*y1);
+	      Double_t x2      = SpectrometerCand2->xAtAfterMagnet(fzCHODPlane);
+	      Double_t y2      = SpectrometerCand2->yAtAfterMagnet(fzCHODPlane);
+	      Double_t r2      = sqrt(x2*x2+y2*y2);
+	      inAcc     = false;
 		
-		if ((r1 > frMinCHOD && r1 < frMaxCHOD) && (r2 > frMinCHOD && r2 < frMaxCHOD))
-		  inAcc = true;
-		if (inAcc) {
-		  if (CHODAssoc) {
+	      if ((r1 > frMinCHOD && r1 < frMaxCHOD) && (r2 > frMinCHOD && r2 < frMaxCHOD))
+		inAcc = true;
+	      
+	      if (inAcc) {
+		if (CHODAssoc) {
 		    
-		    // Downstream track selection, CUT 5: Extrapolation and association to LKr
+		  // Downstream track selection, CUT 5: Extrapolation and association to LKr
 		    
-		    Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
+		  Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
 
-		    if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr)) {
-		      if (LKrAssoc) {
+		  if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr)) {
+		    if (LKrAssoc) {
 			
-			// Downstream track selection, CUT 6: Extrapolation and association to MUV3
+		      // Downstream track selection, CUT 6: Extrapolation and association to MUV3
     
-			if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3)) {
+		      if (GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) && GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3)) {
 			  
-			  Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
-			  Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
-			  Int_t Assoc   = 0;
+			Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
+			Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
+			Int_t Assoc   = 0;
 			  
-			  if (Assoc1 && !Assoc2)
-			    Assoc = 1;
-			  else if (!Assoc1 && Assoc2)
-			    Assoc = 2;
-			  else
-			    Assoc = 0;
+			if (Assoc1 && !Assoc2)
+			  Assoc = 1;
+			else if (!Assoc1 && Assoc2)
+			  Assoc = 2;
+			else
+			  Assoc = 0;
 
-			  if (Assoc == 1 || Assoc == 2) {
+			if (Assoc == 1 || Assoc == 2) {
 			    
-			    // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
+			  // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
   
-			    Double_t MUV3Time;
+			  Double_t MUV3Time;
   
-			    if (Assoc == 1)
-			      MUV3Time = Tracks[0].GetMUV3Time(0);
-			    else if (Assoc == 2)
-			      MUV3Time = Tracks[1].GetMUV3Time(0);
+			  if (Assoc == 1)
+			    MUV3Time = Tracks[0].GetMUV3Time(0);
+			  else if (Assoc == 2)
+			    MUV3Time = Tracks[1].GetMUV3Time(0);
 			    
-			    Double_t CHODTime1 = Tracks[0].GetCHODTime();
-			    Double_t CHODTime2 = Tracks[1].GetCHODTime();
+			  Double_t CHODTime1 = Tracks[0].GetCHODTime();
+			  Double_t CHODTime2 = Tracks[1].GetCHODTime();
 			    
-			    // Energy cuts, CUT 7: Cut on E/p in LKr
+			  // Energy cuts, CUT 7: Cut on E/p in LKr
 			    
-			    Double_t EoP1  = Tracks[0].GetLKrEoP();
-			    Double_t EoP2  = Tracks[1].GetLKrEoP();
-			    Double_t MuEoP = 0.;
-			    Double_t PiEoP = 0.;
+			  Double_t EoP1  = Tracks[0].GetLKrEoP();
+			  Double_t EoP2  = Tracks[1].GetLKrEoP();
+			  Double_t MuEoP = 0.;
+			  Double_t PiEoP = 0.;
 			    
-			    if (Assoc == 1) {
-			      MuEoP = EoP1;
-			      PiEoP = EoP2;
-			    }
-			    else if (Assoc == 2) {
-			      MuEoP = EoP2;
-			      PiEoP = EoP1;
-			    }
+			  if (Assoc == 1) {
+			    MuEoP = EoP1;
+			    PiEoP = EoP2;
+			  }
+			  else if (Assoc == 2) {
+			    MuEoP = EoP2;
+			    PiEoP = EoP1;
+			  }
   
-			    if (MuEoP < 0.2) {
-			      if (PiEoP > 0.2 && PiEoP < 0.8) {
+			  if (MuEoP < 0.2) {
+			    if (PiEoP > 0.2 && PiEoP < 0.8) {
 				
-				// Veto cuts, CUT 8: LAV veto
+			      // Veto cuts, CUT 8: LAV veto
 				
-				fLAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+			      fLAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
 				
-				if (GetWithMC())
-				  fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC
-				else
-				  fLAVMatching->SetTimeCuts(-10., 10.);
+			      if (GetWithMC())
+				fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC
+			      else
+				fLAVMatching->SetTimeCuts(-10., 10.);
 				
-				if (!fLAVMatching->LAVHasTimeMatching(LAVEvent)) {
+			      if (!fLAVMatching->LAVHasTimeMatching(LAVEvent)) {
 				  
-				  // Veto cuts, CUT 9: SAV veto
+				// Veto cuts, CUT 9: SAV veto
 				  
-				  fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+				fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
 				  
-				  if (GetWithMC()) {
-				    fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC
-				    fSAVMatching->SetSACTimeCuts(99999, 99999);
-				  } else {
-				    fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
-				    fSAVMatching->SetSACTimeCuts(10.0, 10.0);
-				  }
+				if (GetWithMC()) {
+				  fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC
+				  fSAVMatching->SetSACTimeCuts(99999, 99999);
+				} else {
+				  fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
+				  fSAVMatching->SetSACTimeCuts(10.0, 10.0);
+				}
   
-				  if (!fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent)) {
+				if (!fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent)) {
 				    
-				    // Geometrical cuts, CUT 11: Cut on CDA of two tracks
+				  // Geometrical cuts, CUT 11: Cut on CDA of two tracks
 				    
-				    if (CDA < 10.) {
+				  if (CDA < 10.) {
 				      
-				      // Geometrical cuts, CUT 12: Cut on two-track vertex wrt beamline
+				    // Geometrical cuts, CUT 12: Cut on two-track vertex wrt beamline
 
-				      if (BeamlineDist > 100.) {
+				    if (BeamlineDist > 100.) {
 					
-					// Geometrical cuts, CUT 13: Cut on Z of two-track vertex
+				      // Geometrical cuts, CUT 13: Cut on Z of two-track vertex
 
-					if (Zvertex > 102500. && Zvertex < 180000.) {
+				      if (Zvertex > 102500. && Zvertex < 180000.) {
 					  
-					  // Geometrical cuts, CUT 14: Cut on CDA of each track wrt beam axis
+					// Geometrical cuts, CUT 14: Cut on CDA of each track wrt beam axis
   
-					  if (CDA1 > 50. && CDA2 > 50.) {
+					if (CDA1 > 50. && CDA2 > 50.) {
 
-					    // Computation of invariant mass
+					  // Computation of invariant mass
 					    
-					    // Computation of coupling-related quantities of the only good HNL in each event
+					  // Computation of coupling-related quantities of the only good HNL in each event
 					    
-					    if (GetWithMC()) {
-					      Event *evt = GetMCEvent();
-					      for (Int_t j = 0; j < evt->GetNKineParts(); j++) {
-						KinePart *p = evt->GetKinePart(j);
-						if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
-						  point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-						  point2.SetXYZ(0., 0., fLInitialFV);
-						  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-						  MN = ComputeHNLMass(p);
-						  HNLTau = tauN(MN);
-						  LReach = ComputeL(point1, point2, momentum1);
-						  DecayFactor = ComputeDecay(MN);
-						  NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-						  NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
+					  if (GetWithMC()) {
+					    Event *evt = GetMCEvent();
+					    for (Int_t j = 0; j < evt->GetNKineParts(); j++) {
+					      KinePart *p = evt->GetKinePart(j);
+					      if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
+						point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
+						point2.SetXYZ(0., 0., fLInitialFV);
+						momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
+						MN = ComputeHNLMass(p);
+						HNLTau = tauN(MN);
+						LReach = ComputeL(point1, point2, momentum1);
+						DecayFactor = ComputeDecay(MN);
+						NReachProb = ComputeNReachProb(p, HNLTau, LReach);
+						NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
 						  
-						  if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
-						    LeptonUSquared = fUeSquared;
-						  else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
-						    LeptonUSquared = fUmuSquared;
-						  else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
-						    LeptonUSquared = fUtauSquared;
+						if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
+						  LeptonUSquared = fUeSquared;
+						else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
+						  LeptonUSquared = fUmuSquared;
+						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+						  LeptonUSquared = fUtauSquared;
 						  
-						  if (p->GetProdPos().Z() < fTAXDistance)
-						    DProdProb = fDBeProdProb;
-						  else if(p->GetProdPos().Z() >= fTAXDistance)
-						    DProdProb = fDCuProdProb;
+						if (p->GetProdPos().Z() < fTAXDistance)
+						  DProdProb = fDBeProdProb;
+						else if(p->GetProdPos().Z() >= fTAXDistance)
+						  DProdProb = fDCuProdProb;
 						  
-						  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
-						  fSumGood[round(MN)][fCoupling] += Weight;
-						}
+						Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
+						fSumGood[round(MN)][fCoupling] += Weight;
 					      }
 					    }
 					  }
@@ -405,32 +449,30 @@ void HeavyNeutrinoTotalScan::EndOfJobUser() {
 
   Double_t Coupling = 0.;
   Double_t MN = 0.;
-  Int_t couplingCounter = 0;
-  Int_t massCounter = 0;
+  Int_t counter = 0;
 
-  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
-    Coupling = it->first;
-    for (auto it1 = fMasses.begin(); it1 != fMasses.end(); it1++) {
-      MN = it1->first;
+  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
+    MN = it->first;
+    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
+      Coupling = it1->first;
       fAcc[MN][Coupling] = fSumGood[MN][Coupling]/fSumAll[MN][Coupling];
       fProb[MN][Coupling] = fSumAll[MN][Coupling]/fNevents[MN][Coupling];
       fYield[MN][Coupling] = fAcc[MN][Coupling]*fProb[MN][Coupling];
-      couplingCounter++;
-      massCounter++;
+      counter++;
     }
   }
   
   // Exclusion plot
-  
-  couplingCounter = 0;
-  massCounter = 0;
-  
-  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
-    Coupling = it->first;
-    for (auto it1 = fMasses.begin(); it1 != fMasses.end(); it1++) {
-      MN = it1->first;
+
+  counter = 0;
+
+  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
+    MN = it->first;
+    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
+      Coupling = it1->first;
       if (fYield[MN][Coupling]*1.E18 > 2.3)
-	fgExclusion->SetPoint(10*couplingCounter + massCounter, MN/1000., Coupling);
+	fgExclusion->SetPoint(counter, MN/1000., Coupling);
+      counter++;
     }
   }
 

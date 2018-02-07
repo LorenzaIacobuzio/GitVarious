@@ -1,3 +1,31 @@
+// ---------------------------------------------------------------                                  
+//                                                                                            
+// History:                                                                                  
+//                                                                                               
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                              
+//                                                                                        
+// ---------------------------------------------------------------                         
+
+/// \class HeavyNeutrino              
+/// \Brief                                                                         
+/// Heavy neutral lepton selection, including weight and yield computation                      
+/// \EndBrief                                                                            
+/// \Detailed                                                                               
+/// If the analyzer is run on MC samples, it produces a weight to be associated 
+/// to each heavy neutral lepton in the sample. After applying selection cuts, 
+/// acceptance and yield per POT are also computed.
+/// If the analyzer is run on data samples, only the selection is applied.
+/// Several histograms plot quantities related to the MC HNL and to relevant quantities 
+/// after each series of cuts.
+/// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.
+/// The value of the squared HNL coupling and the values of the ratios between specific-flavour 
+/// couplings can be either set as external parameters from command line or taken as default values.
+/// For example, if the user sets U2 = 1.E-10, and UeRatio = 5., UmuRatio = 1., UtauRatio = 3.5,
+/// the specific-flavour coupling values will be: Ue2 = 5.25E-11, Umu2 = 1.05E-11, Utau2 = 3.68E-11.
+///
+/// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
+/// \EndDetailed               
+
 #include <stdlib.h>
 #include <iostream>
 #include <string>
@@ -35,6 +63,8 @@ using namespace NA62Constants;
 
 HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   Analyzer(ba, "HeavyNeutrino") {
+
+  if (!GetIsTree()) return;
 
   RequestAllMCTrees();
   RequestAllRecoTrees();
@@ -339,7 +369,7 @@ void HeavyNeutrino::Process(Int_t) {
 	FillHisto("hHNLDecayProb", NDecayProb);
 	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
 	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
-	FillHisto("hWeight",Weight);
+	FillHisto("hWeight", Weight);
       }
     }
   }

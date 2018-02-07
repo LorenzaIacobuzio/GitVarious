@@ -48,10 +48,10 @@ protected:
 
   // Scan variables
 
-  static constexpr Double_t fCouplingStart = -10.;
-  static constexpr Double_t fCouplingStop = 0.;
-  static constexpr Double_t fCouplingStep = 0.1;
-  static constexpr Int_t fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
+  Double_t fCouplingStart;
+  Double_t fCouplingStop;
+  Double_t fCouplingStep;
+  Int_t fN;
   std::map<Double_t, Int_t>    fNevents;
   std::map<Double_t, Double_t> fSumAll;
   std::map<Double_t, Double_t> fSumGood;

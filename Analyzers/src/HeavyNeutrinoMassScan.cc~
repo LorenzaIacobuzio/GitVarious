@@ -1,3 +1,32 @@
+// ---------------------------------------------------------------                                      
+//                                                                                                      
+// History:                                                                                             
+//                                                                                                      
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                               
+//                                                                                                      
+// ---------------------------------------------------------------                                      
+/// \class HeavyNeutrinoMassScan                                                                  
+/// \Brief                                                                                             
+/// Scan on the mass of the heavy neutral leptons. It includes selection, weight and yield computation
+/// as a function of the HNL mass
+/// \EndBrief                                                                                          
+/// \Detailed                                                                                          
+/// If the analyzer is run on MC samples, it produces a weight to be associated                        
+/// to each heavy neutral lepton in the sample. After applying selection cuts,                         
+/// acceptance and yield per POT are also computed. Moreover, several histograms of relevant quantities
+/// (including acceptance and yield) are produced as functions of the HNL mass.                         
+/// For this reason, the analyzer is able to run either on MC samples of just one HNL mass or on samples
+/// containing HNLs of different masses.
+/// If the analyzer is run on data samples, only the selection is applied.                             
+/// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.  
+/// The value of the squared HNL coupling and the values of the ratios between specific-flavour         
+/// couplings can be either set as external parameters from command line or taken as default values.    
+/// For example, if the user sets U2 = 1.E-10, and UeRatio = 5., UmuRatio = 1., UtauRatio = 3.5,        
+/// the specific-flavour coupling values will be: Ue2 = 5.25E-11, Umu2 = 1.05E-11, Utau2 = 3.68E-11.    
+///                                                                                               
+/// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)                                               
+/// \EndDetailed               
+
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -36,6 +65,8 @@ using namespace NA62Constants;
 
 HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
   Analyzer(ba, "HeavyNeutrinoMassScan") {
+
+  if (!GetIsTree()) return;
   
   RequestAllMCTrees();
   RequestAllRecoTrees();
@@ -71,9 +102,9 @@ HeavyNeutrinoMassScan::HeavyNeutrinoMassScan(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrinoMassScan::InitHist() {
 
-  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    100, 0.2, 2., 1000, -0.1, 1.1));
-  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", 100, 0.2, 2., 1000, -0.1, 1.1));
-  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           100, 0.2, 2., 1000,  1.E-26, 1.E-22));
+  BookHisto("hReach",    new TH2D("Reach", "Probability of N reaching the FV vs N mass",    10, 0.3, 1.2, 1000, -0.1, 1.1));
+  BookHisto("hDecay",    new TH2D("Decay", "Probability of N decaying in the FV vs N mass", 10, 0.3, 1.2, 1000, -0.1, 1.1));
+  BookHisto("hWeight",   new TH2D("Weight", "N weight vs N mass",                           10, 0.3, 1.2, 1000,  1.E-15, 1.E-11));
 
   fgGammaTot = new TGraph();
   fgGammaTot->SetNameTitle("GammaTot", "N total decay width vs N mass");
