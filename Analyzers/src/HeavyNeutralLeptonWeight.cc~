@@ -23,10 +23,13 @@
 /// For example, if the user assigns 100000. to the beginning of the FV and 80000. to its length, the FV
 /// will begin at 100 m from the target centre and end at 180 m.
 /// A vector containing all the weight associated to the HNLs in a certain event is produced
-/// as output of the analyzer and can be accessed from another analyzer in the following way:
+/// as output of the analyzer. Each vector element is a triplet containing HNL mass, 
+/// coupling with the lepton the HNL is produced with, and weight. 
+/// The output can be accessed from another analyzer in the following way:
 /// \code
-/// std::vector<Double_t> Weights = 
-///   *(std::vector<Double_t>*)GetOutput("HeavyNeutralLeptonWeight.Output");
+/// std::map<std::string, Double_t> Weights = 
+///   *(std::map<std::string, Double_t>*)
+///   GetOutput("HeavyNeutralLeptonWeight.Output");
 /// \endcode
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)                                               
@@ -88,10 +91,13 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
   Double_t LReach         = 0.;
   Double_t LeptonUSquared = 0.;
   Double_t DecayFactor    = 0.;
+  Double_t ProdFactor     = 0.;
   Double_t Weight         = 0.;
   Double_t DProdProb      = 0.;
-
-  fWeightContainer.clear();
+  Bool_t isGood           = false;
+  TVector3 point1;
+  TVector3 point2;
+  TVector3 momentum1;
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -114,13 +120,34 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
 	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi")|| p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
 
+	if (p->GetParticleName().Contains("tau->")) {
+	  if (p->GetParticleName().Contains("DS"))
+	    ProdFactor = fDStoTauBR;
+	  else
+	    ProdFactor = fDtoTauBR;
+	}
+	else
+	  ProdFactor = 1.;
+
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
-	
-	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
-	fWeightContainer.push_back(Weight);
+
+	if (p->GetEndProcessName() == "good")
+	  isGood = true;
+
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+
+	fWeightContainer["Mass", MN];
+	fWeightContainer["Lifetime", HNLTau];
+	fWeightContainer["DecayFactor", DecayFactor];
+	fWeightContainer["NReachProb", NReachProb];
+	fWeightContainer["NDecayProb", NDecayProb];
+	fWeightContainer["LeptonUSquared", LeptonUSquared];
+	fWeightContainer["ProdFactor", ProdFactor];
+	fWeightContainer["DProdProb", DProdProb];
+	fWeightContainer["IsGood", isGood];
       }
     }
   }

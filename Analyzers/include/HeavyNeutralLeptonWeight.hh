@@ -34,7 +34,7 @@ public:
 
 protected:
 
-  std::vector<std::vector<Double_t, Double_t, Double_t>> fWeightContainer;
+  std::vector<std::map<std::string, Double_t>> fWeightContainer;
   Double_t fLInitialFV;
   Double_t fLFV;
 };

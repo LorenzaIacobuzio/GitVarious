@@ -44,8 +44,8 @@ Double_t fK        = 159.8;
 Double_t fEta      = 1.2*fPi;
 Double_t fEtaprime = -0.45*fPi;
 Double_t fsigmacc  = 2.3*75.; //mubarn at sqrt(s) = 82 GeV (400 GeV proton on Be(9) (mBe = 9*1 GeV), taken from Gaia's note                             
-Double_t fDtoTauNuBR  = 1.2E-3; // upper limit in PDG
-Double_t fDStoTauNuBR = 0.0555;
+Double_t fDtoTauBR    = 1.2E-3;
+Double_t fDStoTauBR   = 0.0555;
 
 // CKM                                                                          
 
@@ -790,4 +790,24 @@ Double_t ComputeDecay(Double_t MN) {
     br = Gamma2pimu/gammaTot;
 
   return br;
+}
+
+void SetCouplingForWeight(Double_t USquared, Double_t UeSquared, Double_t UmuSquared, Double_t UtauSquared) {
+
+  fUSquared = USquared;
+  fUeSquared = UeSquared;
+  fUmuSquared = UmuSquared;
+  fUtauSquared = UtauSquared;
+}
+
+std::vector<Double_t> GetCouplingForWeight() {
+  
+  std::vector<Double_t> U;
+
+  U.push_back(fUSquared);
+  U.push_back(fUeSquared);
+  U.push_back(fUmuSquared);
+  U.push_back(fUtauSquared);
+
+  return U;
 }

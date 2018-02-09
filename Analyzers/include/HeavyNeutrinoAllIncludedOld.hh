@@ -1,5 +1,5 @@
-#ifndef HEAVYNEUTRINO_HH
-#define HEAVYNEUTRINO_HH
+#ifndef HEAVYNEUTRINOALLINCLUDED_HH
+#define HEAVYNEUTRINOALLINCLUDED_HH
 
 #include <stdlib.h>
 #include <iostream>
@@ -20,14 +20,14 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrino : public NA62Analysis::Analyzer {
+class HeavyNeutrinoAllIncluded : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrino(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrino();
+  HeavyNeutrinoAllIncluded(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoAllIncluded();
   void InitHist();
-  void InitOutput();
+  void InitOutput() {}
   void DefineMCSimple() {}
   void Process(Int_t);
   void StartOfBurstUser() {}
@@ -46,9 +46,23 @@ protected:
   SAVMatching *fSAVMatching;
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
-  Bool_t fPassSelection;
 
-  // Histos
+  // Scan variables                                                                                   
+
+  Double_t fCouplingStart;
+  Double_t fCouplingStop;
+  Double_t fCouplingStep;
+  Int_t fN;
+  std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAll;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
+  std::map<Double_t, std::map<Double_t, Double_t>> fAcc;
+  std::map<Double_t, std::map<Double_t, Double_t>> fYield;
+  std::map<Double_t, std::map<Double_t, Double_t>> fProb;
+  std::map<Double_t, Double_t>                     fCouplings;
+  std::map<Double_t, Double_t>                     fMasses;
+
+  // Selection histos
 
   TH1D *fhNk3pi;
   TH1D *fhNbursts;
@@ -125,6 +139,31 @@ protected:
 
   TH1D *fhInvMassMC;
   TH1D *fhInvMassReco;
+
+  TH1D *fhAcc;
+  TH1D *fhYield;
+
+  // Scan histos                                                                  
+
+  TH2D *fhReachCoupling;
+  TH2D *fhDecayCoupling;
+  TH2D *fhWeightCoupling;
+
+  TGraph *fgAccCoupling;
+  TGraph *fgYieldCoupling;
+  TGraph *fgGammaTotCoupling;
+  TGraph *fgTauCoupling;
+
+  TH2D *fhReachMass;
+  TH2D *fhDecayMass;
+  TH2D *fhWeightMass;
+
+  TGraph *fgAccMass;
+  TGraph *fgYieldMass;
+  TGraph *fgGammaTotMass;
+  TGraph *fgTauMass;
+
+  TGraph *fgExclusion;
 };
 
 #endif

@@ -138,17 +138,6 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
     
     if (GetWithMC()) {
       Event *evt = GetMCEvent();
-      for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-        KinePart *p = evt->GetKinePart(i);
-	if (p->GetParentID() == 0) {
-          if (p->GetCharge() == 1.) {
-            mom1 = p->GetInitial4Momentum();
-          }
-          else if (p->GetCharge() == -1.) {
-            mom2 = p->GetInitial4Momentum();
-          }
-	}
-      }
       
       // Computation of coupling-related quantities of all HNLs (good and bad) + scan on the mass
       
@@ -186,15 +175,15 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
 	  fSumAll[round(MN)][fCoupling] += Weight;
 	}
-      }
-    }
+      } 
+    }   
 
     // Select two-track events
     
     std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
     
     if (Tracks.size() == 2) {
-      
+
       // Track features
       
       Int_t Charge1                                 = Tracks[0].GetCharge();
@@ -243,7 +232,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
       fDistcomp->ComputeDistance();
   
       Double_t BeamlineDist = fDistcomp->GetDistance();
-      Bool_t inAcc       = false;
+      Bool_t inAcc = false;
 
       // Track selection, CUT 1: Two tracks in Spectrometer acceptance
       
@@ -262,18 +251,19 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
       }
 
       if (inAcc)  {
-	  
+
 	// Track selection, CUT 2: Chi2 and momentum cuts
 	  
 	if (ChiSquare1 <= 20. && ChiSquare2 <= 20.) {
+
 	  if (SpectrometerCand1->GetNChambers() >= 3 && SpectrometerCand2->GetNChambers() >= 3) {
-	      
+
 	    // Track selection, CUT 3: Opposite-charged tracks
   
 	    if (Charge1 + Charge2 == 0) {
 		
 	      // Downstream track selection, CUT 4: Extrapolation and association to CHOD
-		
+
 	      Bool_t CHODAssoc = (Tracks[0].CHODAssociationExists() && Tracks[1].CHODAssociationExists());
 	      Double_t x1      = SpectrometerCand1->xAtAfterMagnet(fzCHODPlane);
 	      Double_t y1      = SpectrometerCand1->yAtAfterMagnet(fzCHODPlane);
@@ -312,7 +302,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 			  Assoc = 0;
 
 			if (Assoc == 1 || Assoc == 2) {
-			    
+
 			  // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
   
 			  Double_t MUV3Time;
@@ -408,7 +398,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						  LeptonUSquared = fUeSquared;
 						else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 						  LeptonUSquared = fUmuSquared;
-						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 						  LeptonUSquared = fUtauSquared;
 						  
 						if (p->GetProdPos().Z() < fTAXDistance)
@@ -482,7 +472,7 @@ void HeavyNeutrinoTotalScan::EndOfJobUser() {
   fgExclusion->GetYaxis()->SetTitle("Log of coupling");
   fgExclusion->SetLineColor(2);
   fgExclusion->SetLineWidth(3);
-  fgExclusion->Draw("AC");
+  fgExclusion->Draw("*");
   fgExclusion->Write();
 
   SaveAllPlots();

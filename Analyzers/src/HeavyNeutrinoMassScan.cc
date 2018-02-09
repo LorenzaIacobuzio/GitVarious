@@ -147,7 +147,7 @@ void HeavyNeutrinoMassScan::Process(Int_t) {
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
-    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
+    for (In_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);
       if (p->GetParentID() == 0) {
 	if (p->GetCharge() == 1.) {

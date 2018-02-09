@@ -191,12 +191,12 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  4, -0.5, 3.5));
   BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
 
-  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of N mother production point", 20000., -250., 33000.));
-  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of N mother decay point",     20000., -250., 33000.));
-  BookHisto("hDTheta",        new TH1D("DTheta",     "N mother theta",              100,  0., 0.3));
-  BookHisto("hDLambda",       new TH1D("DLambda",    "N mother decay length",       100, -1., 40.));
-  BookHisto("hDPath",         new TH1D("DPath",      "N mother path in Z",          100, -1., 50.));
-  BookHisto("hDMom",          new TH1D("DMom",       "N mother momentum",           100, -1., 170.));
+  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of D meson production point", 20000., -250., 33000.));
+  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of D meson decay point",     20000., -250., 33000.));
+  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100,  0., 0.3));
+  BookHisto("hDLambda",       new TH1D("DLambda",    "D meson decay length",       100, -1., 40.));
+  BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 50.));
+  BookHisto("hDMom",          new TH1D("DMom",       "D meson momentum",           100, -1., 170.));
 
   BookHisto("hZHNLDecay",     new TH1D("ZHNLDecay",    "Z of HNL decay point",           100., 90., 190.));
   BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., 0., 170.));
@@ -282,12 +282,23 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
+  Double_t MN             = 0.;
+  Double_t HNLTau         = 0.;
+  Double_t NDecayProb     = 0.;
+  Double_t NReachProb     = 0.;
+  Double_t LReach         = 0.;
+  Double_t LeptonUSquared = 0.;
+  Double_t DecayFactor    = 0.;
+  Double_t ProdFactor     = 0.;
+  Double_t Weight         = 0.;
+  Double_t DProdProb      = 0.;
   Int_t counter           = 0;
   TLorentzVector mom1;
   TLorentzVector mom2;
+  TVector3 point1;
+  TVector3 point2;
+  TVector3 momentum1;
   Double_t p1,p2;
-  Double_t NReachProb = 0.;
-  Double_t NDecayProb = 0.;
 
   // Some plots of KinePart quantities
 
@@ -320,26 +331,47 @@ void HeavyNeutrino::Process(Int_t) {
 	}
       }
     }
-  }
 
-  // Computation of weight of all HNLs (good and bad)
+    // Computation of coupling-related quantities of all HNLs (good and bad)
 
-  if (GetWithMC()) {
-    std::vector<std::map<std::string, Double_t>> Weights = *(std::vector<std::map<std::string, Double_t>>*)GetOutput("HeavyNeutralLeptonWeight.Output");    
-    for (UInt_t i = 0; i < Weights.size(); i++) {
-      fNevents++;
-      NReachProb = Weights[i]["ReachProb"];
-      NDecayProb = Weights[i]["DecayProb"]; 
-      fSumAll += Weights[i]["Weight"];
-      FillHisto("hWeight", Weights[i]["Weight"]);
-    }
-  }
-
-  if (GetWithMC()) {
-    Event *evt = GetMCEvent();
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-      KinePart *p = evt->GetKinePart(i);
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999.) {
+      KinePart *p = evt->GetKinePart(i);      
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
+	fNevents++;
+	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
+	point2.SetXYZ(0., 0., fLInitialFV);
+	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
+	MN = ComputeHNLMass(p);
+	HNLTau = tauN(MN);
+	LReach = ComputeL(point1, point2, momentum1);
+	DecayFactor = ComputeDecay(MN);
+	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
+	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
+	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
+	  LeptonUSquared = fUeSquared;
+	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
+	  LeptonUSquared = fUmuSquared;
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi")|| p->GetParticleName().Contains("K"))))
+	  LeptonUSquared = fUtauSquared;
+
+	if (p->GetProdPos().Z() < fTAXDistance)
+	  DProdProb = fDBeProdProb;
+	else if (p->GetProdPos().Z() >= fTAXDistance)
+	  DProdProb = fDCuProdProb;
+
+	if (p->GetParticleName().Contains("tau->")) {
+          if (p->GetParticleName().Contains("DS"))
+            ProdFactor = fDStoTauBR;
+          else
+            ProdFactor = fDtoTauBR;
+        }
+        else
+          ProdFactor = 1.;
+
+	// Weight to be associated to each HNL
+
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+	fSumAll += Weight;
 
 	// Some more plots of KinePart quantities
 
@@ -355,6 +387,7 @@ void HeavyNeutrino::Process(Int_t) {
 	FillHisto("hHNLDecayProb", NDecayProb);
 	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
 	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
+	FillHisto("hWeight", Weight);
       }
     }
   }
@@ -884,13 +917,47 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hInvMassReco", invMass);
 
-  // Computation of weight of good HNL
+  // Computation of coupling-related quantities of the only good HNL in each event
 
   if (GetWithMC()) {
-    std::vector<std::map<std::string, Double_t>> Weights = *(std::vector<std::map<std::string, Double_t>>*)GetOutput("HeavyNeutralLeptonWeight.Output");
-    for (UInt_t i = 0; i < Weights.size(); i++) {
-      if (Weights[i]["IsGood"] == true)
-	fSumGood += Weights[i]["Weight"];
+    Event *evt = GetMCEvent();
+    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
+      KinePart *p = evt->GetKinePart(i);
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
+	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
+	point2.SetXYZ(0., 0., fLInitialFV);
+	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
+	MN = ComputeHNLMass(p);
+	HNLTau = tauN(MN);
+	LReach = ComputeL(point1, point2, momentum1);
+	DecayFactor = ComputeDecay(MN);
+	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
+	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
+
+	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
+	  LeptonUSquared = fUeSquared;
+	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
+	  LeptonUSquared = fUmuSquared;
+	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
+	  LeptonUSquared = fUtauSquared;
+
+        if (p->GetProdPos().Z() < fTAXDistance)
+	  DProdProb = fDBeProdProb;
+	else if(p->GetProdPos().Z() >= fTAXDistance)
+          DProdProb = fDCuProdProb;
+
+        if (p->GetParticleName().Contains("tau->")) {
+          if (p->GetParticleName().Contains("DS"))
+            ProdFactor = fDStoTauBR;
+          else
+            ProdFactor = fDtoTauBR;
+        }
+        else
+          ProdFactor = 1.;
+	
+        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+	fSumGood += Weight;
+      }
     }
   }
 }

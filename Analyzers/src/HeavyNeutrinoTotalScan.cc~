@@ -138,18 +138,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
     
     if (GetWithMC()) {
       Event *evt = GetMCEvent();
-      for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-        KinePart *p = evt->GetKinePart(i);
-	if (p->GetParentID() == 0) {
-          if (p->GetCharge() == 1.) {
-            mom1 = p->GetInitial4Momentum();
-          }
-          else if (p->GetCharge() == -1.) {
-            mom2 = p->GetInitial4Momentum();
-          }
-	}
-      }
-      
+
       // Computation of coupling-related quantities of all HNLs (good and bad) + scan on the mass
       
       for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
@@ -159,6 +148,8 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 	  point2.SetXYZ(0., 0., fLInitialFV);
 	  momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
 	  MN = ComputeHNLMass(p);
+	  if(fCoupling != -6. && MN != 1000.)
+	    return;
 	  fMasses[round(MN)] = round(MN);
 	  if (fNevents[round(MN)].count(fCoupling) == 0)
             fNevents[round(MN)][fCoupling] = 0;
@@ -408,7 +399,7 @@ void HeavyNeutrinoTotalScan::Process(Int_t) {
 						  LeptonUSquared = fUeSquared;
 						else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
 						  LeptonUSquared = fUmuSquared;
-						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi"))))
+						else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
 						  LeptonUSquared = fUtauSquared;
 						  
 						if (p->GetProdPos().Z() < fTAXDistance)
@@ -449,38 +440,32 @@ void HeavyNeutrinoTotalScan::EndOfJobUser() {
 
   Double_t Coupling = 0.;
   Double_t MN = 0.;
-  Int_t couplingCounter = 0;
-  Int_t massCounter = 0;
+  Int_t counter = 0;
 
   for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
     MN = it->first;
-  for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
-    Coupling = it1->first;
-    fAcc[MN][Coupling] = fSumGood[MN][Coupling]/fSumAll[MN][Coupling];
-    fProb[MN][Coupling] = fSumAll[MN][Coupling]/fNevents[MN][Coupling];
-    fYield[MN][Coupling] = fAcc[MN][Coupling]*fProb[MN][Coupling];
-    couplingCounter++;
+    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
+      Coupling = it1->first;
+      cout<<it->first<<" "<<it->second<<" "<<it1->first<<" "<<it1->second<<endl;
+      fAcc[MN][Coupling] = fSumGood[MN][Coupling]/fSumAll[MN][Coupling];
+      fProb[MN][Coupling] = fSumAll[MN][Coupling]/fNevents[MN][Coupling];
+      fYield[MN][Coupling] = fAcc[MN][Coupling]*fProb[MN][Coupling];
+      counter++;
     }
-    couplingCounter = 0;
-    massCounter++;
   }
   
   // Exclusion plot
-  
-  couplingCounter = 0;
-  massCounter = 0;
+
+  counter = 0;
 
   for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
     MN = it->first;
-  for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
-    Coupling = it1->first;
-    //if (fYield[MN][Coupling]*1.E18 > 2.3)
-    //fgExclusion->SetPoint(10*massCounter + couplingCounter, MN/1000., Coupling);
-    fgExclusion->SetPoint(10*massCounter + couplingCounter, 10*massCounter, couplingCounter); 
-    couplingCounter++;
+    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
+      Coupling = it1->first;
+      if (fYield[MN][Coupling]*1.E18 > 2.3)
+	fgExclusion->SetPoint(counter, MN/1000., Coupling);
+      counter++;
     }
-    couplingCounter = 0;
-    massCounter++;
   }
 
   // Set titles, etc.
@@ -489,7 +474,7 @@ void HeavyNeutrinoTotalScan::EndOfJobUser() {
   fgExclusion->GetYaxis()->SetTitle("Log of coupling");
   fgExclusion->SetLineColor(2);
   fgExclusion->SetLineWidth(3);
-  fgExclusion->Draw("P");
+  fgExclusion->Draw("AC");
   fgExclusion->Write();
 
   SaveAllPlots();

@@ -34,6 +34,8 @@ extern Double_t GammaTot(Double_t);
 extern Double_t tauN(Double_t);
 extern Double_t lambda(Double_t, Double_t, Double_t);
 extern Double_t ComputeDecay(Double_t);
+extern void SetCouplingForWeight(Double_t, Double_t, Double_t, Double_t);
+extern std::vector<Double_t> GetCouplingForWeight();
 
 // Masses                                                                                              
 
@@ -75,8 +77,8 @@ extern Double_t fK;
 extern Double_t fEta;
 extern Double_t fEtaprime;
 extern Double_t fsigmacc;
-extern Double_t fDtoTauNuBR;
-extern Double_t fDStoTauNuBR;
+extern Double_t fDtoTauBR;
+extern Double_t fDStoTauBR;
 
 // CKM                                                                                                 
 

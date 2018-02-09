@@ -76,12 +76,10 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
 
-  fSumGood     = 0.;
-  fNevents     = 0.;
-  fSumAll      = 0.;
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
+
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
@@ -172,9 +170,11 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
   fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
+}
 
-  fhAcc   = nullptr;
-  fhYield = nullptr;    
+void HeavyNeutrino::InitOutput() {
+
+  RegisterOutput("Output", &fPassSelection);
 }
 
 void HeavyNeutrino::InitHist() {
@@ -185,12 +185,12 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  4, -0.5, 3.5));
   BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
 
-  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of D meson production point", 20000., -250., 33000.));
-  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of D meson decay point",     20000., -250., 33000.));
-  BookHisto("hDTheta",        new TH1D("DTheta",     "D meson theta",              100,  0., 0.3));
-  BookHisto("hDLambda",       new TH1D("DLambda",    "D meson decay length",       100, -1., 40.));
-  BookHisto("hDPath",         new TH1D("DPath",      "D meson path in Z",          100, -1., 50.));
-  BookHisto("hDMom",          new TH1D("DMom",       "D meson momentum",           100, -1., 170.));
+  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of N mother production point", 20000., -250., 33000.));
+  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of N mother decay point",     20000., -250., 33000.));
+  BookHisto("hDTheta",        new TH1D("DTheta",     "N mother theta",              100,  0., 0.3));
+  BookHisto("hDLambda",       new TH1D("DLambda",    "N mother decay length",       100, -1., 40.));
+  BookHisto("hDPath",         new TH1D("DPath",      "N mother path in Z",          100, -1., 50.));
+  BookHisto("hDMom",          new TH1D("DMom",       "N mother momentum",           100, -1., 170.));
 
   BookHisto("hZHNLDecay",     new TH1D("ZHNLDecay",    "Z of HNL decay point",           100., 90., 190.));
   BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., 0., 170.));
@@ -255,12 +255,11 @@ void HeavyNeutrino::InitHist() {
   
   BookHisto("hInvMassMC",   new TH1D("InvMassMC",   "Invariant mass MC", 100, 999., 1001.));
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
-
-  BookHisto("hAcc",   new TH1D("Acc",   "Acceptance", 50, 1.E-6, 5.E-5));
-  BookHisto("hYield", new TH1D("Yield", "Yield",      50, 1.E-17, 1.E-15));
 }
 
 void HeavyNeutrino::Process(Int_t) {
+
+  fPassSelection = false;
 
   //TRecoLKrEvent*          LKrEvent  = (TRecoLKrEvent*)          GetEvent("LKr");
   TRecoLAVEvent*          LAVEvent  = (TRecoLAVEvent*)          GetEvent("LAV");
@@ -274,22 +273,12 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hPhysicsEventsVsCuts", CutID);
   CutID++;
 
-  Double_t MN             = 0.;
-  Double_t HNLTau         = 0.;
-  Double_t NDecayProb     = 0.;
-  Double_t NReachProb     = 0.;
-  Double_t LReach         = 0.;
-  Double_t LeptonUSquared = 0.;
-  Double_t DecayFactor    = 0.;
-  Double_t Weight         = 0.;
-  Double_t DProdProb      = 0.;
   Int_t counter           = 0;
   TLorentzVector mom1;
   TLorentzVector mom2;
-  TVector3 point1;
-  TVector3 point2;
-  TVector3 momentum1;
   Double_t p1,p2;
+  Double_t NReachProb = 0.;
+  Double_t NDecayProb = 0.;
 
   // Some plots of KinePart quantities
 
@@ -322,38 +311,13 @@ void HeavyNeutrino::Process(Int_t) {
 	}
       }
     }
+  }
 
-    // Computation of coupling-related quantities of all HNLs (good and bad)
-
+  if (GetWithMC()) {
+    Event *evt = GetMCEvent();
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-      KinePart *p = evt->GetKinePart(i);      
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	fNevents++;
-	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-	point2.SetXYZ(0., 0., fLInitialFV);
-	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	MN = ComputeHNLMass(p);
-	HNLTau = tauN(MN);
-	LReach = ComputeL(point1, point2, momentum1);
-	DecayFactor = ComputeDecay(MN);
-	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
-	  LeptonUSquared = fUeSquared;
-	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
-	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi")|| p->GetParticleName().Contains("K"))))
-	  LeptonUSquared = fUtauSquared;
-
-	if (p->GetProdPos().Z() < fTAXDistance)
-	  DProdProb = fDBeProdProb;
-	else if (p->GetProdPos().Z() >= fTAXDistance)
-	  DProdProb = fDCuProdProb;
-
-	// Weight to be associated to each HNL
-
-	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
-	fSumAll += Weight;
+      KinePart *p = evt->GetKinePart(i);
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999.) {
 
 	// Some more plots of KinePart quantities
 
@@ -369,7 +333,6 @@ void HeavyNeutrino::Process(Int_t) {
 	FillHisto("hHNLDecayProb", NDecayProb);
 	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
 	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
-	FillHisto("hWeight", Weight);
       }
     }
   }
@@ -516,7 +479,7 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t CDAMom = fCDAcomp->GetCDA();
   
-  // Compute distance of two-track momentum wrt target (extrapolation at target)
+  // Compute distance of two-track momentum wrt target/TAXs
   
   fDistcomp->SetLineDir(TotMom);    
   fDistcomp->SetLinePoint1(Vertex);
@@ -524,7 +487,20 @@ void HeavyNeutrino::Process(Int_t) {
   fDistcomp->ComputeDistance();
   
   Double_t TargetDist = fDistcomp->GetDistance();
+
+  fDistcomp->SetLineDir(TotMom);    
+  fDistcomp->SetLinePoint1(Vertex);
+  fDistcomp->SetPoint(0., 0., fTAXDistance + fTAXLength/2.);  
+  fDistcomp->ComputeDistance();
   
+  Double_t TAXDist = fDistcomp->GetDistance();
+  Double_t Extrap = 0.;
+
+  if (TargetDist <= TAXDist)
+    Extrap = TargetDist;
+  else
+    Extrap = TAXDist;
+
   // Compute distance of two-track vertex wrt beam axis
   
   fDistcomp->SetLinePoint1(0., 0., 102000.);
@@ -540,7 +516,7 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCDAvsZVertex_TrackToTrackInitial",          Zvertex / 1000.,          CDA / 1000.);
   FillHisto("hCDAvsZVertex_TotMomToBeamlineInitial",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 1
   FillHisto("hZvertexvsBeamlineDistInitial",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 1
-  FillHisto("hBeamlineDistvsTargetDist_TotMomInitial", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 1
+  FillHisto("hBeamlineDistvsTargetDist_TotMomInitial",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 1
 
   // Track selection, CUT 1: Two tracks in Spectrometer acceptance
 
@@ -661,7 +637,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 2
   FillHisto("hZvertexvsBeamlineDistAfterDownstreamTrack",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 2
-  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 2
+  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 2
   
   // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
   
@@ -714,7 +690,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 3
   FillHisto("hZvertexvsBeamlineDistAfterEnergyCuts",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 3
-  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterEnergyCuts", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 3
+  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterEnergyCuts",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 3
 
   // Veto cuts, CUT 8: LAV veto
   
@@ -824,7 +800,7 @@ void HeavyNeutrino::Process(Int_t) {
   
   FillHisto("hCDAvsZVertex_TotMomToBeamlineAfterVetoes",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 4
   FillHisto("hZvertexvsBeamlineDistAfterVetoes",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 4
-  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterVetoes", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 4
+  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterVetoes",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 4
 
   // Geometrical cuts, CUT 11: Cut on CDA of two tracks
 
@@ -863,7 +839,7 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCDAvsZVertex_TrackToTrackAfterCut",               Zvertex / 1000.,          CDA / 1000.);
   FillHisto("hCDAvsZVertex_TotMomToBeamlineAfterGeomCuts",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 5
   FillHisto("hZvertexvsBeamlineDistAfterGeomCuts",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 5
-  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterGeomCuts", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 5
+  FillHisto("hBeamlineDistvsTargetDist_TotMomAfterGeomCuts",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 5
   
   // Plot CDA vs Zvertex for events surviving previous selections
   
@@ -872,7 +848,9 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCDAvsZVertex_TrackToTrackFinal",          Zvertex / 1000.,          CDA / 1000.);
   FillHisto("hCDAvsZVertex_TotMomToBeamlineFinal",      Zvertex / 1000.,       CDAMom / 1000.);     // Reference plot, step 6
   FillHisto("hZvertexvsBeamlineDistFinal",              Zvertex / 1000., BeamlineDist / 1000.);     // Reference plot, step 6
-  FillHisto("hBeamlineDistvsTargetDist_TotMomFinal", TargetDist / 1000., BeamlineDist / 1000.);     // Reference plot, step 6
+  FillHisto("hBeamlineDistvsTargetDist_TotMomFinal",     Extrap / 1000., BeamlineDist / 1000.);     // Reference plot, step 6
+
+  fPassSelection = true;
 
   // Computation of invariant mass
   
@@ -896,41 +874,6 @@ void HeavyNeutrino::Process(Int_t) {
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
   FillHisto("hInvMassReco", invMass);
-
-  // Computation of coupling-related quantities of the only good HNL in each event
-
-  if (GetWithMC()) {
-    Event *evt = GetMCEvent();
-    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-      KinePart *p = evt->GetKinePart(i);
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999 && p->GetEndProcessName() == "good") {
-	point1.SetXYZ(p->GetProdPos().X(), p->GetProdPos().Y(), p->GetProdPos().Z());
-	point2.SetXYZ(0., 0., fLInitialFV);
-	momentum1.SetXYZ(p->GetInitial4Momentum().Px(), p->GetInitial4Momentum().Py(), p->GetInitial4Momentum().Pz());
-	MN = ComputeHNLMass(p);
-	HNLTau = tauN(MN);
-	LReach = ComputeL(point1, point2, momentum1);
-	DecayFactor = ComputeDecay(MN);
-	NReachProb = ComputeNReachProb(p, HNLTau, LReach);
-	NDecayProb = ComputeNDecayProb(p, HNLTau, fLFV);
-
-	if (p->GetParticleName().Contains("e") && !p->GetParticleName().Contains("nu_tau"))
-	  LeptonUSquared = fUeSquared;
-	else if (p->GetParticleName().Contains("mu") && !p->GetParticleName().Contains("nu_tau"))
-	  LeptonUSquared = fUmuSquared;
-	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi") || p->GetParticleName().Contains("K"))))
-	  LeptonUSquared = fUtauSquared;
-
-        if (p->GetProdPos().Z() < fTAXDistance)
-	  DProdProb = fDBeProdProb;
-	else if(p->GetProdPos().Z() >= fTAXDistance)
-          DProdProb = fDCuProdProb;
-	
-        Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
-	fSumGood += Weight;
-      }
-    }
-  }
 }
 
 void HeavyNeutrino::EndOfBurstUser() {
@@ -1018,9 +961,6 @@ void HeavyNeutrino::EndOfJobUser() {
   fhInvMassMC    = (TH1D*) fHisto.GetTH1("hInvMassMC");
   fhInvMassReco  = (TH1D*) fHisto.GetTH1("hInvMassReco");
 
-  fhAcc   = (TH1D*) fHisto.GetTH1("hAcc");
-  fhYield = (TH1D*) fHisto.GetTH1("hYield");
-
   // X axis title
 
   fhNk3pi   ->GetXaxis()->SetTitle("Number of k3pi");
@@ -1077,12 +1017,12 @@ void HeavyNeutrino::EndOfJobUser() {
   fhCDAvsZVertex_TrackToTrackAfterCut   ->GetXaxis()->SetTitle("Z [m]");
   fhCDAvsZVertex_TrackToTrackFinal      ->GetXaxis()->SetTitle("Z [m]");
   
-  fhBeamlineDistvsTargetDist_TotMomInitial             ->GetXaxis()->SetTitle("Target distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack->GetXaxis()->SetTitle("Target distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts     ->GetXaxis()->SetTitle("Target distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts       ->GetXaxis()->SetTitle("Target distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomAfterVetoes         ->GetXaxis()->SetTitle("Target distance [m]");
-  fhBeamlineDistvsTargetDist_TotMomFinal               ->GetXaxis()->SetTitle("Target distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomInitial             ->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts     ->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts       ->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomAfterVetoes         ->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fhBeamlineDistvsTargetDist_TotMomFinal               ->GetXaxis()->SetTitle("Target/TAX distance [m]");
   
   fhDeltaTimeFromCHOD    ->GetXaxis()->SetTitle("Time difference [ns]");
   fhNMUV3CandAssocToTrack->GetXaxis()->SetTitle("Number of candidates");
@@ -1098,9 +1038,6 @@ void HeavyNeutrino::EndOfJobUser() {
   
   fhInvMassMC   ->GetXaxis()->SetTitle("Invariant mass [MeV]");
   fhInvMassReco ->GetXaxis()->SetTitle("Invariant mass [MeV]");
-
-  fhAcc  ->GetXaxis()->SetTitle("Acceptance");
-  fhYield->GetXaxis()->SetTitle("Yield");
 
   // Y axis title
 
@@ -1147,19 +1084,6 @@ void HeavyNeutrino::EndOfJobUser() {
   fhSingleAddEnLKrCand->GetYaxis()->SetTitle("LKr additional energy [MeV]");
   fhAddEnLKrHit       ->GetYaxis()->SetTitle("LKr additional energy [GeV]");
   fhAddEnLKrCand      ->GetYaxis()->SetTitle("LKr additional energy [GeV]");
-
-  // Acceptance computation
-
-  Double_t Acceptance = fSumGood/fSumAll; 
-  Double_t MeanProb = fSumAll/fNevents;
-  Double_t Yield = Acceptance*MeanProb;
-
-  cout << endl << "Acceptance = " << fSumGood << "/" << fSumAll << " = " << Acceptance << endl;
-  cout << "Mean probability = " << fSumAll << "/" << fNevents << " = " << MeanProb << endl;
-  cout << "Yield = " << Acceptance << "*" << MeanProb << " = " << Yield << endl;
-
-  FillHisto("hAcc", Acceptance);
-  FillHisto("hYield", Yield);
 
   // Plot residual number of events after each cut
 
@@ -1253,7 +1177,4 @@ HeavyNeutrino::~HeavyNeutrino() {
 
   fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
-
-  fhAcc   = nullptr;
-  fhYield = nullptr;    
 }

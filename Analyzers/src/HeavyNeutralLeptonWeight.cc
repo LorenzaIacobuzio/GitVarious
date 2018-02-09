@@ -27,8 +27,8 @@
 /// coupling with the lepton the HNL is produced with, and weight. 
 /// The output can be accessed from another analyzer in the following way:
 /// \code
-/// std::vector<std::vector<Double_t, Double_t, Double_t>> Weights = 
-///   *(std::vector<std::vector<Double_t, Double_t, Double_t>>*)
+/// std::vector<std::map<std::string, Double_t>> Weights = 
+///   *(std::vector<std::map<std::string, Double_t>>*)
 ///   GetOutput("HeavyNeutralLeptonWeight.Output");
 /// \endcode
 ///
@@ -91,8 +91,13 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
   Double_t LReach         = 0.;
   Double_t LeptonUSquared = 0.;
   Double_t DecayFactor    = 0.;
+  Double_t ProdFactor     = 0.;
   Double_t Weight         = 0.;
   Double_t DProdProb      = 0.;
+  Bool_t isGood           = false;
+  TVector3 point1;
+  TVector3 point2;
+  TVector3 momentum1;
 
   fWeightContainer.clear();
 
@@ -117,16 +122,39 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
 	else if (p->GetParticleName() == "DS->Ntau" || p->GetParticleName().Contains("nu_tau") || (p->GetParticleName().Contains("tau") && (p->GetParticleName().Contains("rho") || p->GetParticleName().Contains("pi")|| p->GetParticleName().Contains("K"))))
 	  LeptonUSquared = fUtauSquared;
 
+	if (p->GetParticleName().Contains("tau->")) {
+	  if (p->GetParticleName().Contains("DS"))
+	    ProdFactor = fDStoTauBR;
+	  else
+	    ProdFactor = fDtoTauBR;
+	}
+	else
+	  ProdFactor = 1.;
+
 	if (p->GetProdPos().Z() < fTAXDistance)
 	  DProdProb = fDBeProdProb;
 	else if (p->GetProdPos().Z() >= fTAXDistance)
 	  DProdProb = fDCuProdProb;
 
-	std::vector<Double_t, Double_t, Double_t> triplet;
-	
-	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*LeptonUSquared;
-	triplet.push_back(MN, LeptonUSquared, Weight);
-	fWeightContainer.push_back(triplet);
+	if (p->GetEndProcessName() == "good")
+	  isGood = true;
+
+	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
+
+	std::map<std::string, Double_t> SingleHNL;
+
+	SingleHNL["Mass"] = MN;
+	SingleHNL["Lifetime"] = HNLTau;
+	SingleHNL["DecayFactor"] = DecayFactor;
+	SingleHNL["ReachProb"] = NReachProb;
+	SingleHNL["DecayProb"] = NDecayProb;
+	SingleHNL["LeptonUSquared"] = LeptonUSquared;
+	SingleHNL["ProdFactor"] = ProdFactor;
+	SingleHNL["ProdProb"] = DProdProb;
+	SingleHNL["IsGood"] = isGood;
+	SingleHNL["Weight"] = Weight;
+
+	fWeightContainer.push_back(SingleHNL);
       }
     }
   }
