@@ -8,15 +8,16 @@
 
 /// \class HeavyNeutrino              
 /// \Brief                                                                         
-/// Heavy neutral lepton selection, including weight and yield computation                      
+/// Heavy neutral lepton selection
 /// \EndBrief                                                                            
 /// \Detailed                                                                               
-/// If the analyzer is run on MC samples, it produces a weight to be associated 
-/// to each heavy neutral lepton in the sample. After applying selection cuts, 
-/// acceptance and yield per POT are also computed.
-/// If the analyzer is run on data samples, only the selection is applied.
-/// Several histograms plot quantities related to the MC HNL and to relevant quantities 
-/// after each series of cuts.
+/// Set of cuts for HNL studies, working both on MC samples and data.
+/// Several histograms are plotted after each series of cuts.
+/// A boolean with the outcome of the selection (whether the HNL passes or not the whole selection)
+/// is stored as output and can be retrieved from another analyzer in the following way:
+/// \code
+/// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
+/// \endcode
 /// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.
 /// The value of the squared HNL coupling and the values of the ratios between specific-flavour 
 /// couplings can be either set as external parameters from command line or taken as default values.

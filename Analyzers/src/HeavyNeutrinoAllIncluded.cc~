@@ -42,7 +42,7 @@
 #include <TStyle.h>
 #include <TROOT.h>
 #include <TPad.h>
-#include "HeavyNeutrinoAllInclusive.hh"
+#include "HeavyNeutrinoAllIncluded.hh"
 #include "MCSimple.hh"
 #include "functions.hh"
 #include "Event.hh"
@@ -63,10 +63,10 @@ using namespace NA62Constants;
 #define MCTriggerMask 0xFF
 #define LabelSize 0.05
 
-/// \class HeavyNeutrinoAllInclusive
+/// \class HeavyNeutrinoAllIncluded
 
-HeavyNeutrinoAllInclusive::HeavyNeutrinoAllInclusive(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrinoAllInclusive") {
+HeavyNeutrinoAllIncluded::HeavyNeutrinoAllIncluded(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrinoAllIncluded") {
 
   if (!GetIsTree()) return;
 
@@ -82,6 +82,7 @@ HeavyNeutrinoAllInclusive::HeavyNeutrinoAllInclusive(Core::BaseAnalysis *ba) :
   AddParam("CouplingStart", &fCouplingStart, -10.);
   AddParam("CouplingStop", &fCouplingStop, 0.);
   AddParam("CouplingStep", &fCouplingStep, 0.1);
+  AddParam("EnableCouplingScan", &fEnableCouplingScan, true);
 
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
@@ -90,6 +91,8 @@ HeavyNeutrinoAllInclusive::HeavyNeutrinoAllInclusive(Core::BaseAnalysis *ba) :
 
   // Scan histos
 
+  fhAcc               = nullptr;
+  fhYield             = nullptr;
   fhReachCoupling     = nullptr;
   fhDecayCoupling     = nullptr;
   fhWeightCoupling    = nullptr;
@@ -97,66 +100,67 @@ HeavyNeutrinoAllInclusive::HeavyNeutrinoAllInclusive(Core::BaseAnalysis *ba) :
   fgYieldCoupling     = nullptr;
   fgGammaTotCoupling  = nullptr;
   fgTauCoupling       = nullptr;
-
-  fhReachMass     = nullptr;
-  fhDecayMass     = nullptr;
-  fhWeightMass    = nullptr;
-  fgAccMass       = nullptr;
-  fgYieldMass     = nullptr;
-  fgGammaTotMass  = nullptr;
-  fgTauMass       = nullptr;
-
-  fgExclusion = nullptr;
+  fhReachMass         = nullptr;
+  fhDecayMass         = nullptr;
+  fhWeightMass        = nullptr;
+  fgAccMass           = nullptr;
+  fgYieldMass         = nullptr;
+  fgGammaTotMass      = nullptr;
+  fgTauMass           = nullptr;
+  fgExclusion         = nullptr;
 }
 
-void HeavyNeutrinoAllInclusive::InitHist() {
+void HeavyNeutrinoAllIncluded::InitHist() {
+
+  BookHisto("SingleValue/hAcc",   new TH1D("Acc", "Acceptance for one value of N mass and coupling",      1000, 1.E-30, 1.));
+  BookHisto("SingleValue/hYield", new TH1D("Yield", "Yield per POT for one value of N mass and coupling", 1000, 1.E-50, 1.E-10));
 
   BookHisto("CouplingScan/hReachCoupling",    new TH2D("ReachCoupling", "Probability of N reaching the FV vs coupling",    fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hDecayCoupling",    new TH2D("DecayCoupling", "Probability of N decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hWeightCoupling",   new TH2D("WeightCoupling", "N weight vs coupling",                           fN, fCouplingStart, fCouplingStop, 1000, 1.E-12, 1.E-9));
 
-  fgGammaTot = new TGraph();
-  fgGammaTot->SetNameTitle("CouplingScan/GammaTotCoupling", "N total decay width vs coupling");
-  BookHisto(fgGammaTot);
+  fgGammaTotCoupling = new TGraph();
+  fgGammaTotCoupling->SetNameTitle("CouplingScan/GammaTotCoupling", "N total decay width vs coupling");
+  BookHisto(fgGammaTotCoupling);
 
-  fgTau = new TGraph();
-  fgTau->SetNameTitle("CouplingScan/TauCoupling", "N lifetime vs coupling");
-  BookHisto(fgTau);
+  fgTauCoupling = new TGraph();
+  fgTauCoupling->SetNameTitle("CouplingScan/TauCoupling", "N lifetime vs coupling");
+  BookHisto(fgTauCoupling);
 
-  fgAcc = new TGraph();
-  fgAcc->SetNameTitle("CouplingScan/AccCoupling", "Acceptance vs coupling");
-  BookHisto(fgAcc);
+  fgAccCoupling = new TGraph();
+  fgAccCoupling->SetNameTitle("CouplingScan/AccCoupling", "Acceptance vs coupling");
+  BookHisto(fgAccCoupling);
 
-  fgYield = new TGraph();
-  fgYield->SetNameTitle("CouplingScan/YieldCoupling", "Yield per POT vs coupling");
-  BookHisto(fgYield);
+  fgYieldCoupling = new TGraph();
+  fgYieldCoupling->SetNameTitle("CouplingScan/YieldCoupling", "Yield per POT vs coupling");
+  BookHisto(fgYieldCoupling);
 
   BookHisto("MassScan/hReachMass",    new TH2D("ReachMass", "Probability of N reaching the FV vs coupling",    fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("MassScan/hDecayMass",    new TH2D("DecayMass", "Probability of N decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("MassScan/hWeightMass",   new TH2D("WeightMass", "N weight vs coupling",                           fN, fCouplingStart, fCouplingStop, 1000, 1.E-12, 1.E-9));
 
-  fgGammaTot = new TGraph();
-  fgGammaTot->SetNameTitle("MassScan/GammaTotMass", "N total decay width vs coupling");
-  BookHisto(fgGammaTot);
+  fgGammaTotMass = new TGraph();
+  fgGammaTotMass->SetNameTitle("MassScan/GammaTotMass", "N total decay width vs coupling");
+  BookHisto(fgGammaTotMass);
 
-  fgTau = new TGraph();
-  fgTau->SetNameTitle("MassScan/TauMass", "N lifetime vs coupling");
-  BookHisto(fgTau);
+  fgTauMass = new TGraph();
+  fgTauMass->SetNameTitle("MassScan/TauMass", "N lifetime vs coupling");
+  BookHisto(fgTauMass);
 
-  fgAcc = new TGraph();
-  fgAcc->SetNameTitle("MassScan/AccMass", "Acceptance vs coupling");
-  BookHisto(fgAcc);
+  fgAccMass = new TGraph();
+  fgAccMass->SetNameTitle("MassScan/AccMass", "Acceptance vs coupling");
+  BookHisto(fgAccMass);
 
-  fgYield = new TGraph();
-  fgYield->SetNameTitle("MassScan/YieldMass", "Yield per POT vs coupling");
-  BookHisto(fgYield);
+  fgYieldMass = new TGraph();
+  fgYieldMass->SetNameTitle("MassScan/YieldMass", "Yield per POT vs coupling");
+  BookHisto(fgYieldMass);
 
   fgExclusion = new TGraph();
   fgExclusion->SetNameTitle("TotalScan/Exclusion", "Sensitivity vs N mass and coupling");
   BookHisto(fgExclusion);
 }
 
-void HeavyNeutrinoAllInclusive::Process(Int_t) {
+void HeavyNeutrinoAllIncluded::Process(Int_t) {
   
   Double_t MN             = 0.;
   Double_t HNLTau         = 0.;
@@ -164,9 +168,15 @@ void HeavyNeutrinoAllInclusive::Process(Int_t) {
   Double_t NDecayProb     = 0.;
   Double_t NReachProb     = 0.;
   Double_t Weight         = 0.;
-  Int_t fNevents          = 0;
   Bool_t isGood           = false;
-  
+
+  if (fEnableCouplingScan == false) {
+
+    fCouplingStart = fUSquared;
+    fCouplingStep = 0.1;
+    fCouplingStop = fUSquared + 2*fCouplingStep;
+  }
+
   // Scan on the coupling                                                                       
   
   for(Double_t fCoupling = fCouplingStart; fCoupling < fCouplingStop-fCouplingStep; fCoupling += fCouplingStep) {
@@ -182,7 +192,6 @@ void HeavyNeutrinoAllInclusive::Process(Int_t) {
     if (GetWithMC()) {
       std::vector<std::map<std::string, Double_t>> Weights = *(std::vector<std::map<std::string, Double_t>>*)GetOutput("HeavyNeutralLeptonWeight.Output");
       for (UInt_t i = 0; i < Weights.size(); i++) {
-	fNevents++;
 	MN =  Weights[i]["Mass"];
 	HNLTau = Weights[i]["Lifetime"];
 	gammaTot = GammaTot(MN);
@@ -199,78 +208,70 @@ void HeavyNeutrinoAllInclusive::Process(Int_t) {
 	
 	FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
 	FillHisto("CouplingScan/hDecayCoupling",  fCoupling, NDecayProb);
-	FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);
-	
-	FillHisto("MassScan/hReachMass",  fCoupling, NReachProb);
-	FillHisto("MassScan/hDecayMass",  fCoupling, NDecayProb);
-	FillHisto("MassScan/hWeightMass", fCoupling, Weight);
+	FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);	
+	FillHisto("MassScan/hReachMass",          fCoupling, NReachProb);
+	FillHisto("MassScan/hDecayMass",          fCoupling, NDecayProb);
+	FillHisto("MassScan/hWeightMass",         fCoupling, Weight);
       }
     }
   }
   
-  Bool_t IsHNLGood = *(Bool_t)GetOutput("HeavyNeutrino.Output");
+  Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
   
   if (IsHNLGood == true) {
     for(Double_t fCoupling = fCouplingStart; fCoupling < fCouplingStop-fCouplingStep; fCoupling += fCouplingStep) {
       if (GetWithMC()) {
 	std::vector<std::map<std::string, Double_t>> Weights = *(std::vector<std::map<std::string, Double_t>>*)GetOutput("HeavyNeutralLeptonWeight.Output");
 	for (UInt_t i = 0; i < Weights.size(); i++) {
-	  Weight = Weights[i]["Weight"];
-	  fSumAll[round(MN)][fCoupling] += Weight;
+	  isGood = Weights[i]["IsHNLGood"];
+	  if (isGood >= 1.) {
+	    Weight = Weights[i]["Weight"];
+	    fSumAll[round(MN)][fCoupling] += Weight;
+	  }
 	}
       }
     }
   }
 }
 
-void HeavyNeutrinoAllInclusive::EndOfJobUser() {
+void HeavyNeutrinoAllIncluded::EndOfJobUser() {
   
   // Retrieve scan histos
 
+  fhAcc              = (TH1D*)fHisto.GetTH1("hAcc");
+  fhYield            = (TH1D*)fHisto.GetTH1("hYield");
   fhReachCoupling    = (TH2D*)fHisto.GetTH2("hReachCoupling");
   fhDecayCoupling    = (TH2D*)fHisto.GetTH2("hDecayCoupling");
   fhWeightCoupling   = (TH2D*)fHisto.GetTH2("hWeightCoupling");
-
-  fhReachMass    = (TH2D*)fHisto.GetTH2("hReachMass");
-  fhDecayMass    = (TH2D*)fHisto.GetTH2("hDecayMass");
-  fhWeightMass   = (TH2D*)fHisto.GetTH2("hWeightMass");
+  fhReachMass        = (TH2D*)fHisto.GetTH2("hReachMass");
+  fhDecayMass        = (TH2D*)fHisto.GetTH2("hDecayMass");
+  fhWeightMass       = (TH2D*)fHisto.GetTH2("hWeightMass");
 
   // X axis title
 
+  fhAcc             ->GetXaxis()->SetTitle("Acceptance");
+  fhYield           ->GetXaxis()->SetTitle("Acceptance");
   fhReachCoupling   ->GetXaxis()->SetTitle("Log of coupling");
   fhDecayCoupling   ->GetXaxis()->SetTitle("Log of coupling");
   fhWeightCoupling  ->GetXaxis()->SetTitle("Log of coupling");
-
-  fhReachMass   ->GetXaxis()->SetTitle("N mass [GeV]");
-  fhDecayMass   ->GetXaxis()->SetTitle("N mass [GeV]");
-  fhWeightMass  ->GetXaxis()->SetTitle("N mass [GeV]");
+  fhReachMass       ->GetXaxis()->SetTitle("N mass [GeV]");
+  fhDecayMass       ->GetXaxis()->SetTitle("N mass [GeV]");
+  fhWeightMass      ->GetXaxis()->SetTitle("N mass [GeV]");
 
   // Y axis title
 
   fhReachCoupling   ->GetYaxis()->SetTitle("Reach probability");
   fhDecayCoupling   ->GetYaxis()->SetTitle("Decay probability");
   fhWeightCoupling  ->GetYaxis()->SetTitle("Weight");
-
-  fhReachMass   ->GetYaxis()->SetTitle("Reach probability");
-  fhDecayMass   ->GetYaxis()->SetTitle("Decay probability");
-  fhWeightMass  ->GetYaxis()->SetTitle("Weight");
+  fhReachMass       ->GetYaxis()->SetTitle("Reach probability");
+  fhDecayMass       ->GetYaxis()->SetTitle("Decay probability");
+  fhWeightMass      ->GetYaxis()->SetTitle("Weight");
 
   // Acceptance computation                                                                       
 
   Double_t Coupling = 0.;
   Double_t MN = 0.;
   Int_t counter = 0;
-
-  for (auto it = fCouplings.begin(); it != fCouplings.end(); it++) {
-    Coupling = it->first;
-    fgGammaTot->SetPoint(counter, Coupling, fGammaTot[Coupling]);
-    fgTau     ->SetPoint(counter, Coupling, fTau     [Coupling]);
-    fgAcc     ->SetPoint(counter, Coupling, fAcc     [Coupling]);
-    fgYield   ->SetPoint(counter, Coupling, fYield   [Coupling]);
-    counter++;
-  }
-
-  counter = 0;
 
   for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
     MN = it->first;
@@ -279,20 +280,21 @@ void HeavyNeutrinoAllInclusive::EndOfJobUser() {
       fAcc[MN][Coupling] = fSumGood[MN][Coupling]/fSumAll[MN][Coupling];
       fProb[MN][Coupling] = fSumAll[MN][Coupling]/fNevents[MN][Coupling];
       fYield[MN][Coupling] = fAcc[MN][Coupling]*fProb[MN][Coupling];
-      counter++;
-    }
-  }
 
-  // Exclusion plot                                                                                    
+      FillHisto("hAcc",     fAcc[MN][Coupling]);
+      FillHisto("hYield", fYield[MN][Coupling]);
 
-  counter= 0;
+      fgGammaTotCoupling->SetPoint(counter, Coupling, fGammaTot[MN][Coupling]);
+      fgTauCoupling     ->SetPoint(counter, Coupling, fTau     [MN][Coupling]);
+      fgAccCoupling     ->SetPoint(counter, Coupling, fAcc     [MN][Coupling]);
+      fgYieldCoupling   ->SetPoint(counter, Coupling, fYield   [MN][Coupling]);
+      fgGammaTotMass    ->SetPoint(counter, MN/1000., fGammaTot[MN][Coupling]);
+      fgTauMass         ->SetPoint(counter, MN/1000., fTau     [MN][Coupling]);
+      fgAccMass         ->SetPoint(counter, MN/1000., fAcc     [MN][Coupling]);
+      fgYieldMass       ->SetPoint(counter, MN/1000., fYield   [MN][Coupling]);
 
-  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
-    MN = it->first;
-    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
-      Coupling = it1->first;
       if (fYield[MN][Coupling]*1.E18 > 2.3)
-        fgExclusion->SetPoint(counter, MN/1000., Coupling);
+	fgExclusion->SetPoint(counter, MN/1000., Coupling);
       counter++;
     }
   }
@@ -361,8 +363,10 @@ void HeavyNeutrinoAllInclusive::EndOfJobUser() {
   return;
 }
 
-HeavyNeutrinoAllInclusive::~HeavyNeutrinoAllInclusive() {
+HeavyNeutrinoAllIncluded::~HeavyNeutrinoAllIncluded() {
 
+  fhAcc              = nullptr;
+  fhYield            = nullptr;
   fhReachCoupling    = nullptr;
   fhDecayCoupling    = nullptr;
   fhWeightCoupling   = nullptr;
@@ -370,14 +374,12 @@ HeavyNeutrinoAllInclusive::~HeavyNeutrinoAllInclusive() {
   fgYieldCoupling    = nullptr;
   fgGammaTotCoupling = nullptr;
   fgTauCoupling      = nullptr;
-
-  fhReachMass    = nullptr;
-  fhDecayMass    = nullptr;
-  fhWeightMass   = nullptr;
-  fgAccMass      = nullptr;
-  fgYieldMass    = nullptr;
-  fgGammaTotMass = nullptr;
-  fgTauMass      = nullptr;
-
-  fgExclusion = nullptr;
+  fhReachMass        = nullptr;
+  fhDecayMass        = nullptr;
+  fhWeightMass       = nullptr;
+  fgAccMass          = nullptr;
+  fgYieldMass        = nullptr;
+  fgGammaTotMass     = nullptr;
+  fgTauMass          = nullptr;
+  fgExclusion        = nullptr;
 }

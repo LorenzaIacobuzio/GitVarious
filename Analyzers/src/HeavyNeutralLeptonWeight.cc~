@@ -27,8 +27,8 @@
 /// coupling with the lepton the HNL is produced with, and weight. 
 /// The output can be accessed from another analyzer in the following way:
 /// \code
-/// std::map<std::string, Double_t> Weights = 
-///   *(std::map<std::string, Double_t>*)
+/// std::vector<std::map<std::string, Double_t>> Weights = 
+///   *(std::vector<std::map<std::string, Double_t>>*)
 ///   GetOutput("HeavyNeutralLeptonWeight.Output");
 /// \endcode
 ///
@@ -99,6 +99,8 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
   TVector3 point2;
   TVector3 momentum1;
 
+  fWeightContainer.clear();
+
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
@@ -139,15 +141,20 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
 
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 
-	fWeightContainer["Mass", MN];
-	fWeightContainer["Lifetime", HNLTau];
-	fWeightContainer["DecayFactor", DecayFactor];
-	fWeightContainer["NReachProb", NReachProb];
-	fWeightContainer["NDecayProb", NDecayProb];
-	fWeightContainer["LeptonUSquared", LeptonUSquared];
-	fWeightContainer["ProdFactor", ProdFactor];
-	fWeightContainer["DProdProb", DProdProb];
-	fWeightContainer["IsGood", isGood];
+	std::map<std::string, Double_t> SingleHNL;
+
+	SingleHNL["Mass"] = MN;
+	SingleHNL["Lifetime"] = HNLTau;
+	SingleHNL["DecayFactor"] = DecayFactor;
+	SingleHNL["ReachProb"] = NReachProb;
+	SingleHNL["DecayProb"] = NDecayProb;
+	SingleHNL["LeptonUSquared"] = LeptonUSquared;
+	SingleHNL["ProdFactor"] = ProdFactor;
+	SingleHNL["ProdProb"] = DProdProb;
+	SingleHNL["IsGood"] = isGood;
+	SingleHNL["Weight"] = Weight;
+
+	fWeightContainer.push_back(SingleHNL);
       }
     }
   }

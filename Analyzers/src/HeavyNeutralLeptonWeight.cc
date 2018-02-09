@@ -8,7 +8,7 @@
 
 /// \class HeavyNeutralLeptonWeight
 /// \Brief                                                  
-/// Compute the weight associated to each heavy neutral lepton in a MC sample, as an output for the user
+/// Compute the weight associated to each heavy neutral lepton in a MC sample, as output for the user
 /// \EndBrief                                                                                           
 /// \Detailed
 /// For each HNL in the MC sample, a weight is computed for the user.
@@ -17,14 +17,18 @@
 /// couplings can be either set as external parameters from command line or taken as default values.   
 /// For example, if the user sets U2 = 1.E-10, and UeRatio = 5., UmuRatio = 1., UtauRatio = 3.5,       
 /// the specific-flavour coupling values will be: Ue2 = 5.25E-11, Umu2 = 1.05E-11, Utau2 = 3.68E-11.
-/// The values of the beginning of the fiducial volume and its length (identical to the ones set 
+/// The values of the beginning of the fiducial volume and its length (must be identical to the ones set
 /// in the MC macro for production) can be either set as external parameters from command line 
 /// or taken as default values.
 /// For example, if the user assigns 100000. to the beginning of the FV and 80000. to its length, the FV
 /// will begin at 100 m from the target centre and end at 180 m.
-/// A vector containing all the weight associated to the HNLs in a certain event is produced
-/// as output of the analyzer. Each vector element is a triplet containing HNL mass, 
-/// coupling with the lepton the HNL is produced with, and weight. 
+/// A vector of maps is produced as output of the analyzer. 
+/// Each map contains quantities associated to each HNL: mass (Mass), lifetime (Lifetime), 
+/// factor associated to its decay (DecayFactor), probability of reaching the FV (ReachProb) and
+/// decaying into it (DecayProb), coupling with the lepton produced with (LeptonUSquared), factor
+/// associated to its production (ProdFactor), probability of proton producing D meson in target/TAX
+/// (DProdProb), weight for each HNL (Weight), and a boolean to check if the HNL is associated to the
+/// two daughters of the event (IsGood).
 /// The output can be accessed from another analyzer in the following way:
 /// \code
 /// std::vector<std::map<std::string, Double_t>> Weights = 
@@ -94,7 +98,7 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
   Double_t ProdFactor     = 0.;
   Double_t Weight         = 0.;
   Double_t DProdProb      = 0.;
-  Bool_t isGood           = false;
+  Bool_t IsGood           = false;
   TVector3 point1;
   TVector3 point2;
   TVector3 momentum1;
@@ -137,7 +141,7 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
 	  DProdProb = fDCuProdProb;
 
 	if (p->GetEndProcessName() == "good")
-	  isGood = true;
+	  IsGood = true;
 
 	Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
 
@@ -151,7 +155,7 @@ void HeavyNeutralLeptonWeight::Process(Int_t) {
 	SingleHNL["LeptonUSquared"] = LeptonUSquared;
 	SingleHNL["ProdFactor"] = ProdFactor;
 	SingleHNL["ProdProb"] = DProdProb;
-	SingleHNL["IsGood"] = isGood;
+	SingleHNL["IsGood"] = IsGood;
 	SingleHNL["Weight"] = Weight;
 
 	fWeightContainer.push_back(SingleHNL);
