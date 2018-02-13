@@ -11,7 +11,7 @@
 /// a scan on the coupling or on the mass, or for both
 /// \EndBrief                                                                                           
 /// \Detailed                                                                                           
-/// After retrieving all HNL weights using the tool called HeavyNeutralLeptonWeight, 
+/// After retrieving all HNL weights using the tool called HNLWeight, 
 /// and checking if an event passed the selection implemented in the analyzer HeavyNeutrino,  
 /// acceptance and yield per POT are computed. 
 /// Different sets of plots are produced in different cases:
@@ -25,7 +25,7 @@
 /// exclusion plot is produced as a function of HNL mass and coupling.                      
 /// Thus, the analyzer is able to run either on MC samples of just one HNL mass or on samples
 /// containing HNLs of different masses.                                                                
-/// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.  
+/// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.  
 /// The values of the ratios between specific-flavour couplings can be either set as external           
 /// parameters from command line or taken as default values.                                            
 /// For example, if the user sets USquared = 1.E-10, UeSquaredRatio = 5., UmuSquaredRatio = 1., 
@@ -60,7 +60,7 @@
 #include "Persistency.hh"
 #include "BeamParameters.hh"
 #include "HNLFunctions.hh"
-#include "HeavyNeutralLeptonWeight.hh"
+#include "HNLWeight.hh"
 #include "HeavyNeutrinoScan.hh"
 
 using namespace std;

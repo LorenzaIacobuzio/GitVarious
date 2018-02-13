@@ -12,7 +12,7 @@
 /// \EndBrief                                                                                           
 /// \Detailed
 /// For each HNL in the MC sample, a weight is computed for the user.
-/// This tool makes use of an external library implemented in PhysicsObjects, called HNLFunctions.
+/// This analyzer makes use of a ToolsLib, called HNLFunctions.
 /// A pointer to the current processed event is needed as first argument of the function ComputeWeight.
 /// The value of the squared HNL coupling and the values of the ratios between specific-flavour        
 /// couplings are also passed as arguments of the tool.   
@@ -46,13 +46,6 @@
 using namespace std;
 
 /// \class HNLWeight
-
-HNLWeight::HNLWeight() {
-
-  if (!GetIsTree()) return;
-
-  RequestAllMCTrees();
-}
 
 std::vector<std::map<std::string, Double_t>> HNLWeight::ComputeWeight(Event* evt, Double_t USquared, Double_t UeSquaredRatio, Double_t UmuSquaredRatio, Double_t UtauSquaredRatio, Double_t LInitialFV, Double_t LFV) {
 

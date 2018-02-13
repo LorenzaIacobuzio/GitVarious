@@ -15,8 +15,18 @@
 #include <TChain.h>
 #include "Rtypes.h"
 
-extern std::vector<std::map<std::string, Double_t>> ComputeWeight(Event*, Double_t, Double_t, Double_t, Double_t, Double_t, Double_t);
+class HNLWeight {
 
-extern std::vector<std::map<std::string, Double_t>> fWeightContainer;
+public:
+  
+  std::vector<std::map<std::string, Double_t>> ComputeWeight(Event*, Double_t, Double_t, Double_t, Double_t, Double_t, Double_t);
+
+private:
+  
+  HNLWeight() {}
+  ~HNLWeight() {}
+
+  std::vector<std::map<std::string, Double_t>> fWeightContainer;
+};
 
 #endif

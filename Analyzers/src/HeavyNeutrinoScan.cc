@@ -11,7 +11,7 @@
 /// a scan on the coupling or on the mass, or for both
 /// \EndBrief                                                                                           
 /// \Detailed                                                                                           
-/// After retrieving all HNL weights using the tool called HeavyNeutralLeptonWeight, 
+/// After retrieving all HNL weights using the tool called HNLWeight, 
 /// and checking if an event passed the selection implemented in the analyzer HeavyNeutrino,  
 /// acceptance and yield per POT are computed. 
 /// Different sets of plots are produced in different cases:
@@ -267,7 +267,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
   if (IsHNLGood == true) {
     for(Double_t fCoupling = fCouplingStart; fCoupling < fCouplingStop-fCouplingStep; fCoupling += fCouplingStep) {
       if (GetWithMC()) {
-	std::vector<std::map<std::string, Double_t>> Weights = *(std::vector<std::map<std::string, Double_t>>*)GetOutput("HeavyNeutralLeptonWeight.Output");
+	Event *evt = GetMCEvent();
+	std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
+
 	for (UInt_t i = 0; i < Weights.size(); i++) {
 	  isGood = Weights[i]["IsHNLGood"];
 	  if (isGood >= 1.) {

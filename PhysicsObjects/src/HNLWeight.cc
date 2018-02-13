@@ -47,14 +47,9 @@ using namespace std;
 
 /// \class HNLWeight
 
-HNLWeight::HNLWeight() {
+std::vector<std::map<std::string, Double_t>> fWeightContainer;
 
-  if (!GetIsTree()) return;
-
-  RequestAllMCTrees();
-}
-
-std::vector<std::map<std::string, Double_t>> HNLWeight::ComputeWeight(Event* evt, Double_t USquared, Double_t UeSquaredRatio, Double_t UmuSquaredRatio, Double_t UtauSquaredRatio, Double_t LInitialFV, Double_t LFV) {
+std::vector<std::map<std::string, Double_t>> ComputeWeight(Event* evt, Double_t USquared, Double_t UeSquaredRatio, Double_t UmuSquaredRatio, Double_t UtauSquaredRatio, Double_t LInitialFV, Double_t LFV) {
 
   fUSquared = USquared;
   fUeSquaredRatio = UeSquaredRatio;
