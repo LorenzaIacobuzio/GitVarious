@@ -1,3 +1,16 @@
+// ---------------------------------------------------------------                             
+//                                                                                                      
+// History:                                                                                             
+//                                                                                                      
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                               
+//                                                                                                      
+// ---------------------------------------------------------------                             
+/// \class HNLFunctions                                                                               
+/// \Brief                                                                                       
+/// Functions to compute quantities related to heavy neutral leptons. All BR formulae are taken from
+/// Shaposhnikov's JHEP10(2007)015 and JHEP11(2013)101
+/// \EndBrief                                                                                           
+
 #include "HNLFunctions.hh"
 
 using namespace std;
@@ -144,7 +157,7 @@ Double_t ComputeL(TVector3 p1, TVector3 p2, TVector3 mom1) {
 
 Double_t ComputeNDecayProb(KinePart* p, Double_t tau, Double_t l) {
 
-  Double_t NProb  = 1. - TMath::Exp(-l/(p->GetInitial4Momentum().Beta()*p->GetInitial4Momentum().Gamma()*fcLight*tau));
+  Double_t NProb  = 1. - ComputeNReachProb(p, tau, l);
 
   return NProb;
 }

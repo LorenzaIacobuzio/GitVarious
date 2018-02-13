@@ -18,7 +18,7 @@
 /// \code
 /// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
 /// \endcode
-/// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.
+/// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.
 /// The value of the squared HNL coupling and the values of the ratios between specific-flavour 
 /// couplings can be either set as external parameters from command line or taken as default values.
 /// For example, if the user sets USquared = 1.E-10, and UeSquaredRatio = 5., UmuSquaredRatio = 1., 
@@ -56,7 +56,7 @@
 #include "GeometricAcceptance.hh"
 #include "TriggerConditions.hh"
 #include "HNLFunctions.hh"
-#include "HNLWeight.hh"
+#include "HeavyNeutralLeptonWeight.hh"
 #include "HeavyNeutrino.hh"
 
 using namespace std;

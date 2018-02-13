@@ -791,23 +791,3 @@ Double_t ComputeDecay(Double_t MN) {
 
   return br;
 }
-
-void SetCouplingForWeight(Double_t USquared, Double_t UeSquared, Double_t UmuSquared, Double_t UtauSquared) {
-
-  fUSquared = USquared;
-  fUeSquared = UeSquared;
-  fUmuSquared = UmuSquared;
-  fUtauSquared = UtauSquared;
-}
-
-std::vector<Double_t> GetCouplingForWeight() {
-  
-  std::vector<Double_t> U;
-
-  U.push_back(fUSquared);
-  U.push_back(fUeSquared);
-  U.push_back(fUmuSquared);
-  U.push_back(fUtauSquared);
-
-  return U;
-}
