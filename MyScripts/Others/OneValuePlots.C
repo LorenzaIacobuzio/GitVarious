@@ -1,5 +1,5 @@
 void OneValuePlots() {
-  TFile *f1 = TFile::Open("/home/li/Desktop/HNL1GeVAnalysis.root");
+  TFile *f1 = TFile::Open("/home/li/Desktop/.root");
   TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrino");  
   TIter next(dir1->GetListOfKeys());
   TKey *key;
