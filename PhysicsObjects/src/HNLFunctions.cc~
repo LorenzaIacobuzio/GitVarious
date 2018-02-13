@@ -793,7 +793,7 @@ Double_t ComputeDecay(Double_t MN) {
 }
 
 void SetCouplingForWeight(Double_t USquared, Double_t UeSquared, Double_t UmuSquared, Double_t UtauSquared) {
-  cout<<fUSquared<<" "<<fUeSquared<<endl;
+
   fUSquared = USquared;
   fUeSquared = UeSquared;
   fUmuSquared = UmuSquared;

@@ -1,31 +1,30 @@
-#ifndef HEAVYNEUTRINOALLINCLUDED_HH
-#define HEAVYNEUTRINOALLINCLUDED_HH
+// ---------------------------------------------------------------                                   
+// History:                                                                                          
+//                                                                                                    
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                              
+//                                                                                                     
+// --------------------------------------------------------------- 
+
+#ifndef HEAVYNEUTRINOSCAN_HH
+#define HEAVYNEUTRINOSCAN_HH
 
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
 #include <TCanvas.h>
 #include "Analyzer.hh"
-#include "MCSimple.hh"
-#include "DetectorAcceptance.hh"
-#include "SpectrometerTrackVertex.hh"
-#include "TwoLinesCDA.hh"
-#include "PointLineDistance.hh"
-#include "LAVMatching.hh"
-#include "SAVMatching.hh"
-#include "MCInfo.hh"
 
 class TH1I;
 class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrinoAllIncluded : public NA62Analysis::Analyzer {
+class HeavyNeutrinoScan : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrinoAllIncluded(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrinoAllIncluded();
+  HeavyNeutrinoScan(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoScan();
   void InitHist();
   void InitOutput() {}
   void DefineMCSimple() {}
@@ -50,8 +49,16 @@ protected:
   std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAll;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
+  std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTarget;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTarget;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTarget;
+  std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTAX;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTAX;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fAcc;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
+  std::map<Double_t, std::map<Double_t, Double_t>> fYieldTarget;
+  std::map<Double_t, std::map<Double_t, Double_t>> fYieldTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fProb;
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
@@ -62,6 +69,8 @@ protected:
 
   TH1D *fhAcc;
   TH1D *fhYield;
+  TH1D *fhYieldTarget;
+  TH1D *fhYieldTAX;
   TH2D *fhReachCoupling;
   TH2D *fhDecayCoupling;
   TH2D *fhWeightCoupling;
@@ -71,10 +80,14 @@ protected:
 
   TGraph *fgAccCoupling;
   TGraph *fgYieldCoupling;
+  TGraph *fgYieldCouplingTarget;
+  TGraph *fgYieldCouplingTAX;
   TGraph *fgGammaTotCoupling;
   TGraph *fgTauCoupling;
   TGraph *fgAccMass;
   TGraph *fgYieldMass;
+  TGraph *fgYieldMassTarget;
+  TGraph *fgYieldMassTAX;
   TGraph *fgGammaTotMass;
   TGraph *fgTauMass;
   TGraph *fgExclusion;

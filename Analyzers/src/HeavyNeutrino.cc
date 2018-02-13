@@ -21,8 +21,17 @@
 /// This analyzer makes use of an external library implemented in PhysicsObjects, called HNLFunctions.
 /// The value of the squared HNL coupling and the values of the ratios between specific-flavour 
 /// couplings can be either set as external parameters from command line or taken as default values.
-/// For example, if the user sets U2 = 1.E-10, and UeRatio = 5., UmuRatio = 1., UtauRatio = 3.5,
-/// the specific-flavour coupling values will be: Ue2 = 5.25E-11, Umu2 = 1.05E-11, Utau2 = 3.68E-11.
+/// For example, if the user sets USquared = 1.E-10, and UeSquaredRatio = 5., UmuSquaredRatio = 1., 
+/// UtauSquaredRatio = 3.5, the specific-flavour coupling values will be: 
+/// UeSquared = 5.25E-11, UmuSquared = 1.05E-11, UtauSquared = 3.68E-11.
+/// Default values are: USquared = 1.E-6, UeSquaredRatio = 1., UmuSquaredRatio = 16., 
+/// UtauSquaredRatio = 3.8.
+/// The values of the beginning of the fiducial volume and its length (must be identical to the ones set
+/// in the MC macro for production) can be either set as external parameters from command line or 
+/// taken as default values.
+/// For example, if the user assigns 100000. to the beginning of the FV and 80000. to its length, the FV
+/// will begin at 100 m from the target centre and end at 180 m.
+/// Default values are: InitialFV = 102500., LFV = 77500.
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
 /// \EndDetailed               
@@ -35,22 +44,19 @@
 #include <TStyle.h>
 #include <TROOT.h>
 #include <TPad.h>
-#include "HeavyNeutrino.hh"
 #include "MCSimple.hh"
 #include "functions.hh"
 #include "Event.hh"
+#include "MCInfo.hh"
 #include "Persistency.hh"
 #include "BeamParameters.hh"
+#include "DetectorAcceptance.hh"
+#include "SpectrometerTrackVertex.hh"
 #include "DownstreamTrack.hh"
 #include "GeometricAcceptance.hh"
 #include "TriggerConditions.hh"
-#include "Math/WrappedTF1.h"
-#include "Math/WrappedMultiTF1.h"
-#include "Math/AdaptiveIntegratorMultiDim.h"
-#include "Math/GaussLegendreIntegrator.h"
-#include "TF1.h"
-#include "TF2.h"
 #include "HNLFunctions.hh"
+#include "HeavyNeutrino.hh"
 
 using namespace std;
 using namespace NA62Analysis;
@@ -316,12 +322,22 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
+    std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
+
+    for (UInt_t i = 0; i < Weights.size(); i++) {
+      NReachProb = Weights[i]["ReachProb"];
+      NDecayProb = Weights[i]["DecayProb"];
+
+      FillHisto("hHNLReachProb", NReachProb);
+      FillHisto("hHNLDecayProb", NDecayProb);
+    }
+
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999.) {
-
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
+	
 	// Some more plots of KinePart quantities
-
+	
 	FillHisto("hZDProd", p->GetPosAtCheckPoint(0).z());
 	FillHisto("hZDDecay", p->GetProdPos().Z());
 	FillHisto("hDTheta", p->GetPosAtCheckPoint(0).x());
@@ -330,8 +346,6 @@ void HeavyNeutrino::Process(Int_t) {
 	FillHisto("hDMom", p->GetMomAtCheckPoint(0).Y()/1000.);
 	FillHisto("hZHNLDecay", p->GetEndPos().Z()/1000.);
 	FillHisto("hHNLGamma", p->GetInitial4Momentum().Gamma());
-	FillHisto("hHNLReachProb", NReachProb);
-	FillHisto("hHNLDecayProb", NDecayProb);
 	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
 	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
       }
@@ -821,7 +835,7 @@ void HeavyNeutrino::Process(Int_t) {
   
   // Geometrical cuts, CUT 13: Cut on Z of two-track vertex
 
-  if (Zvertex <= 102500. || Zvertex >= 180000.)
+  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
     return;
 
   FillHisto("hPhysicsEventsVsCuts", CutID);

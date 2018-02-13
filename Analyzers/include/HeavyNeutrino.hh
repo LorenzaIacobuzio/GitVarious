@@ -1,3 +1,10 @@
+// ---------------------------------------------------------------                                    
+// History:                                                                                           
+//                                                                                                    
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                             
+//                                                                                                    
+// --------------------------------------------------------------- 
+
 #ifndef HEAVYNEUTRINO_HH
 #define HEAVYNEUTRINO_HH
 
@@ -6,14 +13,10 @@
 #include <vector>
 #include <TCanvas.h>
 #include "Analyzer.hh"
-#include "MCSimple.hh"
-#include "DetectorAcceptance.hh"
-#include "SpectrometerTrackVertex.hh"
 #include "TwoLinesCDA.hh"
 #include "PointLineDistance.hh"
 #include "LAVMatching.hh"
 #include "SAVMatching.hh"
-#include "MCInfo.hh"
 
 class TH1I;
 class TH2F;
@@ -47,6 +50,8 @@ protected:
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
   Bool_t fPassSelection;
+  Double_t fInitialFV;
+  Double_t fLFV;
 
   // Histos
 
