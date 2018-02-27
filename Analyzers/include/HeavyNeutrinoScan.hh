@@ -41,6 +41,7 @@ protected:
 
   // Scan variables                                                                                   
 
+  Double_t fMassForSingleValue;
   Double_t fCouplingStart;
   Double_t fCouplingStop;
   Double_t fCouplingStep;
@@ -50,10 +51,8 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAll;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTarget;
-  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTarget;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTAX;
-  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fAcc;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
@@ -64,6 +63,24 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
   std::map<Double_t, Double_t>                     fCouplings;
   std::map<Double_t, Double_t>                     fMasses;
+
+  // One value histos
+
+  TH1D *fhZDProd;
+  TH1D *fhZDDecay;
+  TH1D *fhDTheta;
+  TH1D *fhDLambda;
+  TH1D *fhDPath;
+  TH1D *fhDMom;
+  TH1D *fhZHNLDecay;
+  TH1D *fhHNLGamma;
+  TH1D *fhHNLDecayProb;
+  TH1D *fhHNLReachProb;
+  TH1D *fhHNLTheta;
+  TH1D *fhHNLMom;
+  TH1D *fhWeight;
+  TH1D *fhCoupling;
+  TH1D *fhMass;
 
   // Scan histos                                                                  
 

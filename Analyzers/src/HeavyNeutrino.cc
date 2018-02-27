@@ -108,20 +108,6 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   fhNEvents  = nullptr;
   fhN2tracks = nullptr;
   fhNtracks  = nullptr;
-
-  fhZDProd       = nullptr;
-  fhZDDecay      = nullptr;
-  fhDTheta       = nullptr;
-  fhDLambda      = nullptr;
-  fhDPath        = nullptr;
-  fhDMom         = nullptr;
-  fhZHNLDecay    = nullptr;
-  fhHNLGamma     = nullptr;
-  fhHNLDecayProb = nullptr;
-  fhHNLReachProb = nullptr;
-  fhHNLTheta     = nullptr;
-  fhHNLMom       = nullptr;
-  fhWeight       = nullptr;
   fhMomPi        = nullptr;
   fhMomMu        = nullptr;
 
@@ -176,7 +162,6 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   fhAddEnLKrHit        = nullptr;
   fhAddEnLKrCand       = nullptr;
 
-  fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
 }
 
@@ -192,23 +177,8 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hNEvents",  new TH1D("NEvents",  "Number of total processed events" , 1, 0., 1.));
   BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  4, -0.5, 3.5));
   BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
-
-  BookHisto("hZDProd",        new TH1D("ZDProd", "Z of N mother production point", 20000., -250., 33000.));
-  BookHisto("hZDDecay",       new TH1D("ZDDecay", "Z of N mother decay point",     20000., -250., 33000.));
-  BookHisto("hDTheta",        new TH1D("DTheta",     "N mother theta",              100,  0., 0.3));
-  BookHisto("hDLambda",       new TH1D("DLambda",    "N mother decay length",       100, -1., 40.));
-  BookHisto("hDPath",         new TH1D("DPath",      "N mother path in Z",          100, -1., 50.));
-  BookHisto("hDMom",          new TH1D("DMom",       "N mother momentum",           100, -1., 170.));
-
-  BookHisto("hZHNLDecay",     new TH1D("ZHNLDecay",    "Z of HNL decay point",           100., 90., 190.));
-  BookHisto("hHNLGamma",      new TH1D("HNLGamma",     "Lorentz gamma of HNL",           50., 0., 170.));
-  BookHisto("hHNLDecayProb",  new TH1D("HNLDecayProb", "HNL decay probability",          100., 0., 0.0065));
-  BookHisto("hHNLReachProb",  new TH1D("HNLReachProb", "HNL probability of reaching FV", 100., 0.99, 1.001));
-  BookHisto("hHNLTheta",      new TH1D("HNLTheta",     "HNL theta",                      100., 0., 0.5));
-  BookHisto("hHNLMom",        new TH1D("HNLMom",       "HNL momentum",                   100., -0.5, 200.));
-  BookHisto("hWeight",        new TH1D("Weight",       "Weight",                         1000, 1.E-15, 1.E-12));
-  BookHisto("hMomPi",         new TH1D("MomPi",        "Pion momentum",                  100, -0.5, 200.));
-  BookHisto("hMomMu",         new TH1D("MomMu",        "Muon momentum",                  100, -0.5, 200.));
+  BookHisto("hMomPi",    new TH1D("MomPi",    "Pion momentum",                     100, -0.5, 200.));
+  BookHisto("hMomMu",    new TH1D("MomMu",    "Muon momentum",                     100, -0.5, 200.));
 
   BookHisto("hXYSpec0Reco", new TH2D("XYSpec0Reco",        "Two-track reconstructed events at CH1",  100, -1.5, 1.5, 100, -1.5, 1.5)); 
   BookHisto("hXYSpec1Reco", new TH2D("XYSpec1Reco",        "Two-track reconstructed events at CH2",  100, -1.5, 1.5, 100, -1.5, 1.5));
@@ -260,8 +230,7 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hSingleAddEnLKrCand", new TH2D("SingleAddEnLKrCand", "Single candidate energy vs time, for additional LKr candidates", 250, -100., 100, 250, 0., 100.));
   BookHisto("hAddEnLKrHit",        new TH2D("AddEnLKrHit", "Additional energy vs time, for LKr hits",                               250, -100., 100, 250, 0., 10.));
   BookHisto("hAddEnLKrCand",       new TH2D("AddEnLKrCand", "Additional energy vs time, for LKr candidates",                        250, -100., 100, 250, 0., 10.));
-  
-  BookHisto("hInvMassMC",   new TH1D("InvMassMC",   "Invariant mass MC", 100, 999., 1001.));
+
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
 }
 
@@ -285,8 +254,6 @@ void HeavyNeutrino::Process(Int_t) {
   TLorentzVector mom1;
   TLorentzVector mom2;
   Double_t p1,p2;
-  Double_t NReachProb = 0.;
-  Double_t NDecayProb = 0.;
 
   // Some plots of KinePart quantities
 
@@ -315,44 +282,11 @@ void HeavyNeutrino::Process(Int_t) {
 	  FillHisto("hMomPi",  p1/1000.);
 	  FillHisto("hMomMu",  p2/1000.);
 	  FillHisto("hP1vsP2", p1/1000., p2/1000.);
-	  FillHisto("hInvMassMC", (mom1+mom2).M2()/1000.);
 	}
       }
     }
   }
-
-  if (GetWithMC()) {
-    Event *evt = GetMCEvent();
-    std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
-
-    for (UInt_t i = 0; i < Weights.size(); i++) {
-      NReachProb = Weights[i]["ReachProb"];
-      NDecayProb = Weights[i]["DecayProb"];
-
-      FillHisto("hHNLReachProb", NReachProb);
-      FillHisto("hHNLDecayProb", NDecayProb);
-    }
-
-    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-      KinePart *p = evt->GetKinePart(i);
-      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	
-	// Some more plots of KinePart quantities
-	
-	FillHisto("hZDProd", p->GetPosAtCheckPoint(0).z());
-	FillHisto("hZDDecay", p->GetProdPos().Z());
-	FillHisto("hDTheta", p->GetPosAtCheckPoint(0).x());
-	FillHisto("hDLambda", p->GetPosAtCheckPoint(0).y());
-	FillHisto("hDPath", p->GetMomAtCheckPoint(0).X());
-	FillHisto("hDMom", p->GetMomAtCheckPoint(0).Y()/1000.);
-	FillHisto("hZHNLDecay", p->GetEndPos().Z()/1000.);
-	FillHisto("hHNLGamma", p->GetInitial4Momentum().Gamma());
-	FillHisto("hHNLTheta", p->GetMomAtCheckPoint(0).Z());
-	FillHisto("hHNLMom", p->GetMomAtCheckPoint(0).T()/1000.);
-      }
-    }
-  }
-
+  
   // Compute number of processed events
 
   FillHisto("hNEvents", 0.5);
@@ -906,22 +840,8 @@ void HeavyNeutrino::EndOfJobUser() {
   fhNEvents  = (TH1D*) fHisto.GetTH1("hNEvents");
   fhN2tracks = (TH1D*) fHisto.GetTH1("hN2tracks");
   fhNtracks  = (TH1D*) fHisto.GetTH1("hNtracks");
-
-  fhZDProd       = (TH1D*) fHisto.GetTH1("hZDProd");
-  fhZDDecay      = (TH1D*) fHisto.GetTH1("hZDDecay");
-  fhDTheta       = (TH1D*) fHisto.GetTH1("hDTheta");
-  fhDLambda      = (TH1D*) fHisto.GetTH1("hDLambda");
-  fhDPath        = (TH1D*) fHisto.GetTH1("hDPath");
-  fhDMom         = (TH1D*) fHisto.GetTH1("hDMom");
-  fhZHNLDecay    = (TH1D*) fHisto.GetTH1("hZHNLDecay");
-  fhHNLGamma     = (TH1D*) fHisto.GetTH1("hHNLGamma");
-  fhHNLDecayProb = (TH1D*) fHisto.GetTH1("hHNLDecayProb");
-  fhHNLReachProb = (TH1D*) fHisto.GetTH1("hHNLReachProb");
-  fhHNLTheta     = (TH1D*) fHisto.GetTH1("hHNLTheta");
-  fhHNLMom       = (TH1D*) fHisto.GetTH1("hHNLMom");
   fhMomPi        = (TH1D*) fHisto.GetTH1("hMomPi");
   fhMomMu        = (TH1D*) fHisto.GetTH1("hMomMu");
-  fhWeight       = (TH1D*) fHisto.GetTH1("hWeight");
 
   fhXYSpec0Reco = (TH2D*) fHisto.GetTH2("hXYSpec0Reco");
   fhXYSpec1Reco = (TH2D*) fHisto.GetTH2("hXYSpec1Reco");
@@ -973,8 +893,7 @@ void HeavyNeutrino::EndOfJobUser() {
   fhSingleAddEnLKrCand = (TH2D*) fHisto.GetTH2("hSingleAddEnLKrCand");
   fhAddEnLKrHit        = (TH2D*) fHisto.GetTH2("hAddEnLKrHit");
   fhAddEnLKrCand       = (TH2D*) fHisto.GetTH2("hAddEnLKrCand");
-  
-  fhInvMassMC    = (TH1D*) fHisto.GetTH1("hInvMassMC");
+
   fhInvMassReco  = (TH1D*) fHisto.GetTH1("hInvMassReco");
 
   // X axis title
@@ -984,22 +903,8 @@ void HeavyNeutrino::EndOfJobUser() {
   fhNEvents ->GetXaxis()->SetTitle("Number of events");
   fhN2tracks->GetXaxis()->SetTitle("Number of two-track events");
   fhNtracks ->GetXaxis()->SetTitle("Number of tracks in each event");
-
-  fhZDProd      ->GetXaxis()->SetTitle("Z [mm]");
-  fhZDDecay     ->GetXaxis()->SetTitle("Z [mm]");
-  fhDTheta      ->GetXaxis()->SetTitle("Theta [rad]");
-  fhDLambda     ->GetXaxis()->SetTitle("Decay length [mm]");
-  fhDPath       ->GetXaxis()->SetTitle("Z [mm]");
-  fhDMom        ->GetXaxis()->SetTitle("P [GeV]");
-  fhZHNLDecay   ->GetXaxis()->SetTitle("Z [m]");
-  fhHNLGamma    ->GetXaxis()->SetTitle("Lorentz gamma");
-  fhHNLDecayProb->GetXaxis()->SetTitle("Decay probability");
-  fhHNLReachProb->GetXaxis()->SetTitle("Reach probability");
-  fhHNLTheta    ->GetXaxis()->SetTitle("Theta [rad]");
-  fhHNLMom      ->GetXaxis()->SetTitle("P [GeV]");
   fhMomPi       ->GetXaxis()->SetTitle("P [GeV]");
   fhMomMu       ->GetXaxis()->SetTitle("P [GeV]");
-  fhWeight      ->GetXaxis()->SetTitle("Weight");
 
   fhXYSpec0Reco->GetXaxis()->SetTitle("X [m]");
   fhXYSpec1Reco->GetXaxis()->SetTitle("X [m]");
@@ -1052,7 +957,6 @@ void HeavyNeutrino::EndOfJobUser() {
   fhAddEnLKrHit       ->GetXaxis()->SetTitle("LKr time-track time [ns]");
   fhAddEnLKrCand      ->GetXaxis()->SetTitle("LKr time-track time [ns]");
   
-  fhInvMassMC   ->GetXaxis()->SetTitle("Invariant mass [MeV]");
   fhInvMassReco ->GetXaxis()->SetTitle("Invariant mass [MeV]");
 
   // Y axis title
@@ -1123,20 +1027,6 @@ HeavyNeutrino::~HeavyNeutrino() {
   fhNEvents  = nullptr;
   fhN2tracks = nullptr;
   fhNtracks  = nullptr;
-
-  fhZDProd       = nullptr;
-  fhZDDecay      = nullptr;
-  fhDTheta       = nullptr;
-  fhDLambda      = nullptr;
-  fhDPath        = nullptr;
-  fhDMom         = nullptr;
-  fhZHNLDecay    = nullptr;
-  fhHNLGamma     = nullptr;
-  fhHNLDecayProb = nullptr;
-  fhHNLReachProb = nullptr;
-  fhHNLTheta     = nullptr;
-  fhHNLMom       = nullptr;
-  fhWeight       = nullptr;
   fhMomPi        = nullptr;
   fhMomMu        = nullptr;
 
@@ -1191,6 +1081,5 @@ HeavyNeutrino::~HeavyNeutrino() {
   fhAddEnLKrHit        = nullptr;
   fhAddEnLKrCand       = nullptr;
 
-  fhInvMassMC   = nullptr;
   fhInvMassReco = nullptr;
 }

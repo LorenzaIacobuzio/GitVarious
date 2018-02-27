@@ -115,7 +115,7 @@ std::vector<std::map<std::string, Double_t>> ComputeWeight(Event* evt, Double_t 
 	IsGood = true;
       
       Weight = DProdProb*fDDecayProb*NReachProb*NDecayProb*DecayFactor*ProdFactor*LeptonUSquared;
-      
+
       std::map<std::string, Double_t> SingleHNL;
       
       SingleHNL["Mass"] = MN;
@@ -128,7 +128,7 @@ std::vector<std::map<std::string, Double_t>> ComputeWeight(Event* evt, Double_t 
       SingleHNL["ProdProb"] = DProdProb;
       SingleHNL["IsGood"] = IsGood;
       SingleHNL["Weight"] = Weight;
-      
+
       fWeightContainer.push_back(SingleHNL);
     }
   }

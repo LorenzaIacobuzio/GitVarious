@@ -1,3 +1,10 @@
+// ---------------------------------------------------------------                                    
+// History:                                                                                           
+//                                                                                                    
+// Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                             
+//                                                                                                    
+// --------------------------------------------------------------- 
+
 #ifndef HEAVYNEUTRINO_HH
 #define HEAVYNEUTRINO_HH
 
