@@ -70,50 +70,33 @@ protected:
   TH2D *fhXYCHODReco;
   TH2D *fhXYCHODTrue;
   TH2D *fhXYMUV3True;
-  TH2D *fhP1vsP2;
 
-  TH1D *fhPhysicsEventsVsCuts;
+  TH1D *fhCuts;
 
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineInitial;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterDownstreamTrack;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterEnergyCuts;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterGeomCuts;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineAfterVetoes;
-  TH2D *fhCDAvsZVertex_TotMomToBeamlineFinal;
+  TH2D *fhCDAvsZ_In;
+  TH2D *fhCDAvsZ_Track;
+  TH2D *fhCDAvsZ_Energy;
+  TH2D *fhCDAvsZ_Geom;
+  TH2D *fhCDAvsZ_Vetoes;
+  TH2D *fhCDAvsZ_Fin;
 
-  TH2D *fhZvertexvsBeamlineDistInitial;
-  TH2D *fhZvertexvsBeamlineDistAfterDownstreamTrack;
-  TH2D *fhZvertexvsBeamlineDistAfterEnergyCuts;
-  TH2D *fhZvertexvsBeamlineDistAfterGeomCuts;
-  TH2D *fhZvertexvsBeamlineDistAfterVetoes;
-  TH2D *fhZvertexvsBeamlineDistFinal;
+  TH2D *fhZvsBeam_In;
+  TH2D *fhZvsBeam_Track;
+  TH2D *fhZvsBeam_Energy;
+  TH2D *fhZvsBeam_Geom;
+  TH2D *fhZvsBeam_Vetoes;
+  TH2D *fhZvsBeam_Fin;
 
-  TH2D *fhCDAvsZVertex_TrackToBeamlineInitial;
-  TH2D *fhCDAvsZVertex_TrackToTrackInitial;
-  TH2D *fhCDAvsZVertex_TrackToBeamlineAfterCut;
-  TH2D *fhCDAvsZVertex_TrackToTrackAfterCut;
-  TH2D *fhCDAvsZVertex_TrackToBeamlineFinal;
-  TH2D *fhCDAvsZVertex_TrackToTrackFinal;
+  TH2D *fhBeamvsTar_In;
+  TH2D *fhBeamvsTar_Track;
+  TH2D *fhBeamvsTar_Energy;
+  TH2D *fhBeamvsTar_Geom;
+  TH2D *fhBeamvsTar_Vetoes;
+  TH2D *fhBeamvsTar_Fin;
 
-  TH2D *fhBeamlineDistvsTargetDist_TotMomInitial;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterDownstreamTrack;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterEnergyCuts;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterGeomCuts;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomAfterVetoes;
-  TH2D *fhBeamlineDistvsTargetDist_TotMomFinal;
-
-  TH1D *fhDeltaTimeFromCHOD;
-  TH1D *fhNMUV3CandAssocToTrack;
-  TH1D *fhNCHODCandAssocToTrack;
-
+  TH1D *fhNMUV3Cand;
   TH1D *fhEoP;
   TH2D *fhEoPMuVsPi;
-
-  TH2D *fhSingleAddEnLKrHit;
-  TH2D *fhSingleAddEnLKrCand;
-  TH2D *fhAddEnLKrHit;
-  TH2D *fhAddEnLKrCand;
-
   TH1D *fhInvMassReco;
 };
 

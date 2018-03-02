@@ -293,10 +293,10 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	FillHisto("MassScan/hReachMass",          MN/1000.,  NReachProb);
 	FillHisto("MassScan/hDecayMass",          MN/1000.,  NDecayProb);
 	FillHisto("MassScan/hWeightMass",         MN/1000.,  Weight);
-	
-	if (fEnableCouplingScan == false || (fEnableCouplingScan == true && couplingIndex == (fCouplingStart*10 - fCouplingStop*10)/2. && MN == fMassForSingleValue)) {
+
+	if (fEnableCouplingScan == false || (fEnableCouplingScan == true && fCoupling == (fCouplingStart - fCouplingStop)/2. && round(MN) == fMassForSingleValue)) {
 	  FillHisto("SingleValue/hCoupling",     fCoupling);
-	  FillHisto("SingleValue/hMass",         MN/1000.);
+	  FillHisto("SingleValue/hMass",         round(MN)/1000.);
 	  FillHisto("SingleValue/hHNLReachProb", NReachProb);
 	  FillHisto("SingleValue/hHNLDecayProb", NDecayProb);
 	  FillHisto("SingleValue/hWeight",       Weight);
@@ -304,29 +304,26 @@ void HeavyNeutrinoScan::Process(Int_t) {
       }
     }
   }
-      /*
-      for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-	KinePart *p = evt->GetKinePart(i);
-	if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	  MN = ComputeHNLMass(p);	  
-	  if (fEnableCouplingScan == false || (fEnableCouplingScan == true && couplingIndex == (fCouplingStart*10 - fCouplingStop*10)/2. && MN == fMassForSingleValue)) {
-	    
-	    FillHisto("SingleValue/hZDProd",    p->GetPosAtCheckPoint(0).z());
-	    FillHisto("SingleValue/hZDDecay",   p->GetProdPos().Z());
-	    FillHisto("SingleValue/hDTheta",    p->GetPosAtCheckPoint(0).x());
-	    FillHisto("SingleValue/hDLambda",   p->GetPosAtCheckPoint(0).y());
-	    FillHisto("SingleValue/hDPath",     p->GetMomAtCheckPoint(0).X());
-	    FillHisto("SingleValue/hDMom",      p->GetMomAtCheckPoint(0).Y()/1000.);
-	    FillHisto("SingleValue/hZHNLDecay", p->GetEndPos().Z()/1000.);
-	    FillHisto("SingleValue/hHNLGamma",  p->GetInitial4Momentum().Gamma());
-	    FillHisto("SingleValue/hHNLTheta",  p->GetMomAtCheckPoint(0).Z());
-	    FillHisto("SingleValue/hHNLMom",    p->GetMomAtCheckPoint(0).T()/1000.);
-	  }
-	}
+
+  if (GetWithMC()) {
+    Event *evt = GetMCEvent();
+    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
+      KinePart *p = evt->GetKinePart(i);
+      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
+	FillHisto("SingleValue/hZDProd",    p->GetPosAtCheckPoint(0).z());
+	FillHisto("SingleValue/hZDDecay",   p->GetProdPos().Z());
+	FillHisto("SingleValue/hDTheta",    p->GetPosAtCheckPoint(0).x());
+	FillHisto("SingleValue/hDLambda",   p->GetPosAtCheckPoint(0).y());
+	FillHisto("SingleValue/hDPath",     p->GetMomAtCheckPoint(0).X());
+	FillHisto("SingleValue/hDMom",      p->GetMomAtCheckPoint(0).Y()/1000.);
+	FillHisto("SingleValue/hZHNLDecay", p->GetEndPos().Z()/1000.);
+	FillHisto("SingleValue/hHNLGamma",  p->GetInitial4Momentum().Gamma());
+	FillHisto("SingleValue/hHNLTheta",  p->GetMomAtCheckPoint(0).Z());
+	FillHisto("SingleValue/hHNLMom",    p->GetMomAtCheckPoint(0).T()/1000.);
       }
     }
   }
-	*/  
+
   Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
   
   if (IsHNLGood == true) {
@@ -421,9 +418,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
   // Acceptance computation                                                                       
 
-  Double_t Coupling = 0.;
-  Double_t MN       = 0.;
-  Int_t counter     = 0;
+  Double_t Coupling     = 0.;
+  Double_t MN           = 0.;
+  Int_t counter         = 0;
+  Int_t couplingCounter = 0;
+  Int_t massCounter     = 0;
   
   for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
     MN = it->first;
@@ -441,26 +440,33 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	FillHisto("SingleValue/hYieldTarget", fYieldTarget[MN][Coupling]);
 	FillHisto("SingleValue/hYieldTAX",       fYieldTAX[MN][Coupling]);
       }
-      
-      fgGammaTotCoupling   ->SetPoint(counter, Coupling, fGammaTot   [MN][Coupling]);
-      fgTauCoupling        ->SetPoint(counter, Coupling, fTau        [MN][Coupling]);
-      fgAccCoupling        ->SetPoint(counter, Coupling, fAcc        [MN][Coupling]);
-      fgYieldCoupling      ->SetPoint(counter, Coupling, fYield      [MN][Coupling]);
-      fgYieldCouplingTarget->SetPoint(counter, Coupling, fYieldTarget[MN][Coupling]);
-      fgYieldCouplingTAX   ->SetPoint(counter, Coupling, fYieldTAX   [MN][Coupling]);
-      fgGammaTotMass       ->SetPoint(counter, MN/1000., fGammaTot   [MN][Coupling]);
-      fgTauMass            ->SetPoint(counter, MN/1000., fTau        [MN][Coupling]);
-      fgAccMass            ->SetPoint(counter, MN/1000., fAcc        [MN][Coupling]);
-      fgYieldMass          ->SetPoint(counter, MN/1000., fYield      [MN][Coupling]);
-      fgYieldMassTarget    ->SetPoint(counter, MN/1000., fYieldTarget[MN][Coupling]);
-      fgYieldMassTAX       ->SetPoint(counter, MN/1000., fYieldTAX   [MN][Coupling]);
+
+      if (MN == fMassForSingleValue) {
+	fgGammaTotCoupling   ->SetPoint(couplingCounter, Coupling, fGammaTot   [MN][Coupling]);
+	fgTauCoupling        ->SetPoint(couplingCounter, Coupling, fTau        [MN][Coupling]);
+	fgAccCoupling        ->SetPoint(couplingCounter, Coupling, fAcc        [MN][Coupling]);
+	fgYieldCoupling      ->SetPoint(couplingCounter, Coupling, fYield      [MN][Coupling]);
+	fgYieldCouplingTarget->SetPoint(couplingCounter, Coupling, fYieldTarget[MN][Coupling]);
+	fgYieldCouplingTAX   ->SetPoint(couplingCounter, Coupling, fYieldTAX   [MN][Coupling]);
+	couplingCounter++;
+      }
       
       if (fYield[MN][Coupling]*1.E18 > 2.3)
 	fgExclusion->SetPoint(counter, MN/1000., Coupling);
       else
 	fgExclusion->SetPoint(counter, counter, counter);
+
       counter++;
     }
+    
+    Coupling = (fCouplingStart - fCouplingStop)/2.;
+    fgGammaTotMass       ->SetPoint(massCounter, MN/1000., fGammaTot   [MN][Coupling]);
+    fgTauMass            ->SetPoint(massCounter, MN/1000., fTau        [MN][Coupling]);
+    fgAccMass            ->SetPoint(massCounter, MN/1000., fAcc        [MN][Coupling]);
+    fgYieldMass          ->SetPoint(massCounter, MN/1000., fYield      [MN][Coupling]);
+    fgYieldMassTarget    ->SetPoint(massCounter, MN/1000., fYieldTarget[MN][Coupling]);
+    fgYieldMassTAX       ->SetPoint(massCounter, MN/1000., fYieldTAX   [MN][Coupling]);
+    massCounter++;
   }
 
   // Titles

@@ -128,10 +128,10 @@ std::vector<std::map<std::string, Double_t>> ComputeWeight(Event* evt, Double_t 
       SingleHNL["ProdProb"] = DProdProb;
       SingleHNL["IsGood"] = IsGood;
       SingleHNL["Weight"] = Weight;
-
+      cout<<SingleHNL["IsGood"]<<endl;
       fWeightContainer.push_back(SingleHNL);
     }
   }
-  cout<<fWeightContainer[3]["Weight"]<<endl;
+
   return fWeightContainer;
 }

@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <TCanvas.h>
 #include "Analyzer.hh"
@@ -41,19 +42,32 @@ protected:
 
   // Scan variables                                                                                   
 
+  ofstream errorFile;
+  ofstream errorFileTarget;
+  ofstream errorFileTAX;
+  Double_t fInitialFV;
+  Double_t fLFV;
+  Double_t fMassForSingleValue;
   Double_t fCouplingStart;
   Double_t fCouplingStop;
   Double_t fCouplingStep;
   Bool_t fEnableCouplingScan;
   Int_t fN;
+  Int_t errorCounter;
+  Int_t errorCounterTarget;
+  Int_t errorCounterTAX;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAll;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTarget;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTarget;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTAX;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fAcc;
+  std::map<Double_t, std::map<Double_t, Double_t>> fAccTarget;
+  std::map<Double_t, std::map<Double_t, Double_t>> fAccTAX;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, std::map<Double_t, Double_t>> fYieldTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fYieldTAX;
@@ -78,10 +92,14 @@ protected:
   TH1D *fhHNLTheta;
   TH1D *fhHNLMom;
   TH1D *fhWeight;
+  TH1D *fhCoupling;
+  TH1D *fhMass;
 
   // Scan histos                                                                  
 
   TH1D *fhAcc;
+  TH1D *fhAccTarget;
+  TH1D *fhAccTAX;
   TH1D *fhYield;
   TH1D *fhYieldTarget;
   TH1D *fhYieldTAX;
@@ -93,12 +111,16 @@ protected:
   TH2D *fhWeightMass;
 
   TGraph *fgAccCoupling;
+  TGraph *fgAccCouplingTarget;
+  TGraph *fgAccCouplingTAX;
   TGraph *fgYieldCoupling;
   TGraph *fgYieldCouplingTarget;
   TGraph *fgYieldCouplingTAX;
   TGraph *fgGammaTotCoupling;
   TGraph *fgTauCoupling;
   TGraph *fgAccMass;
+  TGraph *fgAccMassTarget;
+  TGraph *fgAccMassTAX;
   TGraph *fgYieldMass;
   TGraph *fgYieldMassTarget;
   TGraph *fgYieldMassTAX;

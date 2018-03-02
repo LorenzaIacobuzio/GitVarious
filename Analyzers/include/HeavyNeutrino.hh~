@@ -60,20 +60,6 @@ protected:
   TH1D *fhNEvents;
   TH1D *fhN2tracks;
   TH1D *fhNtracks;
-
-  TH1D *fhZDProd;
-  TH1D *fhZDDecay;
-  TH1D *fhDTheta;
-  TH1D *fhDLambda;
-  TH1D *fhDPath;
-  TH1D *fhDMom;
-  TH1D *fhZHNLDecay;
-  TH1D *fhHNLGamma;
-  TH1D *fhHNLDecayProb;
-  TH1D *fhHNLReachProb;
-  TH1D *fhHNLTheta;
-  TH1D *fhHNLMom;
-  TH1D *fhWeight;
   TH1D *fhMomPi;
   TH1D *fhMomMu;
 
@@ -128,7 +114,6 @@ protected:
   TH2D *fhAddEnLKrHit;
   TH2D *fhAddEnLKrCand;
 
-  TH1D *fhInvMassMC;
   TH1D *fhInvMassReco;
 };
 
