@@ -146,10 +146,14 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrino::InitOutput() {
 
+  if (!GetIsTree()) return;
+
   RegisterOutput("Output", &fPassSelection);
 }
 
 void HeavyNeutrino::InitHist() {
+
+  if (!GetIsTree()) return;
 
   BookHisto("hNk3pi",    new TH1D("Nk3pi",    "Total number of K3pi events",       1, 0., 1.));
   BookHisto("hNbursts",  new TH1D("Nbursts",  "Total number of processed bursts",  1, 0., 1.));
@@ -196,6 +200,8 @@ void HeavyNeutrino::InitHist() {
 }
 
 void HeavyNeutrino::Process(Int_t) {
+
+  if (!GetIsTree()) return;
 
   fPassSelection = false;
 
@@ -767,11 +773,15 @@ void HeavyNeutrino::Process(Int_t) {
 }
 
 void HeavyNeutrino::EndOfBurstUser() {
+
+  if (!GetIsTree()) return;
   
   FillHisto("hNbursts", 0.5);
 }
 
 void HeavyNeutrino::EndOfJobUser() {
+
+  if (!GetIsTree()) return;
   
   // Retrieve histos
 
@@ -898,6 +908,8 @@ void HeavyNeutrino::EndOfJobUser() {
 }
 
 HeavyNeutrino::~HeavyNeutrino() {
+
+  if (!GetIsTree()) return;
 
   fhNk3pi            = nullptr;
   fhNbursts          = nullptr;
