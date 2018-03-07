@@ -89,9 +89,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
   
-  fMomStop = 500.;
+  fMomStop = 200.;
   fMomStart = 0.;
-  fMomStep = 1.;
+  fMomStep = 100.;
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
@@ -346,6 +346,10 @@ void HeavyNeutrinoScan::Process(Int_t) {
     fCouplingStop = fCouplingStart;
   }
 
+  //Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
+  //REMOVE
+  Bool_t IsHNLGood = true;
+
   // Scan on the coupling                                                                       
   
   for(Int_t couplingIndex  = fCouplingStart*10; couplingIndex <= fCouplingStop*10; couplingIndex += fCouplingStep*10) {
@@ -370,6 +374,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	NReachProb = Weights[i]["ReachProb"];
 	NDecayProb = Weights[i]["DecayProb"];
 	Weight = Weights[i]["Weight"];    
+	isGood = Weights[i]["IsGood"];
 	fMasses[round(MN)] = round(MN);
 	fGammaTot[round(MN)][fCoupling] = gammaTot;
 	fTau[round(MN)][fCoupling] = HNLTau;
@@ -401,8 +406,14 @@ void HeavyNeutrinoScan::Process(Int_t) {
           fErrorCounterTAX[round(MN)][fCoupling]++;
 	}
 
-	cout<<round(MN)<<" "<<fCoupling<<" "<<fNevents[round(MN)][fCoupling]<<" "<<fSumAll[round(MN)][fCoupling]<<" "<<fSumGood[round(MN)][fCoupling]<<endl;
-	
+	if (IsHNLGood == true && isGood == true) {
+	  fSumGood[round(MN)][fCoupling] += Weight;
+	  if (Weights[i]["ProdProb"] == fDBeProdProb) 
+	    fSumGoodTarget[round(MN)][fCoupling] += Weight;
+	  else if (Weights[i]["ProdProb"] == fDCuProdProb) 
+	    fSumGoodTAX[round(MN)][fCoupling] += Weight;
+	}
+
 	if (fErrorCounter[round(MN)][fCoupling]%fErrorStep == 0) {
 	  fErrorFile << round(MN) << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
 	  fErrorCounter[round(MN)][fCoupling] = 0;
@@ -415,7 +426,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling] << "\t" << fNeventsTAX[round(MN)][fCoupling] << endl;
 	  fErrorCounterTAX[round(MN)][fCoupling] = 0;
 	}
-
+      
 	FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
 	FillHisto("CouplingScan/hDecayCoupling",  fCoupling, NDecayProb);
 	FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);	
@@ -444,6 +455,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
     
     for (UInt_t i = 0; i < Weights.size(); i++) {
       MN =  round(Weights[i]["Mass"]);
+      isGood = Weights[i]["IsGood"];
       if (MN == fMassForSingleValue) {
 	momN = Weights[i]["Momentum"]/1000.;
 	momBin = fMomStep*trunc(momN/fMomStep);
@@ -455,6 +467,14 @@ void HeavyNeutrinoScan::Process(Int_t) {
         if (fErrorCounterMom.count(momBin) == 0)
           fErrorCounterMom[momBin] = 0;
         fErrorCounterMom[momBin]++;
+
+	if (IsHNLGood == true && isGood == true)
+	  fSumGoodMom[momBin] += Weight;
+
+	if (fErrorCounterMom[momBin]%fErrorStepMom == 0) {
+	  fErrorFileMom << "\t" << momBin << "\t" << fSumGoodMom[momBin] << "\t" << fNeventsMom[momBin] << endl;
+	  fErrorCounterMom[momBin] = 0;
+	}
       }
     }
   }
@@ -477,90 +497,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	FillHisto("SingleValue/hHNLTheta",  p->GetMomAtCheckPoint(0).Z());
 	FillHisto("SingleValue/hHNLMom",    p->GetMomAtCheckPoint(0).T()/1000.);
       }
-    }
-  }
-
-  // Scan on the coupling
-
-  //Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
-  //REMOVE
-  Bool_t IsHNLGood = true;
-  
-  for(Int_t couplingIndex  = fCouplingStart*10; couplingIndex <= fCouplingStop*10; couplingIndex += fCouplingStep*10) {
-    fCoupling = couplingIndex/10.;
-    fUSquared = TMath::Power(10, fCoupling);
-    fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
-    fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
-    fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
-    
-    if (IsHNLGood == true) {
-      if (GetWithMC()) {
-	Event *evt = GetMCEvent();
-	std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
-
-	for (UInt_t i = 0; i < Weights.size(); i++) {
-	  isGood = Weights[i]["IsGood"];
-	  MN = Weights[i]["Mass"];
-	  if (isGood == true) {
-	    Weight = Weights[i]["Weight"];
-	    fSumGood[round(MN)][fCoupling] += Weight;
-	    if (Weights[i]["ProdProb"] == fDBeProdProb) 
-	      fSumGoodTarget[round(MN)][fCoupling] += Weight;
-	    else if (Weights[i]["ProdProb"] == fDCuProdProb) 
-	      fSumGoodTAX[round(MN)][fCoupling] += Weight;
-	  }
-	}
-      }
-    }
-    /*
-    cout<<round(MN)<<" "<<fCoupling<<" "<<fErrorCounter[round(MN)][fCoupling]<<" "<<fNevents[round(MN)][fCoupling]<<" "<<fErrorStep<<endl;
-    
-    if (fErrorCounter[round(MN)][fCoupling]%fErrorStep == 0) {
-      fErrorFile << round(MN) << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
-      fErrorCounter[round(MN)][fCoupling] = 0;
-    }
-    if (fErrorCounterTarget[round(MN)][fCoupling]%fErrorStep == 0) {
-      fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << fSumAllTarget[round(MN)][fCoupling] << "\t" << fSumGoodTarget[round(MN)][fCoupling] << "\t" << fNeventsTarget[round(MN)][fCoupling] << endl;
-      fErrorCounterTarget[round(MN)][fCoupling] = 0;
-    }
-    if (fErrorCounterTAX[round(MN)][fCoupling]%fErrorStep == 0) {
-      fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling] << "\t" << fNeventsTAX[round(MN)][fCoupling] << endl;
-      fErrorCounterTAX[round(MN)][fCoupling] = 0;
-    }
-    */
-  }
-
-  // Scan on the N momentum
-
-  if (IsHNLGood == true) {
-    if (GetWithMC()) {
-      Event *evt = GetMCEvent();
-      
-      fUSquared = TMath::Power(10., (fCouplingStart - fCouplingStop)/2.);
-      std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
-      
-      for (UInt_t i = 0; i < Weights.size(); i++) {
-	isGood = Weights[i]["IsGood"];
-	if (isGood == true) {
-	  MN = round(Weights[i]["Mass"]);
-	  if (MN == fMassForSingleValue) {
-	    momN = Weights[i]["Momentum"]/1000.;
-	    momBin = fMomStep*trunc(momN/fMomStep);
-	    Weight = Weights[i]["Weight"];
-	    fSumGoodMom[momBin] += Weight;
-	  }
-	}
-      }
-    }
-  }
-
-  Double_t Mom = 0.;
-
-  for (auto it = fMomenta.begin(); it != fMomenta.end(); it++) {
-    Mom = it->first;
-    if (fErrorCounterMom[Mom]%fErrorStepMom == 0) {
-      fErrorFileMom << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
-      fErrorCounterMom[Mom] = 0;
     }
   }
 }
