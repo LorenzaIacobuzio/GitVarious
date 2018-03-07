@@ -16,7 +16,7 @@
 /// acceptance and yield per POT are computed. 
 /// Different sets of plots are produced in different cases:
 /// if the sample contains only one mass HNLs and the coupling has been set to a constant, acceptance
-/// and yield are computed as single values;
+/// and yield are computed as single values; the yield is also computed as a function of the HNL momentum;
 /// if a scan on the coupling is enabled on a one mass MC sample, plots are produced as a function
 /// of the coupling;
 /// if the coupling is fixed on a MC sample with several masses, plots are produced as a function
@@ -89,23 +89,26 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
   
+  fMomStop = 500.;
+  fMomStart = 0.;
+  fMomStep = 1.;
+  fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
   fMassForSingleValue = 1000.;
-  fErrorCounter       = 0;
-  fErrorCounterTarget = 0;
-  fErrorCounterTAX    = 0;
-  fErrorStep          = 2;
+  fErrorStep          = 10;
+  fErrorStepMom       = 10;
   
   if (fReadingData) {
     
     fErrorFile.      open("ErrorBars.txt",       fstream::out | fstream::in | fstream::trunc);
     fErrorFileTarget.open("ErrorBarsTarget.txt", fstream::out | fstream::in | fstream::trunc);
     fErrorFileTAX.   open("ErrorBarsTAX.txt",    fstream::out | fstream::in | fstream::trunc);
-    
-    if (!fErrorFile.is_open() || !fErrorFileTarget.is_open() || !fErrorFileTAX.is_open()) {
+    fErrorFileMom.   open("ErrorBarsMom.txt",    fstream::out | fstream::in | fstream::trunc);
+
+    if (!fErrorFile.is_open() || !fErrorFileTarget.is_open() || !fErrorFileTAX.is_open() || !fErrorFileMom.is_open()) {
       cout << "Cannot open error bar files" << endl;
       _exit(1);
     }
@@ -158,6 +161,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
     fgYieldMassTAX        = nullptr;
     fgGammaTotMass        = nullptr;
     fgTauMass             = nullptr;
+    fgYieldMom            = nullptr;
     fgExclusion           = nullptr;
   }
   else {
@@ -165,8 +169,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
     fErrorFile.      open("ErrorBars.txt",       fstream::out | fstream::in);
     fErrorFileTarget.open("ErrorBarsTarget.txt", fstream::out | fstream::in);
     fErrorFileTAX.   open("ErrorBarsTAX.txt",    fstream::out | fstream::in);
-    
-    if (!fErrorFile.is_open() || !fErrorFileTarget.is_open() || !fErrorFileTAX.is_open()) {
+    fErrorFileMom.   open("ErrorBarsMom.txt",    fstream::out | fstream::in);
+
+    if (!fErrorFile.is_open() || !fErrorFileTarget.is_open() || !fErrorFileTAX.is_open() || !fErrorFileMom.is_open()) {
       cout << "Cannot open error bar files" << endl;
       _exit(1);
     }
@@ -183,6 +188,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
     fgErrorYieldMass           = nullptr;
     fgErrorYieldMassTarget     = nullptr;
     fgErrorYieldMassTAX        = nullptr;
+    fgErrorYieldMom            = nullptr;
     fgErrorExclusion           = nullptr;
   }
 }
@@ -215,6 +221,10 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("SingleValue/hYieldTarget",  new TH1D("YieldTarget", "Yield per POT for one value of N mass and coupling, for target-produced events",    1000, 1.E-50, 1.E-10));
     BookHisto("SingleValue/hYieldTAX",     new TH1D("YieldTAX", "Yield per POT for one value of N mass and coupling, for TAX-produced events",          1000, 1.E-50, 1.E-10));
     
+    fgYieldMom = new TGraphErrors();
+    fgYieldMom->SetNameTitle("SingleValue/YieldMom", "Yield per POT vs N momentum");
+    BookHisto(fgYieldMom);
+
     // Coupling scan 
     
     BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling", "Probability of N reaching the FV vs coupling",    fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
@@ -294,7 +304,7 @@ void HeavyNeutrinoScan::InitHist() {
     // Total scan
     
     fgExclusion = new TGraphErrors();
-    fgExclusion->SetNameTitle("TotalScan/Exclusion", "Sensitivity vs N mass and N mass");
+    fgExclusion->SetNameTitle("TotalScan/Exclusion", "Sensitivity as a function of coupling and N mass");
     BookHisto(fgExclusion);
   }
   else {
@@ -311,6 +321,7 @@ void HeavyNeutrinoScan::InitHist() {
     fgErrorYieldMass           = (TGraphErrors*)RequestHistogram(fAnalyzerName, "MassScan/YieldMass",               true);
     fgErrorYieldMassTarget     = (TGraphErrors*)RequestHistogram(fAnalyzerName, "MassScan/YieldMassTarget",         true);
     fgErrorYieldMassTAX        = (TGraphErrors*)RequestHistogram(fAnalyzerName, "MassScan/YieldMassTAX",            true);
+    fgErrorYieldMom            = (TGraphErrors*)RequestHistogram(fAnalyzerName, "SingleValue/YieldMom",             true);
     fgErrorExclusion           = (TGraphErrors*)RequestHistogram(fAnalyzerName, "TotalScan/Exclusion",              true);
   }
 }
@@ -323,6 +334,8 @@ void HeavyNeutrinoScan::Process(Int_t) {
   Double_t MN                 = 0.;
   Double_t HNLTau             = 0.;
   Double_t gammaTot           = 0.;
+  Double_t momN               = 0.;
+  Double_t momBin             = 0.;
   Double_t NDecayProb         = 0.;
   Double_t NReachProb         = 0.;
   Double_t Weight             = 0.;
@@ -338,7 +351,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
   for(Int_t couplingIndex  = fCouplingStart*10; couplingIndex <= fCouplingStop*10; couplingIndex += fCouplingStep*10) {
     fCoupling = couplingIndex/10.;
 
-    fUSquared = TMath::Power(10, fCoupling);
+    fUSquared = TMath::Power(10., fCoupling);
     fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
     fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
     fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
@@ -352,6 +365,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
       for (UInt_t i = 0; i < Weights.size(); i++) {
 	MN =  Weights[i]["Mass"];
 	HNLTau = Weights[i]["Lifetime"];
+	momN = Weights[i]["Momentum"];
 	gammaTot = GammaTot(MN);
 	NReachProb = Weights[i]["ReachProb"];
 	NDecayProb = Weights[i]["DecayProb"];
@@ -359,26 +373,47 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	fMasses[round(MN)] = round(MN);
 	fGammaTot[round(MN)][fCoupling] = gammaTot;
 	fTau[round(MN)][fCoupling] = HNLTau;
-	fSumAll[round(MN)][fCoupling] += Weight;
 
 	if (fNevents[round(MN)].count(fCoupling) == 0)
 	  fNevents[round(MN)][fCoupling] = 0;
 	fNevents[round(MN)][fCoupling]++;
-	fErrorCounter++;
+	fSumAll[round(MN)][fCoupling] += Weight;
+	if (fErrorCounter[round(MN)].count(fCoupling) == 0)
+          fErrorCounter[round(MN)][fCoupling] = 0;
+	fErrorCounter[round(MN)][fCoupling]++;
 
 	if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	  if (fNeventsTarget[round(MN)].count(fCoupling) == 0)
 	    fNeventsTarget[round(MN)][fCoupling] = 0;
 	  fNeventsTarget[round(MN)][fCoupling]++;
 	  fSumAllTarget[round(MN)][fCoupling] += Weight;
-	  fErrorCounterTarget++;
+	  if (fErrorCounterTarget[round(MN)].count(fCoupling) == 0)
+	    fErrorCounterTarget[round(MN)][fCoupling] = 0;
+	  fErrorCounterTarget[round(MN)][fCoupling]++;
 	}
 	else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	  if (fNeventsTAX[round(MN)].count(fCoupling) == 0)
 	    fNeventsTAX[round(MN)][fCoupling] = 0;
 	  fNeventsTAX[round(MN)][fCoupling]++;
 	  fSumAllTAX[round(MN)][fCoupling] += Weight;
-	  fErrorCounterTAX++;
+          if (fErrorCounterTAX[round(MN)].count(fCoupling) == 0)
+            fErrorCounterTAX[round(MN)][fCoupling] = 0;
+          fErrorCounterTAX[round(MN)][fCoupling]++;
+	}
+
+	cout<<round(MN)<<" "<<fCoupling<<" "<<fNevents[round(MN)][fCoupling]<<" "<<fSumAll[round(MN)][fCoupling]<<" "<<fSumGood[round(MN)][fCoupling]<<endl;
+	
+	if (fErrorCounter[round(MN)][fCoupling]%fErrorStep == 0) {
+	  fErrorFile << round(MN) << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
+	  fErrorCounter[round(MN)][fCoupling] = 0;
+	}
+	if (fErrorCounterTarget[round(MN)][fCoupling]%fErrorStep == 0) {
+	  fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << fSumAllTarget[round(MN)][fCoupling] << "\t" << fSumGoodTarget[round(MN)][fCoupling] << "\t" << fNeventsTarget[round(MN)][fCoupling] << endl;
+	  fErrorCounterTarget[round(MN)][fCoupling] = 0;
+	}
+	if (fErrorCounterTAX[round(MN)][fCoupling]%fErrorStep == 0) {
+	  fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling] << "\t" << fNeventsTAX[round(MN)][fCoupling] << endl;
+	  fErrorCounterTAX[round(MN)][fCoupling] = 0;
 	}
 
 	FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
@@ -398,7 +433,34 @@ void HeavyNeutrinoScan::Process(Int_t) {
       }
     }
   }
+  
+  // Scan on the N momentum
+  
+  if (GetWithMC()) {
+    Event *evt = GetMCEvent();
 
+    fUSquared = TMath::Power(10., (fCouplingStart - fCouplingStop)/2.);
+    std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
+    
+    for (UInt_t i = 0; i < Weights.size(); i++) {
+      MN =  round(Weights[i]["Mass"]);
+      if (MN == fMassForSingleValue) {
+	momN = Weights[i]["Momentum"]/1000.;
+	momBin = fMomStep*trunc(momN/fMomStep);
+	fMomenta[momBin] = momBin;
+	
+	if (fNeventsMom.count(momBin) == 0)
+	  fNeventsMom[momBin] = 0;
+	fNeventsMom[momBin]++;
+        if (fErrorCounterMom.count(momBin) == 0)
+          fErrorCounterMom[momBin] = 0;
+        fErrorCounterMom[momBin]++;
+      }
+    }
+  }
+  
+  // Some plots
+  
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
@@ -418,6 +480,8 @@ void HeavyNeutrinoScan::Process(Int_t) {
     }
   }
 
+  // Scan on the coupling
+
   //Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
   //REMOVE
   Bool_t IsHNLGood = true;
@@ -436,6 +500,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
 	for (UInt_t i = 0; i < Weights.size(); i++) {
 	  isGood = Weights[i]["IsGood"];
+	  MN = Weights[i]["Mass"];
 	  if (isGood == true) {
 	    Weight = Weights[i]["Weight"];
 	    fSumGood[round(MN)][fCoupling] += Weight;
@@ -447,13 +512,56 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	}
       }
     }
+    /*
+    cout<<round(MN)<<" "<<fCoupling<<" "<<fErrorCounter[round(MN)][fCoupling]<<" "<<fNevents[round(MN)][fCoupling]<<" "<<fErrorStep<<endl;
     
-    if (fErrorCounter%fErrorStep == 0)
+    if (fErrorCounter[round(MN)][fCoupling]%fErrorStep == 0) {
       fErrorFile << round(MN) << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
-    if (fErrorCounterTarget%fErrorStep == 0)
+      fErrorCounter[round(MN)][fCoupling] = 0;
+    }
+    if (fErrorCounterTarget[round(MN)][fCoupling]%fErrorStep == 0) {
       fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << fSumAllTarget[round(MN)][fCoupling] << "\t" << fSumGoodTarget[round(MN)][fCoupling] << "\t" << fNeventsTarget[round(MN)][fCoupling] << endl;
-    if (fErrorCounterTAX%fErrorStep == 0)
+      fErrorCounterTarget[round(MN)][fCoupling] = 0;
+    }
+    if (fErrorCounterTAX[round(MN)][fCoupling]%fErrorStep == 0) {
       fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling] << "\t" << fNeventsTAX[round(MN)][fCoupling] << endl;
+      fErrorCounterTAX[round(MN)][fCoupling] = 0;
+    }
+    */
+  }
+
+  // Scan on the N momentum
+
+  if (IsHNLGood == true) {
+    if (GetWithMC()) {
+      Event *evt = GetMCEvent();
+      
+      fUSquared = TMath::Power(10., (fCouplingStart - fCouplingStop)/2.);
+      std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
+      
+      for (UInt_t i = 0; i < Weights.size(); i++) {
+	isGood = Weights[i]["IsGood"];
+	if (isGood == true) {
+	  MN = round(Weights[i]["Mass"]);
+	  if (MN == fMassForSingleValue) {
+	    momN = Weights[i]["Momentum"]/1000.;
+	    momBin = fMomStep*trunc(momN/fMomStep);
+	    Weight = Weights[i]["Weight"];
+	    fSumGoodMom[momBin] += Weight;
+	  }
+	}
+      }
+    }
+  }
+
+  Double_t Mom = 0.;
+
+  for (auto it = fMomenta.begin(); it != fMomenta.end(); it++) {
+    Mom = it->first;
+    if (fErrorCounterMom[Mom]%fErrorStepMom == 0) {
+      fErrorFileMom << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
+      fErrorCounterMom[Mom] = 0;
+    }
   }
 }
 
@@ -534,9 +642,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
     Double_t Coupling          = 0.;
     Double_t MN                = 0.;
+    Double_t Mom               = 0.;
     Int_t counter              = 0;
     Int_t couplingCounter      = 0;
     Int_t massCounter          = 0;
+    Int_t momCounter           = 0;
 
     for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
       MN = it->first;
@@ -551,6 +661,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	fProb       [MN][Coupling] =        fSumAll[MN][Coupling]/      fNevents[MN][Coupling];
       
 	if (fEnableCouplingScan == false || (fEnableCouplingScan == true && Coupling == (fCouplingStart - fCouplingStop)/2. && MN == fMassForSingleValue)) {      
+
 	  FillHisto("SingleValue/hAcc",                 fAcc[MN][Coupling]);
 	  FillHisto("SingleValue/hAccTarget",     fAccTarget[MN][Coupling]);
 	  FillHisto("SingleValue/hAccTAX",           fAccTAX[MN][Coupling]);
@@ -571,12 +682,10 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	  couplingCounter++;
 	}
       
-	if (fYield[MN][Coupling]*1.E18 > 2.3)
+	if (fYield[MN][Coupling]*1.E18 > 2.3) {
 	  fgExclusion->SetPoint(counter, MN/1000., Coupling);
-	else
-	  fgExclusion->SetPoint(counter, counter, counter);
-
-	counter++;
+	  counter++;
+	}
       }
     
       Coupling = (fCouplingStart - fCouplingStop)/2.;
@@ -590,140 +699,59 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       fgYieldMassTAX       ->SetPoint(massCounter, MN/1000., fYieldTAX   [MN][Coupling]);
       massCounter++;
     }
+  
+    for (auto it = fMomenta.begin(); it != fMomenta.end(); it++) {
+      Mom = it->first;
+      fYieldMom[Mom] = fSumGoodMom[Mom]/fNeventsMom[Mom];
+      fgYieldMom->SetPoint(momCounter, Mom, fYieldMom[Mom]);
+      momCounter++;
+    }
 
-    // Titles
+    // Cosmetics
 
-    fgGammaTotCoupling   ->GetXaxis()->SetTitle("Log of coupling");
-    fgTauCoupling        ->GetXaxis()->SetTitle("Log of coupling");
-    fgAccCoupling        ->GetXaxis()->SetTitle("Log of coupling");
-    fgAccCouplingTarget  ->GetXaxis()->SetTitle("Log of coupling");
-    fgAccCouplingTAX     ->GetXaxis()->SetTitle("Log of coupling");
-    fgYieldCoupling      ->GetXaxis()->SetTitle("Log of coupling");
-    fgYieldCouplingTarget->GetXaxis()->SetTitle("Log of coupling");
-    fgYieldCouplingTAX   ->GetXaxis()->SetTitle("Log of coupling");
-    fgGammaTotCoupling   ->GetYaxis()->SetTitle("Total decay width [MeV]");
-    fgTauCoupling        ->GetYaxis()->SetTitle("Lifetime [ns]");
-    fgAccCoupling        ->GetYaxis()->SetTitle("Acceptance");
-    fgAccCouplingTarget  ->GetYaxis()->SetTitle("Acceptance");
-    fgAccCouplingTAX     ->GetYaxis()->SetTitle("Acceptance");
-    fgYieldCoupling      ->GetYaxis()->SetTitle("Yield");
-    fgYieldCouplingTarget->GetYaxis()->SetTitle("Yield");
-    fgYieldCouplingTAX   ->GetYaxis()->SetTitle("Yield");
-    fgGammaTotCoupling   ->SetMarkerStyle(29);
-    fgTauCoupling        ->SetMarkerStyle(29);
-    fgAccCoupling        ->SetMarkerStyle(29);
-    fgAccCouplingTarget  ->SetMarkerStyle(29);
-    fgAccCouplingTAX     ->SetMarkerStyle(29);
-    fgYieldCoupling      ->SetMarkerStyle(29);
-    fgYieldCouplingTarget->SetMarkerStyle(29);
-    fgYieldCouplingTAX   ->SetMarkerStyle(29);
-    fgGammaTotCoupling   ->SetLineColor(2);
-    fgTauCoupling        ->SetLineColor(2);
-    fgAccCoupling        ->SetLineColor(2);
-    fgAccCouplingTarget  ->SetLineColor(8);
-    fgAccCouplingTAX     ->SetLineColor(9);
-    fgYieldCoupling      ->SetLineColor(2);
-    fgYieldCouplingTarget->SetLineColor(8);
-    fgYieldCouplingTAX   ->SetLineColor(9);
-    fgGammaTotCoupling   ->SetLineWidth(3);
-    fgTauCoupling        ->SetLineWidth(3);
-    fgAccCoupling        ->SetLineWidth(3);
-    fgAccCouplingTarget  ->SetLineWidth(3);
-    fgAccCouplingTAX     ->SetLineWidth(3);
-    fgYieldCoupling      ->SetLineWidth(3);
-    fgYieldCouplingTarget->SetLineWidth(3);
-    fgYieldCouplingTAX   ->SetLineWidth(3);
-    fgGammaTotCoupling   ->Draw("AC");
-    fgTauCoupling        ->Draw("AC");
-    fgAccCoupling        ->Draw("AC");
-    fgAccCouplingTarget  ->Draw("AC");
-    fgAccCouplingTAX     ->Draw("AC");
-    fgYieldCoupling      ->Draw("AC");
-    fgYieldCouplingTarget->Draw("AC");
-    fgYieldCouplingTAX   ->Draw("AC");
-    fgGammaTotCoupling   ->Write();
-    fgTauCoupling        ->Write();
-    fgAccCoupling        ->Write();
-    fgAccCouplingTarget  ->Write();
-    fgAccCouplingTAX     ->Write();
-    fgYieldCoupling      ->Write();
-    fgYieldCouplingTarget->Write();
-    fgYieldCouplingTAX   ->Write();
-
-    fgGammaTotMass   ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgTauMass        ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgAccMass        ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgAccMassTarget  ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgAccMassTAX     ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgYieldMass      ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgYieldMassTarget->GetXaxis()->SetTitle("N mass [GeV]");
-    fgYieldMassTAX   ->GetXaxis()->SetTitle("N mass [GeV]");
-    fgGammaTotMass   ->GetYaxis()->SetTitle("Total decay width [MeV]");
-    fgTauMass        ->GetYaxis()->SetTitle("Lifetime [ns]");
-    fgAccMass        ->GetYaxis()->SetTitle("Acceptance");
-    fgAccMassTarget  ->GetYaxis()->SetTitle("Acceptance");
-    fgAccMassTAX     ->GetYaxis()->SetTitle("Acceptance");
-    fgYieldMass      ->GetYaxis()->SetTitle("Yield");
-    fgYieldMassTarget->GetYaxis()->SetTitle("Yield");
-    fgYieldMassTAX   ->GetYaxis()->SetTitle("Yield");
-    fgGammaTotMass   ->SetMarkerStyle(29);
-    fgTauMass        ->SetMarkerStyle(29);
-    fgAccMass        ->SetMarkerStyle(29);
-    fgAccMassTarget  ->SetMarkerStyle(29);
-    fgAccMassTAX     ->SetMarkerStyle(29);
-    fgYieldMass      ->SetMarkerStyle(29);
-    fgYieldMassTarget->SetMarkerStyle(29);
-    fgYieldMassTAX   ->SetMarkerStyle(29);
-    fgGammaTotMass   ->SetLineColor(2);
-    fgTauMass        ->SetLineColor(2);
-    fgAccMass        ->SetLineColor(2);
-    fgAccMassTarget  ->SetLineColor(8);
-    fgAccMassTAX     ->SetLineColor(9);
-    fgYieldMass      ->SetLineColor(2);
-    fgYieldMassTarget->SetLineColor(8);
-    fgYieldMassTAX   ->SetLineColor(9);
-    fgGammaTotMass   ->SetLineWidth(3);
-    fgTauMass        ->SetLineWidth(3);
-    fgAccMass        ->SetLineWidth(3);
-    fgAccMassTarget  ->SetLineWidth(3);
-    fgAccMassTAX     ->SetLineWidth(3);
-    fgYieldMass      ->SetLineWidth(3);
-    fgYieldMassTarget->SetLineWidth(3);
-    fgYieldMassTAX   ->SetLineWidth(3);
-    fgGammaTotMass   ->Draw("AC");
-    fgTauMass        ->Draw("AC");
-    fgAccMass        ->Draw("AC");
-    fgAccMassTarget  ->Draw("AC");
-    fgAccMassTAX     ->Draw("AC");
-    fgYieldMass      ->Draw("AC");
-    fgYieldMassTarget->Draw("AC");
-    fgYieldMassTAX   ->Draw("AC");
-    fgGammaTotMass   ->Write();
-    fgTauMass        ->Write();
-    fgAccMass        ->Write();
-    fgAccMassTarget  ->Write();
-    fgAccMassTAX     ->Write();
-    fgYieldMass      ->Write();
-    fgYieldMassTarget->Write();
-    fgYieldMassTAX   ->Write();
-
-    fgExclusion->GetXaxis()->SetTitle("N mass [GeV]");
-    fgExclusion->GetYaxis()->SetTitle("Log of coupling");
-    fgExclusion->SetMarkerStyle(29);
-    fgExclusion->SetLineColor(2);
-    fgExclusion->SetLineWidth(3);
-    fgExclusion->Draw("AC");
-    fgExclusion->Write();
+    CosmeticsGraph(fgGammaTotCoupling,    "Log of coupling",  "Total decay width [MeV]", 2);
+    CosmeticsGraph(fgTauCoupling,         "Log of coupling",  "Lifetime [ns]",           2);
+    CosmeticsGraph(fgAccCoupling,         "Log of coupling",  "Acceptance",              2);
+    CosmeticsGraph(fgAccCouplingTarget,   "Log of coupling",  "Acceptance",              8);
+    CosmeticsGraph(fgAccCouplingTAX,      "Log of coupling",  "Acceptance",              9);
+    CosmeticsGraph(fgYieldCoupling,       "Log of coupling",  "Yield per POT",           2);
+    CosmeticsGraph(fgYieldCouplingTarget, "Log of coupling",  "Yield per POT",           8);
+    CosmeticsGraph(fgYieldCouplingTAX,    "Log of coupling",  "Yield per POT",           9);
+    CosmeticsGraph(fgGammaTotMass,        "N mass [GeV]",     "Total decay width [MeV]", 2);
+    CosmeticsGraph(fgTauMass,             "N mass [GeV]",     "Lifetime [ns]",           2);
+    CosmeticsGraph(fgAccMass,             "N mass [GeV]",     "Acceptance",              2);
+    CosmeticsGraph(fgAccMassTarget,       "N mass [GeV]",     "Acceptance",              8);
+    CosmeticsGraph(fgAccMassTAX,          "N mass [GeV]",     "Acceptance",              9);
+    CosmeticsGraph(fgYieldMass,           "N mass [GeV]",     "Yield per POT",           2);
+    CosmeticsGraph(fgYieldMassTarget,     "N mass [GeV]",     "Yield per POT",           8);
+    CosmeticsGraph(fgYieldMassTAX,        "N mass [GeV]",     "Yield per POT",           9);
+    CosmeticsGraph(fgYieldMom,            "N momentum [GeV]", "Yield per POT",           2);
+    CosmeticsGraph(fgExclusion,           "N mass [GeV]",     "Log of coupling",         2);
   }
   else {
 
     PlotErrorBars(fgErrorAccCoupling, fgErrorAccMass, fgErrorYieldCoupling, fgErrorYieldMass, "ErrorBars.txt");
-    PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
-    PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
+    //PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
+    //PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
+    //PlotErrorBarsMom(fgErrorYieldMom, "ErrorBarsMom.txt");
   }
 
   SaveAllPlots();
 
+  return;
+}
+
+// Cosmetics for plots
+
+void HeavyNeutrinoScan::CosmeticsGraph(TGraphErrors* g, const char* x, const char* y, Int_t col) {
+
+  g->GetXaxis()->SetTitle(x);
+  g->GetYaxis()->SetTitle(y);
+  g->SetLineColor(col);
+  g->SetLineWidth(3);
+  g->Draw("AC");
+  g->Write();
+  
   return;
 }
 
@@ -762,11 +790,13 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
     }
   }
 
-  for (auto it = errorListAcc.begin(); it != errorListAcc.end(); it++)
+  for (auto it = errorListAcc.begin(); it != errorListAcc.end(); it++) {
     errorResAcc[it->first] = ComputeRMS(it->second)[1];
+  }
 
-  for (auto it = errorListYield.begin(); it != errorListYield.end(); it++)
+  for (auto it = errorListYield.begin(); it != errorListYield.end(); it++) {
     errorResYield[it->first] = ComputeRMS(it->second)[1];
+  }
 
   for (auto it = errorResAcc.begin(); it != errorResAcc.end(); it++) {                        
     stringstream ss(it->first);                
@@ -818,6 +848,49 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
   return;
 }
 
+void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, std::string fileName) {
+
+  fstream file;
+  std::string line;
+  std::string momStr;
+  Double_t Mom, SumGood, Nevents;
+  std::map<std::string, std::vector<Double_t>> errorListYield;
+  std::map<std::string, Double_t> errorResYield;
+
+  file.open(fileName);
+
+  if (!file.is_open()) {
+    cout << "Cannot open file " << fileName << " in --histo mode" << endl;
+    _exit(1);
+  }
+
+  while (!file.eof()) {
+    while (getline(file, line)) {
+      stringstream s(line);
+      s >> Mom >> SumGood >> Nevents;
+      momStr = std::to_string(Mom);
+      momStr.erase(momStr.find_last_not_of('0') + 1, std::string::npos);
+      errorListYield[momStr].push_back(SumGood/Nevents);
+    }
+  }
+
+  for (auto it = errorListYield.begin(); it != errorListYield.end(); it++)
+    errorResYield[it->first] = ComputeRMS(it->second)[1];
+
+  for (auto it = errorResYield.begin(); it != errorResYield.end(); it++) {                        
+    stringstream ss(it->first);                                                               
+    ss >> Mom;
+    for (Int_t p = 0; p < g->GetN(); p++) {
+      Double_t x = 0.;                                                                
+      Double_t y = 0.;
+      g->GetPoint(p, x, y);
+      g->SetPointError(p, 0., errorResYield[it->first]);
+    }
+  }
+  
+  return;
+}
+
 // Compute mean and RMS of a sample of doubles
 
 std::vector<Double_t> HeavyNeutrinoScan::ComputeRMS(std::vector<Double_t> v) {
@@ -849,10 +922,11 @@ std::vector<Double_t> HeavyNeutrinoScan::ComputeRMS(std::vector<Double_t> v) {
 
 HeavyNeutrinoScan::~HeavyNeutrinoScan() {
   
-  fErrorFile.close();
+  fErrorFile.      close();
   fErrorFileTarget.close();
-  fErrorFileTAX.close();
-  
+  fErrorFileTAX.   close();
+  fErrorFileMom.   close();
+
   if (fReadingData) {
     
     fhZDProd              = nullptr;
@@ -913,6 +987,7 @@ HeavyNeutrinoScan::~HeavyNeutrinoScan() {
     fgErrorYieldMass           = nullptr;
     fgErrorYieldMassTarget     = nullptr;
     fgErrorYieldMassTAX        = nullptr;
+    fgErrorYieldMom            = nullptr;
     fgErrorExclusion           = nullptr;
   }
 }
