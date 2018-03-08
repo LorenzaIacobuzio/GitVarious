@@ -91,15 +91,14 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   
   fMomStop = 200.;
   fMomStart = 0.;
-  fMomStep = 100.;
+  fMomStep = 10.;
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
   fMassForSingleValue = 1000.;
-  fErrorStep          = 10;
-  fErrorStepMom       = 10;
+  fSplitStep = 1000;
   
   if (fReadingData) {
     
@@ -383,27 +382,18 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  fNevents[round(MN)][fCoupling] = 0;
 	fNevents[round(MN)][fCoupling]++;
 	fSumAll[round(MN)][fCoupling] += Weight;
-	if (fErrorCounter[round(MN)].count(fCoupling) == 0)
-          fErrorCounter[round(MN)][fCoupling] = 0;
-	fErrorCounter[round(MN)][fCoupling]++;
 
 	if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	  if (fNeventsTarget[round(MN)].count(fCoupling) == 0)
 	    fNeventsTarget[round(MN)][fCoupling] = 0;
 	  fNeventsTarget[round(MN)][fCoupling]++;
 	  fSumAllTarget[round(MN)][fCoupling] += Weight;
-	  if (fErrorCounterTarget[round(MN)].count(fCoupling) == 0)
-	    fErrorCounterTarget[round(MN)][fCoupling] = 0;
-	  fErrorCounterTarget[round(MN)][fCoupling]++;
 	}
 	else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	  if (fNeventsTAX[round(MN)].count(fCoupling) == 0)
 	    fNeventsTAX[round(MN)][fCoupling] = 0;
 	  fNeventsTAX[round(MN)][fCoupling]++;
 	  fSumAllTAX[round(MN)][fCoupling] += Weight;
-          if (fErrorCounterTAX[round(MN)].count(fCoupling) == 0)
-            fErrorCounterTAX[round(MN)][fCoupling] = 0;
-          fErrorCounterTAX[round(MN)][fCoupling]++;
 	}
 
 	if (IsHNLGood == true && isGood == true) {
@@ -414,17 +404,14 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    fSumGoodTAX[round(MN)][fCoupling] += Weight;
 	}
 
-	if (fErrorCounter[round(MN)][fCoupling]%fErrorStep == 0) {
-	  fErrorFile << round(MN) << "\t" << fCoupling << "\t" << fSumAll[round(MN)][fCoupling] << "\t" << fSumGood[round(MN)][fCoupling] << "\t" << fNevents[round(MN)][fCoupling] << endl;
-	  fErrorCounter[round(MN)][fCoupling] = 0;
+	fErrorFile << round(MN) << "\t" << fCoupling << "\t" << Weight << endl;
+
+	if (Weights[i]["ProdProb"] == fDBeProdProb) {
+	  fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << Weight << endl;
 	}
-	if (fErrorCounterTarget[round(MN)][fCoupling]%fErrorStep == 0) {
-	  fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << fSumAllTarget[round(MN)][fCoupling] << "\t" << fSumGoodTarget[round(MN)][fCoupling] << "\t" << fNeventsTarget[round(MN)][fCoupling] << endl;
-	  fErrorCounterTarget[round(MN)][fCoupling] = 0;
-	}
-	if (fErrorCounterTAX[round(MN)][fCoupling]%fErrorStep == 0) {
-	  fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling] << "\t" << fNeventsTAX[round(MN)][fCoupling] << endl;
-	  fErrorCounterTAX[round(MN)][fCoupling] = 0;
+
+	if (Weights[i]["ProdProb"] == fDCuProdProb) {
+	  fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << Weight << endl;
 	}
       
 	FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
@@ -464,17 +451,11 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	if (fNeventsMom.count(momBin) == 0)
 	  fNeventsMom[momBin] = 0;
 	fNeventsMom[momBin]++;
-        if (fErrorCounterMom.count(momBin) == 0)
-          fErrorCounterMom[momBin] = 0;
-        fErrorCounterMom[momBin]++;
 
 	if (IsHNLGood == true && isGood == true)
 	  fSumGoodMom[momBin] += Weight;
 
-	if (fErrorCounterMom[momBin]%fErrorStepMom == 0) {
-	  fErrorFileMom << "\t" << momBin << "\t" << fSumGoodMom[momBin] << "\t" << fNeventsMom[momBin] << endl;
-	  fErrorCounterMom[momBin] = 0;
-	}
+	fErrorFileMom << "\t" << momBin << "\t" <<  Weight << endl;
       }
     }
   }
@@ -667,9 +648,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   else {
 
     PlotErrorBars(fgErrorAccCoupling, fgErrorAccMass, fgErrorYieldCoupling, fgErrorYieldMass, "ErrorBars.txt");
-    //PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
-    //PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
-    //PlotErrorBarsMom(fgErrorYieldMom, "ErrorBarsMom.txt");
+    PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
+    PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
+    PlotErrorBarsMom(fgErrorYieldMom, "ErrorBarsMom.txt");
   }
 
   SaveAllPlots();
@@ -699,7 +680,8 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
   std::string line;
   std::string MUpair;
   std::string massStr, couplingStr;
-  Double_t Mass, Coupling, SumAll, SumGood, Nevents;
+  Double_t Mass, Coupling, Weight;
+  std::map<std::string, std::vector<Double_t>> errorListWeight;
   std::map<std::string, std::vector<Double_t>> errorListAcc;
   std::map<std::string, std::vector<Double_t>> errorListYield;
   std::map<std::string, Double_t> errorResAcc;
@@ -715,23 +697,21 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
   while (!file.eof()) {
     while (getline(file, line)) {
       stringstream s(line);
-      s >> Mass >> Coupling >> SumAll >> SumGood >> Nevents;
+      s >> Mass >> Coupling >> Weight;
       massStr = std::to_string(Mass);
       couplingStr = std::to_string(Coupling);
       massStr.erase(massStr.find_last_not_of('0') + 1, std::string::npos);
       couplingStr.erase(couplingStr.find_last_not_of('0') + 1, std::string::npos);
       MUpair = massStr + " " + couplingStr;
-      errorListAcc  [MUpair].push_back(SumGood/SumAll);
-      errorListYield[MUpair].push_back(SumGood/Nevents);
+      errorListWeight[MUpair].push_back(Weight);
     }
   }
-
-  for (auto it = errorListAcc.begin(); it != errorListAcc.end(); it++) {
-    errorResAcc[it->first] = ComputeRMS(it->second)[1];
-  }
-
-  for (auto it = errorListYield.begin(); it != errorListYield.end(); it++) {
-    errorResYield[it->first] = ComputeRMS(it->second)[1];
+  
+  for (auto it = errorListWeight.begin(); it != errorListWeight.end(); it++) {
+    std::vector<std::map<std::string, std::vector<Double_t>>> vecRes;
+    vecRes = SplitVector(it->second, it->first);
+    errorResAcc  [it->first] = ComputeRMS(vecRes[0][it->first])[1];
+    errorResYield[it->first] = ComputeRMS(vecRes[1][it->first])[1];
   }
 
   for (auto it = errorResAcc.begin(); it != errorResAcc.end(); it++) {                        
@@ -780,39 +760,45 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
       }
     }
   }
-  
+
   return;
 }
 
-void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, std::string fileName) {
+// Compute error bars for momentum graphs
 
+void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, std::string fileName) {
+  
   fstream file;
   std::string line;
   std::string momStr;
-  Double_t Mom, SumGood, Nevents;
+  Double_t Mom, Weight;
+  std::map<std::string, std::vector<Double_t>> errorListWeight;
   std::map<std::string, std::vector<Double_t>> errorListYield;
   std::map<std::string, Double_t> errorResYield;
-
+  
   file.open(fileName);
-
+  
   if (!file.is_open()) {
     cout << "Cannot open file " << fileName << " in --histo mode" << endl;
     _exit(1);
   }
-
+  
   while (!file.eof()) {
     while (getline(file, line)) {
       stringstream s(line);
-      s >> Mom >> SumGood >> Nevents;
+      s >> Mom >> Weight;
       momStr = std::to_string(Mom);
       momStr.erase(momStr.find_last_not_of('0') + 1, std::string::npos);
-      errorListYield[momStr].push_back(SumGood/Nevents);
+      errorListWeight[momStr].push_back(Weight);
     }
   }
-
-  for (auto it = errorListYield.begin(); it != errorListYield.end(); it++)
-    errorResYield[it->first] = ComputeRMS(it->second)[1];
-
+  
+  for (auto it = errorListWeight.begin(); it != errorListWeight.end(); it++) {
+    std::vector<std::map<std::string, std::vector<Double_t>>> vecRes;
+    vecRes = SplitVector(it->second, it->first);
+    errorResYield[it->first] = ComputeRMS(vecRes[1][it->first])[1];
+  }
+  
   for (auto it = errorResYield.begin(); it != errorResYield.end(); it++) {                        
     stringstream ss(it->first);                                                               
     ss >> Mom;
@@ -825,6 +811,62 @@ void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, std::string fileName) 
   }
   
   return;
+}
+
+// Split vector into chunks and compute acceptance and yield for each chunk
+
+std::vector<std::map<std::string, std::vector<Double_t>>> HeavyNeutrinoScan::SplitVector(std::vector<Double_t> v, std::string MUpair) {
+  
+  Int_t counter = 0;
+  std::map<std::string, std::vector<Double_t>> vecAcc;
+  std::map<std::string, std::vector<Double_t>> vecYield;
+  std::vector<std::map<std::string, std::vector<Double_t>>> vecRes;
+  Double_t SumAll, SumGood, Acc, Yield;
+  std::vector<Double_t> vec;
+  Int_t weightSize = v.size();
+  Int_t nChunks;
+  
+  if (weightSize < fSplitStep)
+    nChunks = 1;
+  else
+    nChunks = weightSize/fSplitStep;
+  
+  Int_t Right = round((Double_t)(weightSize)/(Double_t)(nChunks));
+  //Int_t Left = weightSize % nChunks;
+  
+  for(Int_t i = 0; i < weightSize; i += Right) {
+    if(i < weightSize - Right) {
+      vec.clear();
+      for(Int_t j = i; j < (i + Right); j++)
+	vec.push_back(v[j]);
+    }
+    else {
+      vec.clear();
+      Right = weightSize - i;
+      for(Int_t k = i; k < weightSize; k++) 
+	vec.push_back(v[k]);
+    }
+    
+    SumAll = 0.;
+    SumGood = 0.;
+    
+    for (auto it1 = vec.begin(); it1 != vec.end(); it1++) {
+      SumAll += *it1;
+      if (counter == weightSize - 1)
+	SumGood += *it1;
+      counter++;
+    }
+    
+    Acc = SumGood/SumAll;
+    Yield = SumGood/vec.size();
+    vecAcc  [MUpair].push_back(Acc);
+    vecYield[MUpair].push_back(Yield);
+  }
+  
+  vecRes.push_back(vecAcc);
+  vecRes.push_back(vecYield);
+
+  return vecRes;
 }
 
 // Compute mean and RMS of a sample of doubles

@@ -42,9 +42,10 @@ public:
   void PlotErrorBarsMom(TGraphErrors*, std::string);
   void CosmeticsGraph(TGraphErrors*, const char*, const char*, Int_t);
   std::vector<Double_t> ComputeRMS(std::vector<Double_t>);
-
+  std::vector<std::map<std::string, std::vector<Double_t>>> SplitVector(std::vector<Double_t>, std::string);
+  
 protected:
-
+  
   // Scan variables                                                                                   
 
   Bool_t   fReadingData;
@@ -64,17 +65,12 @@ protected:
   Double_t fCouplingStep;
   Int_t    fN;
   Int_t    fNMom;
-  Int_t    fErrorStep;
-  Int_t    fErrorStepMom;
+  Int_t    fSplitStep;
 
   std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTarget;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTAX;
   std::map<Double_t, Int_t>                        fNeventsMom;
-  std::map<Double_t, std::map<Double_t, Int_t>>    fErrorCounter;
-  std::map<Double_t, std::map<Double_t, Int_t>>    fErrorCounterTarget;
-  std::map<Double_t, std::map<Double_t, Int_t>>    fErrorCounterTAX;
-  std::map<Double_t, Int_t>                        fErrorCounterMom;
   std::map<Double_t, Double_t>                     fCouplings;
   std::map<Double_t, Double_t>                     fMasses;
   std::map<Double_t, Double_t>                     fMomenta;
