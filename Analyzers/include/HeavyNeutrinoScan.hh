@@ -94,7 +94,9 @@ protected:
 
   // One value histos
 
+  TH1D *fhZMotherProd;
   TH1D *fhZDProd;
+  TH1D *fhZTauProd;
   TH1D *fhZDDecay;
   TH1D *fhDTheta;
   TH1D *fhDLambda;
@@ -120,9 +122,11 @@ protected:
 
   TH2D *fhReachCoupling;
   TH2D *fhDecayCoupling;
+  TH2D *fhProbCoupling;
   TH2D *fhWeightCoupling;
   TH2D *fhReachMass;
   TH2D *fhDecayMass;
+  TH2D *fhProbMass;
   TH2D *fhWeightMass;
 
   TGraphErrors *fgAccCoupling;

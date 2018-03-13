@@ -98,7 +98,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
   fMassForSingleValue = 1000.;
-  fSplitStep = 100;
+  fSplitStep = 10;
   
   if (fReadingData) {
     
@@ -114,7 +114,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
    
     // One value histos
     
+    fhZMotherProd  = nullptr;
     fhZDProd       = nullptr;
+    fhZTauProd     = nullptr;
     fhZDDecay      = nullptr;
     fhDTheta       = nullptr;
     fhDLambda      = nullptr;
@@ -198,8 +200,10 @@ void HeavyNeutrinoScan::InitHist() {
     
     // One value of mass and coupling
     
-    BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd", "Z of N mother production point", 20000., -250., 33000.));
-    BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay", "Z of N mother decay point",     20000., -250., 33000.));
+    BookHisto("SingleValue/hZMotherProd",  new TH1D("ZMotherProd", "Z of N mother production point", 20000., -250., 33000.));
+    BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd",      "Z of D meson production point",  20000., -250., 33000.));
+    BookHisto("SingleValue/hZTauProd",     new TH1D("ZTauProd",    "Z of tau production point",      20000., -250., 33000.));
+    BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay",     "Z of N mother decay point",      20000., -250., 33000.));
     BookHisto("SingleValue/hDTheta",       new TH1D("DTheta",  "N mother theta",        100,  0., 0.3));
     BookHisto("SingleValue/hDLambda",      new TH1D("DLambda", "N mother decay length", 100, -1., 40.));
     BookHisto("SingleValue/hDPath",        new TH1D("DPath",   "N mother path in Z",    100, -1., 50.));
@@ -467,16 +471,20 @@ void HeavyNeutrinoScan::Process(Int_t) {
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
       KinePart *p = evt->GetKinePart(i);
       if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-	FillHisto("SingleValue/hZDProd",    p->GetPosAtCheckPoint(0).z());
-	FillHisto("SingleValue/hZDDecay",   p->GetProdPos().Z());
-	FillHisto("SingleValue/hDTheta",    p->GetPosAtCheckPoint(0).x());
-	FillHisto("SingleValue/hDLambda",   p->GetPosAtCheckPoint(0).y());
-	FillHisto("SingleValue/hDPath",     p->GetMomAtCheckPoint(0).X());
-	FillHisto("SingleValue/hDMom",      p->GetMomAtCheckPoint(0).Y()/1000.);
-	FillHisto("SingleValue/hZHNLDecay", p->GetEndPos().Z()/1000.);
-	FillHisto("SingleValue/hHNLGamma",  p->GetInitial4Momentum().Gamma());
-	FillHisto("SingleValue/hHNLTheta",  p->GetMomAtCheckPoint(0).Z());
-	FillHisto("SingleValue/hHNLMom",    p->GetMomAtCheckPoint(0).T()/1000.);
+	FillHisto(  "SingleValue/hZMotherProd", p->GetPosAtCheckPoint(0).z());
+	if (p->GetPosAtCheckPoint(1).z() != 0.)
+	  FillHisto("SingleValue/hZDProd",      p->GetPosAtCheckPoint(1).z());
+	if (p->GetPosAtCheckPoint(2).z() != 0.)
+	  FillHisto("SingleValue/hZTauProd",    p->GetPosAtCheckPoint(2).z());
+	FillHisto(  "SingleValue/hZDDecay",     p->GetProdPos().Z());
+	FillHisto(  "SingleValue/hDTheta",      p->GetPosAtCheckPoint(1).x());
+	FillHisto(  "SingleValue/hDLambda",     p->GetPosAtCheckPoint(1).y());
+	FillHisto(  "SingleValue/hDPath",       p->GetMomAtCheckPoint(1).X());
+	FillHisto(  "SingleValue/hDMom",        p->GetMomAtCheckPoint(1).Y()/1000.);
+	FillHisto(  "SingleValue/hZHNLDecay",   p->GetEndPos().Z()/1000.);
+	FillHisto(  "SingleValue/hHNLGamma",    p->GetInitial4Momentum().Gamma());
+	FillHisto(  "SingleValue/hHNLTheta",    p->GetMomAtCheckPoint(0).Z());
+	FillHisto(  "SingleValue/hHNLMom",      p->GetMomAtCheckPoint(0).T()/1000.);
       }
     }
   }
@@ -488,7 +496,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   
     // Retrieve histos
 
+    fhZMotherProd      = (TH1D*)fHisto.GetTH1("SingleValue/hZMotherProd");
     fhZDProd           = (TH1D*)fHisto.GetTH1("SingleValue/hZDProd");
+    fhZTauProd         = (TH1D*)fHisto.GetTH1("SingleValue/hZTauProd");
     fhZDDecay          = (TH1D*)fHisto.GetTH1("SingleValue/hZDDecay");
     fhDTheta           = (TH1D*)fHisto.GetTH1("SingleValue/hDTheta");
     fhDLambda          = (TH1D*)fHisto.GetTH1("SingleValue/hDLambda");
@@ -518,7 +528,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
     // X axis title
 
+    fhZMotherProd     ->GetXaxis()->SetTitle("Z [mm]");
     fhZDProd          ->GetXaxis()->SetTitle("Z [mm]");
+    fhZTauProd        ->GetXaxis()->SetTitle("Z [mm]");
     fhZDDecay         ->GetXaxis()->SetTitle("Z [mm]");
     fhDTheta          ->GetXaxis()->SetTitle("Theta [rad]");
     fhDLambda         ->GetXaxis()->SetTitle("Decay length [mm]");
@@ -569,14 +581,14 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       MN = it->first;
       for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
 	Coupling = it1->first;
-	fAcc        [MN][Coupling] =       fSumGood[MN][Coupling]/       fSumAll[MN][Coupling];
-	fAccTarget  [MN][Coupling] = fSumGoodTarget[MN][Coupling]/ fSumAllTarget[MN][Coupling];
-	fAccTAX     [MN][Coupling] =    fSumGoodTAX[MN][Coupling]/    fSumAllTAX[MN][Coupling];
-	fYield      [MN][Coupling] =       fSumGood[MN][Coupling]/      fNevents[MN][Coupling];
-	fYieldTarget[MN][Coupling] = fSumGoodTarget[MN][Coupling]/fNeventsTarget[MN][Coupling];
-	fYieldTAX   [MN][Coupling] =    fSumGoodTAX[MN][Coupling]/   fNeventsTAX[MN][Coupling];
-	fProb       [MN][Coupling] =        fSumAll[MN][Coupling]/      fNevents[MN][Coupling];
-      
+	fSumAll       [MN][Coupling] != 0 ? fAcc        [MN][Coupling] =       fSumGood[MN][Coupling]/       fSumAll[MN][Coupling] : fAcc        [MN][Coupling] = 0;
+	fSumAllTarget [MN][Coupling] != 0 ? fAccTarget  [MN][Coupling] = fSumGoodTarget[MN][Coupling]/ fSumAllTarget[MN][Coupling] : fAccTarget  [MN][Coupling] = 0;
+	fSumAllTAX    [MN][Coupling] != 0 ? fAccTAX     [MN][Coupling] =    fSumGoodTAX[MN][Coupling]/    fSumAllTAX[MN][Coupling] : fAccTAX     [MN][Coupling] = 0;
+	fNevents      [MN][Coupling] != 0 ? fYield      [MN][Coupling] =       fSumGood[MN][Coupling]/      fNevents[MN][Coupling] : fYield      [MN][Coupling] = 0;
+	fNeventsTarget[MN][Coupling] != 0 ? fYieldTarget[MN][Coupling] = fSumGoodTarget[MN][Coupling]/fNeventsTarget[MN][Coupling] : fYieldTarget[MN][Coupling] = 0;
+	fNeventsTAX   [MN][Coupling] != 0 ? fYieldTAX   [MN][Coupling] =    fSumGoodTAX[MN][Coupling]/   fNeventsTAX[MN][Coupling] : fYieldTAX   [MN][Coupling] = 0;
+	fNevents      [MN][Coupling] != 0 ? fProb       [MN][Coupling] =        fSumAll[MN][Coupling]/      fNevents[MN][Coupling] : fProb       [MN][Coupling] = 0;
+
 	if (fEnableCouplingScan == false || (fEnableCouplingScan == true && Coupling == (fCouplingStart - fCouplingStop)/2. && MN == fMassForSingleValue)) {      
 
 	  FillHisto("SingleValue/hAcc",                 fAcc[MN][Coupling]);
@@ -648,9 +660,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   else {
 
     PlotErrorBars(fgErrorAccCoupling, fgErrorAccMass, fgErrorYieldCoupling, fgErrorYieldMass, "ErrorBars.txt");
-    //PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
-    //PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
-    //PlotErrorBarsMom(fgErrorYieldMom, "ErrorBarsMom.txt");
+    PlotErrorBars(fgErrorAccCouplingTarget, fgErrorAccMassTarget, fgErrorYieldCouplingTarget, fgErrorYieldMassTarget, "ErrorBarsTarget.txt");
+    PlotErrorBars(fgErrorAccCouplingTAX, fgErrorAccMassTAX, fgErrorYieldCouplingTAX, fgErrorYieldMassTAX, "ErrorBarsTAX.txt");
+    PlotErrorBarsMom(fgErrorYieldMom, "ErrorBarsMom.txt");
   }
 
   SaveAllPlots();
@@ -907,7 +919,9 @@ HeavyNeutrinoScan::~HeavyNeutrinoScan() {
 
   if (fReadingData) {
     
+    fhZMotherProd         = nullptr;
     fhZDProd              = nullptr;
+    fhZTauProd            = nullptr;
     fhZDDecay             = nullptr;
     fhDTheta              = nullptr;
     fhDLambda             = nullptr;
