@@ -1,286 +1,266 @@
-void Plots() {
+void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
 
-  TFile *f1 = TFile::Open("/home/li/Desktop/bla.root");
-  TDirectory * dir1 = (TDirectory*)f1->Get("HeavyNeutrino");
-  TIter next(dir1->GetListOfKeys());
+  h1->SetFillColor(38);
+  h1->SetTitleSize(titleSize, "t");
+  h1->GetXaxis()->SetTitleSize(labelSize);
+  h1->GetXaxis()->SetLabelSize(labelSize);
+  h1->GetYaxis()->SetLabelSize(labelSize);
+  gPad->Update();
+  gStyle->SetStatW(0.2);
+  gStyle->SetStatH(0.2);
+  gStyle->SetOptStat(1111);
+  gPad->Update();
+}
+
+void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSize) {
+  
+  h2->SetTitleSize(titleSize, "t");
+  h2->GetXaxis()->SetTitleSize(labelSize);
+  h2->GetYaxis()->SetTitleSize(labelSize);
+  h2->GetXaxis()->SetLabelSize(labelSize);
+  h2->GetYaxis()->SetLabelSize(labelSize);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+
+  if (logScale == true) {
+    gPad->Update();
+    gPad->SetLogy();
+    gPad->SetLogz();
+    gPad->SetGridx();
+    gPad->SetGridy();
+    gPad->Update();
+  }
+}
+
+void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
+
+  g->GetXaxis()->SetTitleSize(labelSize);
+  g->GetYaxis()->SetTitleSize(labelSize);
+  g->GetXaxis()->SetLabelSize(labelSize);
+  g->GetYaxis()->SetLabelSize(labelSize);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  gPad->SetLogy();
+  gPad->SetLogz();
+  gPad->SetGridx();
+  gPad->SetGridy();
+  gPad->Update();
+}
+
+void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas* c, TString path, Double_t labelSize, Double_t titleSize) {
+
+  m->Draw("AC");
+  m->GetXaxis()->SetTitle(x);
+  m->GetYaxis()->SetTitle(y);
+  m->GetXaxis()->SetTitleSize(labelSize);
+  m->GetYaxis()->SetTitleSize(labelSize);
+  m->GetXaxis()->SetLabelSize(labelSize);
+  m->GetYaxis()->SetLabelSize(labelSize);
+  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
+  gPad->Update();
+  gPad->SetLogy();
+  gPad->SetLogz();
+  gPad->SetGridx();
+  gPad->SetGridy();
+  gPad->Update();
+  c->SaveAs(path + m ->GetName() + ".png");
+
+  delete m;
+
+  m  = nullptr;
+}
+
+TMultiGraph* CreateTMultiGraph(const char* name, const char* title) {
+
+  TMultiGraph *m = new TMultiGraph("m", "");
+  m->SetName(name);
+  m->SetTitle(title);
+
+  return m;
+}
+			       
+void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, TMultiGraph* m, TMultiGraph* m1) {
+
+  TFile *f = TFile::Open(fName);
+  TDirectory * dir = (TDirectory*)f->Get(dirName);
+  TIter next(dir->GetListOfKeys());
   TKey *key;
-  TCanvas *c1 = new TCanvas();
-  Double_t labelSize = 0.05;
-  Double_t titleSize = 0.07;
   TH1D* hBe  = new TH1D();
   TH1D* hTa  = new TH1D();
   TH1D* hBe1 = new TH1D();
   TH1D* hTa1 = new TH1D();
-  TMultiGraph *m = new TMultiGraph("m", "");
-  m->SetName("YieldCoupling");
-  m->SetTitle("Yield per POT vs coupling");
-  TMultiGraph *m1 = new TMultiGraph("m1", "");
-  m1->SetName("YieldMass");
-  m1->SetTitle("Yield per POT vs N mass");
-  TMultiGraph *m2 = new TMultiGraph("m2", "");
-  m2->SetName("AccCoupling");
-  m2->SetTitle("Acceptance vs coupling");
-  TMultiGraph *m3 = new TMultiGraph("m3", "");
-  m3->SetName("AccMass");
-  m3->SetTitle("Acceptance vs N mass");
-  TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;
 
-  TGaxis::SetMaxDigits(2);
-
-  // One value plots for selection analyzer
-  
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (!cl->InheritsFrom("TH1") && !cl->InheritsFrom("TH2")) continue;
-    else {
-      if (cl->InheritsFrom("TH2")) {
-        TH2 *h2 = (TH2*)key->ReadObj();
-        h2->SetTitleSize(titleSize, "t");
-        h2->GetXaxis()->SetTitleSize(labelSize);
-        h2->GetYaxis()->SetTitleSize(labelSize);
-        h2->GetXaxis()->SetLabelSize(labelSize);
-        h2->GetYaxis()->SetLabelSize(labelSize);
-        gStyle->SetOptStat(0);
-        gPad->Update();
-        h2->Draw("colz");
-      }
-      else if (!cl->InheritsFrom("TH2")) {
-        TH1 *h1 = (TH1*)key->ReadObj();
-        h1->SetFillColor(38);
-        h1->SetTitleSize(titleSize, "t");
-	h1->GetXaxis()->SetTitleSize(labelSize);
-	h1->GetXaxis()->SetLabelSize(labelSize);
-	h1->GetYaxis()->SetLabelSize(labelSize);
-	gStyle->SetStatW(0.3);
-	gStyle->SetStatH(0.3);
-	gStyle->SetOptStat(10);
-	gPad->Update();
-        if (!strcmp(key->GetName(), "InvMassReco")) {
-          h1->Fit("gaus");
-          gStyle->SetStatW(0.2);
-          gStyle->SetStatH(0.2);
-          gStyle->SetOptFit(1);
-        }
-        if (!strcmp(key->GetName(), "PhysicsEventsVsCuts"))
-          h1->Draw("text");
-        else
-          h1->Draw();
-      }
-      
-      c1->SaveAs(path + key->GetName() + ".png");
-    }
-  }
+    if (cl->InheritsFrom("TGraphErrors")) {
+      TGraphErrors *g = (TGraphErrors*)key->ReadObj();
+      TString Name = key->GetName();
+      TGraphCosmetics(g, labelSize, titleSize);
 
-  // One value plots for weight quantities
-  
-  dir1 = (TDirectory*)f1->Get("HeavyNeutrinoScan/SingleValue");
-  TIter next1(dir1->GetListOfKeys());
-  
-  while ((key = (TKey*)next1())) {
-    TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (!cl->InheritsFrom("TH2")) {
+      if (!Name.Contains("Mom")) {
+	if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
+	  g->Draw("AC");
+	  c->SaveAs(path + key->GetName() + ".png");
+	}
+	else {
+	  if (Name.Contains("Yield")) {
+	    g->GetYaxis()->SetRangeUser(1.E-30, 1.E-10);
+	    g->Draw("AC");
+	    m->Add(g);
+	  }
+	  else {
+	    g->GetYaxis()->SetRangeUser(1.E-10, 1.E-1);
+	    g->Draw("AC");
+	    m1->Add(g);
+	  }
+	}
+      }
+      else {
+	g->Draw("AC");
+	c->SaveAs(path + key->GetName() + ".png");
+      }
+    }
+    else if (cl->InheritsFrom("TH2")) {
+      TH2 *h2 = (TH2*)key->ReadObj();
+
+      if (path.Contains("Coupling") || path.Contains("Mass"))
+	TH2Cosmetics(h2, true, labelSize, titleSize);
+      else
+	TH2Cosmetics(h2, false, labelSize, titleSize);
+      
+      h2->Draw("colz");
+      c->SaveAs(path + key->GetName() + ".png");
+    }
+    else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
-      h1->SetFillColor(38);
-      h1->SetTitleSize(titleSize, "t");
-      h1->GetXaxis()->SetTitleSize(labelSize);
-      h1->GetXaxis()->SetLabelSize(labelSize);
-      h1->GetYaxis()->SetLabelSize(labelSize);
-      gStyle->SetStatW(0.3);
-      gStyle->SetStatH(0.3);
-      gStyle->SetOptStat(10);
-      gPad->Update();
+      TH1Cosmetics(h1, labelSize, titleSize);
+      if (!strcmp(key->GetName(), "InvMassReco")) {
+        h1->Fit("gaus");
+        gStyle->SetStatW(0.2);
+        gStyle->SetStatH(0.2);
+        gStyle->SetOptFit(1);
+      }
+      if (!strcmp(key->GetName(), "PhysicsEventsVsCuts")) {
+        h1->Draw("text");
+	h1->SetOption("text");
+      }
       if (!strcmp(key->GetName(), "ZDProd")) {
-	hBe = (TH1D*)h1->Clone("hBe");
-	hBe->SetName("ZDProdTarget");
-	hBe->SetTitle("Z of D meson production point in the target");
-	hBe->GetXaxis()->SetRangeUser(-250., 250.);
-	hBe->Draw();
-	c1->SaveAs(path + hBe->GetName() + ".png");
-	hTa = (TH1D*)h1->Clone("hTa");
-	hTa->SetName("ZDProdTAX");
-	hTa->SetTitle("Z of D meson production point in the TAXs");
-	hTa->GetXaxis()->SetRangeUser(24500., 27000.);
-	hTa->Draw();
-	c1->SaveAs(path + hTa->GetName() + ".png");
+        hBe = (TH1D*)h1->Clone("hBe");
+        hBe->SetName("ZDProdTarget");
+        hBe->SetTitle("Z of D meson production point in the target");
+        hBe->GetXaxis()->SetRangeUser(-250., 250.);
+        hBe->Draw();
+	c->SaveAs(path + hBe->GetName() + ".png");
+        hTa = (TH1D*)h1->Clone("hTa");
+        hTa->SetName("ZDProdTAX");
+        hTa->SetTitle("Z of D meson production point in the TAXs");
+        hTa->GetXaxis()->SetRangeUser(24500., 27000.);
+        hTa->Draw();
+        c->SaveAs(path + hTa->GetName() + ".png");
       }
       if (!strcmp(key->GetName(), "ZDDecay")) {
 	hBe1 = (TH1D*)h1->Clone("hBe1");
-	hBe1->SetName("ZDDecayTarget");
-	hBe1->SetTitle("Z of D meson decay point in the target");
-	hBe1->GetXaxis()->SetRangeUser(-250., 300.);
-	hBe1->Draw();
-	c1->SaveAs(path + hBe1->GetName() + ".png");
-	hTa1 = (TH1D*)h1->Clone("hTa1");
+        hBe1->SetName("ZDDecayTarget");
+        hBe1->SetTitle("Z of D meson decay point in the target");
+        hBe1->GetXaxis()->SetRangeUser(-250., 300.);
+        hBe1->Draw();
+	c->SaveAs(path + hBe1->GetName() + ".png");
+        hTa1 = (TH1D*)h1->Clone("hTa1");
 	hTa1->SetName("ZDDecayTAX");
-	hTa1->SetTitle("Z of D meson decay point in the TAXs");
+        hTa1->SetTitle("Z of D meson decay point in the TAXs");
 	hTa1->GetXaxis()->SetRangeUser(24500., 27000.);
-	hTa1->Draw();
-	c1->SaveAs(path + hTa1->GetName() + ".png");
+        hTa1->Draw();
+        c->SaveAs(path + hTa1->GetName() + ".png");
       }
-      c1->SaveAs(path + key->GetName() + ".png");
+      else
+        h1->Draw();
+      
+      c->SaveAs(path + key->GetName() + ".png");
     }
   }
+}
 
+void Plots() {
+    
+  TCanvas *c = new TCanvas();
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;
+
+  c->SetRightMargin(0.2);
+  c->SetLeftMargin(0.2);
+  c->SetBottomMargin(0.25);
+  c->SetWindowSize(20000., 12000.);
+  
+  //TGaxis::SetMaxDigits(2);
+  
+  // FIRST STEP HISTOS
+    
+  // One value plots for selection analyzer
+  
+  TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
+  
+  //ParseDir("~/Desktop/bla.root", "HeavyNeutrino", path, c, nullptr, nullptr);
+
+  // One value plots for weight quantities
+
+  //ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
+  
   // Coupling plots
+  
+  TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
+  TMultiGraph *m1 = CreateTMultiGraph("AccCoupling", "Acceptance vs coupling");
 
-  dir1 = (TDirectory*)f1->Get("HeavyNeutrinoScan/CouplingScan");
-  path = "~/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
-  TIter next2(dir1->GetListOfKeys());
+  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
 
-  while ((key = (TKey*)next2())) {
-    TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (cl->InheritsFrom("TGraph")) {
-      TGraph *g = (TGraph*)key->ReadObj();
-      g->GetXaxis()->SetTitleSize(labelSize);
-      g->GetYaxis()->SetTitleSize(labelSize);
-      g->GetXaxis()->SetLabelSize(labelSize);
-      g->GetYaxis()->SetLabelSize(labelSize);
-      gStyle->SetOptStat(0);
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
 
-      TString Name = key->GetName();
-
-      if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
-	g->Draw("AC");
-	c1->SaveAs(path + key->GetName() + ".png");
-      }
-      else {
-	if (Name.Contains("Yield")) {
-	  g->GetYaxis()->SetRangeUser(1.E-30, 1.E-10);
-	  g->Draw("AC");
-	  m->Add(g);
-	}
-	else {
-	  g->GetYaxis()->SetRangeUser(1.E-10, 1.E-1);
-	  g->Draw("AC");
-	  m2->Add(g);
-	}
-      }
-    }
-    else if (cl->InheritsFrom("TH2")) {
-      TH2 *h2 = (TH2*)key->ReadObj();
-      h2->SetTitleSize(titleSize, "t");
-      h2->GetXaxis()->SetTitleSize(labelSize);
-      h2->GetYaxis()->SetTitleSize(labelSize);
-      h2->GetXaxis()->SetLabelSize(labelSize);
-      h2->GetYaxis()->SetLabelSize(labelSize);
-      h2->GetZaxis()->SetLabelSize(labelSize);
-      gStyle->SetOptStat(0);
-      gPad->SetLogy();
-      gPad->SetLogz();
-      gPad->SetGridx();
-      gPad->SetGridy();
-      c1->SetRightMargin(0.2);
-      h2->Draw("colz");
-      c1->SaveAs(path + key->GetName() + ".png");
-    }
-  }
-  m->Draw("AC");
-  m->GetXaxis()->SetTitle("Log of coupling");
-  m->GetYaxis()->SetTitle("Yield");
-  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
-  gPad->Update();
-  gPad->SetLogy();
-  gPad->SetLogz();
-  gPad->SetGridx();
-  gPad->SetGridy();
-  gPad->Update();
-  c1->SaveAs(path + m->GetName() + ".png");
-  m2->Draw("AC");
-  m2->GetXaxis()->SetTitle("Log of coupling");
-  m2->GetYaxis()->SetTitle("Acceptance");
-  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
-  gPad->Update();
-  c1->SaveAs(path + m2->GetName() + ".png");
-
+  TMultiGraphCosmetics(m,  "Log of coupling", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log of coupling", "Acceptance",    c, path, labelSize, titleSize);
+  
   // Mass plots
+  /*
+  TMultiGraph *m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
+  TMultiGraph *m1 = CreateTMultiGraph("AccMass", "Acceptance vs N mass");
 
-  dir1 = (TDirectory*)f1->Get("HeavyNeutrinoScan/MassScan");
-  path = "~/Desktop/HeavyNeutrino/ScanPlots/Mass/";
-  TIter next3(dir1->GetListOfKeys());
+  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
 
-  while ((key = (TKey*)next3())) {
-    TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (cl->InheritsFrom("TGraph")) {
-      TGraph *g = (TGraph*)key->ReadObj();
-      g->GetXaxis()->SetTitleSize(labelSize);
-      g->GetYaxis()->SetTitleSize(labelSize);
-      g->GetXaxis()->SetLabelSize(labelSize);
-      g->GetYaxis()->SetLabelSize(labelSize);
-      gStyle->SetOptStat(0);
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/MassScan", path, c, m, m1);
 
-      TString Name = key->GetName();
-
-      if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
-        g->Draw("AC");
-        c1->SaveAs(path + key->GetName() + ".png");
-      }
-      else {
-        if (Name.Contains("Yield")) {
-          g->GetYaxis()->SetRangeUser(1.E-30, 1.E-10);
-          g->Draw("AC");
-          m1->Add(g);
-        }
-        else {
-          g->GetYaxis()->SetRangeUser(1.E-10, 1.E-1);
-          g->Draw("AC");
-          m3->Add(g);
-        }
-      }
-    }
-    else if (cl->InheritsFrom("TH2")) {
-      TH2 *h2 = (TH2*)key->ReadObj();
-      h2->SetTitleSize(titleSize, "t");
-      h2->GetXaxis()->SetTitleSize(labelSize);
-      h2->GetYaxis()->SetTitleSize(labelSize);
-      h2->GetXaxis()->SetLabelSize(labelSize);
-      h2->GetYaxis()->SetLabelSize(labelSize);
-      h2->GetZaxis()->SetLabelSize(labelSize);
-      gStyle->SetOptStat(0);
-      gPad->SetLogy();
-      gPad->SetLogz();
-      gPad->SetGridx();
-      gPad->SetGridy();
-      c1->SetRightMargin(0.2);
-      h2->Draw("colz");
-      c1->SaveAs(path + key->GetName() + ".png");
-    }
-  }
-  m1->Draw("AC");
-  m1->GetXaxis()->SetTitle("N mass [GeV]");
-  m1->GetYaxis()->SetTitle("Yield");
-  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
-  gPad->Update();
-  gPad->SetLogy();
-  gPad->SetLogz();
-  gPad->SetGridx();
-  gPad->SetGridy();
-  gPad->Update();
-  c1->SaveAs(path + m1->GetName() + ".png");
-  m3->Draw("AC");
-  m3->GetXaxis()->SetTitle("N mass [GeV]");
-  m3->GetYaxis()->SetTitle("Acceptance");
-  gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
-  gPad->Update();
-  c1->SaveAs(path + m3->GetName() + ".png");
+  TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
 
   // Total scan plots
 
-  dir1 = (TDirectory*)f1->Get("HeavyNeutrinoScan/TotalScan");
-  path = "~/Desktop/HeavyNeutrino/ScanPlots/Total/";
-  TIter next4(dir1->GetListOfKeys());
+  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Total/";
 
-  while ((key = (TKey*)next4())) {
-    TClass *cl = gROOT->GetClass(key->GetClassName());
-    if (cl->InheritsFrom("TGraph")) {
-      TGraph *g = (TGraph*)key->ReadObj();
-      g->GetXaxis()->SetTitleSize(labelSize);
-      g->GetYaxis()->SetTitleSize(labelSize);
-      g->GetXaxis()->SetLabelSize(labelSize);
-      g->GetYaxis()->SetLabelSize(labelSize);
-      gStyle->SetOptStat(0);
-      g->Draw("AC");
-      
-      c1->SaveAs(path + key->GetName() + ".png");
-    }
-  }
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
+
+  // SECOND STEP HISTOS (--HISTO MODE)
+
+  // Coupling plots                                                                          
+
+  TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
+  TMultiGraph *m1 = CreateTMultiGraph("AccCoupling", "Acceptance vs coupling");
+  
+  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
+
+  ParseDir("~/Desktop/minc.root", "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
+  
+  TMultiGraphCosmetics(m,  "Log of coupling", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log of coupling", "Acceptance",    c, path, labelSize, titleSize);
+  
+  // Mass plots                                                                         
+  
+  TMultiGraph *m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
+  TMultiGraph *m1 = CreateTMultiGraph("AccMass", "Acceptance vs N mass");
+
+  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
+
+  ParseDir("~/Desktop/minc.root", "HeavyNeutrinoScan/MassScan", path, c, m, m1);
+  
+  TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
+  */
 }

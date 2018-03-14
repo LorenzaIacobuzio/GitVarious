@@ -39,10 +39,9 @@ public:
   void PostProcess() {}
   void DrawPlot() {}
   void PlotErrorBars(TGraphErrors*, TGraphErrors*, TGraphErrors*, TGraphErrors*, std::string);
-  void PlotErrorBarsMom(TGraphErrors*, std::string);
+  void PlotErrorBarsMom(TGraphErrors*, TGraphErrors*, std::string);
   void CosmeticsGraph(TGraphErrors*, const char*, const char*, Int_t);
   std::vector<Double_t> ComputeRMS(std::vector<Double_t>);
-  std::vector<std::map<std::string, std::vector<Double_t>>> SplitVector(std::vector<Double_t>, std::string);
   
 protected:
   
@@ -67,9 +66,11 @@ protected:
   Int_t    fNMom;
   Int_t    fSplitStep;
 
+  std::map<Double_t, std::map<Double_t, Int_t>>    fEvtCounter;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTarget;
   std::map<Double_t, std::map<Double_t, Int_t>>    fNeventsTAX;
+  std::map<Double_t, Int_t>                        fEvtCounterMom;
   std::map<Double_t, Int_t>                        fNeventsMom;
   std::map<Double_t, Double_t>                     fCouplings;
   std::map<Double_t, Double_t>                     fMasses;
@@ -77,6 +78,7 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAll;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumAllTAX;
+  std::map<Double_t, Double_t>                     fSumAllMom;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTAX;
@@ -84,6 +86,7 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fAcc;
   std::map<Double_t, std::map<Double_t, Double_t>> fAccTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fAccTAX;
+  std::map<Double_t, Double_t>                     fAccMom;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, std::map<Double_t, Double_t>> fYieldTarget;
   std::map<Double_t, std::map<Double_t, Double_t>> fYieldTAX;
@@ -129,6 +132,8 @@ protected:
   TH2D *fhProbMass;
   TH2D *fhWeightMass;
 
+  // Error bar histos
+
   TGraphErrors *fgAccCoupling;
   TGraphErrors *fgAccCouplingTarget;
   TGraphErrors *fgAccCouplingTAX;
@@ -145,10 +150,9 @@ protected:
   TGraphErrors *fgYieldMassTAX;
   TGraphErrors *fgGammaTotMass;
   TGraphErrors *fgTauMass;
+  TGraphErrors *fgAccMom;
   TGraphErrors *fgYieldMom;
   TGraphErrors *fgExclusion;
-
-  // Error bar histos
 
   TGraphErrors *fgErrorAccCoupling;
   TGraphErrors *fgErrorAccCouplingTarget;
@@ -162,6 +166,7 @@ protected:
   TGraphErrors *fgErrorYieldMass;
   TGraphErrors *fgErrorYieldMassTarget;
   TGraphErrors *fgErrorYieldMassTAX;
+  TGraphErrors *fgErrorAccMom;
   TGraphErrors *fgErrorYieldMom;
   TGraphErrors *fgErrorExclusion;  
 };

@@ -172,12 +172,12 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",  "X,Y of HNL daughters at CHOD, from MC",  100, -2., 2., 100, -2., 2.));
   BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",  "X,Y of HNL daughters at MUV3, from MC",  100, -2., 2., 100, -2., 2.));
 
-  BookHisto("hCDAvsZ_In",     new TH2D("CDAvsZ_In",     "Two-track total momentum wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 0.5));
-  BookHisto("hCDAvsZ_Track",  new TH2D("CDAvsZ_Track",  "Two-track total momentum wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 0.5));
-  BookHisto("hCDAvsZ_Energy", new TH2D("CDAvsZ_Energy", "Two-track total momentum wrt beam axis, after energy cuts",        200, 100., 190., 100, 0., 0.5));
-  BookHisto("hCDAvsZ_Vetoes", new TH2D("CDAvsZ_Vetoes", "Two-track total momentum wrt beam axis, after veto cuts",          200, 100., 190., 100, 0., 0.5));
-  BookHisto("hCDAvsZ_Geom",   new TH2D("CDAvsZ_Geom",   "Two-track total momentum wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 0.5));
-  BookHisto("hCDAvsZ_Fin",    new TH2D("CDAvsZ_Fin",    "Two-track total momentum wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_In",     new TH2D("CDAvsZ_In",     "N trajectory wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_Track",  new TH2D("CDAvsZ_Track",  "N trajectory wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_Energy", new TH2D("CDAvsZ_Energy", "N trajectory wrt beam axis, after energy cuts",        200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_Vetoes", new TH2D("CDAvsZ_Vetoes", "N trajectory wrt beam axis, after veto cuts",          200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_Geom",   new TH2D("CDAvsZ_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 0.5));
+  BookHisto("hCDAvsZ_Fin",    new TH2D("CDAvsZ_Fin",    "N trajectory wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 0.5));
   
   BookHisto("hZvsBeam_In",     new TH2D("ZvsBeam_In",     "Two track vertex wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 1.));
   BookHisto("hZvsBeam_Track",  new TH2D("ZvsBeam_Track",  "Two track vertex wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 1.));
@@ -186,12 +186,12 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two track vertex wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 1.));
   BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two track vertex wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 1.));
   
-  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "Two-track total momentum wrt beam axis, before all cuts",          100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "Two-track total momentum wrt beam axis, after track-quality cuts", 100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "Two-track total momentum wrt beam axis, after energy cuts",        100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "Two-track total momentum wrt beam axis, after veto cuts",          100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "Two-track total momentum wrt beam axis, after geometrical cuts",   100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "Two-track total momentum wrt beam axis, after all cuts",           100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           100, 0., 1., 200, 0., 27.));
   
   BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
   BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
@@ -401,20 +401,6 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t TargetDist = fDistcomp->GetDistance();
   Double_t Extrap     = TargetDist;
-  /*
-  fDistcomp->SetLineDir(TotMom);    
-  fDistcomp->SetLinePoint1(Vertex);
-  fDistcomp->SetPoint(0., 0., fTAXDistance + fTAXLength/2.);  
-  fDistcomp->ComputeDistance();
-  
-  Double_t TAXDist = fDistcomp->GetDistance();
-  Double_t Extrap = 0.;
-
-  if (TargetDist <= TAXDist)
-    Extrap = TargetDist;
-  else
-    Extrap = TAXDist;
-  */
 
   // Compute distance of two-track vertex wrt beam axis
   
@@ -697,7 +683,15 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Geometrical cuts, CUT: Cut on distance between tracks at CH1
 
+  Double_t X = SpectrometerCand1->xAt(fzStraw[0]) - SpectrometerCand2->xAt(fzStraw[0]);
+  Double_t Y = SpectrometerCand1->yAt(fzStraw[0]) - SpectrometerCand2->yAt(fzStraw[0]);
+  Double_t R = TMath::Sqrt(X*X + Y*Y);
 
+  if (R < 20.)
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // Geometrical cuts, CUT: Cut on CDA of two tracks
 
@@ -883,7 +877,7 @@ void HeavyNeutrino::EndOfJobUser() {
 
   // Plot residual number of events after each cut
 
-  const int NCuts = 21;
+  const int NCuts = 23;
   const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "LKr acc", "LKr assoc", "MUV3 acc", "MUV3 assoc", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "LKr veto", "Track dist CH1", "CDA tracks", "Beam distance", "Z vertex"};
 
   for (Int_t i = 1; i <= NCuts; i++)

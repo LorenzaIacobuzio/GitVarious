@@ -32,6 +32,9 @@
 /// For example, if the user assigns 100000. to the beginning of the FV and 80000. to its length, the FV
 /// will begin at 100 m from the target centre and end at 180 m.
 /// Default values are: InitialFV = 102500., LFV = 77500.
+/// The value of the HNL mass for which the reconstructed invariant mass is plotted can be either set 
+/// as external parameters from command line or taken as default values. 
+/// Default value is MassForReco = 1000.
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
 /// \EndDetailed               
@@ -85,6 +88,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
+  AddParam("MassForReco", &fMassForReco, 1000.);
 
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
@@ -751,8 +755,9 @@ void HeavyNeutrino::Process(Int_t) {
   energyPi = TMath::Sqrt(threeMomPi.Px()*threeMomPi.Px() + threeMomPi.Py()*threeMomPi.Py() + threeMomPi.Pz()*threeMomPi.Pz() + fMpi*fMpi);
   energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
-  
-  FillHisto("hInvMassReco", invMass);
+
+  if (TMath::Abs(invMass - fMassForReco) <= 50.)
+    FillHisto("hInvMassReco", invMass);
 }
 
 void HeavyNeutrino::EndOfBurstUser() {
