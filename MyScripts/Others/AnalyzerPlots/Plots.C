@@ -85,7 +85,6 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   gPad->BuildLegend(0.61, 0.72, 0.98, 0.93);
   gPad->Update();
   gPad->SetLogy();
-  gPad->SetLogz();
   gPad->SetGridx();
   gPad->SetGridy();
   gPad->Update();
@@ -235,17 +234,17 @@ void Plots() {
   
   TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
 
-  //ParseDir("~/Desktop/bla.root", "HeavyNeutrino", path, c, nullptr, nullptr);
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrino", path, c, nullptr, nullptr);
 
   // One value plots for weight quantities
 
-  //ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
   
   // Coupling plots
 
   TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
-  TMultiGraph *m1 = CreateTMultiGraph("AccCoupling", "Acceptance vs coupling");
-
+  TMultiGraph *m1 = CreateTMultiGraph("AccCoupling",   "Acceptance vs coupling");
+  
   path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
 
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
@@ -258,7 +257,7 @@ void Plots() {
   // Mass plots
   
   m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
-  m1 = CreateTMultiGraph("AccMass", "Acceptance vs N mass");
+  m1 = CreateTMultiGraph("AccMass",   "Acceptance vs N mass");
 
   path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
 
@@ -276,11 +275,11 @@ void Plots() {
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
     
   // SECOND STEP HISTOS (--HISTO MODE)
-  /*  
+
   // Coupling plots                                                                          
 
-  m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
-  m1 = CreateTMultiGraph("AccCoupling", "Acceptance vs coupling");
+  m  = CreateTMultiGraph("ErrorYieldCoupling", "Yield per POT vs coupling");
+  m1 = CreateTMultiGraph("ErrorAccCoupling",   "Acceptance vs coupling");
   
   path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
 
@@ -292,9 +291,9 @@ void Plots() {
   c = CreateTCanvas();
 
   // Mass plots                                                                         
-    
-  m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
-  m1 = CreateTMultiGraph("AccMass", "Acceptance vs N mass");
+
+  m  = CreateTMultiGraph("ErrorYieldMass", "Yield per POT vs N mass");
+  m1 = CreateTMultiGraph("ErrorAccMass",   "Acceptance vs N mass");
 
   path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
 
@@ -303,5 +302,4 @@ void Plots() {
   TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
   TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
-  */
 }
