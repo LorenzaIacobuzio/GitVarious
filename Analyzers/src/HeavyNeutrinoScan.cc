@@ -29,14 +29,11 @@
 /// For example, if the user sets USquared = 1.E-10, UeSquaredRatio = 5., UmuSquaredRatio = 1., 
 /// UtauSquaredRatio = 3.5, the specific-flavour coupling values will be: UeSquared = 5.25E-11, 
 /// UmuSquared = 1.05E-11, UtauSquared = 3.68E-11.   
-/// Default values are: USquared = 1.E-6, UeSquaredRatio = 1., UmuSquaredRatio = 16.,         
-/// UtauSquaredRatio = 3.8.
 /// The values of the initial and final coupling and the scan step can be either set as external      
 /// parameters from command line or taken as default values.                                           
 /// For example, if the user assigns -3. to the starting coupling, -2. to the final one                
 /// and 0.5 to the step, the scan will be performed for Log(U2) = [-3., -2.5, -2.], this meaning       
 /// U2 = [1.E-3., 1.E-2.5, 1.E-2.].                                                                    
-/// Default values are: CouplingStart = -10., CouplingStop = 0., CouplingStep = 0.1.
 /// A boolean to enable/disable the coupling scan can be also set as an external parameter.
 /// The coupling scan is enabled by default.
 /// This analyzer produces .txt files needed for computing error bars for plots generated during
@@ -46,12 +43,9 @@
 /// The values of the initial and final momentum and its step can be either set as external         
 /// parameters from command line or taken as default values. These are used to produce plots 
 /// of the acceptance and yield per POT as a function of the HNL momentum.
-/// Default values are: MomStart = 0., MomStop = 200., MomStep = 10.
 /// Other parameters to be set from command line are:
-/// mass value to produce plots at a fixed mass (coupling scan and single value plots); default value
-/// is MassForSingleValue = 1000.;
-/// number of events in each chunk the sample is split into, to compute error bars in --histo mode;
-/// default value is SplitStep = 10.
+/// mass value to produce plots at a fixed mass (coupling scan and single value plots);
+/// number of events in each chunk the sample is split into, to compute error bars in --histo mode.
 ///                                                                                                     
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)                                               
 /// \EndDetailed                                           
@@ -85,14 +79,14 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
   fReadingData = GetIsTree();    
   RequestAllMCTrees();
-  
+
   AddParam("USquared", &fUSquared, 1.E-6);
   AddParam("UeSquaredRatio", &fUeSquaredRatio, 1.);
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
   AddParam("CouplingStart", &fCouplingStart, -10.);
   AddParam("CouplingStop", &fCouplingStop, 0.);
-  AddParam("CouplingStep", &fCouplingStep, 5.);
+  AddParam("CouplingStep", &fCouplingStep, 1.);
   AddParam("EnableCouplingScan", &fEnableCouplingScan, true);
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
@@ -107,7 +101,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
-  
+
   if (fReadingData) {
     
     fErrorFile.      open("ErrorBars.txt",       fstream::out | fstream::in | fstream::trunc);
@@ -368,9 +362,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
     fCouplingStop = fCouplingStart;
   }
 
-  //Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
-  //REMOVE
-  Bool_t IsHNLGood = true;
+  Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
 
   // Scan on the coupling                                                                       
   
@@ -426,7 +418,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  else if (Weights[i]["ProdProb"] == fDCuProdProb) 
 	    fSumGoodTAX[round(MN)][fCoupling] += Weight;
 	}
-
+	
 	if (i == 0) {
 	  if (fEvtCounter[round(MN)].count(fCoupling) == 0)
 	    fEvtCounter[round(MN)][fCoupling] = 0;
@@ -441,11 +433,11 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  if (fSumAllTarget[round(MN)][fCoupling] != 0. && fNeventsTarget[round(MN)][fCoupling] != 0)
 	    fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << fSumGoodTarget[round(MN)][fCoupling]/fSumAllTarget[round(MN)][fCoupling] << "\t" << fSumGoodTarget[round(MN)][fCoupling]/fNeventsTarget[round(MN)][fCoupling] << endl;
 	  else
-	    fErrorFile << round(MN) << "\t" << fCoupling << "\t" << "0." << "\t" << "0." << endl;
+	    fErrorFileTarget << round(MN) << "\t" << fCoupling << "\t" << "0." << "\t" << "0." << endl;
 	  if (fSumAllTAX[round(MN)][fCoupling] != 0. && fNeventsTAX[round(MN)][fCoupling] != 0)
 	    fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << fSumGoodTAX[round(MN)][fCoupling]/fSumAllTAX[round(MN)][fCoupling] << "\t" << fSumGoodTAX[round(MN)][fCoupling]/fNeventsTAX[round(MN)][fCoupling] << endl;
 	  else
-	    fErrorFile << round(MN) << "\t" << fCoupling << "\t" << "0." << "\t" << "0." << endl;
+	    fErrorFileTAX << round(MN) << "\t" << fCoupling << "\t" << "0." << "\t" << "0." << endl;
 	}
 
 	FillHisto("CouplingScan/hReachCoupling",  fCoupling,       NReachProb);
@@ -526,7 +518,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	FillHisto(  "SingleValue/hDTheta",      p->GetPosAtCheckPoint(1).x());
 	FillHisto(  "SingleValue/hDLambda",     p->GetPosAtCheckPoint(1).y());
 	FillHisto(  "SingleValue/hDPath",       p->GetMomAtCheckPoint(1).X());
-	FillHisto(  "SingleValue/hDMom",        p->GetMomAtCheckPoint(1).Y()/1000.);
+	//FillHisto(  "SingleValue/hDMom",        p->GetMomAtCheckPoint(1).Y()/1000.);
+	// CHANGE TO p->GetMomAtCheckPoint(1) WITH NEW SAMPLE
+	FillHisto(  "SingleValue/hDMom",        p->GetMomAtCheckPoint(0).Y()/1000.);
 	FillHisto(  "SingleValue/hZHNLDecay",   p->GetEndPos().Z()/1000.);
 	FillHisto(  "SingleValue/hHNLGamma",    p->GetInitial4Momentum().Gamma());
 	FillHisto(  "SingleValue/hHNLTheta",    p->GetMomAtCheckPoint(0).Z());
@@ -633,6 +627,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       MN = it->first;
       for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
 	Coupling = it1->first;
+
 	fSumAll       [MN][Coupling] != 0 ? fAcc        [MN][Coupling] =       fSumGood[MN][Coupling]/       fSumAll[MN][Coupling] : fAcc        [MN][Coupling] = 0;
 	fSumAllTarget [MN][Coupling] != 0 ? fAccTarget  [MN][Coupling] = fSumGoodTarget[MN][Coupling]/ fSumAllTarget[MN][Coupling] : fAccTarget  [MN][Coupling] = 0;
 	fSumAllTAX    [MN][Coupling] != 0 ? fAccTAX     [MN][Coupling] =    fSumGoodTAX[MN][Coupling]/    fSumAllTAX[MN][Coupling] : fAccTAX     [MN][Coupling] = 0;
@@ -661,6 +656,8 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	  fgYieldCouplingTarget->SetPoint(couplingCounter, Coupling, fYieldTarget[MN][Coupling]);
 	  fgYieldCouplingTAX   ->SetPoint(couplingCounter, Coupling, fYieldTAX   [MN][Coupling]);
 	  couplingCounter++;
+	  if(Coupling == -6.)
+	    cout<<fYield      [MN][Coupling]<<" "<<fSumGood[MN][Coupling]<<" "<<fNevents[MN][Coupling]<<endl;
 	}
       
 	if (fYield[MN][Coupling]*1.E18 > 2.3) {
@@ -982,12 +979,12 @@ HeavyNeutrinoScan::~HeavyNeutrinoScan() {
     fgExclusion           = nullptr;
   }
   else {
-    /*
+    
     remove("ErrorBars.txt");
     remove("ErrorBarsTarget.txt");
     remove("ErrorBarsTAX.txt");
     remove("ErrorBarsMom.txt");
-    */
+  
     fgErrorAccCoupling         = nullptr; 
     fgErrorAccCouplingTarget   = nullptr;
     fgErrorAccCouplingTAX      = nullptr;

@@ -52,6 +52,7 @@ protected:
   Bool_t fPassSelection;
   Double_t fInitialFV;
   Double_t fLFV;
+  Double_t fMassForReco;
 
   // Histos
 

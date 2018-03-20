@@ -24,17 +24,13 @@
 /// For example, if the user sets USquared = 1.E-10, and UeSquaredRatio = 5., UmuSquaredRatio = 1., 
 /// UtauSquaredRatio = 3.5, the specific-flavour coupling values will be: 
 /// UeSquared = 5.25E-11, UmuSquared = 1.05E-11, UtauSquared = 3.68E-11.
-/// Default values are: USquared = 1.E-6, UeSquaredRatio = 1., UmuSquaredRatio = 16., 
-/// UtauSquaredRatio = 3.8.
 /// The values of the beginning of the fiducial volume and its length (must be identical to the ones set
 /// in the MC macro for production) can be either set as external parameters from command line or 
 /// taken as default values.
 /// For example, if the user assigns 100000. to the beginning of the FV and 80000. to its length, the FV
 /// will begin at 100 m from the target centre and end at 180 m.
-/// Default values are: InitialFV = 102500., LFV = 77500.
 /// The value of the HNL mass for which the reconstructed invariant mass is plotted can be either set 
 /// as external parameters from command line or taken as default values. 
-/// Default value is MassForReco = 1000.
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
 /// \EndDetailed               
@@ -98,6 +94,22 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   fDistcomp    = new PointLineDistance();
   fLAVMatching = new LAVMatching();
   fSAVMatching = new SAVMatching();
+
+  fzCHOD                  = GeometricAcceptance::GetInstance()->GetZCHODVPlane();
+  fzMUV3                  = GeometricAcceptance::GetInstance()->GetZMUV3();
+  fzStraw[0]              = GeometricAcceptance::GetInstance()->GetZStraw(0);
+  fzStraw[1]              = GeometricAcceptance::GetInstance()->GetZStraw(1);
+  fzStraw[2]              = GeometricAcceptance::GetInstance()->GetZStraw(2);
+  fzStraw[3]              = GeometricAcceptance::GetInstance()->GetZStraw(3);
+  fxStrawChamberCentre[0] = GeometricAcceptance::GetInstance()->GetXStrawChamberCentre(0);
+  fxStrawChamberCentre[1] = GeometricAcceptance::GetInstance()->GetXStrawChamberCentre(1);
+  fxStrawChamberCentre[2] = GeometricAcceptance::GetInstance()->GetXStrawChamberCentre(2);
+  fxStrawChamberCentre[3] = GeometricAcceptance::GetInstance()->GetXStrawChamberCentre(3);
+  frMinStraw              = GeometricAcceptance::GetInstance()->GetStrawRmin();
+  frMaxStraw              = GeometricAcceptance::GetInstance()->GetStrawRmax();
+  fzCHODPlane             = GeometricAcceptance::GetInstance()->GetZCHODVPlane();
+  frMinCHOD               = GeometricAcceptance::GetInstance()->GetCHODRmin();
+  frMaxCHOD               = GeometricAcceptance::GetInstance()->GetCHODRmax();
 
   // Parameters for L0 trigger conditions
 
@@ -190,16 +202,16 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two track vertex wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 1.));
   BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two track vertex wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 1.));
   
-  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   100, 0., 1., 200, 0., 27.));
-  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           100, 0., 1., 200, 0., 27.));
+  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           1000, 0., 2., 100, 0., 2.));
   
   BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
   BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
-  BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.2, 100, 0., 0.1));  
+  BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
 }
 
@@ -404,7 +416,19 @@ void HeavyNeutrino::Process(Int_t) {
   fDistcomp->ComputeDistance();
   
   Double_t TargetDist = fDistcomp->GetDistance();
-  Double_t Extrap     = TargetDist;
+
+  fDistcomp->SetLineDir(TotMom);    
+  fDistcomp->SetLinePoint1(Vertex);
+  fDistcomp->SetPoint(0., 0., fTAXDistance + fTAXLength/2.);  
+  fDistcomp->ComputeDistance();
+  
+  Double_t TAXDist = fDistcomp->GetDistance();
+  Double_t Extrap = 0.;
+
+  if (TargetDist <= TAXDist)
+    Extrap = TargetDist;
+  else
+    Extrap = TAXDist;
 
   // Compute distance of two-track vertex wrt beam axis
   

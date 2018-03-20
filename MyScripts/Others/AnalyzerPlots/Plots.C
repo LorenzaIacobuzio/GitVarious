@@ -59,9 +59,12 @@ void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
   gPad->Update();
-  gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
+
+  if (!title.Contains("Sensitivity"))
+    gPad->SetLogy();
+  
   gPad->Update();
 }
 
@@ -110,11 +113,11 @@ TCanvas* CreateTCanvas() {
 
   TCanvas *c = new TCanvas();
 
-  c->SetRightMargin(0.2);
-  c->SetLeftMargin(0.2);
-  c->SetBottomMargin(0.25);
-  c->SetTopMargin(0.15);
-  c->SetWindowSize(20000., 12000.);
+  //c->SetRightMargin(0.2);
+  //c->SetLeftMargin(0.2);
+  //c->SetBottomMargin(0.25);
+  //c->SetTopMargin(0.15);
+  //c->SetWindowSize(20000., 12000.);
 
   return c;
 }
@@ -140,20 +143,20 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 
       TGraphCosmetics(g, labelSize, titleSize);
       
-      if (!Name.Contains("Mom")) {                                                                  
-        if (!Name.Contains("Yield") && !Name.Contains("Acc")) {                             
-          g->Draw("AC");                                                                       
-          c->SaveAs(path + key->GetName() + ".png");                                          
-        }                                                                                       
-        else {                                                                              
-          if (Name.Contains("Yield")) {                                                     
-            g->Draw("A");                                                             
-            m->Add(g);                                                                    
-          }                                                                           
-          else {                                                                           
-            g->Draw("A");                                                                 
-            m1->Add(g);                                                                    
-          }                                                                                  
+      if (!Name.Contains("Mom")) {                                  
+        if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
+          g->Draw("AC");                                         
+          c->SaveAs(path + key->GetName() + ".png");                 
+        }                                                           
+        else {                                                 
+          if (Name.Contains("Yield")) {                       
+            g->Draw("A");                                
+            m->Add(g);                                             
+          }                                                     
+          else {                                            
+            g->Draw("A");                                         
+            m1->Add(g);                                          
+          }                                                              
         }
       }
       else {
@@ -275,8 +278,8 @@ void Plots() {
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
     
   // SECOND STEP HISTOS (--HISTO MODE)
-
-  // Coupling plots                                                                          
+  /*
+  // Coupling plots                                                   
 
   m  = CreateTMultiGraph("ErrorYieldCoupling", "Yield per POT vs coupling");
   m1 = CreateTMultiGraph("ErrorAccCoupling",   "Acceptance vs coupling");
@@ -302,4 +305,5 @@ void Plots() {
   TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
   TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
+  */
 }

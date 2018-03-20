@@ -69,7 +69,7 @@ Double_t Vcd = 0.2252;
 Double_t Vud = 0.9743;
 Double_t Vus = 0.2253;
 
-//form factors, pseudoscalar meson
+// form factors, pseudoscalar meson
 
 Double_t fDK0 = 0.745; // f+
 Double_t fDpi0 = 0.648;
@@ -80,7 +80,7 @@ Double_t gDpi0 = -0.435;
 Double_t gD0K = gDK0;
 Double_t gD0pi = gDpi0;
 
-//form factors, vector meson
+// form factors, vector meson
 
 Double_t fA0D = 0.398;
 Double_t fA1D = 0.47;
