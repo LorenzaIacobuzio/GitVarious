@@ -35,6 +35,7 @@ Double_t fK = 159.8;
 Double_t fEta = 1.2*fPi;
 Double_t fEtaprime = -0.45*fPi;
 Double_t sigmacc = 2.3*9.; // Taken from Gaia's note. sigmacc = f*sigma, where sigma is in mubarn at sqrt(s) = 82 GeV (400 GeV proton on p/n (m_p = 1 GeV) and f is fragmentation fraction
+Double_t sin2thetaW = 0.2223;
 
 // masses
 
@@ -175,8 +176,13 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
   }
   else if (Mass1 == tau) {
     life = taulife;
-    f = fPi;
     V = Vud;
+    if (Mass3 == pi)
+      f = fPi;
+    else if (Mass3 == K)
+      f = fK;
+    else if (Mass3 == rho)
+      f = fRho;
   }
   else {
     cout<<"[TwoBodyBR] Unknown mother hadron"<<endl;
@@ -515,17 +521,48 @@ Double_t Gamma2(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t form) {
 
 Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 
-  Double_t U, r, a, b, f;
+  Double_t U, U1, r, a, b, b1, c, c1, d, d1, f, f1, g, g1, j, j1, L, C1, C2, C3, C4;
   Double_t gamma_l_l_nu = 0.;
+  Double_t gamma_l_l_nu0 = 0.;
+  Double_t gamma_l_l_nu1 = 0.;
 
   if (Mass1 >= (Mass2+Mass3)) {
     if (Mass2 == Mass3 && Mass2 != 0.) {
-      U = USquared;
-      r  = 4*U*Mass3*Mass3/(Mass1*Mass1);
-      a = TMath::Power(1-r,0.5)*(1./3.-7*r/6.-r*r/24.-r*r*r/16.);
-      b = r*r*(1-r*r/16.)*TMath::ATanH(TMath::Power(1-r,0.5));
-      f = a+b;
-      gamma_l_l_nu = GF*GF*TMath::Power(Mass1,5)*f/(64.*TMath::Power(TMath::Pi(),3));
+      r = Mass2/Mass1;
+      L = TMath::Log((1. - 3.*r*r - (1. - r*r)*(TMath::Sqrt(1. - 4.*r*r)))/(r*r*(1. + TMath::Sqrt(1. - 4.*r*r))));
+      if (Mass2 == e) {
+	U = UeSquared;
+	U1 = UmuSquared + UtauSquared;
+	L = -100.;
+      }
+      else if (Mass2 == mu) {
+	U = UmuSquared;
+	U1 = UeSquared + UtauSquared;
+      }
+      else if (Mass2 == tau) {
+	U = UtauSquared;
+	U1 = UeSquared + UmuSquared;
+      }
+      a = GF*GF*TMath::Power(Mass1, 5.)/(192.*TMath::Power(TMath::Pi(), 3.));
+      C1 = 0.25*(1. - 4.*sin2thetaW + 8.*sin2thetaW*sin2thetaW);
+      C2 = 0.5*sin2thetaW*(2.*sin2thetaW - 1.);
+      C3 = 0.25*(1. + 4.*sin2thetaW + 8.*sin2thetaW*sin2thetaW);
+      C4 = 0.5*sin2thetaW*(2.*sin2thetaW + 1.);
+      b = C3;
+      c = (1. - 14.*r*r - 2.*TMath::Power(r, 4.) - 12.*TMath::Power(r, 6.))*(TMath::Sqrt(1. - 4.*r*r));
+      d = 12.*TMath::Power(r, 4.)*(TMath::Power(r, 4.) - 1.)*L;
+      f = 4.*C4;
+      g = r*r*(2. + 10.*r*r - 12.*TMath::Power(r, 4.))*(TMath::Sqrt(1. - 4.*r*r));
+      j = 6.*TMath::Power(r, 4.)*(1. - 2.*r*r + 2.*TMath::Power(r, 4.))*L;
+      gamma_l_l_nu0 = U*a*(b*(c+d) + f*(g+j));
+      b1 = C1;
+      c1 = c;
+      d1 = d;
+      f1 = 4.*C2;
+      g1 = g;
+      j1 = j;
+      gamma_l_l_nu1 = U1*a*(b1*(c1+d1) + f1*(g1+j1));
+      gamma_l_l_nu = gamma_l_l_nu0 + gamma_l_l_nu1;
     }
     else if (Mass2 == Mass3 && Mass2 == 0.) {
       U = USquared;
@@ -542,11 +579,11 @@ Double_t GammaLeptonNu3(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
 	exit(1);
       }
       if ((Mass2 == e || Mass3 == e) && (Mass2 == mu || Mass3 == mu))
-	U = UeSquared*UeSquared + UmuSquared*UmuSquared;
+	U = UeSquared + UmuSquared;
       else if ((Mass2 == e || Mass3 == e) && (Mass2 == tau || Mass3 == tau))
-	U = UeSquared*UeSquared + UtauSquared*UtauSquared;
+	U = UeSquared + UtauSquared;
       else if ((Mass2 == mu || Mass3 == mu) && (Mass2 == tau || Mass3 == tau))
-	U = UmuSquared*UmuSquared + UtauSquared*UtauSquared;
+	U = UmuSquared + UtauSquared;
       
       a = (U*GF*GF*TMath::Power(Mass1, 5))/(192*TMath::Power(TMath::Pi(), 3));
       b = 1 - 8.*r*r + 8.*TMath::Power(r, 6) - TMath::Power(r, 8) -12.*TMath::Power(r, 4)*TMath::Log(r*r);

@@ -175,8 +175,13 @@ Double_t TwoBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3) {
     }
     else if (Mass1 == tau) {
       life = taulife;
-      f = fPi;
       V = Vud;
+      if (Mass3 == fMpi)
+        f = fPi;
+      else if (Mass3 == fMK)
+        f = fK;
+      else if (Mass3 == fMrho)
+        f = fRho;
     }
     else {
       cout<<"[TwoBodyBR] Unknown mother hadron"<<endl;

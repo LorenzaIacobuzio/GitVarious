@@ -84,6 +84,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
+  AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1000.);
 
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
@@ -202,12 +203,12 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two track vertex wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 1.));
   BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two track vertex wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 1.));
   
-  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          1000, 0., 2., 100, 0., 2.));
-  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 1000, 0., 2., 100, 0., 2.));
-  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        1000, 0., 2., 100, 0., 2.));
-  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          1000, 0., 2., 100, 0., 2.));
-  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   1000, 0., 2., 100, 0., 2.));
-  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           1000, 0., 2., 100, 0., 2.));
+  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          100, 0., 1., 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 100, 0., 1., 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        100, 0., 1., 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          100, 0., 1., 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   100, 0., 1., 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           100, 0., 1., 100, 0., 0.8));
   
   BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
   BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
@@ -270,12 +271,12 @@ void HeavyNeutrino::Process(Int_t) {
     }
   }
   
-  // Retrieve weight associated to each HNL
+  // Retrieve weight associated to good HNL
   
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
-    
-    std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV);
+
+    std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fUeSquaredRatio, fUmuSquaredRatio, fUtauSquaredRatio, fLInitialFV, fLFV, fMode);
 
     for (UInt_t i = 0; i < Weights.size(); i++) {
       if ((Bool_t)(Weights[i]["IsGood"]) == true) {
@@ -407,7 +408,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->ComputeVertexCDA();
   
   Double_t CDAMom = fCDAcomp->GetCDA();
-  
+
   // Compute distance of two-track momentum wrt target/TAXs
   
   fDistcomp->SetLineDir(TotMom);    
@@ -462,7 +463,7 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  if (SpectrometerCand1->GetNChambers() < 3 || SpectrometerCand2->GetNChambers() < 3)
+  if (SpectrometerCand1->GetNChambers() <= 3 || SpectrometerCand2->GetNChambers() <= 3)
     return;
 
   FillHisto("hCuts", CutID);

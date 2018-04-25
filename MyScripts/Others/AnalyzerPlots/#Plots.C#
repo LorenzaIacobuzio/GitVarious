@@ -182,7 +182,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       TH1Cosmetics(h1, labelSize, titleSize);
       if (!strcmp(key->GetName(), "InvMassReco")) {
         h1->Fit("gaus");
-        gStyle->SetStatW(0.2);
+\        gStyle->SetStatW(0.2);
         gStyle->SetStatH(0.2);
         gStyle->SetOptFit(0);
       }

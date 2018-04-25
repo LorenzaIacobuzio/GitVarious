@@ -53,6 +53,15 @@ protected:
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
+  Double_t fzCHOD;
+  Double_t fzMUV3;
+  Double_t fzStraw[4];
+  Double_t fxStrawChamberCentre[4];
+  Double_t frMinStraw;
+  Double_t frMaxStraw;
+  Double_t fzCHODPlane;
+  Double_t frMinCHOD;
+  Double_t frMaxCHOD;
 
   // Histos
 

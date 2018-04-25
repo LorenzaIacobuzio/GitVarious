@@ -49,7 +49,8 @@ protected:
   SAVMatching *fSAVMatching;
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
-  Bool_t fPassSelection;
+  Bool_t   fPassSelection;
+  Int_t    fMode;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
