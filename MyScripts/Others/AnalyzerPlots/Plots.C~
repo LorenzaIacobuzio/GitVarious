@@ -92,7 +92,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   gPad->SetGridx();
   gPad->SetGridy();
   gPad->Update();
-  c->SaveAs(path + m ->GetName() + ".png");
+  c->SaveAs(path + m ->GetName() + ".pdf");
 
   delete m;
   delete c;
@@ -118,7 +118,7 @@ TCanvas* CreateTCanvas() {
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.25);
   c->SetTopMargin(0.15);
-  c->SetWindowSize(20000., 12000.);
+  //c->SetWindowSize(20000., 12000.);
 
   return c;
 }
@@ -147,7 +147,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       if (!Name.Contains("Mom")) {                                  
         if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
           g->Draw("AC");                                         
-          c->SaveAs(path + key->GetName() + ".png");                 
+          c->SaveAs(path + key->GetName() + ".pdf");                 
         }                                                           
         else {                                                 
           if (Name.Contains("Yield")) {                       
@@ -163,7 +163,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       else {
 	TGraphCosmetics(g, labelSize, titleSize);
 	g->Draw("AC");
-	c->SaveAs(path + key->GetName() + ".png");
+	c->SaveAs(path + key->GetName() + ".pdf");
       }
     }
     else if (cl->InheritsFrom("TH2")) {
@@ -175,14 +175,14 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TH2Cosmetics(h2, false, labelSize, titleSize);
       
       h2->Draw("colz");
-      c->SaveAs(path + key->GetName() + ".png");
+      c->SaveAs(path + key->GetName() + ".pdf");
     }
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
       TH1Cosmetics(h1, labelSize, titleSize);
       if (!strcmp(key->GetName(), "InvMassReco")) {
         h1->Fit("gaus");
-\        gStyle->SetStatW(0.2);
+        gStyle->SetStatW(0.2);
         gStyle->SetStatH(0.2);
         gStyle->SetOptFit(0);
       }
@@ -196,13 +196,13 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
         hBe->SetTitle("Z of D meson production point in the target");
         hBe->GetXaxis()->SetRangeUser(-250., 250.);
         hBe->Draw();
-	c->SaveAs(path + hBe->GetName() + ".png");
+	c->SaveAs(path + hBe->GetName() + ".pdf");
         hTa = (TH1D*)h1->Clone("hTa");
         hTa->SetName("ZDProdTAX");
         hTa->SetTitle("Z of D meson production point in the TAXs");
-        hTa->GetXaxis()->SetRangeUser(24500., 27000.);
+        hTa->GetXaxis()->SetRangeUser(23000., 25000.);
         hTa->Draw();
-        c->SaveAs(path + hTa->GetName() + ".png");
+        c->SaveAs(path + hTa->GetName() + ".pdf");
       }
       if (!strcmp(key->GetName(), "ZDDecay")) {
 	hBe1 = (TH1D*)h1->Clone("hBe1");
@@ -210,18 +210,18 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
         hBe1->SetTitle("Z of D meson decay point in the target");
         hBe1->GetXaxis()->SetRangeUser(-250., 300.);
         hBe1->Draw();
-	c->SaveAs(path + hBe1->GetName() + ".png");
+	c->SaveAs(path + hBe1->GetName() + ".pdf");
         hTa1 = (TH1D*)h1->Clone("hTa1");
 	hTa1->SetName("ZDDecayTAX");
         hTa1->SetTitle("Z of D meson decay point in the TAXs");
-	hTa1->GetXaxis()->SetRangeUser(24500., 27000.);
+	hTa1->GetXaxis()->SetRangeUser(23000., 25000.);
         hTa1->Draw();
-        c->SaveAs(path + hTa1->GetName() + ".png");
+        c->SaveAs(path + hTa1->GetName() + ".pdf");
       }
       else
         h1->Draw();
       
-      c->SaveAs(path + key->GetName() + ".png");
+      c->SaveAs(path + key->GetName() + ".pdf");
     }
   }
 }
@@ -235,21 +235,22 @@ void Plots() {
   // FIRST STEP HISTOS
     
   // One value plots for selection analyzer
-  
-  TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
+
+  //TString path = "/home/li/Desktop/HeavyNeutrino/OneValuePlots/";
+  TString path = "~/Desktop/MCnote/images/Plots/";
 
   ParseDir("~/Desktop/bla.root", "HeavyNeutrino", path, c, nullptr, nullptr);
 
   // One value plots for weight quantities
 
-  //ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
+  ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
   
   // Coupling plots
-  /*
+  
   TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
   TMultiGraph *m1 = CreateTMultiGraph("AccCoupling",   "Acceptance vs coupling");
   
-  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
+  //path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
 
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
 
@@ -263,7 +264,7 @@ void Plots() {
   m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
   m1 = CreateTMultiGraph("AccMass",   "Acceptance vs N mass");
 
-  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
+  //path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
 
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/MassScan", path, c, m, m1);
 
@@ -274,18 +275,18 @@ void Plots() {
   
   // Total scan plots
   
-  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Total/";
+  //path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Total/";
 
   ParseDir("~/Desktop/bla.root", "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
-  */    
+      
   // SECOND STEP HISTOS (--HISTO MODE)
-  /*
+  
   // Coupling plots                                                   
 
   m  = CreateTMultiGraph("ErrorYieldCoupling", "Yield per POT vs coupling");
   m1 = CreateTMultiGraph("ErrorAccCoupling",   "Acceptance vs coupling");
   
-  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
+  //path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Coupling/";
 
   ParseDir("~/Desktop/minc.root", "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
   
@@ -299,12 +300,11 @@ void Plots() {
   m  = CreateTMultiGraph("ErrorYieldMass", "Yield per POT vs N mass");
   m1 = CreateTMultiGraph("ErrorAccMass",   "Acceptance vs N mass");
 
-  path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
+  //path = "/home/li/Desktop/HeavyNeutrino/ScanPlots/Mass/";
 
   ParseDir("~/Desktop/minc.root", "HeavyNeutrinoScan/MassScan", path, c, m, m1);
   
   TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
   TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
-  */
 }
