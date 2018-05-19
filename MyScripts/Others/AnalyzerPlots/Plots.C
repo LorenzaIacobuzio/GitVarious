@@ -46,13 +46,15 @@ void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
   else if (title.Contains("Acceptance"))
     g->GetYaxis()->SetTitle("Acceptance");
   
-  if (title.Contains("coupling"))
-    g->GetXaxis()->SetTitle("Log of coupling");
-  else if (title.Contains("mass"))
-    g->GetXaxis()->SetTitle("N mass [GeV]");
-  else if (title.Contains("momentum"))
-    g->GetXaxis()->SetTitle("N momentum [GeV]");
-  
+  if (!title.Contains("Sensitivity")) {
+    if (title.Contains("coupling"))
+      g->GetXaxis()->SetTitle("Log of coupling");
+    else if (title.Contains("mass"))
+      g->GetXaxis()->SetTitle("N mass [GeV]");
+    else if (title.Contains("momentum"))
+      g->GetXaxis()->SetTitle("N momentum [GeV]");
+  }
+
   gPad->Update();
   g->GetXaxis()->SetTitleSize(labelSize);
   g->GetYaxis()->SetTitleSize(labelSize);
