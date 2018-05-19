@@ -48,7 +48,6 @@ protected:
   // Scan variables                                                                                   
 
   Bool_t   fReadingData;
-  Bool_t   fEnableCouplingScan;
   fstream  fErrorFile;
   fstream  fErrorFileTarget;
   fstream  fErrorFileTAX;
