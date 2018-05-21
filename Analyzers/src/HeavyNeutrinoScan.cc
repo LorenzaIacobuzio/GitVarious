@@ -92,7 +92,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("MomStart", &fMomStart, 0.);
   AddParam("MomStep", &fMomStep, 5.);
   AddParam("MassForSingleValue", &fMassForSingleValue, 1000.);
-  AddParam("SplitStep", &fSplitStep, 10);
+  AddParam("SplitStep", &fSplitStep, 100);
 
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
@@ -493,7 +493,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    fEvtCounterMom[momBin]++;
 	  }
 
-	  if (fEvtCounterMom[momBin] % fSplitStep == 0 && i == Weights.size() - 1) {
+	  if (fEvtCounterMom[momBin] % fSplitStep/2 == 0 && i == Weights.size() - 1) {
 	    if (fSumAllMom[momBin] != 0. && fNeventsMom[momBin] != 0) {
 	      fErrorFileMom << momBin << "\t" << fSumGoodMom[momBin]/fSumAllMom[momBin] << "\t" << fSumGoodMom[momBin]/fNeventsMom[momBin] << endl;
 	    }
@@ -657,10 +657,6 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	  fgYieldCouplingTarget->SetPoint(couplingCounter, Coupling, fYieldTarget[MN][Coupling]);
 	  fgYieldCouplingTAX   ->SetPoint(couplingCounter, Coupling, fYieldTAX   [MN][Coupling]);
 	  couplingCounter++;
-
-	  if(Coupling == -6.) {
-	    cout<<fAcc[MN][Coupling]<<" "<<fYield[MN][Coupling]<<" "<<fNevents[MN][Coupling]<<" "<<fSumAll[MN][Coupling]<<" "<<fSumGood[MN][Coupling]<<endl;
-	  }
 	}
  
 	if (fYield[MN][Coupling]*1.E18 > 2.3) {
@@ -774,8 +770,9 @@ void HeavyNeutrinoScan::PlotErrorBars(TGraphErrors* g, TGraphErrors* g1, TGraphE
     }
   }
   
-  for (auto it = errorListAcc.begin(); it != errorListAcc.end(); it++)
+  for (auto it = errorListAcc.begin(); it != errorListAcc.end(); it++) {
     errorResAcc[it->first] = ComputeRMS(it->second)[1];
+  }
 
   for (auto it = errorListYield.begin(); it != errorListYield.end(); it++)
     errorResYield[it->first] = ComputeRMS(it->second)[1];
@@ -904,8 +901,9 @@ std::vector<Double_t> HeavyNeutrinoScan::ComputeRMS(std::vector<Double_t> v) {
   Double_t Diff = 0.;
   std::vector<Double_t> res;
 
-  for (auto it = v.begin(); it != v.end(); it++)
+  for (auto it = v.begin(); it != v.end(); it++) {
     Sum += *it;
+  }
 
   Mean = Sum/v.size();
 
@@ -984,11 +982,12 @@ HeavyNeutrinoScan::~HeavyNeutrinoScan() {
     fgExclusion           = nullptr;
   }
   else {
+    /*
     remove("ErrorBars.txt");
     remove("ErrorBarsTarget.txt");
     remove("ErrorBarsTAX.txt");
     remove("ErrorBarsMom.txt");
-
+    */
     fgErrorAccCoupling         = nullptr; 
     fgErrorAccCouplingTarget   = nullptr;
     fgErrorAccCouplingTAX      = nullptr;
