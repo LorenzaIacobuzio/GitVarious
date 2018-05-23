@@ -6,6 +6,8 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   h1->GetXaxis()->SetLabelSize(labelSize);
   h1->GetYaxis()->SetLabelSize(labelSize);
   gPad->Update();
+  gPad->SetGridx();
+  gPad->SetGridy();
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.2);
   gStyle->SetOptStat(0);
@@ -48,7 +50,7 @@ void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
   
   if (!title.Contains("Sensitivity")) {
     if (title.Contains("coupling"))
-      g->GetXaxis()->SetTitle("LogU^{2}");
+      g->GetXaxis()->SetTitle("Log(U^{2})");
     else if (title.Contains("mass"))
       g->GetXaxis()->SetTitle("N mass [GeV]");
     else if (title.Contains("momentum"))
@@ -81,11 +83,15 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
 
   TString title = m->GetYaxis()->GetTitle();
 
-  if (title.Contains("Acceptance"))
-    m->GetYaxis()->SetRangeUser(1.E-50, 1.);
-  else if (title.Contains("Yield per POT"))
-    m->GetYaxis()->SetRangeUser(1.E-50, 1.E-10);
-  
+  if (title.Contains("Acceptance") && title.Contains("coupling"))
+    m->GetYaxis()->SetRangeUser(1.E-20, 1.);
+  else if (title.Contains("Yield per POT") && title.Contains("coupling"))
+    m->GetYaxis()->SetRangeUser(1.E-30, 1.E-10);
+  else if (title.Contains("Acceptance") && title.Contains("mass"))
+    m->GetYaxis()->SetRangeUser(1.E-10, 1.);
+  else if (title.Contains("Yield per POT") && title.Contains("mass"))
+    m->GetYaxis()->SetRangeUser(1.E-20, 1.E-10);
+
   gPad->BuildLegend(0.61, 0.72, 0.98, 0.93);
   gPad->Update();
   gPad->SetLogy();
@@ -246,8 +252,7 @@ void Plots(TString dir, TString histo1, TString histo2) {
   else if (histo1.Contains("3"))
     path += "3/";
   else {
-    cout << "Probably no model has been set" << endl;
-    exit(1);
+    path += "2/";
   }
 
   ParseDir(histo1, "HeavyNeutrino", path, c, nullptr, nullptr);
@@ -265,9 +270,9 @@ void Plots(TString dir, TString histo1, TString histo2) {
 
   ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
 
-  TMultiGraphCosmetics(m,  "LogU^{2}", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
-  TMultiGraphCosmetics(m1, "LogU^{2}", "Acceptance",    c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
   c = CreateTCanvas();
   
   // Mass plots
@@ -289,6 +294,13 @@ void Plots(TString dir, TString histo1, TString histo2) {
   //path = dir + "ScanPlots/Total/";
 
   ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
+
+  // Toy-MC comparison plots
+
+  //path = dir + "ScanPlots/ToyMC/";
+
+  ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path, c, nullptr, nullptr);
+  ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path, c, nullptr, nullptr);
       
   // SECOND STEP HISTOS (--HISTO MODE)
   
@@ -301,9 +313,9 @@ void Plots(TString dir, TString histo1, TString histo2) {
 
   ParseDir(histo2, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
   
-  TMultiGraphCosmetics(m,  "LogU^{2}", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
-  TMultiGraphCosmetics(m1, "LogU^{2}", "Acceptance",    c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
   c = CreateTCanvas();
 
   // Mass plots                                                                         

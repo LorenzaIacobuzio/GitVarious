@@ -153,6 +153,33 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
     fgAccMom              = nullptr;
     fgYieldMom            = nullptr;
     fgExclusion           = nullptr;
+
+    // Toy-MC comparison
+
+    fhpDS                 = nullptr;
+    fhpDS1                = nullptr;
+    fhptDS                = nullptr;
+    fhptDS1               = nullptr;
+    fhpNS                 = nullptr;
+    fhpNS1                = nullptr;
+    fhptNS                = nullptr;
+    fhptNS1               = nullptr;
+    fhpmuS                = nullptr;
+    fhpmuS1               = nullptr;
+    fhptmuS               = nullptr;
+    fhptmuS1              = nullptr;
+    fhpD0                 = nullptr;
+    fhpD01                = nullptr;
+    fhptD0                = nullptr;
+    fhptD01               = nullptr;
+    fhpN0                 = nullptr;
+    fhpN01                = nullptr;
+    fhptN0                = nullptr;
+    fhptN01               = nullptr;
+    fhpmu0                = nullptr;
+    fhpmu01               = nullptr;
+    fhptmu0               = nullptr;
+    fhptmu01              = nullptr;
   }
   else {
 
@@ -238,27 +265,27 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto(fgTauCoupling);
     
     fgAccCoupling = new TGraphErrors();
-    fgAccCoupling->SetNameTitle("CouplingScan/AccCoupling", "Acceptance vs coupling");
+    fgAccCoupling->SetNameTitle("CouplingScan/AccCoupling", "All events");
     BookHisto(fgAccCoupling);
     
     fgAccCouplingTarget = new TGraphErrors();
-    fgAccCouplingTarget->SetNameTitle("CouplingScan/AccCouplingTarget", "Acceptance per POT vs coupling, for target-produced events");
+    fgAccCouplingTarget->SetNameTitle("CouplingScan/AccCouplingTarget", "Target-produced events");
     BookHisto(fgAccCouplingTarget);
     
     fgAccCouplingTAX = new TGraphErrors();
-    fgAccCouplingTAX->SetNameTitle("CouplingScan/AccCouplingTAX", "Acceptance per POT vs coupling, for TAX-produced events");
+    fgAccCouplingTAX->SetNameTitle("CouplingScan/AccCouplingTAX", "TAX-produced events");
     BookHisto(fgAccCouplingTAX);
     
     fgYieldCoupling = new TGraphErrors();
-    fgYieldCoupling->SetNameTitle("CouplingScan/YieldCoupling", "Yield per POT vs coupling");
+    fgYieldCoupling->SetNameTitle("CouplingScan/YieldCoupling", "All events");
     BookHisto(fgYieldCoupling);
     
     fgYieldCouplingTarget = new TGraphErrors();
-    fgYieldCouplingTarget->SetNameTitle("CouplingScan/YieldCouplingTarget", "Yield per POT vs coupling, for target-produced events");
+    fgYieldCouplingTarget->SetNameTitle("CouplingScan/YieldCouplingTarget", "Target-produced events");
     BookHisto(fgYieldCouplingTarget);
     
     fgYieldCouplingTAX = new TGraphErrors();
-    fgYieldCouplingTAX->SetNameTitle("CouplingScan/YieldCouplingTAX", "Yield per POT vs coupling, for TAX-produced events");
+    fgYieldCouplingTAX->SetNameTitle("CouplingScan/YieldCouplingTAX", "TAX-produced events");
     BookHisto(fgYieldCouplingTAX);
     
     // Mass scan
@@ -277,27 +304,27 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto(fgTauMass);
     
     fgAccMass = new TGraphErrors();
-    fgAccMass->SetNameTitle("MassScan/AccMass", "Acceptance vs N mass");
+    fgAccMass->SetNameTitle("MassScan/AccMass", "All events");
     BookHisto(fgAccMass);
     
     fgAccMassTarget = new TGraphErrors();
-    fgAccMassTarget->SetNameTitle("MassScan/AccMassTarget", "Acceptance per POT vs N mass, for target-produced events");
+    fgAccMassTarget->SetNameTitle("MassScan/AccMassTarget", "Target-produced events");
     BookHisto(fgAccMassTarget);
     
     fgAccMassTAX = new TGraphErrors();
-    fgAccMassTAX->SetNameTitle("MassScan/AccMassTAX", "Acceptance per POT vs N mass, for TAX-produced events");
+    fgAccMassTAX->SetNameTitle("MassScan/AccMassTAX", "TAX-produced events");
     BookHisto(fgAccMassTAX);
     
     fgYieldMass = new TGraphErrors();
-    fgYieldMass->SetNameTitle("MassScan/YieldMass", "Yield per POT vs N mass");
+    fgYieldMass->SetNameTitle("MassScan/YieldMass", "All events");
     BookHisto(fgYieldMass);
     
     fgYieldMassTarget = new TGraphErrors();
-    fgYieldMassTarget->SetNameTitle("MassScan/YieldMassTarget", "Yield per POT vs N mass, for target-produced events");
+    fgYieldMassTarget->SetNameTitle("MassScan/YieldMassTarget", "Target-produced events");
     BookHisto(fgYieldMassTarget);
     
     fgYieldMassTAX = new TGraphErrors();
-    fgYieldMassTAX->SetNameTitle("MassScan/YieldMassTAX", "Yield per POT vs N mass, for TAX-produced events");
+    fgYieldMassTAX->SetNameTitle("MassScan/YieldMassTAX", "TAX-produced events");
     BookHisto(fgYieldMassTAX);
     
     // Total scan
@@ -308,35 +335,35 @@ void HeavyNeutrinoScan::InitHist() {
 
     // Toy-MC comparison
 
-    BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS",   "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -1., 170.));
-    BookHisto("ToyMC/DS/hpDS1",  new TH1D("pDS1",  "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            100, -1., 170.));
-    BookHisto("ToyMC/DS/hptDS",  new TH1D("ptDS",  "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/DS/hptDS1", new TH1D("ptDS1", "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS",   "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 170.));
+    BookHisto("ToyMC/DS/hpDS1",  new TH1D("pDS1",  "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            50, 40., 200.));
+    BookHisto("ToyMC/DS/hptDS",  new TH1D("ptDS",  "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 6.));
+    BookHisto("ToyMC/DS/hptDS1", new TH1D("ptDS1", "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 3.));
 
-    BookHisto("ToyMC/DS/hpNS",   new TH1D("pNS",   "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -1., 140.));
-    BookHisto("ToyMC/DS/hpNS1",  new TH1D("pNS1",  "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            100, -1., 140.));
-    BookHisto("ToyMC/DS/hptNS",  new TH1D("ptNS",  "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/DS/hptNS1", new TH1D("ptNS1", "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/DS/hpNS",   new TH1D("pNS",   "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 140.));
+    BookHisto("ToyMC/DS/hpNS1",  new TH1D("pNS1",  "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            50, 40., 200.));
+    BookHisto("ToyMC/DS/hptNS",  new TH1D("ptNS",  "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 5.));
+    BookHisto("ToyMC/DS/hptNS1", new TH1D("ptNS1", "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 2.));
 
-    BookHisto("ToyMC/DS/hpmuS",   new TH1D("pmuS",   "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -1., 100.));
-    BookHisto("ToyMC/DS/hpmuS1",  new TH1D("pmuS1",  "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            100, -1., 100.));
-    BookHisto("ToyMC/DS/hptmuS",  new TH1D("ptmuS",  "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/DS/hptmuS1", new TH1D("ptmuS1", "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/DS/hpmuS",   new TH1D("pmuS",   "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 100.));
+    BookHisto("ToyMC/DS/hpmuS1",  new TH1D("pmuS1",  "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            50, -0.5, 120.));
+    BookHisto("ToyMC/DS/hptmuS",  new TH1D("ptmuS",  "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 4.));
+    BookHisto("ToyMC/DS/hptmuS1", new TH1D("ptmuS1", "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 2.));
 
-    BookHisto("ToyMC/D0/hpD0",   new TH1D("pD0",   "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -1., 170.));
-    BookHisto("ToyMC/D0/hpD01",  new TH1D("pD01",  "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, -1., 170.));
-    BookHisto("ToyMC/D0/hptD0",  new TH1D("ptD0",  "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/D0/hptD01", new TH1D("ptD01", "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/D0/hpD0",   new TH1D("pD0",   "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 170.));
+    BookHisto("ToyMC/D0/hpD01",  new TH1D("pD01",  "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, 40., 200.));
+    BookHisto("ToyMC/D0/hptD0",  new TH1D("ptD0",  "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 6.));
+    BookHisto("ToyMC/D0/hptD01", new TH1D("ptD01", "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 3.));
 
-    BookHisto("ToyMC/D0/hpN0",   new TH1D("pN0",   "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -1., 140.));
-    BookHisto("ToyMC/D0/hpN01",  new TH1D("pN01",  "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, -1., 140.));
-    BookHisto("ToyMC/D0/hptN0",  new TH1D("ptN0",  "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/D0/hptN01", new TH1D("ptN01", "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/D0/hpN0",   new TH1D("pN0",   "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 140.));
+    BookHisto("ToyMC/D0/hpN01",  new TH1D("pN01",  "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, 40., 200.));
+    BookHisto("ToyMC/D0/hptN0",  new TH1D("ptN0",  "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 5.));
+    BookHisto("ToyMC/D0/hptN01", new TH1D("ptN01", "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 2.));
 
-    BookHisto("ToyMC/D0/hpmu0",   new TH1D("pmu0",   "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -1., 100.));
-    BookHisto("ToyMC/D0/hpmu01",  new TH1D("pmu01",  "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, -1., 100.));
-    BookHisto("ToyMC/D0/hptmu0",  new TH1D("ptmu0",  "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       50, -1., 10.));
-    BookHisto("ToyMC/D0/hptmu01", new TH1D("ptmu01", "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 50, -1., 10.));
+    BookHisto("ToyMC/D0/hpmu0",   new TH1D("pmu0",   "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  100, -0.5, 100.));
+    BookHisto("ToyMC/D0/hpmu01",  new TH1D("pmu01",  "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            100, -0.5, 120.));
+    BookHisto("ToyMC/D0/hptmu0",  new TH1D("ptmu0",  "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       20, -0.5, 4.));
+    BookHisto("ToyMC/D0/hptmu01", new TH1D("ptmu01", "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 10, -0.5, 2.));
   }
   else {
 
@@ -513,7 +540,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    fEvtCounterMom[momBin]++;
 	  }
 
-	  if (fEvtCounterMom[momBin] % fSplitStep/2 == 0 && i == Weights.size() - 1) {
+	  if (fEvtCounterMom[momBin] % (fSplitStep*2) == 0 && i == Weights.size() - 1) {
 	    if (fSumAllMom[momBin] != 0. && fNeventsMom[momBin] != 0) {
 	      fErrorFileMom << momBin << "\t" << fSumGoodMom[momBin]/fSumAllMom[momBin] << "\t" << fSumGoodMom[momBin]/fNeventsMom[momBin] << endl;
 	    }
@@ -549,7 +576,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	FillHisto("SingleValue/hHNLTheta",  p->GetMomAtCheckPoint(0).Z());
 	FillHisto("SingleValue/hHNLMom",    p->GetMomAtCheckPoint(0).T()/1000.);
 
-	//if (TMath::Sqrt(p->GetInitial4Momentum().E()*p->GetInitial4Momentum().E() - p->GetInitial4Momentum().P()*p->GetInitial4Momentum().P()) == fMassForSingleValue) {
+	if (TMath::Sqrt(p->GetInitial4Momentum().E()*p->GetInitial4Momentum().E() - p->GetInitial4Momentum().P()*p->GetInitial4Momentum().P()) == fMassForSingleValue) {
 	  if (p->GetMomAtCheckPoint(3).X() != 0.) {
 	    FillHisto("ToyMC/DS/hpDS",   p->GetMomAtCheckPoint(3).X()/1000.);
 	    FillHisto("ToyMC/DS/hptDS",  p->GetMomAtCheckPoint(3).Y()/1000.);
@@ -586,7 +613,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	      FillHisto("ToyMC/D0/hpmu01",  p->GetMomAtCheckPoint(6).X()/1000.);
 	      FillHisto("ToyMC/D0/hptmu01", p->GetMomAtCheckPoint(6).Y()/1000.);
 	    }
-	    //}
+	  }
 	}
       }
     }
@@ -980,8 +1007,9 @@ void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, TGraphErrors* g1, std:
     errorResYield[it->first] = ComputeRMS(it->second)[1];
 
   for (auto it = errorResAcc.begin(); it != errorResAcc.end(); it++) {                        
-    stringstream ss(it->first);                                                               
+    stringstream ss(it->first);                                                    
     ss >> Mom;
+
     for (Int_t p = 0; p < g->GetN(); p++) {
       Double_t x = 0.;                                                                
       Double_t y = 0.;
@@ -994,6 +1022,7 @@ void HeavyNeutrinoScan::PlotErrorBarsMom(TGraphErrors* g, TGraphErrors* g1, std:
   for (auto it = errorResYield.begin(); it != errorResYield.end(); it++) {                        
     stringstream ss(it->first);                                                               
     ss >> Mom;
+
     for (Int_t p = 0; p < g1->GetN(); p++) {
       Double_t x = 0.;                                                                
       Double_t y = 0.;

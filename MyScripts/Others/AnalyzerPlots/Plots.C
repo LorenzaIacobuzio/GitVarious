@@ -6,6 +6,8 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   h1->GetXaxis()->SetLabelSize(labelSize);
   h1->GetYaxis()->SetLabelSize(labelSize);
   gPad->Update();
+  gPad->SetGridx();
+  gPad->SetGridy();
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.2);
   gStyle->SetOptStat(0);
@@ -55,6 +57,12 @@ void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
       g->GetXaxis()->SetTitle("N momentum [GeV]");
   }
 
+  if (title.Contains("momentum")) {
+    g->GetXaxis()->SetTitleOffset(1.4);
+    g->GetYaxis()->SetTitleOffset(1.4);
+    gPad->SetLogy();
+  }
+
   gPad->Update();
   g->GetXaxis()->SetTitleSize(labelSize);
   g->GetYaxis()->SetTitleSize(labelSize);
@@ -79,14 +87,20 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   m->GetXaxis()->SetLabelSize(labelSize);
   m->GetYaxis()->SetLabelSize(labelSize);
 
-  TString title = m->GetYaxis()->GetTitle();
+  TString title = m->GetTitle();
 
-  if (title.Contains("Acceptance"))
-    m->GetYaxis()->SetRangeUser(1.E-50, 1.);
-  else if (title.Contains("Yield per POT"))
-    m->GetYaxis()->SetRangeUser(1.E-50, 1.E-10);
-  
-  gPad->BuildLegend(0.61, 0.72, 0.98, 0.93);
+  if (title.Contains("Acceptance") && title.Contains("coupling"))
+    m->GetYaxis()->SetRangeUser(1.E-12, 1.);
+  else if (title.Contains("Yield per POT") && title.Contains("coupling"))
+    m->GetYaxis()->SetRangeUser(1.E-28, 1.E-10);
+  else if (title.Contains("Acceptance") && title.Contains("mass"))
+    m->GetYaxis()->SetRangeUser(1.E-6, 1.E-3);
+  else if (title.Contains("Yield per POT") && title.Contains("mass"))
+    m->GetYaxis()->SetRangeUser(1.E-18, 1.E-14);
+
+  if (!title.Contains("momentum"))
+    gPad->BuildLegend(0.71, 0.72, 0.98, 0.93);
+
   gPad->Update();
   gPad->SetLogy();
   gPad->SetGridx();
@@ -129,10 +143,11 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   TDirectory * dir = (TDirectory*)f->Get(dirName);
   TIter next(dir->GetListOfKeys());
   TKey *key;
-  TH1D* hBe  = new TH1D();
-  TH1D* hTa  = new TH1D();
-  TH1D* hBe1 = new TH1D();
-  TH1D* hTa1 = new TH1D();
+  TH1D* hBe   = new TH1D();
+  TH1D* hTa   = new TH1D();
+  TH1D* hBe1  = new TH1D();
+  TH1D* hTa1  = new TH1D();
+  TH1D* hTemp = new TH1D();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
 
@@ -143,7 +158,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       TGraphErrors *g = (TGraphErrors*)(key->ReadObj());
 
       TGraphCosmetics(g, labelSize, titleSize);
-      
+
       if (!Name.Contains("Mom")) {                                  
         if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
           g->Draw("AL");                                         
@@ -163,7 +178,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       else {
 	TGraphCosmetics(g, labelSize, titleSize);
 	g->Draw("AL");
-	c->SaveAs(path + key->GetName() + ".pdf");
+	c->SaveAs(path + "Error" + key->GetName() + ".pdf");
       }
     }
     else if (cl->InheritsFrom("TH2")) {
@@ -246,8 +261,7 @@ void Plots(TString dir, TString histo1, TString histo2) {
   else if (histo1.Contains("3"))
     path += "3/";
   else {
-    cout << "Probably no model has been set" << endl;
-    exit(1);
+    path += "2/";
   }
 
   ParseDir(histo1, "HeavyNeutrino", path, c, nullptr, nullptr);
@@ -289,6 +303,13 @@ void Plots(TString dir, TString histo1, TString histo2) {
   //path = dir + "ScanPlots/Total/";
 
   ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
+
+  // Toy-MC comparison plots
+
+  //path = dir + "ScanPlots/ToyMC/";
+
+  ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path, c, nullptr, nullptr);
+  ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path, c, nullptr, nullptr);
       
   // SECOND STEP HISTOS (--HISTO MODE)
   
@@ -318,4 +339,11 @@ void Plots(TString dir, TString histo1, TString histo2) {
   TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
   TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
+  c = CreateTCanvas();
+
+  // Momentum plots
+
+  //path = dir + "ScanPlots/OneValuePlots/";
+
+  ParseDir(histo2, "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
 }
