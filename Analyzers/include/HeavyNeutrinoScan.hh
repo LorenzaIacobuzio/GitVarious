@@ -58,6 +58,7 @@ protected:
   Double_t fMomStop;
   Double_t fMomStep;
   Double_t fMassForSingleValue;
+  Double_t fCouplingForSingleValue;
   Double_t fCouplingStart;
   Double_t fCouplingStop;
   Double_t fCouplingStep;
@@ -131,6 +132,33 @@ protected:
   TH2D *fhDecayMass;
   TH2D *fhProbMass;
   TH2D *fhWeightMass;
+
+  // Toy-MC histos
+
+  TH1D *fhpDS;
+  TH1D *fhpDS1;
+  TH1D *fhptDS;
+  TH1D *fhptDS1;
+  TH1D *fhpNS;
+  TH1D *fhpNS1;
+  TH1D *fhptNS;
+  TH1D *fhptNS1;
+  TH1D *fhpmuS;
+  TH1D *fhpmuS1;
+  TH1D *fhptmuS;
+  TH1D *fhptmuS1;
+  TH1D *fhpD0;
+  TH1D *fhpD01;
+  TH1D *fhptD0;
+  TH1D *fhptD01;
+  TH1D *fhpN0;
+  TH1D *fhpN01;
+  TH1D *fhptN0;
+  TH1D *fhptN01;
+  TH1D *fhpmu0;
+  TH1D *fhpmu01;
+  TH1D *fhptmu0;
+  TH1D *fhptmu01;
 
   // Error bar histos
 

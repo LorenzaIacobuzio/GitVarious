@@ -48,7 +48,7 @@ void TGraphCosmetics(TGraphErrors* g, Double_t labelSize, Double_t titleSize) {
   
   if (!title.Contains("Sensitivity")) {
     if (title.Contains("coupling"))
-      g->GetXaxis()->SetTitle("Log of coupling");
+      g->GetXaxis()->SetTitle("Log(U^{2})");
     else if (title.Contains("mass"))
       g->GetXaxis()->SetTitle("N mass [GeV]");
     else if (title.Contains("momentum"))
@@ -265,9 +265,9 @@ void Plots(TString dir, TString histo1, TString histo2) {
 
   ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
 
-  TMultiGraphCosmetics(m,  "Log of coupling", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
-  TMultiGraphCosmetics(m1, "Log of coupling", "Acceptance",    c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
   c = CreateTCanvas();
   
   // Mass plots
@@ -301,9 +301,9 @@ void Plots(TString dir, TString histo1, TString histo2) {
 
   ParseDir(histo2, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
   
-  TMultiGraphCosmetics(m,  "Log of coupling", "Yield per POT", c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
   c = CreateTCanvas();
-  TMultiGraphCosmetics(m1, "Log of coupling", "Acceptance",    c, path, labelSize, titleSize);
+  TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
   c = CreateTCanvas();
 
   // Mass plots                                                                         
