@@ -119,46 +119,6 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   for (UInt_t i = 0; i < fStream.size(); i++) {
     fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
   }
-
-  // Histos
-
-  fhNk3pi            = nullptr;
-  fhNbursts          = nullptr;
-  fhNEvents          = nullptr;
-  fhN2tracks         = nullptr;
-  fhNtracks          = nullptr;
-  fhMomPi            = nullptr;
-  fhMomMu            = nullptr;
-  fhXYSpec0Reco      = nullptr;
-  fhXYSpec1Reco      = nullptr;
-  fhXYSpec2Reco      = nullptr;
-  fhXYSpec3Reco      = nullptr;
-  fhXYCHODReco       = nullptr;
-  fhXYCHODTrue       = nullptr;
-  fhXYMUV3True       = nullptr;
-  fhCuts             = nullptr;
-  fhCDAvsZ_In        = nullptr;
-  fhCDAvsZ_Track     = nullptr;
-  fhCDAvsZ_Energy    = nullptr;
-  fhCDAvsZ_Geom      = nullptr;
-  fhCDAvsZ_Vetoes    = nullptr;
-  fhCDAvsZ_Fin       = nullptr;
-  fhZvsBeam_In       = nullptr;
-  fhZvsBeam_Track    = nullptr;
-  fhZvsBeam_Energy   = nullptr;
-  fhZvsBeam_Geom     = nullptr;
-  fhZvsBeam_Vetoes   = nullptr;
-  fhZvsBeam_Fin      = nullptr;
-  fhBeamvsTar_In     = nullptr;
-  fhBeamvsTar_Track  = nullptr;
-  fhBeamvsTar_Energy = nullptr;
-  fhBeamvsTar_Geom   = nullptr;
-  fhBeamvsTar_Vetoes = nullptr;
-  fhBeamvsTar_Fin    = nullptr;
-  fhNMUV3Cand        = nullptr;
-  fhEoP              = nullptr;
-  fhEoPMuVsPi        = nullptr;
-  fhInvMassReco      = nullptr;
 }
 
 void HeavyNeutrino::InitOutput() {
@@ -179,15 +139,17 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
   BookHisto("hMomPi",    new TH1D("MomPi",    "Pion momentum",                     100, -0.5, 200.));
   BookHisto("hMomMu",    new TH1D("MomMu",    "Muon momentum",                     100, -0.5, 200.));
-  BookHisto("hCuts",     new TH1D("PhysicsEventsVsCuts", "Physics events passing the selection cuts", 35, 0., 35.));
+  BookHisto("hCuts",     new TH1D("PhysicsEventsVsCuts", "Physics events after cuts", 35, 0., 35.));
 
-  BookHisto("hXYSpec0Reco", new TH2D("XYSpec0Reco", "Two-track reconstructed events at CH1",  100, -1.5, 1.5, 100, -1.5, 1.5)); 
-  BookHisto("hXYSpec1Reco", new TH2D("XYSpec1Reco", "Two-track reconstructed events at CH2",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYSpec2Reco", new TH2D("XYSpec2Reco", "Two-track reconstructed events at CH3",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYSpec3Reco", new TH2D("XYSpec3Reco", "Two-track reconstructed events at CH4",  100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYCHODReco",  new TH2D("XYCHODReco",  "Two-track reconstructed events at CHOD", 100, -1.5, 1.5, 100, -1.5, 1.5));
-  BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",  "X,Y of HNL daughters at CHOD, from MC",  100, -2., 2., 100, -2., 2.));
-  BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",  "X,Y of HNL daughters at MUV3, from MC",  100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Reco", new TH2D("XYSpec0Reco", "Two-track reconstructed events at CH1",                 100, -1.5, 1.5, 100, -1.5, 1.5)); 
+  BookHisto("hXYSpec1Reco", new TH2D("XYSpec1Reco", "Two-track reconstructed events at CH2",                 100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYSpec2Reco", new TH2D("XYSpec2Reco", "Two-track reconstructed events at CH3",                 100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYSpec3Reco", new TH2D("XYSpec3Reco", "Two-track reconstructed events at CH4",                 100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYCHODReco",  new TH2D("XYCHODReco",  "Two-track reconstructed events at CHOD",                100, -1.5, 1.5, 100, -1.5, 1.5));
+  BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",  "X,Y of HNL daughters at CHOD, from MC",                 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",  "X,Y of HNL daughters at MUV3, from MC",                 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Mu",   new TH2D("hXYSpec0Mu",  "X,Y of muon daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Pi",   new TH2D("hXYSpec0Pi",  "X,Y of pion daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
 
   BookHisto("hCDAvsZ_In",     new TH2D("CDAvsZ_In",     "N trajectory wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 0.15));
   BookHisto("hCDAvsZ_Track",  new TH2D("CDAvsZ_Track",  "N trajectory wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 0.02));
@@ -195,25 +157,31 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hCDAvsZ_Vetoes", new TH2D("CDAvsZ_Vetoes", "N trajectory wrt beam axis, after veto cuts",          200, 100., 190., 100, 0., 0.02));
   BookHisto("hCDAvsZ_Geom",   new TH2D("CDAvsZ_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 0.02));
   BookHisto("hCDAvsZ_Fin",    new TH2D("CDAvsZ_Fin",    "N trajectory wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 0.02));
+
+  BookHisto("hCDAvsCDA_Track",  new TH2D("CDAvsCDA_Track",  "CDA wrt beam axis, after track-quality cuts", 100, 0., 0.5, 100, 0., 0.5));
+  BookHisto("hCDAvsCDA_Energy", new TH2D("CDAvsCDA_Energy", "CDA wrt beam axis, after energy cuts",        100, 0., 0.5, 100, 0., 0.5));
+  BookHisto("hCDAvsCDA_Vetoes", new TH2D("CDAvsCDA_Vetoes", "CDA wrt beam axis, after veto cuts",          100, 0., 0.5, 100, 0., 0.5));
+  BookHisto("hCDAvsCDA_Geom",   new TH2D("CDAvsCDA_Geom",   "CDA wrt beam axis, after geometrical cuts",   100, 0., 0.5, 100, 0., 0.5));
+  BookHisto("hCDAvsCDA_Fin",    new TH2D("CDAvsCDA_Fin",    "CDA wrt beam axis, after all cuts",           100, 0., 0.5, 100, 0., 0.5));
   
-  BookHisto("hZvsBeam_In",     new TH2D("ZvsBeam_In",     "Two track vertex wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 0.7));
-  BookHisto("hZvsBeam_Track",  new TH2D("ZvsBeam_Track",  "Two track vertex wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 0.7));
-  BookHisto("hZvsBeam_Energy", new TH2D("ZvsBeam_Energy", "Two track vertex wrt beam axis, after energy cuts",        200, 100., 190., 100, 0., 0.7));
-  BookHisto("hZvsBeam_Vetoes", new TH2D("ZvsBeam_Vetoes", "Two track vertex wrt beam axis, after veto cuts",          200, 100., 190., 100, 0., 0.7));
-  BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two track vertex wrt beam axis, after geometrical cuts",   200, 100., 190., 100, 0., 0.7));
-  BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two track vertex wrt beam axis, after all cuts",           200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_In",     new TH2D("ZvsBeam_In",     "Two-track vertex, before all cuts",          200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_Track",  new TH2D("ZvsBeam_Track",  "Two-track vertex, after track-quality cuts", 200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_Energy", new TH2D("ZvsBeam_Energy", "Two-track vertex, after energy cuts",        200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_Vetoes", new TH2D("ZvsBeam_Vetoes", "Two-track vertex, after veto cuts",          200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two-track vertex, after geometrical cuts",   200, 100., 190., 100, 0., 0.7));
+  BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two-track vertex, after all cuts",           200, 100., 190., 100, 0., 0.7));
   
-  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory wrt beam axis, before all cuts",          100, 0., 0.05, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory wrt beam axis, after track-quality cuts", 100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory wrt beam axis, after energy cuts",        100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory wrt beam axis, after veto cuts",          100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory wrt beam axis, after geometrical cuts",   100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory wrt beam axis, after all cuts",           100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory, before all cuts",          100, 0., 0.05, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory, after track-quality cuts", 100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory, after energy cuts",        100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory, after veto cuts",          100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory, after geometrical cuts",   100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory, after all cuts",           100, 0., 0.02, 100, 0., 0.8));
   
-  BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "Number of MUV3 candidates associated to each track", 4, -0.5, 3.5));
+  BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
   BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
   BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
-  BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 960., 1040.));
+  BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
 
   BookHisto("hSpare1", new TH1D("Spare1", "", 100, 117., 122.));
   BookHisto("hSpare2", new TH2D("Spare2", "", 100, 110., 130., 100, 110., 130.));
@@ -225,10 +193,10 @@ void HeavyNeutrino::Process(Int_t) {
 
   fPassSelection = false;
 
-  TRecoLKrEvent*          LKrEvent  = (TRecoLKrEvent*)          GetEvent("LKr");
-  TRecoLAVEvent*          LAVEvent  = (TRecoLAVEvent*)          GetEvent("LAV");
-  TRecoIRCEvent*          IRCEvent  = (TRecoIRCEvent*)          GetEvent("IRC");
-  TRecoSACEvent*          SACEvent  = (TRecoSACEvent*)          GetEvent("SAC");
+  TRecoLKrEvent* LKrEvent  = (TRecoLKrEvent*)GetEvent("LKr");
+  TRecoLAVEvent* LAVEvent  = (TRecoLAVEvent*)GetEvent("LAV");
+  TRecoIRCEvent* IRCEvent  = (TRecoIRCEvent*)GetEvent("IRC");
+  TRecoSACEvent* SACEvent  = (TRecoSACEvent*)GetEvent("SAC");
 
   // Counter for cuts
 
@@ -417,6 +385,24 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t CDAMom = fCDAcomp->GetCDA();
 
+  // Compute distance of track1,2 wrt beam axis
+
+  fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
+  fCDAcomp->SetDir1(Mom1);
+  fCDAcomp->SetLine1Point2(0.0, 0.0, 102000.0);
+  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->ComputeVertexCDA();
+
+  Double_t CDA1 = fCDAcomp->GetCDA();
+
+  fCDAcomp->SetLine1Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
+  fCDAcomp->SetDir1(Mom2);
+  fCDAcomp->SetLine1Point2(0.0, 0.0, 102000.0);
+  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->ComputeVertexCDA();
+
+  Double_t CDA2 = fCDAcomp->GetCDA();
+
   // Compute distance of two-track momentum wrt target/TAXs
   
   fDistcomp->SetLineDir(TotMom);    
@@ -547,12 +533,61 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  // Downstream track selection, CUT: LAV12 acceptance
+
+  if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLAV12) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLAV12))
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Reference plot - 2
 
   FillHisto("hCDAvsZ_Track",   Zvertex/1000.,       CDAMom/1000., Weight);
   FillHisto("hZvsBeam_Track",  Zvertex/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTar_Track", Extrap/1000., BeamlineDist/1000., Weight);
-  
+
+  if (Assoc == 1) 
+    FillHisto("hCDAvsCDA_Track", CDA2/1000., CDA1/1000.);
+  else if (Assoc == 2)
+    FillHisto("hCDAvsCDA_Track", CDA1/1000., CDA2/1000.);
+
+  // X,Y of mu/pi at Straw1
+
+  if (Assoc == 1) {  
+    Double_t x        = SpectrometerCand1->xAt(fzStraw[0]);
+    Double_t y        = SpectrometerCand1->yAt(fzStraw[0]);
+    Double_t r        = sqrt(x*x + y*y);
+    Double_t rShifted = sqrt(pow(x-fxStrawChamberCentre[0],2) + y*y);
+    if (rShifted > frMinStraw && r < frMaxStraw) {
+      FillHisto("hXYSpec0Mu", x/1000., y/1000.);
+    }
+    x        = SpectrometerCand2->xAt(fzStraw[0]);
+    y        = SpectrometerCand2->yAt(fzStraw[0]);
+    r        = sqrt(x*x + y*y);
+    rShifted = sqrt(pow(x-fxStrawChamberCentre[0],2) + y*y);
+    if (rShifted > frMinStraw && r < frMaxStraw) {
+      FillHisto("hXYSpec0Pi", x/1000., y/1000.);
+    }
+  }
+  else if (Assoc == 2) {
+    Double_t x        = SpectrometerCand2->xAt(fzStraw[0]);
+    Double_t y        = SpectrometerCand2->yAt(fzStraw[0]);
+    Double_t r        = sqrt(x*x + y*y);
+    Double_t rShifted = sqrt(pow(x-fxStrawChamberCentre[0],2) + y*y);
+    if (rShifted > frMinStraw && r < frMaxStraw) {
+      FillHisto("hXYSpec0Mu", x/1000., y/1000.);
+    }
+    x        = SpectrometerCand1->xAt(fzStraw[0]);
+    y        = SpectrometerCand1->yAt(fzStraw[0]);
+    r        = sqrt(x*x + y*y);
+    rShifted = sqrt(pow(x-fxStrawChamberCentre[0],2) + y*y);
+    if (rShifted > frMinStraw && r < frMaxStraw) {
+      FillHisto("hXYSpec0Pi", x/1000., y/1000.);
+    }
+  }
+
+
   // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
   
   Double_t MUV3Time;
@@ -564,14 +599,6 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t CHODTime1 = Tracks[0].GetCHODTime();
   Double_t CHODTime2 = Tracks[1].GetCHODTime();
-
-  // Downstream track selection, CUT: LAV12 acceptance
-
-  if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLAV12) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLAV12))
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
   
   // Energy cuts, CUT: Cut on E/p in LKr
   
@@ -611,6 +638,11 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCDAvsZ_Energy",   Zvertex/1000.,       CDAMom/1000., Weight);
   FillHisto("hZvsBeam_Energy",  Zvertex/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTar_Energy", Extrap/1000., BeamlineDist/1000., Weight);
+
+  if (Assoc == 1) 
+    FillHisto("hCDAvsCDA_Energy", CDA2/1000., CDA1/1000.);
+  else if (Assoc == 2)
+    FillHisto("hCDAvsCDA_Energy", CDA1/1000., CDA2/1000.);
 
   // Veto cuts, CUT: LAV veto
   
@@ -718,6 +750,11 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hZvsBeam_Vetoes",  Zvertex/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTar_Vetoes", Extrap/1000., BeamlineDist/1000., Weight);
 
+  if (Assoc == 1) 
+    FillHisto("hCDAvsCDA_Vetoes", CDA2/1000., CDA1/1000.);
+  else if (Assoc == 2)
+    FillHisto("hCDAvsCDA_Vetoes", CDA1/1000., CDA2/1000.);
+
   // Geometrical cuts, CUT: Cut on distance between tracks at CH1
 
   Double_t X = SpectrometerCand1->xAt(fzStraw[0]) - SpectrometerCand2->xAt(fzStraw[0]);
@@ -760,11 +797,21 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hZvsBeam_Geom",  Zvertex/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTar_Geom", Extrap/1000., BeamlineDist/1000., Weight);
 
+  if (Assoc == 1) 
+    FillHisto("hCDAvsCDA_Geom", CDA2/1000., CDA1/1000.);
+  else if (Assoc == 2)
+    FillHisto("hCDAvsCDA_Geom", CDA1/1000., CDA2/1000.);
+
   // Reference plot - 6
 
   FillHisto("hCDAvsZ_Fin",   Zvertex/1000.,       CDAMom/1000., Weight);
   FillHisto("hZvsBeam_Fin",  Zvertex/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTar_Fin", Extrap/1000., BeamlineDist/1000., Weight);
+
+  if (Assoc == 1) 
+    FillHisto("hCDAvsCDA_Fin", CDA2/1000., CDA1/1000.);
+  else if (Assoc == 2)
+    FillHisto("hCDAvsCDA_Fin", CDA1/1000., CDA2/1000.);
 
   fPassSelection = true;
 
@@ -789,8 +836,8 @@ void HeavyNeutrino::Process(Int_t) {
   energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
-  if (TMath::Abs(invMass - fMassForReco) <= 50.)
-    FillHisto("hInvMassReco", invMass);
+  if (TMath::Abs(invMass - fMassForReco) <= fMassForReco/100.)
+    FillHisto("hInvMassReco", invMass/1000.);
 }
 
 void HeavyNeutrino::EndOfBurstUser() {
@@ -806,167 +853,96 @@ void HeavyNeutrino::EndOfJobUser() {
   
   // Retrieve histos
 
-  fhNk3pi            = (TH1D*) fHisto.GetTH1("hNk3pi");
-  fhNbursts          = (TH1D*) fHisto.GetTH1("hNbursts");
-  fhNEvents          = (TH1D*) fHisto.GetTH1("hNEvents");
-  fhN2tracks         = (TH1D*) fHisto.GetTH1("hN2tracks");
-  fhNtracks          = (TH1D*) fHisto.GetTH1("hNtracks");
-  fhMomPi            = (TH1D*) fHisto.GetTH1("hMomPi");
-  fhMomMu            = (TH1D*) fHisto.GetTH1("hMomMu");
-  fhXYSpec0Reco      = (TH2D*) fHisto.GetTH2("hXYSpec0Reco");
-  fhXYSpec1Reco      = (TH2D*) fHisto.GetTH2("hXYSpec1Reco");
-  fhXYSpec2Reco      = (TH2D*) fHisto.GetTH2("hXYSpec2Reco");
-  fhXYSpec3Reco      = (TH2D*) fHisto.GetTH2("hXYSpec3Reco");
-  fhXYCHODReco       = (TH2D*) fHisto.GetTH2("hXYCHODReco");
-  fhXYCHODTrue       = (TH2D*) fHisto.GetTH2("hXYCHODTrue");
-  fhXYMUV3True       = (TH2D*) fHisto.GetTH2("hXYMUV3True");
-  fhCuts             = (TH1D*) fHisto.GetTH1("hCuts");
-  fhCDAvsZ_In        = (TH2D*) fHisto.GetTH2("hCDAvsZ_In");
-  fhCDAvsZ_Track     = (TH2D*) fHisto.GetTH2("hCDAvsZ_Track");
-  fhCDAvsZ_Energy    = (TH2D*) fHisto.GetTH2("hCDAvsZ_Energy");
-  fhCDAvsZ_Vetoes    = (TH2D*) fHisto.GetTH2("hCDAvsZ_Vetoes");
-  fhCDAvsZ_Geom      = (TH2D*) fHisto.GetTH2("hCDAvsZ_Geom");
-  fhCDAvsZ_Fin       = (TH2D*) fHisto.GetTH2("hCDAvsZ_Fin");
-  fhZvsBeam_In       = (TH2D*) fHisto.GetTH2("hZvsBeam_In");
-  fhZvsBeam_Track    = (TH2D*) fHisto.GetTH2("hZvsBeam_Track");
-  fhZvsBeam_Energy   = (TH2D*) fHisto.GetTH2("hZvsBeam_Energy");
-  fhZvsBeam_Vetoes   = (TH2D*) fHisto.GetTH2("hZvsBeam_Vetoes");
-  fhZvsBeam_Geom     = (TH2D*) fHisto.GetTH2("hZvsBeam_Geom");
-  fhZvsBeam_Fin      = (TH2D*) fHisto.GetTH2("hZvsBeam_Fin");
-  fhBeamvsTar_In     = (TH2D*) fHisto.GetTH2("hBeamvsTar_In");
-  fhBeamvsTar_Track  = (TH2D*) fHisto.GetTH2("hBeamvsTar_Track");
-  fhBeamvsTar_Energy = (TH2D*) fHisto.GetTH2("hBeamvsTar_Energy");
-  fhBeamvsTar_Vetoes = (TH2D*) fHisto.GetTH2("hBeamvsTar_Vetoes");
-  fhBeamvsTar_Geom   = (TH2D*) fHisto.GetTH2("hBeamvsTar_Geom");
-  fhBeamvsTar_Fin    = (TH2D*) fHisto.GetTH2("hBeamvsTar_Fin");
-  fhNMUV3Cand        = (TH1D*) fHisto.GetTH1("hNMUV3Cand");
-  fhEoP              = (TH1D*) fHisto.GetTH1("hEoP");
-  fhEoPMuVsPi        = (TH2D*) fHisto.GetTH1("hEoPMuVsPi");
-  fhInvMassReco      = (TH1D*) fHisto.GetTH1("hInvMassReco");
+  fHisto.GetTH1("hNk3pi")->GetXaxis()->SetTitle("Number of k3pi");
+  fHisto.GetTH1("hNbursts")->GetXaxis()->SetTitle("Number of bursts");
+  fHisto.GetTH1("hNEvents")->GetXaxis()->SetTitle("Number of events");
+  fHisto.GetTH1("hN2tracks")->GetXaxis()->SetTitle("Number of two-track events");
+  fHisto.GetTH1("hNtracks")->GetXaxis()->SetTitle("Number of tracks");
+  fHisto.GetTH1("hMomPi")->GetXaxis()->SetTitle("P [GeV/c]");
+  fHisto.GetTH1("hMomMu")->GetXaxis()->SetTitle("P [GeV/c]");
+  fHisto.GetTH2("hXYSpec0Reco")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYSpec1Reco")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYSpec2Reco")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYSpec3Reco")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYCHODReco")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYCHODTrue")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYMUV3True")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYSpec0Mu")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH2("hXYSpec0Pi")->GetXaxis()->SetTitle("X [m]");
+  fHisto.GetTH1("hCuts")->GetXaxis()->SetTitle("Cut ID");
+  fHisto.GetTH2("hCDAvsZ_In")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsZ_Track")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsZ_Energy")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsZ_Vetoes")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsZ_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsZ_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hCDAvsCDA_Track")->GetXaxis()->SetTitle("Pion CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Energy")->GetXaxis()->SetTitle("Pion CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Vetoes")->GetXaxis()->SetTitle("Pion CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Geom")->GetXaxis()->SetTitle("Pion CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Fin")->GetXaxis()->SetTitle("Pion CDA [m]");
+  fHisto.GetTH2("hZvsBeam_In")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hZvsBeam_Track")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hZvsBeam_Energy")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hZvsBeam_Vetoes")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hZvsBeam_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hZvsBeam_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+  fHisto.GetTH2("hBeamvsTar_In")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Track")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Energy")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Vetoes")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Geom")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Fin")->GetXaxis()->SetTitle("Target/TAX distance [m]");
+  fHisto.GetTH1("hNMUV3Cand")->GetXaxis()->SetTitle("Number of candidates");
+  fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
+  fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
+  fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
 
-  // X axis title
-
-  fhNk3pi           ->GetXaxis()->SetTitle("Number of k3pi");
-  fhNbursts         ->GetXaxis()->SetTitle("Number of bursts");
-  fhNEvents         ->GetXaxis()->SetTitle("Number of events");
-  fhN2tracks        ->GetXaxis()->SetTitle("Number of two-track events");
-  fhNtracks         ->GetXaxis()->SetTitle("Number of tracks in each event");
-  fhMomPi           ->GetXaxis()->SetTitle("P [GeV]");
-  fhMomMu           ->GetXaxis()->SetTitle("P [GeV]");
-  fhXYSpec0Reco     ->GetXaxis()->SetTitle("X [m]");
-  fhXYSpec1Reco     ->GetXaxis()->SetTitle("X [m]");
-  fhXYSpec2Reco     ->GetXaxis()->SetTitle("X [m]");
-  fhXYSpec3Reco     ->GetXaxis()->SetTitle("X [m]");  
-  fhXYCHODReco      ->GetXaxis()->SetTitle("X [m]");
-  fhXYCHODTrue      ->GetXaxis()->SetTitle("X [m]");
-  fhXYMUV3True      ->GetXaxis()->SetTitle("X [m]");
-  fhCuts            ->GetXaxis()->SetTitle("Cut ID");    
-  fhCDAvsZ_In       ->GetXaxis()->SetTitle("Z [m]");
-  fhCDAvsZ_Track    ->GetXaxis()->SetTitle("Z [m]");
-  fhCDAvsZ_Energy   ->GetXaxis()->SetTitle("Z [m]");
-  fhCDAvsZ_Geom     ->GetXaxis()->SetTitle("Z [m]");
-  fhCDAvsZ_Vetoes   ->GetXaxis()->SetTitle("Z [m]");
-  fhCDAvsZ_Fin      ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_In      ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_Track   ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_Energy  ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_Geom    ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_Vetoes  ->GetXaxis()->SetTitle("Z [m]");
-  fhZvsBeam_Fin     ->GetXaxis()->SetTitle("Z [m]");
-  fhBeamvsTar_In    ->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhBeamvsTar_Track ->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhBeamvsTar_Energy->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhBeamvsTar_Geom  ->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhBeamvsTar_Vetoes->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhBeamvsTar_Fin   ->GetXaxis()->SetTitle("Target/TAX distance [m]");
-  fhNMUV3Cand       ->GetXaxis()->SetTitle("Number of candidates");
-  fhEoP             ->GetXaxis()->SetTitle("E/p");
-  fhEoPMuVsPi       ->GetXaxis()->SetTitle("Pion E/p");
-  fhInvMassReco     ->GetXaxis()->SetTitle("Invariant mass [MeV]");
-
-  // Y axis title
-
-  fhXYSpec0Reco     ->GetYaxis()->SetTitle("Y [m]");
-  fhXYSpec1Reco     ->GetYaxis()->SetTitle("Y [m]");
-  fhXYSpec2Reco     ->GetYaxis()->SetTitle("Y [m]");
-  fhXYSpec3Reco     ->GetYaxis()->SetTitle("Y [m]");  
-  fhXYCHODReco      ->GetYaxis()->SetTitle("Y [m]");
-  fhXYCHODTrue      ->GetYaxis()->SetTitle("Y [m]");
-  fhXYMUV3True      ->GetYaxis()->SetTitle("Y [m]");
-  fhCDAvsZ_In       ->GetYaxis()->SetTitle("CDA [m]");
-  fhCDAvsZ_Track    ->GetYaxis()->SetTitle("CDA [m]");
-  fhCDAvsZ_Energy   ->GetYaxis()->SetTitle("CDA [m]");
-  fhCDAvsZ_Geom     ->GetYaxis()->SetTitle("CDA [m]");
-  fhCDAvsZ_Vetoes   ->GetYaxis()->SetTitle("CDA [m]");
-  fhCDAvsZ_Fin      ->GetYaxis()->SetTitle("CDA [m]");
-  fhZvsBeam_In      ->GetYaxis()->SetTitle("Distance [m]");
-  fhZvsBeam_Track   ->GetYaxis()->SetTitle("Distance [m]");
-  fhZvsBeam_Energy  ->GetYaxis()->SetTitle("Distance [m]");
-  fhZvsBeam_Geom    ->GetYaxis()->SetTitle("Distance [m]");
-  fhZvsBeam_Vetoes  ->GetYaxis()->SetTitle("Distance [m]");
-  fhZvsBeam_Fin     ->GetYaxis()->SetTitle("Distance [m]");
-  fhBeamvsTar_In    ->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhBeamvsTar_Track ->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhBeamvsTar_Energy->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhBeamvsTar_Geom  ->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhBeamvsTar_Vetoes->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhBeamvsTar_Fin   ->GetYaxis()->SetTitle("Beam axis distance [m]");
-  fhEoPMuVsPi       ->GetYaxis()->SetTitle("Muon E/p");
+  fHisto.GetTH2("hXYSpec0Reco")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYSpec1Reco")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYSpec2Reco")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYSpec3Reco")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYCHODReco")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYCHODTrue")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYMUV3True")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYSpec0Mu")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hXYSpec0Pi")->GetYaxis()->SetTitle("Y [m]");
+  fHisto.GetTH2("hCDAvsZ_In")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsZ_Track")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsZ_Energy")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsZ_Vetoes")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsZ_Geom")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsZ_Fin")->GetYaxis()->SetTitle("CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Track")->GetYaxis()->SetTitle("Muon CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Energy")->GetYaxis()->SetTitle("Muon CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Vetoes")->GetYaxis()->SetTitle("Muon CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Geom")->GetYaxis()->SetTitle("Muon CDA [m]");
+  fHisto.GetTH2("hCDAvsCDA_Fin")->GetYaxis()->SetTitle("Muon CDA [m]");
+  fHisto.GetTH2("hZvsBeam_In")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hZvsBeam_Track")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hZvsBeam_Energy")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hZvsBeam_Vetoes")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hZvsBeam_Geom")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hZvsBeam_Fin")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_In")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Track")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Energy")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Vetoes")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Geom")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH2("hBeamvsTar_Fin")->GetYaxis()->SetTitle("Beam axis distance [m]");
+  fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
 
   // Plot residual number of events after each cut
 
   const int NCuts = 22;
   const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "LKr acc", "LKr assoc", "MUV3 acc", "MUV3 assoc", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", /*"LKr veto",*/ "Track dist CH1", "CDA tracks", "Beam distance", "Z vertex"};
-
-  for (Int_t i = 1; i <= NCuts; i++)
-    fhCuts->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
   
-  fhCuts->GetXaxis()->LabelsOption("v");
-
+  for (Int_t i = 1; i <= NCuts; i++)
+    fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
+  
+  fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
+  
   SaveAllPlots();
-
+  
   return;
-}
-
-HeavyNeutrino::~HeavyNeutrino() {
-
-  if (!GetIsTree()) return;
-
-  fhNk3pi            = nullptr;
-  fhNbursts          = nullptr;
-  fhNEvents          = nullptr;
-  fhN2tracks         = nullptr;
-  fhNtracks          = nullptr;
-  fhMomPi            = nullptr;
-  fhMomMu            = nullptr;
-  fhXYSpec0Reco      = nullptr;
-  fhXYSpec1Reco      = nullptr;
-  fhXYSpec2Reco      = nullptr;
-  fhXYSpec3Reco      = nullptr;
-  fhXYCHODReco       = nullptr;
-  fhXYCHODTrue       = nullptr;
-  fhXYMUV3True       = nullptr;
-  fhCuts             = nullptr;
-  fhCDAvsZ_In        = nullptr;
-  fhCDAvsZ_Track     = nullptr;
-  fhCDAvsZ_Energy    = nullptr;
-  fhCDAvsZ_Geom      = nullptr;
-  fhCDAvsZ_Vetoes    = nullptr;
-  fhCDAvsZ_Fin       = nullptr;
-  fhZvsBeam_In       = nullptr;
-  fhZvsBeam_Track    = nullptr;
-  fhZvsBeam_Energy   = nullptr;
-  fhZvsBeam_Geom     = nullptr;
-  fhZvsBeam_Vetoes   = nullptr;
-  fhZvsBeam_Fin      = nullptr;
-  fhBeamvsTar_In     = nullptr;
-  fhBeamvsTar_Track  = nullptr;
-  fhBeamvsTar_Energy = nullptr;
-  fhBeamvsTar_Geom   = nullptr;
-  fhBeamvsTar_Vetoes = nullptr;
-  fhBeamvsTar_Fin    = nullptr;
-  fhNMUV3Cand        = nullptr;
-  fhEoP              = nullptr;
-  fhEoPMuVsPi        = nullptr;
-  fhInvMassReco      = nullptr;
 }

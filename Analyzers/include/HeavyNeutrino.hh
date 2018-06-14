@@ -28,7 +28,7 @@ class HeavyNeutrino : public NA62Analysis::Analyzer {
 public:
 
   HeavyNeutrino(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrino();
+  ~HeavyNeutrino() {}
   void InitHist();
   void InitOutput();
   void DefineMCSimple() {}
@@ -63,52 +63,6 @@ protected:
   Double_t fzCHODPlane;
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
-
-  // Histos
-
-  TH1D *fhNk3pi;
-  TH1D *fhNbursts;
-  TH1D *fhNEvents;
-  TH1D *fhN2tracks;
-  TH1D *fhNtracks;
-  TH1D *fhMomPi;
-  TH1D *fhMomMu;
-
-  TH2D *fhXYSpec0Reco;
-  TH2D *fhXYSpec1Reco;
-  TH2D *fhXYSpec2Reco;
-  TH2D *fhXYSpec3Reco;
-  TH2D *fhXYCHODReco;
-  TH2D *fhXYCHODTrue;
-  TH2D *fhXYMUV3True;
-
-  TH1D *fhCuts;
-
-  TH2D *fhCDAvsZ_In;
-  TH2D *fhCDAvsZ_Track;
-  TH2D *fhCDAvsZ_Energy;
-  TH2D *fhCDAvsZ_Geom;
-  TH2D *fhCDAvsZ_Vetoes;
-  TH2D *fhCDAvsZ_Fin;
-
-  TH2D *fhZvsBeam_In;
-  TH2D *fhZvsBeam_Track;
-  TH2D *fhZvsBeam_Energy;
-  TH2D *fhZvsBeam_Geom;
-  TH2D *fhZvsBeam_Vetoes;
-  TH2D *fhZvsBeam_Fin;
-
-  TH2D *fhBeamvsTar_In;
-  TH2D *fhBeamvsTar_Track;
-  TH2D *fhBeamvsTar_Energy;
-  TH2D *fhBeamvsTar_Geom;
-  TH2D *fhBeamvsTar_Vetoes;
-  TH2D *fhBeamvsTar_Fin;
-
-  TH1D *fhNMUV3Cand;
-  TH1D *fhEoP;
-  TH2D *fhEoPMuVsPi;
-  TH1D *fhInvMassReco;
 };
 
 #endif
