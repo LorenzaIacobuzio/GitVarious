@@ -33,6 +33,11 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
     gStyle->SetLineStyleString(9, "80 20");
     gPad->Update();
   }
+
+  if ((TString)h2->GetName() == "XYSpec0Mu" || (TString)h2->GetName() == "XYSpec0Pi") {
+    h2->GetXaxis()->SetRangeUser(-1., 1.);
+    h2->GetYaxis()->SetRangeUser(-1., 1.);
+  }
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
@@ -43,19 +48,19 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
     g->GetYaxis()->SetTitle("Decay width [MeV]");
   else if (title.Contains("lifetime"))
     g->GetYaxis()->SetTitle("Lifetime [ns]");
-  /*
+  
   if (title.Contains("Sensitivity")) {
-    gPad->Update();
-    g->GetXaxis()->SetLimits(0.3, 100.);
+    g->GetXaxis()->SetLimits(0.1, 100.);
     g->GetHistogram()->SetMinimum(1.E-12);
-    g->GetHistogram()->SetMaximum(1.);
+    g->GetHistogram()->SetMaximum(100.);
     gPad->SetLogy();
     gPad->SetLogx();
     gPad->Update();
-    gPad->Modified();
   }
-  */
+  
   gPad->Update();
+  g->GetXaxis()->SetTitleOffset(1.4);
+  g->GetYaxis()->SetTitleOffset(1.4);
   g->GetXaxis()->SetTitleSize(labelSize);
   g->GetYaxis()->SetTitleSize(labelSize);
   g->GetXaxis()->SetLabelSize(labelSize);
@@ -81,13 +86,9 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
     else if (title.Contains("momentum"))
       g->GetXaxis()->SetTitle("N momentum [GeV/c^{2}]");
   }
-
-  if (title.Contains("momentum")) {
-    g->GetXaxis()->SetTitleOffset(1.4);
-    g->GetYaxis()->SetTitleOffset(1.4);
-    gPad->SetLogy();
-  }
-
+  
+  g->GetXaxis()->SetTitleOffset(1.4);
+  g->GetYaxis()->SetTitleOffset(1.4);
   gPad->Update();
   g->GetXaxis()->SetTitleSize(labelSize);
   g->GetYaxis()->SetTitleSize(labelSize);
@@ -116,7 +117,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   else if (title.Contains("Yield per POT") && title.Contains("coupling"))
     m->GetYaxis()->SetRangeUser(1.E-28, 1.E-10);
   else if (title.Contains("Acceptance") && title.Contains("mass"))
-    m->GetYaxis()->SetRangeUser(1.E-7, 1.E-4);
+    m->GetYaxis()->SetRangeUser(1.E-6, 1.E-4);
   else if (title.Contains("Yield per POT") && title.Contains("mass"))
     m->GetYaxis()->SetRangeUser(1.E-19, 1.E-16);
 
