@@ -9,8 +9,6 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   h1->GetXaxis()->SetTitleOffset(1.4);
   h1->GetYaxis()->SetTitleOffset(1.4);
   gPad->Update();
-  gPad->SetGridx();
-  gPad->SetGridy();
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.2);
   gStyle->SetOptStat(0);
@@ -31,9 +29,6 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   
   if (logScale == true) {
     gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetGridx();
-    gPad->SetGridy();
     gStyle->SetLineStyleString(9, "80 20");
     gStyle->SetLineStyleString(9, "80 20");
     gPad->Update();
@@ -48,16 +43,24 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
     g->GetYaxis()->SetTitle("Decay width [MeV]");
   else if (title.Contains("lifetime"))
     g->GetYaxis()->SetTitle("Lifetime [ns]");
-
+  /*
+  if (title.Contains("Sensitivity")) {
+    gPad->Update();
+    g->GetXaxis()->SetLimits(0.3, 100.);
+    g->GetHistogram()->SetMinimum(1.E-12);
+    g->GetHistogram()->SetMaximum(1.);
+    gPad->SetLogy();
+    gPad->SetLogx();
+    gPad->Update();
+    gPad->Modified();
+  }
+  */
   gPad->Update();
   g->GetXaxis()->SetTitleSize(labelSize);
   g->GetYaxis()->SetTitleSize(labelSize);
   g->GetXaxis()->SetLabelSize(labelSize);
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
-  gPad->Update();
-  gPad->SetGridx();
-  gPad->SetGridy();
   gPad->Update();
 }
 
@@ -92,9 +95,6 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
   gPad->Update();
-  gPad->SetGridx();
-  gPad->SetGridy();
-  gPad->Update();
 }
 
 void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas* c, TString path, Double_t labelSize, Double_t titleSize) {
@@ -125,8 +125,6 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
 
   gPad->Update();
   gPad->SetLogy();
-  gPad->SetGridx();
-  gPad->SetGridy();
   gPad->Update();
   c->SaveAs(path + m->GetName() + ".pdf");
 
@@ -154,8 +152,9 @@ TCanvas* CreateTCanvas() {
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.25);
   c->SetTopMargin(0.15);
-  //c->SetWindowSize(20000., 12000.);
-
+  c->SetGrid();
+  c->RedrawAxis();
+  
   return c;
 }
 
@@ -209,7 +208,11 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
        TGraph *g = (TGraph*)(key->ReadObj());
 
        TGraphCosmetics(g, labelSize, titleSize);
-       g->Draw("AC");
+
+       if (Name1.Contains("Exclusion"))
+	 g->Draw("AL");
+       else
+	 g->Draw("AC");
 
        c->SaveAs(path + Name1 + ".pdf");
     }
@@ -227,6 +230,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
       TH1Cosmetics(h1, labelSize, titleSize);
+
       if (!strcmp(key->GetName(), "InvMassReco")) {
         h1->Fit("gaus");
         gStyle->SetStatW(0.2);

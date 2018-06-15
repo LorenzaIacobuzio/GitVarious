@@ -127,7 +127,7 @@ void HeavyNeutrinoScan::InitHist() {
   BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling",  "Probability of N reaching the FV vs coupling",                 fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling",  "Probability of N decaying in the FV vs coupling",              fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling",   "Probability of N reaching and decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                         fN, fCouplingStart, fCouplingStop, 1000, 1.E-13, 1.E-6));
+  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                         fN, fCouplingStart, fCouplingStop, 1000, 1.E-17, 1.E-6));
   BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling",                                         fN, fCouplingStart, fCouplingStop, 100, 0., 100.));
   BookHisto("CouplingScan/hSpare",          new TH1D("Spare", "Spare", fN, fCouplingStart, fCouplingStop));
 
@@ -282,6 +282,8 @@ void HeavyNeutrinoScan::Process(Int_t) {
   Double_t NReachProb = 0.;
   Double_t Weight     = 0.;
   Double_t scale      = 1.E10;
+  Double_t N=0;
+  Double_t D=0;
   Bool_t isGood       = false;
 
   Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
@@ -342,8 +344,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	      FillHisto("CouplingScan/hG2", fCoupling, Weight*scale);
 	    }
-	    if (fCoupling == fCouplingForSingleValue)
-	      cout<<round(MN)<<" "<<fCoupling<<" "<<Weight<<" "<<(IsHNLGood&&isGood)<<endl;
 	  }
 
 	  FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
@@ -374,8 +374,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	      FillHisto("MassScan/hG2", round(MN)/1000., Weight*scale);
 	    }
-	    if (round(MN)==fMassForSingleValue)
-	      cout<<round(MN)<<" "<<fCoupling<<" "<<Weight<<" "<<(IsHNLGood&&isGood)<<endl;
 	  }
 	  
 	  FillHisto("MassScan/hReachMass",  round(MN)/1000., NReachProb);
@@ -391,6 +389,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  FillHisto("SingleValue/hHNLReachProb", NReachProb);
 	  FillHisto("SingleValue/hHNLDecayProb", NDecayProb);
 	  FillHisto("SingleValue/hWeight",       Weight);
+	  D++;
+	  if (IsHNLGood == true && isGood == true) 
+	    N += Weight;
 	}
       }
     }
@@ -583,9 +584,6 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMom"))->Divide(fHisto.GetTH1("SingleValue/hG"), fHisto.GetTH1("SingleValue/hA"), "cl=0.683 mode");
   static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom"))->Divide(fHisto.GetTH1("SingleValue/hG"), fHisto.GetTH1("SingleValue/hN"), "cl=0.683 mode");
 
-  static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling"))->Print();
-  static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMass"))->Print();
-
   Double_t Coupling     = 0.;
   Double_t MN           = 0.;
   Int_t couplingCounter = 0;
@@ -602,6 +600,8 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	fHisto.GetTGraph("CouplingScan/TauCoupling")->SetPoint(couplingCounter, Coupling, fTau[fMassForSingleValue][Coupling]);
 	couplingCounter++;
       }
+
+      fYield[MN][Coupling] = fSumGood[MN][Coupling]/fNevents[MN][Coupling];
 
       if (fYield[MN][Coupling]*1.E18 > 2.3) {
 	fHisto.GetTGraph("TotalScan/Exclusion")->SetPoint(counter, MN/1000., Coupling);
@@ -663,9 +663,9 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, cons
   g->GetYaxis()->SetTitle(y);
   g->SetLineColor(1);
   g->SetLineWidth(1);
-  g->SetMarkerStyle(10);
+  g->SetMarkerStyle(8);
   g->SetMarkerColor(col);
-  g->Draw();
+  g->Draw("AP");
   g->Write();
   
   return;

@@ -69,7 +69,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
   AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, 0.);
+  AddParam("CouplingStop", &fCouplingStop, 1.);
   AddParam("CouplingStep", &fCouplingStep, 1.);
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
@@ -110,7 +110,7 @@ void HeavyNeutrinoScan::InitHist() {
   BookHisto("SingleValue/hMass",         new TH1D("Mass", "Mass", 10, 0.3, 1.2));    
   BookHisto("SingleValue/hTransverse",   new TH1D("Transverse",  "N transverse position at decay point", 100, 0., 2.));
   BookHisto("SingleValue/hDThetaMom",    new TH2D("DThetaMom",   "D meson polar angle vs momentum", 100, 0., 150., 50, 0., 0.5));
-  BookHisto("SingleValue/hXYDecay",      new TH2D("XYDecay",     "X, Y of N at decay point", 50, 0., 1., 50, 0., 1.));
+  BookHisto("SingleValue/hXYDecay",      new TH2D("XYDecay",     "X, Y of N at decay point", 100, -1., 1., 100, -1., 1.));
 
   BookHisto("SingleValue/hG",            new TH1D("sG",  "", fNMom, fMomStart, fMomStop));
   BookHisto("SingleValue/hA",            new TH1D("sA",  "", fNMom, fMomStart, fMomStop));
@@ -127,7 +127,7 @@ void HeavyNeutrinoScan::InitHist() {
   BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling",  "Probability of N reaching the FV vs coupling",                 fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling",  "Probability of N decaying in the FV vs coupling",              fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
   BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling",   "Probability of N reaching and decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                         fN, fCouplingStart, fCouplingStop, 1000, 1.E-13, 1.E-6));
+  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                         fN, fCouplingStart, fCouplingStop, 1000, 1.E-17, 1.E-6));
   BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling",                                         fN, fCouplingStart, fCouplingStop, 100, 0., 100.));
   BookHisto("CouplingScan/hSpare",          new TH1D("Spare", "Spare", fN, fCouplingStart, fCouplingStop));
 
@@ -604,7 +604,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       fYield[MN][Coupling] = fSumGood[MN][Coupling]/fNevents[MN][Coupling];
 
       if (fYield[MN][Coupling]*1.E18 > 2.3) {
-	fHisto.GetTGraph("TotalScan/Exclusion")->SetPoint(counter, MN/1000., Coupling);
+	fHisto.GetTGraph("TotalScan/Exclusion")->SetPoint(counter, MN/1000., TMath::Power(10., Coupling));
 	counter++;
       }
     }

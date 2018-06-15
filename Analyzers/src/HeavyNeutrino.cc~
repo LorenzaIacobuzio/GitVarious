@@ -836,7 +836,7 @@ void HeavyNeutrino::Process(Int_t) {
   energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
-  if (TMath::Abs(invMass - fMassForReco) <= 0.05)
+  if (TMath::Abs(invMass - fMassForReco) <= fMassForReco/100.)
     FillHisto("hInvMassReco", invMass/1000.);
 }
 

@@ -148,8 +148,8 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hXYCHODReco",  new TH2D("XYCHODReco",  "Two-track reconstructed events at CHOD",                100, -1.5, 1.5, 100, -1.5, 1.5));
   BookHisto("hXYCHODTrue",  new TH2D("XYCHODTrue",  "X,Y of HNL daughters at CHOD, from MC",                 100, -2., 2., 100, -2., 2.));
   BookHisto("hXYMUV3True",  new TH2D("XYMUV3True",  "X,Y of HNL daughters at MUV3, from MC",                 100, -2., 2., 100, -2., 2.));
-  BookHisto("hXYSpec0Mu",   new TH2D("hXYSpec0Mu",  "X,Y of muon daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
-  BookHisto("hXYSpec0Pi",   new TH2D("hXYSpec0Pi",  "X,Y of pion daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Mu",   new TH2D("XYSpec0Mu",  "X,Y of muon daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
+  BookHisto("hXYSpec0Pi",   new TH2D("XYSpec0Pi",  "X,Y of pion daughter at CH1, after track-quality cuts", 100, -2., 2., 100, -2., 2.));
 
   BookHisto("hCDAvsZ_In",     new TH2D("CDAvsZ_In",     "N trajectory wrt beam axis, before all cuts",          200, 100., 190., 100, 0., 0.15));
   BookHisto("hCDAvsZ_Track",  new TH2D("CDAvsZ_Track",  "N trajectory wrt beam axis, after track-quality cuts", 200, 100., 190., 100, 0., 0.02));
