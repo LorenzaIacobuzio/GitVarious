@@ -91,10 +91,10 @@ void HeavyNeutrinoScan::InitHist() {
     
   // One value of mass and coupling
 
-  BookHisto("SingleValue/hZMotherProd",  new TH1D("ZMotherProd", "N mother production point", 20000, 0., 27.));
-  BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd",      "D meson production point",  20000, 0., 27.));
-  BookHisto("SingleValue/hZTauProd",     new TH1D("ZTauProd",    "#tau production point",     20000, 0., 27.));
-  BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay",     "N production point",        20000, 0., 27.));
+  BookHisto("SingleValue/hZMotherProd",  new TH1D("ZMotherProd", "N mother production point", 100000, 0., 27.));
+  BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd",      "D meson production point",  100000, 0., 27.));
+  BookHisto("SingleValue/hZTauProd",     new TH1D("ZTauProd",    "#tau production point",     100000, 0., 27.));
+  BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay",     "N production point",        100000, 0., 27.));
   BookHisto("SingleValue/hDTheta",       new TH1D("DTheta",  "N mother polar angle",        100,  0., 0.3));
   BookHisto("SingleValue/hDLambda",      new TH1D("DLambda", "N mother decay length", 100, -1., 40.));
   BookHisto("SingleValue/hDPath",        new TH1D("DPath",   "N mother path along Z", 100, -1., 50.));

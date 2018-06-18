@@ -249,13 +249,13 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
         hBe = (TH1D*)h1->Clone("hBe");
         hBe->SetName("ZDProdTarget");
         hBe->SetTitle("Z of D meson production point in the target");
-        hBe->GetXaxis()->SetRangeUser(-250., 250.);
+        hBe->GetXaxis()->SetRangeUser(0., 0.25);
         hBe->Draw();
 	c->SaveAs(path + hBe->GetName() + ".pdf");
         hTa = (TH1D*)h1->Clone("hTa");
         hTa->SetName("ZDProdTAX");
         hTa->SetTitle("Z of D meson production point in the TAXs");
-        hTa->GetXaxis()->SetRangeUser(23000., 25000.);
+        hTa->GetXaxis()->SetRangeUser(23., 25.);
         hTa->Draw();
         c->SaveAs(path + hTa->GetName() + ".pdf");
       }
@@ -263,13 +263,13 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	hBe1 = (TH1D*)h1->Clone("hBe1");
         hBe1->SetName("ZDDecayTarget");
         hBe1->SetTitle("Z of D meson decay point in the target");
-        hBe1->GetXaxis()->SetRangeUser(-250., 300.);
+        hBe1->GetXaxis()->SetRangeUser(0., 0.3);
         hBe1->Draw();
 	c->SaveAs(path + hBe1->GetName() + ".pdf");
         hTa1 = (TH1D*)h1->Clone("hTa1");
 	hTa1->SetName("ZDDecayTAX");
         hTa1->SetTitle("Z of D meson decay point in the TAXs");
-	hTa1->GetXaxis()->SetRangeUser(23000., 25000.);
+	hTa1->GetXaxis()->SetRangeUser(23., 25.);
         hTa1->Draw();
         c->SaveAs(path + hTa1->GetName() + ".pdf");
       }
@@ -283,7 +283,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 
 void Plots(TString dir, TString histo1, Bool_t MCcomp) {
 
-  TGaxis::SetMaxDigits(2);
+  //TGaxis::SetMaxDigits(2);
 
   TCanvas *c = CreateTCanvas();
   Double_t labelSize = 0.05;
