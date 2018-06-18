@@ -230,6 +230,7 @@ void HeavyNeutrinoScan::InitHist() {
   BookHisto("ToyMC/DS/hpmuS1",  new TH1D("pmuS1",  "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            20, 0., 120.));
   BookHisto("ToyMC/DS/hptmuS",  new TH1D("ptmuS",  "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, 0., 2.));
   BookHisto("ToyMC/DS/hptmuS1", new TH1D("ptmuS1", "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, 0., 2.));
+
   BookHisto("ToyMC/D0/hpD0",   new TH1D("pD0",   "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  40, 0., 200.));
   BookHisto("ToyMC/D0/hpD01",  new TH1D("pD01",  "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            40, 60., 300.));
   BookHisto("ToyMC/D0/hptD0",  new TH1D("ptD0",  "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       10, 0., 5.));
@@ -566,6 +567,30 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   fHisto.GetTH2("MassScan/hProbMass")->GetYaxis()->SetTitle("Reach and decay probability");
   fHisto.GetTH2("MassScan/hWeightMass")->GetYaxis()->SetTitle("Weight");
   fHisto.GetTH2("MassScan/hEnergyMass")->GetYaxis()->SetTitle("N energy [GeV]");
+  fHisto.GetTH1("ToyMC/DS/hpDS")->GetYaxis()->SetTitle("Entries/5 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpDS1")->GetYaxis()->SetTitle("Entries/8 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptDS")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptDS1")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpNS")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpNS1")->GetYaxis()->SetTitle("Entries/13 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptNS")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptNS1")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpmuS")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpmuS1")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptmuS")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptmuS1")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpD0")->GetYaxis()->SetTitle("Entries/5 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpD01")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptD0")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptD01")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpN0")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpN01")->GetYaxis()->SetTitle("Entries/13 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptN0")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptN01")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpmu0")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpmu01")->GetYaxis()->SetTitle("Entries/6 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptmu0")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptmu01")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
   
   // Acceptance and yield computation                                             
 
@@ -670,3 +695,5 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, cons
   
   return;
 }
+
+//  LocalWords:  GeV

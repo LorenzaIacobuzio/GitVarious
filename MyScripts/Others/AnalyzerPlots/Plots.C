@@ -83,8 +83,11 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
       g->GetXaxis()->SetTitle("Log(U^{2})");
     else if (title.Contains("mass"))
       g->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-    else if (title.Contains("momentum"))
-      g->GetXaxis()->SetTitle("N momentum [GeV/c^{2}]");
+    else if (title.Contains("momentum")) {
+      g->GetXaxis()->SetTitle("N momentum [GeV/c]");
+      if (title.Contains("Acceptance") && title.Contains("momentum"))
+	gPad->SetLogy();
+    }
   }
   
   g->GetXaxis()->SetTitleOffset(1.4);
@@ -186,7 +189,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       if (!Name.Contains("Mom")) {                                  
         if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
           g->Draw("AL");                                         
-          c->SaveAs(path + key->GetName() + ".pdf");                 
+          c->SaveAs(path + Name1 + ".pdf");                 
         }                                                           
         else {                                                 
           if (Name.Contains("Yield")) {
@@ -201,8 +204,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       }
       else {
 	TGraphCosmetics(g, labelSize, titleSize);
-	g->Draw("AL");
-	c->SaveAs(path + "Error" + key->GetName() + ".pdf");
+	g->Draw("AP");
+	c->SaveAs(path + Name1 + ".pdf");
       }
     }
     else if (cl->InheritsFrom("TGraph")) {
@@ -281,7 +284,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 void Plots(TString dir, TString histo1, Bool_t MCcomp) {
 
   TGaxis::SetMaxDigits(2);
-  
+
   TCanvas *c = CreateTCanvas();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
