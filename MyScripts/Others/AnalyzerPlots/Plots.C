@@ -131,7 +131,8 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   gPad->SetLogy();
   gPad->Update();
   c->SaveAs(path + m->GetName() + ".pdf");
-
+  c->SaveAs(path + m->GetName() + ".png");
+  
   delete m;
   delete c;
 
@@ -189,7 +190,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       if (!Name.Contains("Mom")) {                                  
         if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
           g->Draw("AL");                                         
-          c->SaveAs(path + Name1 + ".pdf");                 
+          c->SaveAs(path + Name1 + ".pdf");
+	  c->SaveAs(path + Name1 + ".png");
         }                                                           
         else {                                                 
           if (Name.Contains("Yield")) {
@@ -206,6 +208,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TGraphCosmetics(g, labelSize, titleSize);
 	g->Draw("AP");
 	c->SaveAs(path + Name1 + ".pdf");
+	c->SaveAs(path + Name1 + ".png");
       }
     }
     else if (cl->InheritsFrom("TGraph")) {
@@ -219,6 +222,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	 g->Draw("AC");
 
        c->SaveAs(path + Name1 + ".pdf");
+       c->SaveAs(path + Name1 + ".png");
     }
     else if (cl->InheritsFrom("TH2")) {
       TH2 *h2 = (TH2*)key->ReadObj();
@@ -230,6 +234,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       
       h2->Draw("colz");
       c->SaveAs(path + key->GetName() + ".pdf");
+      c->SaveAs(path + key->GetName() + ".png");
     }
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
@@ -252,12 +257,14 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
         hBe->GetXaxis()->SetRangeUser(0., 0.25);
         hBe->Draw();
 	c->SaveAs(path + hBe->GetName() + ".pdf");
+	c->SaveAs(path + hBe->GetName() + ".png");
         hTa = (TH1D*)h1->Clone("hTa");
         hTa->SetName("ZDProdTAX");
         hTa->SetTitle("Z of D meson production point in the TAXs");
         hTa->GetXaxis()->SetRangeUser(23., 25.);
         hTa->Draw();
         c->SaveAs(path + hTa->GetName() + ".pdf");
+	c->SaveAs(path + hTa->GetName() + ".png");
       }
       if (!strcmp(key->GetName(), "ZDDecay")) {
 	hBe1 = (TH1D*)h1->Clone("hBe1");
@@ -266,17 +273,20 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
         hBe1->GetXaxis()->SetRangeUser(0., 0.3);
         hBe1->Draw();
 	c->SaveAs(path + hBe1->GetName() + ".pdf");
+	c->SaveAs(path + hBe1->GetName() + ".png");
         hTa1 = (TH1D*)h1->Clone("hTa1");
 	hTa1->SetName("ZDDecayTAX");
         hTa1->SetTitle("Z of D meson decay point in the TAXs");
 	hTa1->GetXaxis()->SetRangeUser(23., 25.);
         hTa1->Draw();
         c->SaveAs(path + hTa1->GetName() + ".pdf");
+	c->SaveAs(path + hTa1->GetName() + ".png");
       }
       else
         h1->Draw();
       
       c->SaveAs(path + key->GetName() + ".pdf");
+      c->SaveAs(path + key->GetName() + ".png");
     }
   }
 }
