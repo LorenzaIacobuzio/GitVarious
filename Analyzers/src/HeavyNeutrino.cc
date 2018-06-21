@@ -54,6 +54,10 @@
 #include "DownstreamTrack.hh"
 #include "GeometricAcceptance.hh"
 #include "TriggerConditions.hh"
+#include "SpectrometerCHODAssociationOutput.hh"
+#include "SpectrometerNewCHODAssociationOutput.hh"
+#include "SpectrometerLKrAssociationOutput.hh"
+#include "SpectrometerMUV3AssociationOutput.hh"
 #include "HNLFunctions.hh"
 #include "HNLWeight.hh"
 #include "HeavyNeutrino.hh"
@@ -64,7 +68,6 @@ using namespace NA62Constants;
 
 #define TRIGGER_L0_PHYSICS_TYPE 1
 #define MCTriggerMask 0xFF
-#define LabelSize 0.05
 
 /// \class HeavyNeutrino
 
@@ -77,6 +80,8 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestAllRecoTrees();
   RequestL0Data();
   RequestL1Data();
+  RequestL0SpecialTrigger();
+  RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6);
   AddParam("UeSquaredRatio", &fUeSquaredRatio, 1.);
@@ -135,7 +140,7 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hNk3pi",    new TH1D("Nk3pi",    "Total number of K3pi events",       1, 0., 1.));
   BookHisto("hNbursts",  new TH1D("Nbursts",  "Total number of processed bursts",  1, 0., 1.));
   BookHisto("hNEvents",  new TH1D("NEvents",  "Number of total processed events" , 1, 0., 1.));
-  BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  4, -0.5, 3.5));
+  BookHisto("hNtracks",  new TH1D("Ntracks",  "Number of tracks",                  10, -0.5, 9.5));
   BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events",       1, 0., 1.));
   BookHisto("hMomPi",    new TH1D("MomPi",    "Pion momentum",                     100, -0.5, 200.));
   BookHisto("hMomMu",    new TH1D("MomMu",    "Muon momentum",                     100, -0.5, 200.));
@@ -171,17 +176,30 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom",   "Two-track vertex, after geometrical cuts",   200, 100., 190., 100, 0., 0.7));
   BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin",    "Two-track vertex, after all cuts",           200, 100., 190., 100, 0., 0.7));
   
-  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory, before all cuts",          100, 0., 0.05, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory, after track-quality cuts", 100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory, after energy cuts",        100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory, after veto cuts",          100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory, after geometrical cuts",   100, 0., 0.02, 100, 0., 0.8));
-  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory, after all cuts",           100, 0., 0.02, 100, 0., 0.8));
+  BookHisto("hBeamvsTar_In",     new TH2D("BeamvsTar_In",     "N trajectory, before all cuts",          100, 0., 1.5, 100, 0., 1.5));
+  BookHisto("hBeamvsTar_Track",  new TH2D("BeamvsTar_Track",  "N trajectory, after track-quality cuts", 100, 0., 1.5, 100, 0., 1.5));
+  BookHisto("hBeamvsTar_Energy", new TH2D("BeamvsTar_Energy", "N trajectory, after energy cuts",        100, 0., 1.5, 100, 0., 1.5));
+  BookHisto("hBeamvsTar_Vetoes", new TH2D("BeamvsTar_Vetoes", "N trajectory, after veto cuts",          100, 0., 1.5, 100, 0., 1.5));
+  BookHisto("hBeamvsTar_Geom",   new TH2D("BeamvsTar_Geom",   "N trajectory, after geometrical cuts",   100, 0., 1.5, 100, 0., 1.5));
+  BookHisto("hBeamvsTar_Fin",    new TH2D("BeamvsTar_Fin",    "N trajectory, after all cuts",           100, 0., 1.5, 100, 0., 1.5));
   
   BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
   BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
   BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
   BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
+
+  BookHisto("hKTAG",    new TH1D("KTAG",    "Trigger time - KTAG candidate time",    100, -30., 30.));
+  BookHisto("hCHOD",    new TH1D("CHOD",    "Trigger time - CHOD candidate time",    100, -30., 30.));
+  BookHisto("hNewCHOD", new TH1D("NewCHOD", "Trigger time - NewCHOD candidate time", 100, -30., 30.));
+  BookHisto("hStraw",   new TH1D("Straw",   "Trigger time - reference time",         100, -30., 30.));
+  BookHisto("hLKr",     new TH1D("LKr",     "Trigger time - LKr candidate time",     100, -30., 30.));
+  BookHisto("hMUV3",    new TH1D("MUV3",    "Trigger time - MUV3 candidate time",    100, -30., 30.));
+  BookHisto("hLAV",     new TH1D("LAV",     "Trigger time - LAV candidate time",     100, -150., 150.));
+  BookHisto("hSAV",     new TH1D("SAV",     "Trigger time - SAV candidate time",     100, -150., 150.));
+  BookHisto("hCHANTI",  new TH1D("CHANTI",  "Trigger time - CHANTI candidate time",  100, -150., 150.));
+
+  BookHisto("hCHANTImult",   new TH1D("CHANTImult", "CHANTI multiplicity in time",         10, 0., 10.));
+  BookHisto("hExtraLKrmult", new TH1D("ExtraLKrmult", "Residual LKr multiplicity in time", 10, 0., 10.));
 
   BookHisto("hSpare1", new TH1D("Spare1", "", 100, 117., 122.));
   BookHisto("hSpare2", new TH2D("Spare2", "", 100, 110., 130., 100, 110., 130.));
@@ -193,10 +211,16 @@ void HeavyNeutrino::Process(Int_t) {
 
   fPassSelection = false;
 
-  TRecoLKrEvent* LKrEvent  = (TRecoLKrEvent*)GetEvent("LKr");
-  TRecoLAVEvent* LAVEvent  = (TRecoLAVEvent*)GetEvent("LAV");
-  TRecoIRCEvent* IRCEvent  = (TRecoIRCEvent*)GetEvent("IRC");
-  TRecoSACEvent* SACEvent  = (TRecoSACEvent*)GetEvent("SAC");
+  // Compute number of processed events
+
+  FillHisto("hNEvents", 0.5);
+
+  TRecoCedarEvent* CedarEvent         = (TRecoCedarEvent*)GetEvent("Cedar");
+  TRecoCHODEvent* CHODEvent           = (TRecoCHODEvent*)GetEvent("CHOD");
+  TRecoLAVEvent* LAVEvent             = (TRecoLAVEvent*)GetEvent("LAV");
+  TRecoIRCEvent* IRCEvent             = (TRecoIRCEvent*)GetEvent("IRC");
+  TRecoSACEvent* SACEvent             = (TRecoSACEvent*)GetEvent("SAC");
+  TRecoCHANTIEvent* CHANTIEvent       = (TRecoCHANTIEvent*)GetEvent("CHANTI");
 
   // Counter for cuts
 
@@ -209,7 +233,7 @@ void HeavyNeutrino::Process(Int_t) {
   TLorentzVector mom1;
   TLorentzVector mom2;
   Double_t p1,p2;
-  Double_t Weight = 0.;
+  Double_t Weight = 1.;
 
   // Some plots of KinePart quantities
 
@@ -255,15 +279,23 @@ void HeavyNeutrino::Process(Int_t) {
       }  
     }
   }
-
-  // Compute number of processed events
-
-  FillHisto("hNEvents", 0.5);
+  
+  Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
+  Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
+  Double_t L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
+  L0TPTime *= TdcCalib;
+  Double_t L0Window      = 1.13*5.;
+  Double_t KTAGWindow    = 1.27*5.;
+  Double_t CHODWindow    = 1.94*5.;
+  Double_t NewCHODWindow = 1.82*5.;
+  Double_t LKrWindow     = 1.75*5.;
+  Double_t MUV3Window    = 1.44*5.;
+  Double_t LAVWindow     = 6.24*5.;
+  Double_t SAVWindow     = 5.79*5.;
+  Double_t CHANTIWindow  = 2.80*5.;
+  Bool_t k3pi = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
   
   // K3Pi
-  
-  Bool_t k3pi     = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
-  Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
 
   if (k3pi && 0x10)
     FillHisto("hNk3pi", 0.5);
@@ -276,6 +308,8 @@ void HeavyNeutrino::Process(Int_t) {
   Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
   Bool_t TriggerFlagsOK   = L0TriggerFlags & MCTriggerMask;
   Bool_t TriggerOK        = PhysicsTriggerOK && TriggerFlagsOK;
+
+  // CUT: L0 + L1
 
   if (!TriggerOK)
     return;
@@ -312,7 +346,7 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // Select two-track events
+  // CUT: Select two-track events
   
   std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
 
@@ -336,11 +370,172 @@ void HeavyNeutrino::Process(Int_t) {
   TVector3 Mom1                                 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
   TVector3 Mom2                                 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
   TVector3 TotMom                               = Mom1 + Mom2;
+  Double_t CHODTime1                            = Tracks[0].GetCHODTime();
+  Double_t CHODTime2                            = Tracks[1].GetCHODTime();
 
-  for(int i = 0; i<LKrEvent->GetNCandidates(); i++) {
-    TRecoVCandidate* c = (TRecoVCandidate*)LKrEvent->GetCandidate(i);
-    FillHisto("hSpare1", c->GetTime());
+  // TIMING PLOTS
+
+  // Track timing                                                             
+
+  if (!GetWithMC()) {
+    FillHisto("hStraw", L0TPTime - CHODTime1);
+    FillHisto("hStraw", L0TPTime - CHODTime2);
   }
+
+  // KTAG timing
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
+      TRecoCedarCandidate* cand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+      if (cand->GetNSectors() >= 5)
+	FillHisto("hKTAG", cand->GetTime() - L0TPTime);
+    }
+  }
+
+  // CHOD timing
+  
+  if (!GetWithMC()) {
+    for(int i = 0; i < CHODEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)CHODEvent->GetCandidate(i);
+      FillHisto("hCHOD", cand->GetTime() - L0TPTime);
+    }
+  }
+  
+  // NewCHOD timing
+  
+  if (!GetWithMC()) {
+    std::vector<SpectrometerNewCHODAssociationOutput> SpecNewCHOD = *(std::vector<SpectrometerNewCHODAssociationOutput>*)GetOutput("SpectrometerNewCHODAssociation.Output");
+    for (Int_t i = 0; i < SpecNewCHOD[0].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecNewCHOD[0].GetAssociationRecord(i)->GetRecoHitTime() - L0TPTime;
+      FillHisto("hNewCHOD", dT);
+    }
+    
+    for (Int_t i = 0; i < SpecNewCHOD[1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecNewCHOD[1].GetAssociationRecord(i)->GetRecoHitTime() - L0TPTime;
+      FillHisto("hNewCHOD", dT);
+    }
+  }
+
+  // LKr timing
+
+  if (!GetWithMC()) {
+    std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
+    for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      FillHisto("hLKr", dT);
+    }
+
+    for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      FillHisto("hLKr", dT);
+    }
+
+    Int_t inTime = 0;
+
+    if (SpecLKr[0].GetNAssociationRecords() > 1) {
+      for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+	if (TMath::Abs(dT) <= LKrWindow)
+	  inTime++;
+      }
+      FillHisto("hExtraLKrmult", inTime);
+    }
+
+    inTime = 0;
+
+    if (SpecLKr[1].GetNAssociationRecords() > 1) {
+      for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+	if (TMath::Abs(dT) <= LKrWindow)
+          inTime++;
+      }
+      FillHisto("hExtraLKrmult", inTime);
+    }
+  }
+
+  // MUV3 timing
+
+  if (!GetWithMC()) {
+    std::vector<SpectrometerMUV3AssociationOutput> SpecMUV3 = *(std::vector<SpectrometerMUV3AssociationOutput>*)GetOutput("SpectrometerMUV3Association.Output");
+    for (Int_t i = 0; i < SpecMUV3[0].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecMUV3[0].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+      FillHisto("hMUV3", dT);
+    }
+    
+    for (Int_t i = 0; i < SpecMUV3[1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecMUV3[1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+      FillHisto("hMUV3", dT);
+    }
+  }
+
+  // LAV timing
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < LAVEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)LAVEvent->GetCandidate(i);
+      FillHisto("hLAV", cand->GetTime() - L0TPTime);
+    }
+  }
+
+  // SAV timing
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < IRCEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)IRCEvent->GetCandidate(i);
+      FillHisto("hSAV", cand->GetTime() - L0TPTime);
+    }
+    for(int i = 0; i < SACEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)SACEvent->GetCandidate(i);
+      FillHisto("hSAV", cand->GetTime() - L0TPTime);
+    }
+  }
+
+  // CHANTI timing
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      FillHisto("hCHANTI", cand->GetTime() - L0TPTime);
+    }
+  }
+
+  // CHANTI multiplicity
+
+  if (!GetWithMC()) {
+    Int_t inTime = 0;
+    for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      if (TMath::Abs(cand->GetTime() - L0TPTime) <= CHANTIWindow)
+	inTime++;
+    }
+    FillHisto("hCHANTImult", inTime);
+  }
+
+  // END OF TIMING PLOTS
+
+  // Track timing                                                             
+
+  if (!GetWithMC()) {
+    if (TMath::Abs(L0TPTime - CHODTime1) >= L0Window || TMath::Abs(L0TPTime - CHODTime2) >= L0Window)
+      return;
+  }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // KTAG timing
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
+      TRecoCedarCandidate* cand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+      Double_t dT = cand->GetTime() - L0TPTime;
+      if (cand->GetNSectors() >= 5 && TMath::Abs(dT) <= KTAGWindow)
+	return;
+    }
+  }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // (X,Y) of reconstructed tracks for all Spectrometer chambers
     
@@ -449,13 +644,15 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // Track selection, CUT: Chi2 and momentum cuts
+  // Track selection, CUT: Chi2
 
   if (ChiSquare1 >= 20. || ChiSquare2 >= 20.)
     return;
 
   FillHisto("hCuts", CutID);
   CutID++;
+
+  // Track selection, CUT: Chambers
 
   if (SpectrometerCand1->GetNChambers() <= 3 || SpectrometerCand2->GetNChambers() <= 3)
     return;
@@ -492,6 +689,61 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  // CUT: CHOD timing
+  
+  if (!GetWithMC()) {
+    if (!CHODEvent->GetNCandidates())
+      return;
+  }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // Downstream track selection, CUT: Extrapolation and association to NewCHOD
+
+  Bool_t NewCHODAssoc = (Tracks[0].NewCHODAssociationExists() && Tracks[1].NewCHODAssociationExists());
+
+  if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kNewCHOD) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kNewCHOD))
+    return;
+  
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  if (!NewCHODAssoc)
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // CUT: NewCHOD timing
+
+  if (!GetWithMC()) {
+    Int_t inTime = 0;
+    std::vector<SpectrometerNewCHODAssociationOutput> SpecNewCHOD = *(std::vector<SpectrometerNewCHODAssociationOutput>*)GetOutput("SpectrometerNewCHODAssociation.Output");
+    for (Int_t i = 0; i < SpecNewCHOD[0].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecNewCHOD[0].GetAssociationRecord(i)->GetRecoHitTime() - L0TPTime;
+      if (TMath::Abs(dT) <= NewCHODWindow)
+	inTime++;
+    }
+
+    if (!inTime)
+      return;
+
+    inTime = 0;
+
+    for (Int_t i = 0; i < SpecNewCHOD[1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecNewCHOD[1].GetAssociationRecord(i)->GetRecoHitTime() - L0TPTime;
+      if (TMath::Abs(dT) <= NewCHODWindow)
+        inTime++;
+    }    
+
+    if (!inTime) 
+      return;
+  }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Downstream track selection, CUT: Extrapolation and association to LKr
 
   Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
@@ -504,6 +756,35 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!LKrAssoc)
     return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // CUT: LKr timing
+
+  if (!GetWithMC()) {
+    Int_t inTime = 0;
+    std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
+    for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      if (TMath::Abs(dT) <= LKrWindow)
+        inTime++;
+    }
+
+    if (!inTime)
+      return;
+
+    inTime = 0;
+
+    for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      if (TMath::Abs(dT) <= LKrWindow)
+        inTime++;
+    }
+
+    if (!inTime)
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
@@ -529,6 +810,25 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (Assoc != 1 && Assoc != 2)
     return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // CUT: MUV3 timing
+
+  if (!GetWithMC()) {
+    Int_t inTime = 0;
+    std::vector<SpectrometerMUV3AssociationOutput> SpecMUV3 = *(std::vector<SpectrometerMUV3AssociationOutput>*)GetOutput("SpectrometerMUV3Association.Output");
+    for (Int_t i = 0; i < SpecMUV3[Assoc-1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+      FillHisto("hMUV3", dT);
+      if (TMath::Abs(dT) <= MUV3Window)
+	inTime++;
+    }
+    
+    if (!inTime)
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
@@ -587,19 +887,6 @@ void HeavyNeutrino::Process(Int_t) {
     }
   }
 
-
-  // Compute time of MUV3 and CHOD candidates for better resolution wrt Spectrometer tracks
-  
-  Double_t MUV3Time;
-  
-  if (Assoc == 1)
-    MUV3Time = Tracks[0].GetMUV3Time(0);
-  else if (Assoc == 2)
-    MUV3Time = Tracks[1].GetMUV3Time(0);
-  
-  Double_t CHODTime1 = Tracks[0].GetCHODTime();
-  Double_t CHODTime2 = Tracks[1].GetCHODTime();
-  
   // Energy cuts, CUT: Cut on E/p in LKr
   
   Double_t EoP1  = Tracks[0].GetLKrEoP();
@@ -646,12 +933,12 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Veto cuts, CUT: LAV veto
   
-  fLAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+  fLAVMatching->SetReferenceTime(L0TPTime);
   
   if (GetWithMC())
     fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC
   else
-    fLAVMatching->SetTimeCuts(-10., 10.);
+    fLAVMatching->SetTimeCuts(-LAVWindow, LAVWindow);
   
   if (fLAVMatching->LAVHasTimeMatching(LAVEvent))
     return;
@@ -661,14 +948,14 @@ void HeavyNeutrino::Process(Int_t) {
   
   // Veto cuts, CUT: SAV veto
   
-  fSAVMatching->SetReferenceTime((CHODTime1 + CHODTime2) / 2);
+  fSAVMatching->SetReferenceTime(L0TPTime);
   
   if (GetWithMC()) {
     fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC
     fSAVMatching->SetSACTimeCuts(99999, 99999);
   } else {
-    fSAVMatching->SetIRCTimeCuts(10.0, 10.0);
-    fSAVMatching->SetSACTimeCuts(10.0, 10.0);
+    fSAVMatching->SetIRCTimeCuts(-SAVWindow, SAVWindow);
+    fSAVMatching->SetSACTimeCuts(-SAVWindow, SAVWindow);
   }
   
   if (fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent))
@@ -676,74 +963,45 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-  
-  // Veto cuts, CUT: Residual LKr veto
-  /*  
-  Double_t LKrEnergyInTime = 0;
-  Double_t LKrWeightedTime = 0;
-  Int_t NLKrCand = LKrEvent->GetNCandidates();
-  Int_t NLKrHits = LKrEvent->GetNHits();
-  
-  // Cut on candidates in time with CHOD, more than 20 cm distant from extrapolation points of both tracks, single candidate energy > 40 MeV
-  
-  for (Int_t i = 0; i < NLKrCand; i++) {
-    TRecoLKrCandidate *LKrCand = (TRecoLKrCandidate*) LKrEvent->GetCandidate(i);
-    Double_t X1 = LKrCand->GetClusterX() - Tracks[0].GetLKrClusterX();
-    Double_t Y1 = LKrCand->GetClusterY() - Tracks[0].GetLKrClusterY();
-    Double_t X2 = LKrCand->GetClusterX() - Tracks[1].GetLKrClusterX();
-    Double_t Y2 = LKrCand->GetClusterY() - Tracks[1].GetLKrClusterY();
-    Double_t LKrCandPos1 = sqrt(X1*X1 + Y1*Y1);
-    Double_t LKrCandPos2 = sqrt(X2*X2 + Y2*Y2);
-    Bool_t LKrPos = (fabs(LKrCandPos1) > 200. && fabs(LKrCandPos2) > 200.);
-    Double_t LKrCandE = LKrCand->GetClusterEnergy();
-    Double_t LKrCandDt1 = LKrCand->GetTime() - CHODTime1;
-    Double_t LKrCandDt2 = LKrCand->GetTime() - CHODTime2;
-    Bool_t LKrTime = (fabs(LKrCandDt1) < 5. && fabs(LKrCandDt2) < 5.);
 
-    if (LKrPos && LKrCandE > 40. && LKrTime) {
-      LKrEnergyInTime += LKrCandE;
-      LKrWeightedTime += LKrCandE * LKrCand->GetTime();
+  // Veto cuts, CUT: CHANTI veto
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      Double_t dT = cand->GetTime() - L0TPTime;
+      if (TMath::Abs(dT) <= CHANTIWindow)
+	return;
     }
-  }
-  
-  if (LKrEnergyInTime > 1000.) {
-    LKrWeightedTime /= LKrEnergyInTime;
-    return;
-  }
-  
-  LKrEnergyInTime = 0;
-  LKrWeightedTime = 0;
-  
-  // Cut on total energy of hits in time with CHOD, more than 20 cm distant from extrapolation points of both tracks, single hit energy > 40 MeV
-  
-  TClonesArray& LKrHits = (*(LKrEvent->GetHits()));
-  for (Int_t i = 0; i < NLKrHits; i++) {
-    TRecoLKrHit* LKrHit = (TRecoLKrHit*) LKrHits[i];
-    Double_t X1 = LKrHit->GetPosition().x() - Tracks[0].GetLKrClusterX();
-    Double_t Y1 = LKrHit->GetPosition().y() - Tracks[0].GetLKrClusterY();
-    Double_t X2 = LKrHit->GetPosition().x() - Tracks[1].GetLKrClusterX();
-    Double_t Y2 = LKrHit->GetPosition().y() - Tracks[1].GetLKrClusterY();
-    Double_t LKrHitPos1 = sqrt(X1*X1 + Y1*Y1);
-    Double_t LKrHitPos2 = sqrt(X2*X2 + Y2*Y2);
-    Bool_t LKrPos = (fabs(LKrHitPos1) > 200. && fabs(LKrHitPos2) > 200.);
-    Double_t LKrHitE = LKrHit->GetEnergy();
-    Double_t LKrHitTime = LKrHit->GetTime();
-    Double_t LKrTime = (fabs(LKrHitTime - CHODTime1) < 5. && fabs(LKrHitTime - CHODTime2) < 5.);
-    
-    if (LKrPos && LKrHitE > 40. && LKrTime) {
-      LKrEnergyInTime += LKrHitE;
-      LKrWeightedTime += LKrHitE * LKrHitTime;
-    }
-  }
-  
-  if (LKrEnergyInTime > 1000.) {
-    LKrWeightedTime /= LKrEnergyInTime;    
-    return;
   }
 
   FillHisto("hCuts", CutID);
   CutID++;
-  */
+
+  // Veto cuts, CUT: Residual LKr
+
+  if (!GetWithMC()) {
+    std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
+    if (SpecLKr[0].GetNAssociationRecords() > 1) {
+      for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+	if (TMath::Abs(dT) <= LKrWindow)
+	  return;
+      }
+    }
+
+    if (SpecLKr[1].GetNAssociationRecords() > 1) {
+      for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+        if (TMath::Abs(dT) <= LKrWindow)
+          return;
+      }
+    }
+  }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Reference plot - 4 
 
   FillHisto("hCDAvsZ_Vetoes",   Zvertex/1000.,       CDAMom/1000., Weight);
@@ -790,7 +1048,15 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-  
+
+  // Geometrical cuts, CUT: Cut on target/TAX distance
+
+  if (Extrap >= 100.)
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Reference plot - 5 
 
   FillHisto("hCDAvsZ_Geom",   Zvertex/1000.,       CDAMom/1000., Weight);
@@ -812,8 +1078,6 @@ void HeavyNeutrino::Process(Int_t) {
     FillHisto("hCDAvsCDA_Fin", CDA2/1000., CDA1/1000.);
   else if (Assoc == 2)
     FillHisto("hCDAvsCDA_Fin", CDA1/1000., CDA2/1000.);
-
-  fPassSelection = true;
 
   // Computation of invariant mass
   
@@ -838,6 +1102,10 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (TMath::Abs(invMass - fMassForReco) <= fMassForReco/100.)
     FillHisto("hInvMassReco", invMass/1000.);
+
+  // Output of selection
+
+  fPassSelection = true;
 }
 
 void HeavyNeutrino::EndOfBurstUser() {
@@ -897,6 +1165,11 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
   fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
   fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
+  fHisto.GetTH1("hKTAG")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hLKr")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hMUV3")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hLAV")->GetXaxis()->SetTitle("Time difference [ns]");
 
   fHisto.GetTH2("hXYSpec0Reco")->GetYaxis()->SetTitle("Y [m]");
   fHisto.GetTH2("hXYSpec1Reco")->GetYaxis()->SetTitle("Y [m]");
@@ -934,8 +1207,8 @@ void HeavyNeutrino::EndOfJobUser() {
 
   // Plot residual number of events after each cut
 
-  const int NCuts = 22;
-  const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "LKr acc", "LKr assoc", "MUV3 acc", "MUV3 assoc", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", /*"LKr veto",*/ "Track dist CH1", "CDA tracks", "Beam distance", "Z vertex"};
+  const int NCuts = 33;
+  const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", "LKr assoc", "LKr time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Beam dist", "Z vertex", "Target extrap"};
   
   for (Int_t i = 1; i <= NCuts; i++)
     fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
