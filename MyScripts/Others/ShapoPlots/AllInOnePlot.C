@@ -109,8 +109,8 @@ Double_t ffDS = 0.08;
 
 // variables for macro
 
-const int InitialMass = 100;
-const int Mass = 10000;
+const int InitialMass = 0;
+const int Mass = 2500;
 const int step = 1;
 const int Masses = Mass/step;
 TString name = "";
