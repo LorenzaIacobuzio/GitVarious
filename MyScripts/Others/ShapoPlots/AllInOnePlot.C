@@ -109,8 +109,8 @@ Double_t ffDS = 0.08;
 
 // variables for macro
 
-const int InitialMass = 0;
-const int Mass = 2500;
+const int InitialMass = 1;
+const int Mass = 10000;
 const int step = 1;
 const int Masses = Mass/step;
 TString name = "";
@@ -1158,7 +1158,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   else if (model == 3)
     HistoTitle = "3 (0.061:1:4.3)";
 
-  Mprod->SetTitle("N production modes vs N mass");
+  Mprod->SetTitle("N production modes vs N mass (1:1:1)");
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
   Mgamma->SetTitle(("N partial decay widths vs N mass, model " + HistoTitle).c_str());
     
