@@ -20,12 +20,11 @@ arg = argparse.ArgumentParser(usage)
 
 # Arg parser
 
-parser.add_option("-i", "--info", help="Script to submit jobs for analysis; Binary is analyzer name, List contains the reco files to be analyzed")
-parser.add_option("-l", "--launch", dest="launch", action="store_true", default=False, help="if enabled, launches jobs")
-parser.add_option("-a", "--add", dest="add", action="store_true", default=False, help="if enabled, hadds output histograms of each job")
-parser.add_option("-q", "--queue", dest="queue", default="2nd", help="type of queue; if not specified, default is 2nd")
-parser.add_option("-p","--path", dest="path", default="/afs/cern.ch/na62/offline/lists/Data/Reco/2016/", help="path of files to be processed; if not specified, default is /afs/cern.ch/na62/offline/lists/Data/Reco/2016/")
-parser.add_option("-o","--output", dest="output", default="/afs/cern.ch/work/l/liacobuz/private/", help="path of output files; if not specified, default is /afs/cern.ch/work/l/liacobuz/private/")
+parser.add_option("-i", "--info", help = "Script to submit jobs for analysis; Binary is analyzer name, List contains the reco files to be analyzed")
+parser.add_option("-q", "--queue", dest = "queue", default = "2nd", help = "type of queue; default is 2nd")
+parser.add_option("-p", "--path", dest = "path", default = "/afs/cern.ch/na62/offline/lists/Data/Reco/2016/", help = "path of files to be processed; default is /afs/cern.ch/na62/offline/lists/Data/Reco/2016/")
+parser.add_option("-o", "--output", dest = "output", default = "/afs/cern.ch/work/l/liacobuz/private/", help = "path of output files; default is /afs/cern.ch/work/l/liacobuz/private/")
+parser.add_option("-n", "--number", dest = "number", default = "150", help = "number of files per sublist; default is 150")
 
 (options, args) = parser.parse_args()
 
@@ -36,58 +35,72 @@ if len(sys.argv) < 2:
 arg.add_argument('args', nargs='*')
 
 binary = os.path.abspath(sys.argv[1])
-launch = options.launch
-add = options.add
 queue = options.queue
 path = options.path
 output = options.output
-listpath = "/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/Lists/Lists/"
-jobpath = "/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/Lists/Job/"
+number = options.number
+listpath = output + "Lists/Lists/"
+jobpath = output + "Lists/Job/"
+binarypath = (binary.rpartition("/")[0]).rpartition("/")[0] + "/"
 
 # Function for creating single job script
 
 def JobScript(binary, listname, output):
-    with open(jobpath + "singleJob" + listname + ".sh", "w") as f:
-        f.write("#!/usr/bin/env bash \ncd /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/ \nsource /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/scripts/env.sh \n" + binary + " -l " + listpath + listname + " -o " + output + listname + ".root --ignore -n 100")
-    os.system("chmod u+x " + jobpath + "singleJob" + listname + ".sh")
+    with open(jobpath + "singleJob" + listname + ".sh", "w") as f: # creating job script with sublist name
+        f.write("#!/usr/bin/env bash \ncd " + binarypath + " \nsource " + binarypath + "scripts/env.sh \n" + binary + " -l " + listpath + listname + " -o " + output + listname + ".root --ignore") # script executes analyzer on sublist
+    os.system("chmod u+x " + jobpath + "singleJob" + listname + ".sh") # permissions for script
 
 # Function for splitting reco files into sublists
 
 def JobManager(binary, path, queue):
-    ListOfLists = os.listdir(path)
+    ListOfLists = os.listdir(path) # listing all reco lists
     NLists = len(ListOfLists)
-    NFilesPerList = 150
-    print("[RunJobs] Removing existing sublists from " + listpath)
-    for file in os.listdir(listpath):
-        if "list" in file:
-            os.remove(os.path.join(listpath, file))
-    print("[RunJobs] Creating new list of all reco files in " + path)
+
+    if os.path.exists(listpath): # if sublist directory exists, empty it
+        print("[RunJobs] Removing existing sublists from " + listpath)
+        for file in os.listdir(listpath):
+            if "list" in file:
+                os.remove(os.path.join(listpath, file))
+    else: # otherwise, create it
+        os.makedirs(listpath)
+
+    print("[RunJobs] Creating new list of all reco files in " + path) # creating list of all reco files in reco lists
+
     with open(listpath + "/List", "w") as f:
         for file in ListOfLists:
             if "HNLVtx" in file and "r1666" not in file and "EOS" in file and "v0.11.1" in file:
                 with open(str(path + file), "r") as d:
                     for line in d:
                         f.write(line)
-    print("[RunJobs] Splitting into sublists in " + listpath)
+
+    print("[RunJobs] Splitting into sublists in " + listpath) # splitting list into sublists
+
     with open(listpath + "List", "r") as f:
-        os.system("split -l " + str(NFilesPerList) + " " + listpath + "List " + listpath + "Sublist-")
+        os.system("split -l " + str(number) + " " + listpath + "List " + listpath + "Sublist-")
+
+# Main
+
+def main():
+    counter = 0
+
+    print(str("[RunJobs] About to execute binary " + binary + ". Output file will be in " + output))
+
+    JobManager(binary, path, queue)
+
+    if os.path.exists(jobpath): # if job script directory exists, empty it
+        print(str("[RunJobs] Deleting job scripts in " + jobpath))
+        for file in os.listdir(jobpath):
+            os.remove(os.path.join(jobpath, file))
+    else: # otherwise, create it
+        os.makedirs(jobpath)
+
+    for f in os.listdir(listpath):
+        if "Sublist" in f and counter < 1:
+            counter += 1
+            JobScript(binary, f, output) # creating job script for specific sublist
+            os.system("bsub -q " + queue + " -oo " + output + "log-" + f + " " + jobpath + "singleJob" + f + ".sh") # submitting specific job
 
 # Execution
 
-counter = 0
-
-if launch:
-    print(str("[RunJobs] About to execute binary " + binary + ". Output file will be in " + output))
-    JobManager(binary, path, queue)
-    print(str("[RunJobs] Deleting job scripts in " + jobpath))
-    for file in os.listdir(jobpath):
-        os.remove(os.path.join(jobpath, file))
-    for f in os.listdir(listpath):
-        if "Sublist" in f and counter < 3:
-            counter += 1
-            JobScript(binary, f, output)
-            os.system("bsub -q " + queue + " -oo " + output + "log-" + f + " " + jobpath + "singleJob" + f + ".sh")
-
-if add:
-    print(str("[RunJobs] About to hadd all output histograms. Output will be in " + output))
-    subprocess.call(str("hadd " + output + "Result.root " + output + "*.root"))
+if __name__ == "__main__":
+    main()
