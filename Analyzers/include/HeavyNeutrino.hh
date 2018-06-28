@@ -40,6 +40,7 @@ public:
   void EndOfJobUser();
   void PostProcess() {}
   void DrawPlot() {}
+  void ProcessEOBEvent();
 
 protected:
 
@@ -51,6 +52,7 @@ protected:
   std::vector<std::string> fStream;
   Bool_t   fPassSelection;
   Int_t    fMode;
+  Int_t    fBurstCounter;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
@@ -63,6 +65,12 @@ protected:
   Double_t fzCHODPlane;
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
+  Double_t fNPOTT10;
+  Double_t fNPOTFit;
+  Double_t fNKTot;
+  Double_t fNK3Pi;
+  std::vector<Double_t> fNK;
+  std::vector<Int_t> fBursts;
 };
 
 #endif

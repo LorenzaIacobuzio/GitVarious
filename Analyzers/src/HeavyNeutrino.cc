@@ -98,8 +98,8 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
   fCDAcomp     = new TwoLinesCDA();
   fDistcomp    = new PointLineDistance();
-  fLAVMatching = new LAVMatching();
-  fSAVMatching = new SAVMatching();
+  //fLAVMatching = new LAVMatching();
+  //fSAVMatching = new SAVMatching();
 
   fzCHOD                  = GeometricAcceptance::GetInstance()->GetZCHODVPlane();
   fzMUV3                  = GeometricAcceptance::GetInstance()->GetZMUV3();
@@ -119,11 +119,22 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
   // Parameters for L0 trigger conditions
 
-  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30"};
+  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
 
   for (UInt_t i = 0; i < fStream.size(); i++) {
     fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
   }
+
+  // POT computation
+
+  fNPOTT10 = 0.;
+  fNPOTFit = 0.;
+  fNKTot = 0.;
+  fNK3Pi = 0.;
+  fBurstCounter = 0;
+
+  //for test
+  gRandom = new TRandom3();
 }
 
 void HeavyNeutrino::InitOutput() {
@@ -201,14 +212,24 @@ void HeavyNeutrino::InitHist() {
   BookHisto("hCHANTImult",   new TH1D("CHANTImult", "CHANTI multiplicity in time",         10, 0., 10.));
   BookHisto("hExtraLKrmult", new TH1D("ExtraLKrmult", "Residual LKr multiplicity in time", 10, 0., 10.));
 
+  BookHisto("hPOTT10", new TH1D("POTT10", "", 1, 0., 1.));
+  BookHisto("hPOTFit", new TH1D("POTFit", "", 1, 0., 1.));
+
   BookHisto("hSpare1", new TH1D("Spare1", "", 100, 117., 122.));
   BookHisto("hSpare2", new TH2D("Spare2", "", 100, 110., 130., 100, 110., 130.));
+
+  BookHisto("T10", new TGraph());
+  fHisto.GetTGraph("T10")->SetNameTitle("T10", "N POT vs N K decays");
+  BookHisto("POT1", new TGraph());
+  fHisto.GetTGraph("POT1")->SetNameTitle("POT1", "N POT vs burst ID - T10 method");
+  BookHisto("POT2", new TGraph());
+  fHisto.GetTGraph("POT2")->SetNameTitle("POT2", "N POT vs burst ID - K3Pi method");
 }
 
 void HeavyNeutrino::Process(Int_t) {
-
+  
   if (!GetIsTree()) return;
-
+    
   fPassSelection = false;
 
   // Compute number of processed events
@@ -284,21 +305,20 @@ void HeavyNeutrino::Process(Int_t) {
   Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
   Double_t L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
   L0TPTime *= TdcCalib;
-  Double_t L0Window      = 1.13*5.;
-  Double_t KTAGWindow    = 1.27*5.;
-  Double_t CHODWindow    = 1.94*5.;
-  Double_t NewCHODWindow = 1.82*5.;
-  Double_t LKrWindow     = 1.75*5.;
-  Double_t MUV3Window    = 1.44*5.;
-  Double_t LAVWindow     = 6.24*5.;
-  Double_t SAVWindow     = 5.79*5.;
-  Double_t CHANTIWindow  = 2.80*5.;
+  Double_t L0Window      = 1.22*5.;
+  Double_t KTAGWindow    = 0.96*5.;
+  Double_t NewCHODWindow = 1.81*5.;
+  Double_t LKrWindow     = 1.96*5.;
+  Double_t MUV3Window    = 1.55*5.;
+  Double_t CHANTIWindow  = 2.60*5.;
   Bool_t k3pi = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
   
   // K3Pi
 
-  if (k3pi && 0x10)
+  if (k3pi && 0x10) {
+    fNK3Pi++;
     FillHisto("hNk3pi", 0.5);
+  }
 
   // L0 data
   
@@ -933,34 +953,38 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Veto cuts, CUT: LAV veto
   
-  fLAVMatching->SetReferenceTime(L0TPTime);
-  
-  if (GetWithMC())
+  if (!GetWithMC()) {
+    fLAVMatching = *(LAVMatching**)GetOutput("PhotonVetoHandler.LAVMatching");
+    if (fLAVMatching->LAVHasTimeMatching(LAVEvent))
+      return;
+  }
+
+  if (GetWithMC()) {
+    fLAVMatching->SetReferenceTime(L0TPTime);
     fLAVMatching->SetTimeCuts(99999, 99999);     // LAV is not time-aligned in MC
-  else
-    fLAVMatching->SetTimeCuts(-LAVWindow, LAVWindow);
-  
-  if (fLAVMatching->LAVHasTimeMatching(LAVEvent))
-    return;
+    if (fLAVMatching->LAVHasTimeMatching(LAVEvent))
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
   
   // Veto cuts, CUT: SAV veto
   
-  fSAVMatching->SetReferenceTime(L0TPTime);
-  
+  if (!GetWithMC()) {
+    fSAVMatching = *(SAVMatching**)GetOutput("PhotonVetoHandler.SAVMatching");
+    if (fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent))
+      return;
+  }
+
   if (GetWithMC()) {
-    fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC
+    fSAVMatching->SetReferenceTime(L0TPTime);
+    fSAVMatching->SetIRCTimeCuts(99999, 99999);     // SAV is not time-aligned in MC            
     fSAVMatching->SetSACTimeCuts(99999, 99999);
-  } else {
-    fSAVMatching->SetIRCTimeCuts(-SAVWindow, SAVWindow);
-    fSAVMatching->SetSACTimeCuts(-SAVWindow, SAVWindow);
+    if (fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent))
+      return;
   }
   
-  if (fSAVMatching->SAVHasTimeMatching(IRCEvent, SACEvent))
-    return;
-
   FillHisto("hCuts", CutID);
   CutID++;
 
@@ -1115,10 +1139,39 @@ void HeavyNeutrino::EndOfBurstUser() {
   FillHisto("hNbursts", 0.5);
 }
 
+void HeavyNeutrino::ProcessEOBEvent() {
+
+  if (!GetIsTree()) return;
+
+  // POT computation (works for parasitic and dump mode)    
+
+  if (GetBeamSpecialTrigger()->GetIntensityT10() >= 0.)
+    fNPOTT10 += GetBeamSpecialTrigger()->GetIntensityT10()*1.E11;
+
+  // POT computation (works for parasitic mode only)
+
+  Double_t BRK3Pi = 0.05583;
+  Double_t AccK3Pi = 0.1536;
+  Double_t NK = fNK3Pi/(BRK3Pi*AccK3Pi);
+  Int_t BurstNumber = GetWithMC() ? 0 : GetBurstID();
+
+  fNK.push_back(NK);
+  fBursts.push_back(BurstNumber);
+  fNKTot += NK;
+
+  if (GetBeamSpecialTrigger()->GetIntensityT10() >= 0.) {
+    fHisto.GetTGraph("T10")->SetPoint(fBurstCounter, NK, GetBeamSpecialTrigger()->GetIntensityT10()*1.E11);
+    fHisto.GetTGraph("POT1")->SetPoint(fBurstCounter, BurstNumber, GetBeamSpecialTrigger()->GetIntensityT10()*1.E11); 
+    fBurstCounter++; 
+    cout<<fNK3Pi<<" "<<NK<<" "<<fNKTot<<" "<<fNPOTT10<<endl;
+    fNK3Pi = 0.;
+  }
+}
+
 void HeavyNeutrino::EndOfJobUser() {
 
   if (!GetIsTree()) return;
-  
+
   // Retrieve histos
 
   fHisto.GetTH1("hNk3pi")->GetXaxis()->SetTitle("Number of k3pi");
@@ -1167,9 +1220,18 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
   fHisto.GetTH1("hKTAG")->GetXaxis()->SetTitle("Time difference [ns]");
   fHisto.GetTH1("hCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hNewCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
   fHisto.GetTH1("hLKr")->GetXaxis()->SetTitle("Time difference [ns]");
   fHisto.GetTH1("hMUV3")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hStraw")->GetXaxis()->SetTitle("Time difference [ns]");
   fHisto.GetTH1("hLAV")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hSAV")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
+  fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
+  fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
+  fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
+  fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
+  fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
 
   fHisto.GetTH2("hXYSpec0Reco")->GetYaxis()->SetTitle("Y [m]");
   fHisto.GetTH2("hXYSpec1Reco")->GetYaxis()->SetTitle("Y [m]");
@@ -1204,6 +1266,34 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH2("hBeamvsTar_Geom")->GetYaxis()->SetTitle("Beam axis distance [m]");
   fHisto.GetTH2("hBeamvsTar_Fin")->GetYaxis()->SetTitle("Beam axis distance [m]");
   fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
+  fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
+  fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
+  fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
+
+  fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);
+  fHisto.GetTH1("hCHOD")->Fit("gaus", "", "", -4., 4.);
+  fHisto.GetTH1("hNewCHOD")->Fit("gaus", "", "", -4., 4.);
+  fHisto.GetTH1("hLKr")->Fit("gaus", "", "", -2., 6.);
+  fHisto.GetTH1("hMUV3")->Fit("gaus", "", "", -4., 4.);
+  fHisto.GetTH1("hStraw")->Fit("gaus", "", "", -2., 2.);
+  fHisto.GetTH1("hLAV")->Fit("gaus", "", "", -10., 10.);
+  fHisto.GetTH1("hSAV")->Fit("gaus", "", "", -10., 10.);
+  fHisto.GetTH1("hCHANTI")->Fit("gaus", "", "", -10., 10.);
+
+  // POT computation (works for parasitic mode only)
+
+  fHisto.GetTGraph("T10")->Fit("pol1");
+  fHisto.GetTGraph("T10")->Draw("AP*");
+
+  for (Int_t i = 0; i < fHisto.GetTGraph("POT1")->GetN(); i++) {
+    fHisto.GetTGraph("POT2")->SetPoint(i, fBursts[i], fHisto.GetTGraph("T10")->GetFunction("pol1")->GetParameter(1)*fNK[i] + fHisto.GetTGraph("T10")->GetFunction("pol1")->GetParameter(0));
+  }
+
+  fNPOTFit = fHisto.GetTGraph("T10")->GetFunction("pol1")->GetParameter(1)*fNKTot + fHisto.GetTGraph("T10")->GetFunction("pol1")->GetParameter(0);
+  FillHisto("hPOTT10", 0.5, fNPOTT10);
+  FillHisto("hPOTFit", 0.5, fNPOTFit);
+
+  cout << endl << "Total number of K decays, POT (T10 method) and POT (fit method) in this job: " << fNKTot << " " << fNPOTT10 << " " << fNPOTFit << endl;
 
   // Plot residual number of events after each cut
 

@@ -216,8 +216,17 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 
        TGraphCosmetics(g, labelSize, titleSize);
 
+       if (Name1.Contains("T10") && !Name1.Contains("POT")) {
+	 gStyle->SetOptFit(0011);
+	 gStyle->SetStatH(0.03);
+       }
+       
        if (Name1.Contains("Exclusion"))
 	 g->Draw("AL");
+       else if (Name1.Contains("T10") && !Name1.Contains("POT")) 
+	 g->Draw("AP*");
+       else if (Name1.Contains("POT1") || Name1.Contains("POT2"))
+	 g->Draw("AP*");
        else
 	 g->Draw("AC");
 
@@ -239,6 +248,9 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
       TH1Cosmetics(h1, labelSize, titleSize);
+
+      if (Name1.Contains("POT") || Name1.Contains("T10"))
+	 gStyle->SetOptStat(1111111111);
 
       if (!strcmp(key->GetName(), "InvMassReco")) {
         h1->Fit("gaus");
@@ -308,7 +320,7 @@ void Plots(TString dir, TString histo1, Bool_t MCcomp) {
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/Dropbox/PhD/Talks, papers, posters, notes/Notes/MCnote/images/Plots/";
+    path = "/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
@@ -320,42 +332,50 @@ void Plots(TString dir, TString histo1, Bool_t MCcomp) {
     path += "2/";
   }
 
+  TFile *f = TFile::Open(histo1);
+  
   if (MCcomp == false) {
-    ParseDir(histo1, "HeavyNeutrino", path, c, nullptr, nullptr);
+    if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr) {
+      ParseDir(histo1, "HeavyNeutrino", path, c, nullptr, nullptr);
+    }
     
-    // One value plots for weight quantities
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
-    
-    // Coupling plots
-    
-    TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
-    TMultiGraph *m1 = CreateTMultiGraph("AccCoupling",   "Acceptance vs coupling");
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
-    
-    TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
-    c = CreateTCanvas();
-    TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
-    c = CreateTCanvas();
-    
-    // Mass plots
-    
-    m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
-    m1 = CreateTMultiGraph("AccMass",   "Acceptance vs N mass");
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/MassScan", path, c, m, m1);
-    
-    TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
-    c = CreateTCanvas();
-    TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
-    c = CreateTCanvas();
-    
-    // Total scan plots
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
+    if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr) {
+
+      // One value plots for weight quantities
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr);
+      
+      // Coupling plots
+      
+      TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
+      TMultiGraph *m1 = CreateTMultiGraph("AccCoupling",   "Acceptance vs coupling");
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path, c, m, m1);
+      
+      TMultiGraphCosmetics(m,  "Log(U^{2})", "Yield per POT", c, path, labelSize, titleSize);
+      c = CreateTCanvas();
+      TMultiGraphCosmetics(m1, "Log(U^{2})", "Acceptance",    c, path, labelSize, titleSize);
+      c = CreateTCanvas();
+      
+      // Mass plots
+      
+      m  = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
+      m1 = CreateTMultiGraph("AccMass",   "Acceptance vs N mass");
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/MassScan", path, c, m, m1);
+      
+      TMultiGraphCosmetics(m,  "N mass [GeV]", "Yield per POT", c, path, labelSize, titleSize);
+      c = CreateTCanvas();
+      TMultiGraphCosmetics(m1, "N mass [GeV]", "Acceptance",    c, path, labelSize, titleSize);
+      c = CreateTCanvas();
+      
+      // Total scan plots
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr);
+    }
   }
   else {
+
     // Toy-MC comparison plots
     
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path, c, nullptr, nullptr);
