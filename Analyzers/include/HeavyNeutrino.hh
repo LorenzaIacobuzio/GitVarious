@@ -51,6 +51,7 @@ protected:
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
   Bool_t   fPassSelection;
+  Bool_t   fReadingData;
   Int_t    fMode;
   Int_t    fBurstCounter;
   Double_t fInitialFV;
@@ -69,8 +70,9 @@ protected:
   Double_t fNPOTFit;
   Double_t fNKTot;
   Double_t fNK3Pi;
-  std::vector<Double_t> fNK;
-  std::vector<Int_t> fBursts;
+  Double_t fNK;
+  Double_t fNPOT;
+  std::vector<Double_t> fNKaons;
 };
 
 #endif

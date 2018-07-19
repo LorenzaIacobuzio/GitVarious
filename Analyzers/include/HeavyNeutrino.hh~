@@ -33,7 +33,7 @@ public:
   void InitOutput();
   void DefineMCSimple() {}
   void Process(Int_t);
-  void StartOfBurstUser() {}
+  void StartOfBurstUser();
   void EndOfBurstUser();
   void StartOfRunUser() {}
   void EndOfRunUser() {}
@@ -51,6 +51,7 @@ protected:
   std::vector<Int_t> fID;
   std::vector<std::string> fStream;
   Bool_t   fPassSelection;
+  Bool_t   fReadingData;
   Int_t    fMode;
   Int_t    fBurstCounter;
   Double_t fInitialFV;
@@ -65,12 +66,13 @@ protected:
   Double_t fzCHODPlane;
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
-  Double_t fNPOT;
+  Double_t fNPOTT10;
+  Double_t fNPOTFit;
   Double_t fNKTot;
   Double_t fNK3Pi;
-  std::vector<Double_t> fNK;
-  std::vector<Int_t> fBursts;
-  TRandom3* gRandom;
+  Double_t fNK;
+  Double_t fNPOT;
+  std::vector<Double_t> fNKaons;
 };
 
 #endif

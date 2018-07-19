@@ -49,7 +49,7 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
     h2->GetXaxis()->SetRangeUser(0., 0.1);
     h2->GetYaxis()->SetRangeUser(0., 0.8);
   }
-  /*
+
   if (!data) {
     if ((TString)h2->GetName() == "SignalRegionTar_Fin") {
       h2->GetXaxis()->SetRangeUser(0., 20.);
@@ -60,7 +60,6 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
       h2->GetYaxis()->SetRangeUser(0., 0.1);
     }
   }
-  */
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
@@ -80,12 +79,6 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
       g->GetXaxis()->SetTitle("Log(U^{2})");
     else if (title.Contains("mass"))
       g->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-  }
-  else if (!strcmp(g->GetName(), "MassScan/MeanMass")) {
-    g->SetTitle("Mean probability of N reaching and decaying in the FV vs N mass; N mass [GeV/c^{2}]; Mean probability");
-  }
-  else if (!strcmp(g->GetName(), "CouplingScan/MeanCoupling")) {
-    g->SetTitle("Mean probability of N reaching and decaying in the FV vs coupling; Log(U^{2}); Mean probability");
   }
 
   gPad->Update();
@@ -222,7 +215,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   TH1D* hTemp = new TH1D();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-  
+
   if (MCcomp) {
     while ((key = (TKey*)next())) {
       if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/DS")) {
@@ -230,24 +223,21 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
-	  TString title = key1->GetTitle();
-	  if ((title.Contains(" N p prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "pNS1")) || (title.Contains(" N pt prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "ptNS1")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmuS1")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmuS1"))) {
+	  if ((!strcmp(key1->GetTitle(), " N p prodinacc") && !strcmp(key->GetName(), "pNS1")) || (!strcmp(key1->GetTitle(), " N pt prodinacc") && !strcmp(key->GetName(), "ptNS1")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmuS1")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmuS1"))) {
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
-	    TH1D* hMio = (TH1D*)(key->ReadObj());
+	    TH1D* hMio =	(TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->Draw();
-	    TString mytitle = key->GetName();
-	    if (mytitle.Contains("t"))
-	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
-	    Float_t rightmax = hMio->GetMaximum();
-	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
+	    //hMio->Draw();
+	    //Float_t rightmax = hMio->GetMaximum();
+	    //Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
 	    //gROOT->ForceStyle();
-	    hGaia->Scale(scale);
-	    hGaia->Draw("same");
-	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
-	    legend->Draw();
+	    //hGaia->Scale(scale);
+	    //hGaia->Draw("same");
+	    hGaia->Draw();
+	    //auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
+	    //legend->AddEntry(hGaia, "Toy MC");
+	    //legend->AddEntry(hMio, "Full MC");
+	    //legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
 	    c->SaveAs(path + key->GetName() + "_comp.png");
@@ -259,23 +249,19 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
-	  TString title	= key1->GetTitle();
-	  if ((title.Contains(" N p prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "pN01")) || (title.Contains(" N pt prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "ptN01")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmu01")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmu01"))) {
+	  if ((!strcmp(key1->GetTitle(), " N p prodinacc") && !strcmp(key->GetName(), "pN01")) || (!strcmp(key1->GetTitle(), " N pt prodinacc") && !strcmp(key->GetName(), "ptN01")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmu01")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmu01"))) {
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
 	    TH1D* hMio =	(TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
 	    hMio->Draw();
-	    TString mytitle = key->GetName();
-            if (mytitle.Contains("t"))
-              hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
 	    Float_t rightmax = hMio->GetMaximum();
 	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
-	    //gROOT->ForceStyle();
+	    gROOT->ForceStyle();
 	    hGaia->Scale(scale);
 	    hGaia->Draw("same");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
+	    legend->AddEntry(hGaia, "Toy MC");
+	    legend->AddEntry(hMio, "Full MC");
 	    legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
@@ -462,10 +448,10 @@ void Plots(TString dir, TString histo1, Bool_t MCcomp, Bool_t data) {
 
       // One value plots for weight quantities
 
-      //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr, MCcomp, data);
+      ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path, c, nullptr, nullptr, MCcomp, data);
       
       // Coupling plots
-      /*
+
       TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
       TMultiGraph *m1 = CreateTMultiGraph("AccCoupling",   "Acceptance vs coupling");
       
@@ -491,7 +477,6 @@ void Plots(TString dir, TString histo1, Bool_t MCcomp, Bool_t data) {
       // Total scan plots
       
       ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path, c, nullptr, nullptr, MCcomp, data);
-      */
     }
   }
   else {

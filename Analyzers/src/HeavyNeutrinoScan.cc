@@ -16,20 +16,17 @@
 /// for one value of HNL mass and coupling (that can be set as external parameters; default values are MassForSingleValue = 1000 MeV and CouplingForSingleValue = -6 = Log(10^-6)), quantities related to the D meson, the HNL and its product are produced;acceptance and yield are also computed; the yield is computed as a function of the HNL momentum as well;
 /// a scan is enabled, to produce plots as a function of the coupling;
 /// if the MC sample contains several masses, plots are produced as a function of the HNL mass; in this case, an expected exclusion plot is produced as a function of the HNL mass and coupling. Thus, the analyzer is able to run either on MC samples of just one HNL mass or on samples containing HNLs of different masses;
-/// For HNL masses of 1 GeV, several plots are produced for toy-MC comparison: momentum and transverse momentum of the D meson, HNL and muon daughter (both for all HNLs and only for the good HNL), for two decay chains, as produced in the MC routine: DS->Nmu; N->pimu, and D0->KNmu; N->pimu.
+/// for HNL masses of 1 GeV, several plots are produced for toy-MC comparison: momentum and transverse momentum of the D meson, HNL and muon daughter (both for all HNLs and only for the good HNL), for two decay chains, as produced in the MC routine: DS->Nmu; N->pimu, and D0->KNmu; N->pimu.
 ///                  
 /// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.  
 /// The values of the ratios between specific-flavour couplings can be either set as external parameters from command line or taken as default values.               
 /// For example, if the user sets USquared = 1.E-10, UeSquaredRatio = 5., UmuSquaredRatio = 1., UtauSquaredRatio = 3.5, the specific-flavour coupling values will be: UeSquared = 5.25E-11, UmuSquared = 1.05E-11, UtauSquared = 3.68E-11.   
 /// The values of the initial and final coupling and the scan step can be either set as external parameters from command line or taken as default values.               
-/// For example, if the user sets CouplingStart = -3, CouplingStop = -2. and CouplingStep = 0.5, the scan will be performed for Log(U2) = [-3., -2.5, -2.], this meaning U2 = [1.E-3., 1.E-2.5, 1.E-2.].                                                          
-///
-/// This analyzer produces .txt files needed for computing error bars for plots generated during the first step, and it can be run in --histo mode to produce these plots:
-/// ./myExecutable -i outFile.root -o outFile1.root --histo
-/// The files are deleted at the end of the second step.
+/// For example, if the user sets CouplingStart = -3, CouplingStop = -2. and CouplingStep = 0.5, the scan will be performed for Log(U2) = [-3., -2.5, -2.], this meaning U2 = [1.E-3., 1.E-2.5, 1.E-2.].       
+/// The user must also set the initial and final mass and the mass step, as generated in the MC simulation, in GeV.
 /// The values of the initial and final momentum and its step can be either set as external parameters from command line or taken as default values. These are used to produce plots of the acceptance and yield per POT as a function of the HNL momentum (default values are MomStart = 0. GeV, MomStop = 150. GeV and MomStep = 5. GeV).
 /// Other parameters to be set from command line are:
-/// length of the beginning Z of the fiducial volume (default InitialFV = 102500. mm); length of the FV (default LFV = 77500. mm); decay mode of the HNLs, as set in the MC macro (default Mode = 0, which is pimu mode); number of events in each chunk the sample is split into, to compute error bars in --histo mode.                               
+/// length of the beginning Z of the fiducial volume (default InitialFV = 102500. mm); length of the FV (default LFV = 77500. mm); decay mode of the HNLs, as set in the MC macro (default Mode = 0, which is pimu mode).                               
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)                           
 /// \EndDetailed                                           
@@ -68,20 +65,24 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("UeSquaredRatio", &fUeSquaredRatio, 1.);
   AddParam("UmuSquaredRatio", &fUmuSquaredRatio, 16.);
   AddParam("UtauSquaredRatio", &fUtauSquaredRatio, 3.8);
-  AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, 1.);
+  AddParam("CouplingStart", &fCouplingStart, -7.);
+  AddParam("CouplingStop", &fCouplingStop, -2.);
   AddParam("CouplingStep", &fCouplingStep, 1.);
+  AddParam("MassStart", &fMassStart, 0.3);
+  AddParam("MassStop", &fMassStop, 1.8);
+  AddParam("MassStep", &fMassStep, 0.1);
   AddParam("InitialFV", &fInitialFV, 102500.);
   AddParam("LFV", &fLFV, 77500.);
   AddParam("Mode", &fMode, 0);
   AddParam("MomStop", &fMomStop, 150.);
   AddParam("MomStart", &fMomStart, 0.);
   AddParam("MomStep", &fMomStep, 5.);
-  AddParam("MassForSingleValue", &fMassForSingleValue, 1000.);
+  AddParam("MassForSingleValue", &fMassForSingleValue, 1.);
   AddParam("CouplingForSingleValue", &fCouplingForSingleValue, -6.);
 
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
+  fNMass = round((std::abs(fMassStop-fMassStart))/fMassStep);
   fUeSquared   = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUeSquaredRatio;
   fUmuSquared  = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUmuSquaredRatio;
   fUtauSquared = fUSquared/(fUeSquaredRatio + fUmuSquaredRatio + fUtauSquaredRatio)*fUtauSquaredRatio;
@@ -91,10 +92,10 @@ void HeavyNeutrinoScan::InitHist() {
     
   // One value of mass and coupling
 
-  BookHisto("SingleValue/hZMotherProd",  new TH1D("ZMotherProd", "N mother production point", 20000, 0., 27.));
-  BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd",      "D meson production point",  20000, 0., 27.));
-  BookHisto("SingleValue/hZTauProd",     new TH1D("ZTauProd",    "#tau production point",     20000, 0., 27.));
-  BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay",     "N production point",        20000, 0., 27.));
+  BookHisto("SingleValue/hZMotherProd",  new TH1D("ZMotherProd", "N mother production point", 100000, -1., 27.));
+  BookHisto("SingleValue/hZDProd",       new TH1D("ZDProd",      "D meson production point",  100000, -1., 27.));
+  BookHisto("SingleValue/hZTauProd",     new TH1D("ZTauProd",    "#tau production point",     100000, -1., 27.));
+  BookHisto("SingleValue/hZDDecay",      new TH1D("ZDDecay",     "N production point",        100000, -1., 27.));
   BookHisto("SingleValue/hDTheta",       new TH1D("DTheta",  "N mother polar angle",        100,  0., 0.3));
   BookHisto("SingleValue/hDLambda",      new TH1D("DLambda", "N mother decay length", 100, -1., 40.));
   BookHisto("SingleValue/hDPath",        new TH1D("DPath",   "N mother path along Z", 100, -1., 50.));
@@ -123,13 +124,12 @@ void HeavyNeutrinoScan::InitHist() {
   fHisto.GetTGraph("SingleValue/ErrorYieldMom")->SetNameTitle("SingleValue/ErrorYieldMom", "Yield per POT vs N momentum");
 
   // Coupling scan 
-    
-  BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling",  "Probability of N reaching the FV vs coupling",                 fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling",  "Probability of N decaying in the FV vs coupling",              fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling",   "Probability of N reaching and decaying in the FV vs coupling", fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
-  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                         fN, fCouplingStart, fCouplingStop, 1000, 1.E-17, 1.E-6));
-  BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling",                                         fN, fCouplingStart, fCouplingStop, 100, 0., 100.));
-  BookHisto("CouplingScan/hSpare",          new TH1D("Spare", "Spare", fN, fCouplingStart, fCouplingStop));
+
+  BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling",  "Probability of N reaching the FV vs coupling",                      fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
+  BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling",  "Probability of N decaying in the FV vs coupling",                   fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
+  BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling",   "Probability of N reaching and decaying in the FV vs coupling",      fN, fCouplingStart, fCouplingStop, 1000, -0.1, 1.1));
+  BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling",                                              fN, fCouplingStart, fCouplingStop, 10000, 1.E-11, 1.E-7));
+  BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling",                                              fN, fCouplingStart, fCouplingStop, 100, 0., 100.));
 
   BookHisto("CouplingScan/hG",  new TH1D("cG",  "", fN, fCouplingStart, fCouplingStop));
   BookHisto("CouplingScan/hA",  new TH1D("cA",  "", fN, fCouplingStart, fCouplingStop));
@@ -140,7 +140,10 @@ void HeavyNeutrinoScan::InitHist() {
   BookHisto("CouplingScan/hN",  new TH1D("cN",  "", fN, fCouplingStart, fCouplingStop));
   BookHisto("CouplingScan/hN1", new TH1D("cN1", "", fN, fCouplingStart, fCouplingStop));
   BookHisto("CouplingScan/hN2", new TH1D("cN2", "", fN, fCouplingStart, fCouplingStop));
-    
+
+  BookHisto("CouplingScan/MeanCoupling", new TGraph());
+  fHisto.GetTGraph("CouplingScan/MeanCoupling")->SetNameTitle("CouplingScan/MeanCoupling", "Mean probability of N reaching and decaying in the FV vs coupling");
+
   BookHisto("CouplingScan/GammaTotCoupling", new TGraph());
   fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetNameTitle("CouplingScan/GammaTotCoupling", "N total decay width vs coupling");
 
@@ -166,25 +169,26 @@ void HeavyNeutrinoScan::InitHist() {
   fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX")->SetNameTitle("CouplingScan/ErrorYieldCouplingTAX", "TAX");
    
   // Mass scan
-    
-  BookHisto("MassScan/hReachMass",  new TH2D("ReachMass",  "Probability of N reaching the FV vs N mass",                 10, 0.25, 1.25, 1000, -0.1, 1.1));
-  BookHisto("MassScan/hDecayMass",  new TH2D("DecayMass",  "Probability of N decaying in the FV vs N mass",              10, 0.25, 1.25, 1000, -0.1, 1.1));
-  BookHisto("MassScan/hProbMass",   new TH2D("ProbMass",   "Probability of N reaching and decaying in the FV vs N mass", 10, 0.25, 1.25, 1000, -0.1, 1.1));
-  BookHisto("MassScan/hWeightMass", new TH2D("WeightMass", "N weight vs N mass",                                         10, 0.25, 1.25, 1000, 1.E-14, 1.E-10));
-  BookHisto("MassScan/hEnergyMass", new TH2D("EnergyMass", "N energy vs N mass",                                         10, 0.25, 1.25, 100, 0., 100.));
-  BookHisto("MassScan/hSpare",      new TH1D("Spare", "Spare", 10, 0.25, 1.25));
 
+  BookHisto("MassScan/hReachMass",  new TH2D("ReachMass",  "Probability of N reaching the FV vs N mass",                 fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 1000, -0.1, 1.1));
+  BookHisto("MassScan/hDecayMass",  new TH2D("DecayMass",  "Probability of N decaying in the FV vs N mass",              fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 1000, -0.1, 1.1));
+  BookHisto("MassScan/hProbMass",   new TH2D("ProbMass",   "Probability of N reaching and decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 1000, -0.1, 1.1));
+  BookHisto("MassScan/hWeightMass", new TH2D("WeightMass", "N weight vs N mass",                                         fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 10000, 1.E-13, 1.E-9));
+  BookHisto("MassScan/hEnergyMass", new TH2D("EnergyMass", "N energy vs N mass",                                         fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, 0., 100.));
 
-  BookHisto("MassScan/hG",  new TH1D("mG",  "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hA",  new TH1D("mA",  "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hG1", new TH1D("mG1", "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hA1", new TH1D("mA1", "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hG2", new TH1D("mG2", "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hA2", new TH1D("mA2", "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hN",  new TH1D("mN",  "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hN1", new TH1D("mN1", "", 10, 0.25, 1.25));
-  BookHisto("MassScan/hN2", new TH1D("mN2", "", 10, 0.25, 1.25));
-    
+  BookHisto("MassScan/hG",  new TH1D("mG",  "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hA",  new TH1D("mA",  "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hG1", new TH1D("mG1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hA1", new TH1D("mA1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hG2", new TH1D("mG2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hA2", new TH1D("mA2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hN",  new TH1D("mN",  "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hN1", new TH1D("mN1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+  BookHisto("MassScan/hN2", new TH1D("mN2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+
+  BookHisto("MassScan/MeanMass", new TGraph());
+  fHisto.GetTGraph("MassScan/MeanMass")->SetNameTitle("MassScan/MeanMass", "Mean probability of N reaching and decaying in the FV vs N mass");
+
   BookHisto("MassScan/GammaTotMass", new TGraph());
   fHisto.GetTGraph("MassScan/GammaTotMass")->SetNameTitle("MassScan/GammaTotMass", "N total decay width vs N mass");
 
@@ -211,40 +215,40 @@ void HeavyNeutrinoScan::InitHist() {
     
   // Total scan
 
-  BookHisto("TotalScan/Exclusion", new TGraph());    
+  BookHisto("TotalScan/Exclusion", new TGraphAsymmErrors());    
   fHisto.GetTGraph("TotalScan/Exclusion")->SetNameTitle("TotalScan/Exclusion", "Sensitivity as a function of coupling and N mass");
 
   // Toy-MC comparison
 
-  BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS",   "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  40, 0., 200.));
-  BookHisto("ToyMC/DS/hpDS1",  new TH1D("pDS1",  "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            20, 40., 200.));
-  BookHisto("ToyMC/DS/hptDS",  new TH1D("ptDS",  "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       10, 0., 5.));
-  BookHisto("ToyMC/DS/hptDS1", new TH1D("ptDS1", "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",  6, 0., 3.));
+  BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS",   "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 40, 0., 200.));
+  BookHisto("ToyMC/DS/hpDS1",  new TH1D("pDS1",  "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 20, 40., 200.));
+  BookHisto("ToyMC/DS/hptDS",  new TH1D("ptDS",  "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 10, 0., 5.));
+  BookHisto("ToyMC/DS/hptDS1", new TH1D("ptDS1", "D_{S} transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 6, 0., 3.));
 
-  BookHisto("ToyMC/DS/hpNS",   new TH1D("pNS",   "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  50, 0., 300.));
-  BookHisto("ToyMC/DS/hpNS1",  new TH1D("pNS1",  "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            20, 40., 300.));
-  BookHisto("ToyMC/DS/hptNS",  new TH1D("ptNS",  "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, 0., 2.));
-  BookHisto("ToyMC/DS/hptNS1", new TH1D("ptNS1", "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, 0., 2.));
+  BookHisto("ToyMC/DS/hpNS",   new TH1D("pNS",   "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 50, 0., 300.));
+  BookHisto("ToyMC/DS/hpNS1",  new TH1D("pNS1",  "N momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 50, 0., 300.));
+  BookHisto("ToyMC/DS/hptNS",  new TH1D("ptNS",  "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 20, 0., 2.));
+  BookHisto("ToyMC/DS/hptNS1", new TH1D("ptNS1", "N transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 20, 0., 2.));
 
-  BookHisto("ToyMC/DS/hpmuS",   new TH1D("pmuS",   "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",                  50, 0., 300.));
-  BookHisto("ToyMC/DS/hpmuS1",  new TH1D("pmuS1",  "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only",            20, 0., 120.));
-  BookHisto("ToyMC/DS/hptmuS",  new TH1D("ptmuS",  "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs",       20, 0., 2.));
-  BookHisto("ToyMC/DS/hptmuS1", new TH1D("ptmuS1", "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 10, 0., 2.));
+  BookHisto("ToyMC/DS/hpmuS",   new TH1D("pmuS",   "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 50, 0., 300.));
+  BookHisto("ToyMC/DS/hpmuS1",  new TH1D("pmuS1",  "Muon daughter momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 50, 0., 300.));
+  BookHisto("ToyMC/DS/hptmuS",  new TH1D("ptmuS",  "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 20, 0., 2.));
+  BookHisto("ToyMC/DS/hptmuS1", new TH1D("ptmuS1", "Muon daughter transverse momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, good HNLs only", 20, 0., 2.));
 
-  BookHisto("ToyMC/D0/hpD0",   new TH1D("pD0",   "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  40, 0., 200.));
-  BookHisto("ToyMC/D0/hpD01",  new TH1D("pD01",  "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            40, 60., 300.));
-  BookHisto("ToyMC/D0/hptD0",  new TH1D("ptD0",  "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       10, 0., 5.));
-  BookHisto("ToyMC/D0/hptD01", new TH1D("ptD01", "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",  6, 0., 3.));
+  BookHisto("ToyMC/D0/hpD0",   new TH1D("pD0",   "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 40, 0., 200.));
+  BookHisto("ToyMC/D0/hpD01",  new TH1D("pD01",  "D^{0} momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 40, 60., 300.));
+  BookHisto("ToyMC/D0/hptD0",  new TH1D("ptD0",  "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 10, 0., 5.));
+  BookHisto("ToyMC/D0/hptD01", new TH1D("ptD01", "D^{0} transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 6, 0., 3.));
 
-  BookHisto("ToyMC/D0/hpN0",   new TH1D("pN0",   "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  50, 0., 300.));
-  BookHisto("ToyMC/D0/hpN01",  new TH1D("pN01",  "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            20, 40., 300.));
-  BookHisto("ToyMC/D0/hptN0",  new TH1D("ptN0",  "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       20, 0., 2.));
-  BookHisto("ToyMC/D0/hptN01", new TH1D("ptN01", "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 10, 0., 2.));
+  BookHisto("ToyMC/D0/hpN0",   new TH1D("pN0",   "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 50, 0., 300.));
+  BookHisto("ToyMC/D0/hpN01",  new TH1D("pN01",  "N momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 50, 0., 300.));
+  BookHisto("ToyMC/D0/hptN0",  new TH1D("ptN0",  "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 20, 0., 2.));
+  BookHisto("ToyMC/D0/hptN01", new TH1D("ptN01", "N transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 20, 0., 2.));
 
-  BookHisto("ToyMC/D0/hpmu0",   new TH1D("pmu0",   "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",                  50, 0., 300.));
-  BookHisto("ToyMC/D0/hpmu01",  new TH1D("pmu01",  "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only",            20, 0., 120.));
-  BookHisto("ToyMC/D0/hptmu0",  new TH1D("ptmu0",  "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs",       20, 0., 2.));
-  BookHisto("ToyMC/D0/hptmu01", new TH1D("ptmu01", "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 10, 0., 2.));
+  BookHisto("ToyMC/D0/hpmu0",   new TH1D("pmu0",   "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 50, 0., 300.));
+  BookHisto("ToyMC/D0/hpmu01",  new TH1D("pmu01",  "Muon daughter momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 50, 0., 300.));
+  BookHisto("ToyMC/D0/hptmu0",  new TH1D("ptmu0",  "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, all HNLs", 20, 0., 2.));
+  BookHisto("ToyMC/D0/hptmu01", new TH1D("ptmu01", "Muon daughter transverse momentum from D^{0} #rightarrow K#muN, N #rightarrow #pi#mu, good HNLs only", 20, 0., 2.));
 
   // Needed for error graphs
 
@@ -283,8 +287,8 @@ void HeavyNeutrinoScan::Process(Int_t) {
   Double_t NReachProb = 0.;
   Double_t Weight     = 0.;
   Double_t scale      = 1.E10;
-  Double_t N=0;
-  Double_t D=0;
+  Double_t N = 0;
+  Double_t D = 0;
   Bool_t isGood       = false;
 
   Bool_t IsHNLGood = *(Bool_t*)GetOutput("HeavyNeutrino.Output");
@@ -324,7 +328,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	if (IsHNLGood == true && isGood == true)
 	  fSumGood[round(MN)][fCoupling] += Weight;
 
-	if (round(MN) == fMassForSingleValue) {
+	if (round(MN)/1000. == fMassForSingleValue) {
 	  FillHisto("CouplingScan/hA", fCoupling, Weight*scale);
 	  FillHisto("CouplingScan/hN", fCoupling, scale);
 	  
@@ -350,7 +354,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  FillHisto("CouplingScan/hReachCoupling",  fCoupling, NReachProb);
 	  FillHisto("CouplingScan/hDecayCoupling",  fCoupling, NDecayProb);
 	  FillHisto("CouplingScan/hProbCoupling",   fCoupling, NReachProb*NDecayProb);
-	  FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);	
+	  FillHisto("CouplingScan/hWeightCoupling", fCoupling, /*Weight*/1);	
 	  FillHisto("CouplingScan/hEnergyCoupling", fCoupling, momN/1000.*momN/1000. + MN/1000.*MN/1000.);
 	}
 
@@ -384,7 +388,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  FillHisto("MassScan/hEnergyMass", round(MN)/1000., momN/1000.*momN/1000. + MN/1000.*MN/1000.);
 	}
 
-	if (fCoupling == fCouplingForSingleValue && round(MN) == fMassForSingleValue) {
+	if (fCoupling == fCouplingForSingleValue && round(MN)/1000. == fMassForSingleValue) {
 	  FillHisto("SingleValue/hCoupling",     fCoupling);
 	  FillHisto("SingleValue/hMass",         round(MN)/1000.);
 	  FillHisto("SingleValue/hHNLReachProb", NReachProb);
@@ -410,7 +414,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
       MN =  round(Weights[i]["Mass"]);
       isGood = Weights[i]["IsGood"];
 
-      if (MN == fMassForSingleValue) {
+      if (MN/1000. == fMassForSingleValue) {
 	momN = Weights[i]["Momentum"]/1000.;
 	Weight = Weights[i]["Weight"];
 
@@ -454,7 +458,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
         FillHisto("SingleValue/hXYDecay",    p->GetEndPos().X()/1000., p->GetEndPos().Y()/1000.);
 	FillHisto("SingleValue/hTransverse", TMath::Sqrt(p->GetEndPos().X()/1000.*p->GetEndPos().X()/1000. + p->GetEndPos().Y()/1000.*p->GetEndPos().Y()/1000.));
 
-        if (TMath::Sqrt(p->GetInitial4Momentum().E()*p->GetInitial4Momentum().E() - p->GetInitial4Momentum().P()*p->GetInitial4Momentum().P()) == fMassForSingleValue) {
+        if ((TMath::Sqrt(p->GetInitial4Momentum().E()*p->GetInitial4Momentum().E() - p->GetInitial4Momentum().P()*p->GetInitial4Momentum().P()))/1000. == fMassForSingleValue) {
           if (p->GetMomAtCheckPoint(3).X() != 0.) {
             FillHisto("ToyMC/DS/hpDS",   p->GetMomAtCheckPoint(3).X()/1000.);
             FillHisto("ToyMC/DS/hptDS",  p->GetMomAtCheckPoint(3).Y()/1000.);
@@ -572,25 +576,25 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   fHisto.GetTH1("ToyMC/DS/hptDS")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hptDS1")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hpNS")->GetYaxis()->SetTitle("Entries/6 GeV/c");
-  fHisto.GetTH1("ToyMC/DS/hpNS1")->GetYaxis()->SetTitle("Entries/13 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hpNS1")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hptNS")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
-  fHisto.GetTH1("ToyMC/DS/hptNS1")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptNS1")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hpmuS")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hpmuS1")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/DS/hptmuS")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
-  fHisto.GetTH1("ToyMC/DS/hptmuS1")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/DS/hptmuS1")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hpD0")->GetYaxis()->SetTitle("Entries/5 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hpD01")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hptD0")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hptD01")->GetYaxis()->SetTitle("Entries/0.5 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hpN0")->GetYaxis()->SetTitle("Entries/6 GeV/c");
-  fHisto.GetTH1("ToyMC/D0/hpN01")->GetYaxis()->SetTitle("Entries/13 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hpN01")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hptN0")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
-  fHisto.GetTH1("ToyMC/D0/hptN01")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptN01")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hpmu0")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hpmu01")->GetYaxis()->SetTitle("Entries/6 GeV/c");
   fHisto.GetTH1("ToyMC/D0/hptmu0")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
-  fHisto.GetTH1("ToyMC/D0/hptmu01")->GetYaxis()->SetTitle("Entries/0.2 GeV/c");
+  fHisto.GetTH1("ToyMC/D0/hptmu01")->GetYaxis()->SetTitle("Entries/0.1 GeV/c");
   
   // Acceptance and yield computation                                             
 
@@ -613,25 +617,19 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   Double_t MN           = 0.;
   Int_t couplingCounter = 0;
   Int_t massCounter     = 0;
-  Int_t counter         = 0;
 
   for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
     MN = it->first;
     for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
       Coupling = it1->first;
 
-      if (MN == fMassForSingleValue) {
-	fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetPoint(couplingCounter, Coupling, fGammaTot[fMassForSingleValue][Coupling]);
-	fHisto.GetTGraph("CouplingScan/TauCoupling")->SetPoint(couplingCounter, Coupling, fTau[fMassForSingleValue][Coupling]);
+      if (MN/1000. == fMassForSingleValue) {
+	fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetPoint(couplingCounter, Coupling, fGammaTot[fMassForSingleValue*1000.][Coupling]);
+	fHisto.GetTGraph("CouplingScan/TauCoupling")->SetPoint(couplingCounter, Coupling, fTau[fMassForSingleValue*1000.][Coupling]);
 	couplingCounter++;
       }
 
       fYield[MN][Coupling] = fSumGood[MN][Coupling]/fNevents[MN][Coupling];
-
-      if (fYield[MN][Coupling]*1.E18 > 2.3) {
-	fHisto.GetTGraph("TotalScan/Exclusion")->SetPoint(counter, MN/1000., TMath::Power(10., Coupling));
-	counter++;
-      }
     }
     
     Coupling = fCouplingForSingleValue;
@@ -639,14 +637,98 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     fHisto.GetTGraph("MassScan/TauMass")->SetPoint(massCounter, MN/1000., fTau[MN][fCouplingForSingleValue]);
     massCounter++;
   }
+
+  // Sensitivity
+
+  Double_t POT = 1.E18;
+  Double_t M = -999.;
+  Double_t Umax = 999.;
+  Double_t Umin = 999.;
+  Double_t min = 1.E50;
+  Double_t max = 1.E-50;
+  Double_t mean = 0.;
+  Double_t startM = 0.;
+  Double_t stopM = 0.;
+  Int_t meanN = 0;
+  Int_t count = 0;
+  Int_t counter = 1;
+
+  for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
+    MN = it->first;
+    for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
+      Coupling = it1->first;
+      if (fYield[MN][Coupling]*POT > 2.3) {
+	M = MN;
+	mean += -Coupling;
+	meanN++;
+      }
+      cout<<M<<" "<<mean<<" "<<min<<" "<<Umin<<" "<<max<<" "<<Umax<<" "<<fYield[MN][Coupling]*POT<<endl;
+      if (fYield[MN][Coupling]*POT > max && fYield[MN][Coupling]*POT > 2.3) {
+	Umax = Coupling;
+	max = fYield[MN][Coupling]*POT;
+      }
+      if (fYield[MN][Coupling]*POT < min && fYield[MN][Coupling]*POT > 2.3) {
+	Umin = Coupling;
+	min = fYield[MN][Coupling]*POT;
+      }
+    }
+
+    if (meanN != 0.) {
+      mean = -mean/meanN;
+    }
+
+    if (-mean > 0.) {
+      count++;
+      if (count == 1) {
+	startM = M;
+	static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->SetPoint(0, startM/1000., fCouplingStop);
+      }
+      static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->SetPoint(counter, M/1000., mean);
+      static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->SetPointError(counter, 0., 0., TMath::Abs(mean-Umin), TMath::Abs(Umax-mean));
+    //cout<<M<<" "<<mean<<" "<<Umin<<" "<<TMath::Abs(mean-Umin)<<" "<<Umax<<" "<<TMath::Abs(Umax-mean)<<endl;
+      counter++;
+      stopM = M;
+      mean = 0.;
+      meanN = 0;
+      min = 1.E50;
+      max = 1.E-50;
+      M = -999.;
+      Umax = 999.;
+      Umin = 999.;
+    }
+    mean = 0.;
+    meanN = 0;
+    min = 1.E50;
+    max = 1.E-50;
+    M = -999.;
+    Umax = 999.;
+    Umin = 999.;
+  }
+  
+  static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->SetPoint(counter, stopM/1000., fCouplingStop);
+  static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->SetPoint(counter+1, startM/1000., fCouplingStop);
+  static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion"))->Print();
+
+  // Mean probability vs mass and coupling
+
+  for (Int_t i = 0; i < fHisto.GetTH2("CouplingScan/hProbCoupling")->GetNbinsX()-1; i++) {
+    TH1D *h = fHisto.GetTH2("CouplingScan/hProbCoupling")->ProjectionY("", i, i+1, "");
+    fHisto.GetTGraph("CouplingScan/MeanCoupling")->SetPoint(i, fHisto.GetTH2("CouplingScan/hProbCoupling")->GetXaxis()->GetBinCenter(i), h->GetMean());
+  }
+  
+  for (Int_t i = 0; i < fHisto.GetTH2("MassScan/hProbMass")->GetNbinsX()-1; i++) {      
+    TH1D *h = fHisto.GetTH2("MassScan/hProbMass")->ProjectionY("", i, i+1, "");           
+    fHisto.GetTGraph("MassScan/MeanMass")->SetPoint(i, fHisto.GetTH2("MassScan/hProbMass")->GetXaxis()->GetBinCenter(i), h->GetMean());
+  }  
   
   // Cosmetics
   
-  CosmeticsGraph(fHisto.GetTGraph("CouplingScan/GammaTotCoupling"), "Log(U^{2})", "Total decay width [MeV]",  2);
-  CosmeticsGraph(fHisto.GetTGraph("CouplingScan/TauCoupling"),  "Log(U^{2})", "Lifetime [ns]",                2);
+  CosmeticsGraph(fHisto.GetTGraph("CouplingScan/GammaTotCoupling"), "Log(U^{2})", "Total decay width [MeV]", 2);
+  CosmeticsGraph(fHisto.GetTGraph("CouplingScan/TauCoupling"),  "Log(U^{2})", "Lifetime [ns]", 2);
+  CosmeticsGraph(fHisto.GetTGraph("CouplingScan/MeanCoupling"),  "Log(U^{2})", "Mean probability", 2);
   CosmeticsGraph(fHisto.GetTGraph("MassScan/GammaTotMass"),  "N mass [GeV/c^{2}]", "Total decay width [MeV]", 2);
-  CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"),  "N mass [GeV/c^{2}]", "Lifetime [ns]",                2);
-  CosmeticsGraph(fHisto.GetTGraph("TotalScan/Exclusion"),  "N mass [GeV/c^{2}]", "Log(U^{2})",                2);
+  CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"),  "N mass [GeV/c^{2}]", "Lifetime [ns]", 2);
+  CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"),  "N mass [GeV/c^{2}]", "Mean probability", 2);
   
   CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCoupling")), "Log(U^{2})", "Acceptance", 2);
   CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingTarget")), "Log(U^{2})", "Acceptance", 8);
@@ -662,6 +744,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")), "N mass [GeV/c^{2}]", "Yield per POT", 9);
   CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMom")), "P [GeV/c]", "Acceptance", 2);
   CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "P [GeV/c]", "Yield per POT", 2);
+  CosmeticsGraph( static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("TotalScan/Exclusion")), "N mass [GeV/c^{2}]", "Log(U^{2})", 2);
 
   SaveAllPlots();
   
@@ -677,7 +760,6 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraph* g, const char* x, const char* y, 
   g->SetLineColor(col);
   g->SetLineWidth(3);
   g->Draw("AC");
-  g->Write();
   
   return;
 }
@@ -686,14 +768,22 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, cons
 
   g->GetXaxis()->SetTitle(x);
   g->GetYaxis()->SetTitle(y);
-  g->SetLineColor(1);
-  g->SetLineWidth(1);
-  g->SetMarkerStyle(8);
-  g->SetMarkerColor(col);
-  g->Draw("AP");
-  g->Write();
+      
+  if (!strcmp(g->GetName(), "TotalScan/Exclusion")) {
+    g->SetLineColor(col);
+    g->SetLineWidth(1);
+    //g->SetFillColor(col); 
+    //g->SetFillStyle(3001); 
+    //g->Draw("ALF");
+    g->Draw("AP");
+  }
+  else {
+    g->SetLineColor(1);
+    g->SetLineWidth(1);
+    g->SetMarkerStyle(8);
+    g->SetMarkerColor(col);
+    g->Draw("AP");
+  }
   
   return;
 }
-
-//  LocalWords:  GeV
