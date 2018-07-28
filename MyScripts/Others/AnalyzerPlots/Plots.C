@@ -242,6 +242,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    Float_t rightmax = hMio->GetMaximum();
 	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
 	    //gROOT->ForceStyle();
+	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
 	    hGaia->Draw("same");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
@@ -271,6 +272,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    Float_t rightmax = hMio->GetMaximum();
 	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
 	    //gROOT->ForceStyle();
+	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
 	    hGaia->Draw("same");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
