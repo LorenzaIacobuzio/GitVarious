@@ -1005,6 +1005,7 @@ void AllProd (Int_t model, TMultiGraph* M) {
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
   M->GetYaxis()->SetTitle("f*BR [#mubarn]");
   M->GetXaxis()->SetTitleOffset(1.2);
+  M->GetYaxis()->SetTitleOffset(1.2);
   M->GetXaxis()->SetTitleSize(labelSize);
   M->GetYaxis()->SetTitleSize(labelSize);
   M->GetXaxis()->SetLabelSize(labelSize);
@@ -1022,7 +1023,7 @@ void AllProd (Int_t model, TMultiGraph* M) {
   
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NProdGraph_%i.png", model));
+  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1054,6 +1055,7 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
   M->GetYaxis()->SetTitle("BR");
   M->GetXaxis()->SetTitleOffset(1.2);
+  M->GetYaxis()->SetTitleOffset(1.2);
   M->GetXaxis()->SetTitleSize(labelSize);
   M->GetYaxis()->SetTitleSize(labelSize);
   M->GetXaxis()->SetLabelSize(labelSize);
@@ -1071,7 +1073,7 @@ void AllDecay(Int_t model, TMultiGraph* M) {
  
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NDecayGraph_%i.png", model));
+  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1103,6 +1105,7 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
   M->GetYaxis()->SetTitle("Partial decay width [MeV]");
   M->GetXaxis()->SetTitleOffset(1.2);
+  M->GetYaxis()->SetTitleOffset(1.2);
   M->GetXaxis()->SetTitleSize(labelSize);
   M->GetYaxis()->SetTitleSize(labelSize);
   M->GetXaxis()->SetLabelSize(labelSize);
@@ -1120,7 +1123,7 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   
   TImage *img = TImage::Create();
   img->FromPad(gPad);
-  img->WriteImage(Form("/home/li/Desktop/HeavyNeutrino/BRs/AllInOne/NWidthGraph_%i.png", model));
+  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
@@ -1131,7 +1134,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  c->SetWindowSize(20000., 12000.);
+  //c->SetWindowSize(20000., 12000.);
 
   TGaxis::SetMaxDigits(2);
 
