@@ -1021,9 +1021,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  TImage *img = TImage::Create();
-  img->FromPad(gPad);
-  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MC\
+note/images/NProdGraph_%i.pdf", model));
 }
 
 // Function to call all N decay modes
@@ -1071,9 +1070,7 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  TImage *img = TImage::Create();
-  img->FromPad(gPad);
-  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
 }
 
 // Function to call all N partial decay widths
@@ -1121,9 +1118,7 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  TImage *img = TImage::Create();
-  img->FromPad(gPad);
-  img->WriteImage(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
 }
 
 // Main
