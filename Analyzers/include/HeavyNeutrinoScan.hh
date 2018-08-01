@@ -15,6 +15,8 @@
 #include <TCanvas.h>
 #include <TGraphErrors.h>
 #include "Analyzer.hh"
+#include "TwoLinesCDA.hh"
+#include "PointLineDistance.hh"
 
 class TH1I;
 class TH2F;
@@ -41,11 +43,14 @@ public:
   void DrawPlot() {}
   void CosmeticsGraph(TGraph*, const char*, const char*, Int_t);
   void CosmeticsGraph(TGraphAsymmErrors*, const char*, const char*, Int_t);
+  void EvaluateUL(TH2*, TGraph*);
+  std::vector<TGraph*> ExtractContours(TH2*);
   
 protected:
   
-  // Scan variables                                                                 
-
+  TwoLinesCDA *fCDAcomp;
+  PointLineDistance *fDistcomp;
+  Bool_t fReadingData;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMomStart;
@@ -63,10 +68,14 @@ protected:
   Int_t fN;
   Int_t fNMom;
   Int_t fNMass;
+  fstream fGammaTotFile;
+  fstream fTauFile;
+  fstream fNEventsFile;
+  fstream fSumGoodFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
-  std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
+  std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, Double_t>                     fCouplings;

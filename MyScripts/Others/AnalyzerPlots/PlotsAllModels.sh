@@ -6,5 +6,4 @@ cd ~/GitVarious/MyScripts/Others/AnalyzerPlots/
 root -b -q 'Plots.C("", "~/Desktop/NewHistos/2.root", false, false)'
 #root -b -q 'Plots.C("", "~/Desktop/NewHistos/3.root", false, false)'
 #root -b -q 'Plots.C("", "~/Desktop/NewHistos/POT.root", false, false)'
-#root -b -q 'Plots.C("", "~/Desktop/NewHistos/Toy.root", true, false)'
 #root -b -q 'Plots.C("", "~/Desktop/NewHistos/Data.root", false, true)'
