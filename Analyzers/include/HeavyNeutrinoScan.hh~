@@ -45,7 +45,9 @@ public:
   void CosmeticsGraph(TGraphAsymmErrors*, const char*, const char*, Int_t);
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
-  
+  //void SumGraphs(TGraph*, TGraph*, TGraph*);
+  //void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
+
 protected:
   
   TwoLinesCDA *fCDAcomp;
@@ -70,12 +72,12 @@ protected:
   Int_t fNMass;
   fstream fGammaTotFile;
   fstream fTauFile;
-  fstream fNeventsFile;
+  fstream fNEventsFile;
   fstream fSumGoodFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
-  std::map<Double_t, std::map<Double_t, Int_t>>    fNevents;
+  std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, Double_t>                     fCouplings;

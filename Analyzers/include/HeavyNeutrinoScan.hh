@@ -45,7 +45,8 @@ public:
   void CosmeticsGraph(TGraphAsymmErrors*, const char*, const char*, Int_t);
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
-  
+  void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
+
 protected:
   
   TwoLinesCDA *fCDAcomp;

@@ -142,10 +142,10 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("SingleValue/hBeamvsTarTrue", new TH2D("BeamvsTarTrue", "N true trajectory (target)", 20, 0., 0.2, 100, 0., 1.)); // target extrapolation for all events
     BookHisto("SingleValue/hBeamvsTAXTrue", new TH2D("BeamvsTAXTrue", "N true trajectory (TAX)", 20, 0., 0.2, 100, 0., 1.)); // TAX extrapolation for all events
 
-    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
 
     // Coupling scan 
 
@@ -497,7 +497,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  if (round(MN)/1000. == fMassForSingleValue) {
 	    FillHisto("CouplingScan/hA", fCoupling, Weight*scale);
 	    FillHisto("CouplingScan/hN", fCoupling, scale);
-	  
+
 	    if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	      FillHisto("CouplingScan/hA1", fCoupling, Weight*scale);
 	      FillHisto("CouplingScan/hN1", fCoupling, scale);
@@ -509,6 +509,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
 	    if (IsHNLGood == true && isGood == true) {
 	      FillHisto("CouplingScan/hG", fCoupling, Weight*scale);
+
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) { 
 		FillHisto("CouplingScan/hG1", fCoupling, Weight*scale);
 	      }
@@ -592,7 +593,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	}
       }
     }
-  
+
     // Scan on the N momentum
   
     if (GetWithMC()) {
@@ -625,7 +626,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	}
       }
     }
-  
+
     // Some plots from MC
 
     Int_t kineCounter = 0;
@@ -700,7 +701,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
 	    fDistcomp->SetLineDir(TVector3(p->GetInitial4Momentum().X(), p->GetInitial4Momentum().Y(), p->GetInitial4Momentum().Z()));
 	    fDistcomp->SetLinePoint1(TVector3(p->GetEndPos().X(), p->GetEndPos().Y(), p->GetEndPos().Z()));
-	    fDistcomp->SetPoint(0., -22., 153.); // Z = one interaction length of Cu               
+	    fDistcomp->SetPoint(0., -22., 23230.);
 	    fDistcomp->ComputeDistance();
 
 	    Double_t TAXDist = fDistcomp->GetDistance();
@@ -920,11 +921,6 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   
     // Acceptance and yield computation: coupling
 
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true), "cl=0.683 mode");
-
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA1", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN1", true)), "cl=0.683 mode");
@@ -934,6 +930,13 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG2", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN2", true), "cl=0.683 mode");
+
+    //SumGraphs(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTAX")));
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true), "cl=0.683 mode");
+
 
     // Acceptance and yield computation: mass
 
@@ -1019,7 +1022,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	cout<<fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->GetBinCenter(i)<<" "<<fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->GetBinCenter(j)<<" "<<fHisto.GetTH2("TotalScan/hExclusion")->GetBinContent(i,j)<<endl;
       }
     }
-    cout<<"--------------------------"<<endl;
+
     EvaluateUL(fHisto.GetTH2("TotalScan/hExclusion"), fHisto.GetTGraph("TotalScan/Contours"));
 
     // Mean probability vs mass and coupling
@@ -1204,3 +1207,29 @@ std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
 
   return graf;
 }
+/*
+void HeavyNeutrinoScan::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
+
+  for (Int_t i = 0; i <= g1->GetN(); i++) {
+    Double_t x1, y1, x2, y2;
+    g1->GetPoint(i, x1, y1);
+    g2->GetPoint(i, x2, y2);
+    //cout<<i<<" "<<g1->GetN()<<" "<<x1<<" "<<y1<<" "<<x2<<" "<<y2<<endl;
+    res->SetPoint(i, x1+x2, y1+y2);
+  }
+
+  return;
+}
+
+void HeavyNeutrinoScan::SumGraphs(TGraph* res, TGraph* g1, TGraph* g2) {
+
+  for (Int_t i = 0; i <= g1->GetN(); i++) {
+    Double_t x1, y1, x2, y2;
+    g1->GetPoint(i, x1,y1);
+    g2->GetPoint(i, x2,y2);
+    res->SetPoint(i, x1+x2, y1+y2);
+  }
+
+  return;
+}
+*/

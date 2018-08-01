@@ -142,17 +142,17 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("SingleValue/hBeamvsTarTrue", new TH2D("BeamvsTarTrue", "N true trajectory (target)", 20, 0., 0.2, 100, 0., 1.)); // target extrapolation for all events
     BookHisto("SingleValue/hBeamvsTAXTrue", new TH2D("BeamvsTAXTrue", "N true trajectory (TAX)", 20, 0., 0.2, 100, 0., 1.)); // TAX extrapolation for all events
 
-    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom, fMomStart, fMomStop));
-    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
 
     // Coupling scan 
 
     BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling", "Probability of N reaching the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, -0.1, 1.1));
     BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling", "Probability of N decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, -0.1, 1.1));
     BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling", "Probability of N reaching and decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, -0.1, 1.1));
-    BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100000, 1.E-12, 1.E-7));
+    BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 10000, 1.E-11, 1.E-7));
     BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 100.));
 
     BookHisto("CouplingScan/hG",  new TH1D("cG", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
@@ -593,7 +593,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	}
       }
     }
-  
+
     // Scan on the N momentum
   
     if (GetWithMC()) {
@@ -626,7 +626,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	}
       }
     }
-  
+
     // Some plots from MC
 
     Int_t kineCounter = 0;
@@ -934,15 +934,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true), "cl=0.683 mode");
-
+    SumGraphs(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX")));
 
     // Acceptance and yield computation: mass
-
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMass"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG", true), (TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN", true), "cl=0.683 mode");
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSelTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR1", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA1", true)), "cl=0.683 mode");
@@ -953,6 +947,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG2", true), (TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN2", true), "cl=0.683 mode");
+
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN", true)), "cl=0.683 mode");
+    SumGraphs(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMass")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTarget")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")));
 
     // Retrieve file info for exclusion plot
     
@@ -1015,13 +1014,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     }
 
     // Sensitivity
-
-    for (int i=1; i<=fHisto.GetTH2("TotalScan/hExclusion")->GetNbinsX(); i++) {
-      for (int j=1; j<=fHisto.GetTH2("TotalScan/hExclusion")->GetNbinsY(); j++) {
-	cout<<fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->GetBinCenter(i)<<" "<<fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->GetBinCenter(j)<<" "<<fHisto.GetTH2("TotalScan/hExclusion")->GetBinContent(i,j)<<endl;
-      }
+    /*
+    for (int i=0; i<=fHisto.GetTH1("CouplingScan/cN")->GetNbinsX()+2; i++) {
+      cout<<fHisto.GetTH1("CouplingScan/cN")->GetXaxis()->GetBinCenter(i)<<" "<<fHisto.GetTH1("CouplingScan/cN")->GetBinContent(i)<<" "<<fHisto.GetTH1("CouplingScan/cG")->GetXaxis()->GetBinCenter(i)<<" "<<fHisto.GetTH1("CouplingScan/cG"->GetBinContent(i)<<endl;
     }
-    cout<<"--------------------------"<<endl;
+    */
     EvaluateUL(fHisto.GetTH2("TotalScan/hExclusion"), fHisto.GetTGraph("TotalScan/Contours"));
 
     // Mean probability vs mass and coupling
@@ -1206,3 +1203,18 @@ std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
 
   return graf;
 }
+
+void HeavyNeutrinoScan::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
+
+  for (Int_t i = 0; i < g1->GetN(); i++) {
+    Double_t x1, y1, x2, y2;
+    g1->GetPoint(i, x1, y1);
+    g2->GetPoint(i, x2, y2);
+    res->SetPoint(i, x1, y1+y2);
+    res->SetPointError(i, g1->GetErrorXlow(i), g1->GetErrorXhigh(i), TMath::Sqrt(g1->GetErrorYlow(i)*g1->GetErrorYlow(i)+g2->GetErrorYlow(i)*g2->GetErrorYlow(i)), TMath::Sqrt(g1->GetErrorYhigh(i)*g1->GetErrorYhigh(i)+g2->GetErrorYhigh(i)*g2->GetErrorYhigh(i)));
+  }
+
+  return;
+}
+
+
