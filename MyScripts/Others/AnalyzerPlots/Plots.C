@@ -216,8 +216,6 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	      g->Draw("AP");                                         
 	      m1->Add(g); 
 	      m1->Draw("AP");            
-	      if (Name.Contains("Coupling"))
-		m1->GetYaxis()->SetRangeUser(1.E-6, 9.E-1);
 	    }
 	    else if (Name.Contains("Reg")) {                             
 	      g->Draw("AP");
@@ -284,7 +282,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
 	    TH1D* hMio = (TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->Draw();
+	    hMio->Draw("hist");
 	    TString mytitle = key->GetName();
 	    if (mytitle.Contains("t"))
 	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
@@ -292,7 +290,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
 	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
-	    hGaia->Draw("same");
+	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
 	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
 	    legend->AddEntry(hMio, "Full MC (Lorenza)");
@@ -313,7 +311,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
 	    TH1D* hMio =	(TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->Draw();
+	    hMio->Draw("hist");
 	    TString mytitle = key->GetName();
 	    if (mytitle.Contains("t"))
 	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
@@ -321,7 +319,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
 	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
-	    hGaia->Draw("same");
+	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
 	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
 	    legend->AddEntry(hMio, "Full MC (Lorenza)");
@@ -421,17 +419,17 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   TFile *f = TFile::Open(histo1);
   
   if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr) {
-    ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
+    //ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
   
   if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
     
     // One value plots for weight quantities
     
-    ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
+    //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
       
     // Coupling plots
-    
+    /*
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
@@ -471,7 +469,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, nullptr, nullptr, nullptr, nullptr, data);
     
     // Toy-MC comparison plots
-
+    */
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
