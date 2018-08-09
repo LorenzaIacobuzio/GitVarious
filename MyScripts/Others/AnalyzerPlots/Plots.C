@@ -40,12 +40,18 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   if ((TString)h2->GetName() == "XYSpec0Mu" || (TString)h2->GetName() == "XYSpec0Pi") {
     h2->GetXaxis()->SetRangeUser(-1., 1.);
     h2->GetYaxis()->SetRangeUser(-1., 1.);
+
+    TString name = h2->GetName();
+
+    if (name.Contains("Res2D"))
+      gPad->SetLogy(0);
   }
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
 
   TString title = g->GetTitle();
+  TString name = g->GetName();
 
   if (title.Contains("width")) {
     g->GetYaxis()->SetTitle("Decay width [MeV]");
@@ -79,6 +85,8 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
 
   if (title.Contains("N POT vs N K decays") || title.Contains("Contour"))
     gPad->SetLogy(0);
+  else if (name.Contains("CL"))
+    gPad->SetLogy(0);
   else
     gPad->SetLogy();
   
@@ -88,7 +96,7 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
 void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSize) {
 
   TString title = g->GetTitle();
-  
+
   if (title.Contains("Yield"))
     g->GetYaxis()->SetTitle("Yield per POT");
   else if (title.Contains("Acceptance"))
@@ -114,7 +122,7 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
 	gPad->SetLogy();
     }
   }
-  
+
   g->GetXaxis()->SetTitleOffset(1.4);
   g->GetYaxis()->SetTitleOffset(1.4);
   gPad->Update();
@@ -128,7 +136,16 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
 
 void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas* c, TString path, Double_t labelSize, Double_t titleSize) {
 
-  m->Draw("AP");
+  TString name = m->GetName();
+
+  if (!name.Contains("MergedContours"))
+    m->Draw("AP");
+  else 
+    m->Draw("AC");
+
+  if (name.Contains("Coupling") && name.Contains("Sel"))
+    m->GetYaxis()->SetRangeUser(1.E-4, 1.);
+
   m->GetXaxis()->SetTitle(x);
   m->GetYaxis()->SetTitle(y);
   m->GetXaxis()->SetTitleOffset(1.4);
@@ -137,10 +154,14 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   m->GetYaxis()->SetTitleSize(labelSize);
   m->GetXaxis()->SetLabelSize(labelSize);
   m->GetYaxis()->SetLabelSize(labelSize);
-  gPad->BuildLegend(0.77, 0.77, 0.98, 0.93);
-  gPad->Update();
-  gPad->SetLogy();
-  gPad->Update();
+
+  if (!name.Contains("MergedContours")) {
+    gPad->BuildLegend(0.77, 0.77, 0.98, 0.93);
+    gPad->Update();
+    gPad->SetLogy();
+    gPad->Update();
+  }
+
   c->SaveAs(path + m->GetName() + ".pdf");
 
   delete m;
@@ -249,6 +270,10 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	g->Draw("AP*");
       else if (Name1.Contains("POT1") || Name1.Contains("POT2") || Name1.Contains("NK"))
 	g->Draw("AP*");
+      else if (Name1.Contains("CL")) {
+	g->Draw("AC");
+	m->Add(g);
+      }
       else
 	g->Draw("AC");
 
@@ -429,7 +454,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
       
     // Coupling plots
-    /*
+    
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
@@ -447,7 +472,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     c = CreateTCanvas();
     
     // Mass plots
-        
+    /*    
     m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
     m1 = CreateTMultiGraph("AccSelMass", "Selection acceptance vs N mass");
     m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
@@ -466,11 +491,16 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     
     // Total scan plots
     
-    ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, nullptr, nullptr, nullptr, nullptr, data);
+    TMultiGraph *M = CreateTMultiGraph("MergedContours", "Merged 90 CL contours");
+
+    ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
+    TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
+
     // Toy-MC comparison plots
-    */
+
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
+    */
   }
 }
