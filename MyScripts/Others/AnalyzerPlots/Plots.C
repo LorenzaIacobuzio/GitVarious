@@ -298,7 +298,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       TH1 *h1 = (TH1*)key->ReadObj();
 
       if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/DS")) {
-	TFile *f1 = TFile::Open("/Users/gonnella/Desktop/NewHistos/Lorenza_D2Nmu_Npimu_comparison.root");
+	TFile *f1 = TFile::Open("/Users/lorenza/Desktop/NewHistos/Lorenza_D2Nmu_Npimu_comparison.root");
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
@@ -317,8 +317,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
+	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
+	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
 	    legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
@@ -327,7 +327,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	}
       }
       else if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/D0")) {
-	TFile *f1 = TFile::Open("/Users/gonnella/Desktop/NewHistos/Lorenza_D2NKmu_Npimu_toys.root");
+	TFile *f1 = TFile::Open("/Users/lorenza/Desktop/NewHistos/Lorenza_D2NKmu_Npimu_toys.root");
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
@@ -346,8 +346,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
+	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
+	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
 	    legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
@@ -426,7 +426,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   if (dir != "")
     path = dir;
   else
-    path = "/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/Users/lorenza/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
@@ -454,7 +454,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
       
     // Coupling plots
-    
+    /*
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
@@ -472,7 +472,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     c = CreateTCanvas();
     
     // Mass plots
-    /*    
+        
     m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
     m1 = CreateTMultiGraph("AccSelMass", "Selection acceptance vs N mass");
     m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
@@ -496,11 +496,10 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
     TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
-
+    */
     // Toy-MC comparison plots
-
+    
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
-    */
   }
 }

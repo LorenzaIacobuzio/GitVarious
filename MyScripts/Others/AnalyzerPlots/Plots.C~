@@ -139,9 +139,12 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   TString name = m->GetName();
 
   if (!name.Contains("MergedContours"))
-    m->Draw("APL");
+    m->Draw("AP");
   else 
     m->Draw("AC");
+
+  if (name.Contains("Coupling") && name.Contains("Sel"))
+    m->GetYaxis()->SetRangeUser(1.E-4, 1.);
 
   m->GetXaxis()->SetTitle(x);
   m->GetYaxis()->SetTitle(y);
@@ -314,8 +317,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
+	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
+	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
 	    legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
@@ -343,8 +346,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
 	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (Gaia)");
-	    legend->AddEntry(hMio, "Full MC (Lorenza)");
+	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
+	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
 	    legend->Draw();
 	    c->Update();
 	    c->SaveAs(path + key->GetName() + "_comp.pdf");
@@ -423,7 +426,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   if (dir != "")
     path = dir;
   else
-    path = "/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/Users/lorenza/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
@@ -441,7 +444,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   TFile *f = TFile::Open(histo1);
   
   if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr) {
-    //ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
+    ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
   
   if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
@@ -485,7 +488,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     c = CreateTCanvas();      
     TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
     c = CreateTCanvas();
-    */
+    
     // Total scan plots
     
     TMultiGraph *M = CreateTMultiGraph("MergedContours", "Merged 90 CL contours");
@@ -493,10 +496,10 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
     TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
-
+    */
     // Toy-MC comparison plots
-
-    //ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
-    //ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
+    
+    ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
+    ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
 }
