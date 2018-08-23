@@ -14,6 +14,7 @@
 #include <vector>
 #include <TCanvas.h>
 #include <TGraphErrors.h>
+#include <TRandom3.h>
 #include "Analyzer.hh"
 #include "TwoLinesCDA.hh"
 #include "PointLineDistance.hh"
@@ -46,9 +47,11 @@ public:
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
   void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
+  void Sample(TGraphAsymmErrors*, TH2D*, Double_t);
 
 protected:
   
+  TRandom3* r;
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   Bool_t fReadingData;
@@ -69,16 +72,22 @@ protected:
   Int_t fN;
   Int_t fNMom;
   Int_t fNMass;
+  Int_t fNContours;
   fstream fGammaTotFile;
   fstream fTauFile;
   fstream fNEventsFile;
   fstream fSumGoodFile;
+  fstream fNEventsTomFile;
+  fstream fSumGoodTomFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
+  std::map<Double_t, std::map<Double_t, Double_t>> fNEventsTom;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTom;
+  std::map<Double_t, std::map<Double_t, Double_t>> fYieldTom;
   std::map<Double_t, Double_t>                     fCouplings;
   std::map<Double_t, Double_t>                     fMasses;
 };

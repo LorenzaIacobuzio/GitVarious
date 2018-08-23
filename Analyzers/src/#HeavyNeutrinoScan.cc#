@@ -576,15 +576,10 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	      FillHisto("MassScan/hN2", round(MN)/1000., scale);
 	    }
 
-	    for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-	      KinePart *p = evt->GetKinePart(i);
-	      if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-		if (p->GetParticleName() == "D+->e+N" || p->GetParticleName() == "D-->e-N" || p->GetParticleName() == "D+->mu+N" || p->GetParticleName() == "D-->mu-N" || p->GetParticleName() == "DS+->e+N" || p->GetParticleName() == "DS-->e-N"|| p->GetParticleName() == "DS+->mu+N" || p->GetParticleName() == "DS-->mu-N") {
-		  if (p->GetProdPos().Z() <= 400. && p->GetProdPos().Z() >= -400.) {
-		    FillHisto("MassScan/hA3", round(MN)/1000., Weight*scale);
-		    FillHisto("MassScan/hN3", round(MN)/1000., scale);
-		  }
-		}
+	    if (Weights[i]["Name"] == "D+->e+N" || Weights[i]["Name"] == "D-->e-N" || Weights[i]["Name"] == "D+->mu+N" || Weights[i]["Name"] == "D-->mu-N" || Weights[i]["Name"] == "DS+->e+N" || Weights[i]["Name"] == "DS-->e-N"|| Weights[i]["Name"] == "DS+->mu+N" || Weights[i]["Name"] == "DS-->mu-N") {
+	      if (p->GetProdPos().Z() <= 400. && p->GetProdPos().Z() >= -400.) {
+		FillHisto("MassScan/hA3", round(MN)/1000., Weight*scale);
+		FillHisto("MassScan/hN3", round(MN)/1000., scale);
 	      }
 	    }
 
@@ -597,15 +592,10 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	      else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 		FillHisto("MassScan/hG2", round(MN)/1000., Weight*scale);
 	      }
-	      
-	      for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
-		KinePart *p = evt->GetKinePart(i);
-		if (p->GetParentID() == -1 && p->GetPDGcode() == 999) {
-		  if (p->GetParticleName() == "D+->e+N" || p->GetParticleName() == "D-->e-N" || p->GetParticleName() == "D+->mu+N" || p->GetParticleName() == "D-->mu-N" || p->GetParticleName() == "DS+->e+N" || p->GetParticleName() == "DS-->e-N"|| p->GetParticleName() == "DS+->mu+N" || p->GetParticleName() == "DS-->mu-N") {
-		    if (p->GetProdPos().Z() <= 400. && p->GetProdPos().Z() >= -400.) {
-		      FillHisto("MassScan/hG3", round(MN)/1000., Weight*scale);
-		    }
-		  }
+
+	      if (Weights[i]["Name"] == "D+->e+N" || Weights[i]["Name"] == "D-->e-N" || Weights[i]["Name"] == "D+->mu+N" || Weights[i]["Name"] == "D-->mu-N" || Weights[i]["Name"] == "DS+->e+N" || Weights[i]["Name"] == "DS-->e-N"|| Weights[i]["Name"] == "DS+->mu+N" || Weights[i]["Name"] == "DS-->mu-N") {
+		if (p->GetProdPos().Z() <= 400. && p->GetProdPos().Z() >= -400.) {
+		  FillHisto("MassScan/hG3", round(MN)/1000., Weight*scale);
 		}
 	      }
 	    }
@@ -620,7 +610,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
                 FillHisto("MassScan/hR2", round(MN)/1000., Weight*scale);
               }
 
-	      if (p->GetParticleName() == "D+->e+N" || p->GetParticleName() == "D-->e-N" || p->GetParticleName() == "D+->mu+N" || p->GetParticleName() == "D-->mu-N" || p->GetParticleName() == "DS+->e+N" || p->GetParticleName() == "DS-->e-N"|| p->GetParticleName() == "DS+->mu+N" || p->GetParticleName() == "DS-->mu-N") {
+	      if (Weights[i]["Name"] == "D+->e+N" || Weights[i]["Name"] == "D-->e-N" || Weights[i]["Name"] == "D+->mu+N" || Weights[i]["Name"] == "D-->mu-N" || Weights[i]["Name"] == "DS+->e+N" || Weights[i]["Name"] == "DS-->e-N"|| Weights[i]["Name"] == "DS+->mu+N" || Weights[i]["Name"] == "DS-->mu-N") {
 		if (p->GetProdPos().Z() <= 400. && p->GetProdPos().Z() >= -400.) {
 		  FillHisto("MassScan/hR3", round(MN)/1000., Weight*scale);
 		}
@@ -985,6 +975,8 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	Coupling = it1->first;
 	fGammaTotFile << MN << " " << Coupling << " " << fGammaTot[MN][Coupling] << "\n";
 	fTauFile << MN << " " << Coupling << " " << fTau[MN][Coupling] << "\n";
+	fNEventsFile << MN << " " << Coupling << " " << fNEvents[MN][Coupling] << "\n";
+	fSumGoodFile << MN << " " << Coupling << " " << fSumGood[MN][Coupling] << "\n";
 	fNEventsFile << MN << " " << Coupling << " " << fNEvents[MN][Coupling] << "\n";
 	fSumGoodFile << MN << " " << Coupling << " " << fSumGood[MN][Coupling] << "\n";
       }
