@@ -77,17 +77,12 @@ protected:
   fstream fTauFile;
   fstream fNEventsFile;
   fstream fSumGoodFile;
-  fstream fNEventsTomFile;
-  fstream fSumGoodTomFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
-  std::map<Double_t, std::map<Double_t, Double_t>> fNEventsTom;
-  std::map<Double_t, std::map<Double_t, Double_t>> fSumGoodTom;
-  std::map<Double_t, std::map<Double_t, Double_t>> fYieldTom;
   std::map<Double_t, Double_t>                     fCouplings;
   std::map<Double_t, Double_t>                     fMasses;
 };

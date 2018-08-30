@@ -976,34 +976,34 @@ void AllDalitz(Int_t model) {
 
 void AllProd (Int_t model, TMultiGraph* M) {
 
-  MassScan(D,   e,      0., 1, 1, 0, "D #rightarrow Ne",                M, sigmacc/sigmapp*2.*ffD);  // HNL production via two-body decay
-  MassScan(D,   mu,     0., 1, 1, 0, "D #rightarrow N#mu",              M, sigmacc/sigmapp*2.*ffD);
-  MassScan(DS,  e,      0., 1, 1, 0, "D_{S} #rightarrow Ne",            M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(DS,  mu,     0., 1, 1, 0, "D_{S} #rightarrow N#mu",          M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(DS,  tau,    0., 1, 1, 0, "D_{S} #rightarrow N#tau",         M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, pi,     0., 1, 1, 0, "#tau #rightarrow N#pi",           M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, K,      0., 1, 1, 0, "#tau #rightarrow NK",             M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, rho,    0., 1, 1, 0, "#tau #rightarrow N#rho",          M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(D,   K0,     e,  1, 0, 0, "D #rightarrow K^{0}eN",           M, sigmacc/sigmapp*2.*ffD);  // HNL production via three-body decay
-  MassScan(D,   pi0,    e,  1, 0, 0, "D #rightarrow #pi^{0}eN",         M, sigmacc/sigmapp*2.*ffD);
-  MassScan(D0,  K,      e,  1, 0, 0, "D^{0} #rightarrow KeN",           M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(D0,  pi,     e,  1, 0, 0, "D^{0} #rightarrow #pieN",         M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(D,   K0,     mu, 1, 0, 0, "D #rightarrow K^{0}#muN",         M, sigmacc/sigmapp*2.*ffD);
-  MassScan(D,   pi0,    mu, 1, 0, 0, "D #rightarrow #pi^{0}#muN",       M, sigmacc/sigmapp*2.*ffD);
-  MassScan(D0,  K,      mu, 1, 0, 0, "D^{0} #rightarrow K#muN",         M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(D0,  pi,     mu, 1, 0, 0, "D^{0} #rightarrow #pi#muN",       M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(D,   K0Star, e,  1, 0, 0, "D #rightarrow K^{0*}eN",          M, sigmacc/sigmapp*2.*ffD);
-  MassScan(D0,  KStar,  e,  1, 0, 0, "D^{0} #rightarrow K^{*}eN",       M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(D,   K0Star, mu, 1, 0, 0, "D #rightarrow K^{0*}#muN",        M, sigmacc/sigmapp*2.*ffD);
-  MassScan(D0,  KStar,  mu, 1, 0, 0, "D^{0} #rightarrow K^{*}#muN",     M, sigmacc/sigmapp*2.*ffD0);
-  MassScan(tau, 0.1,    e,  1, 0, 0, "#tau #rightarrow Ne#nu_{#tau}",   M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, 0.01,   e,  1, 0, 0, "#tau #rightarrow Ne#nu_{e}",      M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, 0.1,    mu, 1, 0, 0, "#tau #rightarrow N#mu#nu_{#tau}", M, sigmacc/sigmapp*2.*ffDS);
-  MassScan(tau, 0.01,   mu, 1, 0, 0, "#tau #rightarrow N#mu#nu_{#mu}",  M, sigmacc/sigmapp*2.*ffDS);
+  MassScan(D,   e,      0., 1, 1, 0, "D #rightarrow Ne",                M, 1.);//sigmacc*2.*ffD);  // HNL production via two-body decay
+  MassScan(D,   mu,     0., 1, 1, 0, "D #rightarrow N#mu",              M, 1.);//sigmacc*2.*ffD);
+  MassScan(DS,  e,      0., 1, 1, 0, "D_{S} #rightarrow Ne",            M, 1.);//sigmacc*2.*ffDS);
+  MassScan(DS,  mu,     0., 1, 1, 0, "D_{S} #rightarrow N#mu",          M, 1.);//sigmacc*2.*ffDS);
+  MassScan(DS,  tau,    0., 1, 1, 0, "D_{S} #rightarrow N#tau",         M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, pi,     0., 1, 1, 0, "#tau #rightarrow N#pi",           M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, K,      0., 1, 1, 0, "#tau #rightarrow NK",             M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, rho,    0., 1, 1, 0, "#tau #rightarrow N#rho",          M, 1.);//sigmacc*2.*ffDS);
+  MassScan(D,   K0,     e,  1, 0, 0, "D #rightarrow K^{0}eN",           M, 1.);//sigmacc*2.*ffD);  // HNL production via three-body decay
+  MassScan(D,   pi0,    e,  1, 0, 0, "D #rightarrow #pi^{0}eN",         M, 1.);//sigmacc*2.*ffD);
+  MassScan(D0,  K,      e,  1, 0, 0, "D^{0} #rightarrow KeN",           M, 1.);//sigmacc*2.*ffD0);
+  MassScan(D0,  pi,     e,  1, 0, 0, "D^{0} #rightarrow #pieN",         M, 1.);//sigmacc*2.*ffD0);
+  MassScan(D,   K0,     mu, 1, 0, 0, "D #rightarrow K^{0}#muN",         M, 1.);//sigmacc*2.*ffD);
+  MassScan(D,   pi0,    mu, 1, 0, 0, "D #rightarrow #pi^{0}#muN",       M, 1.);//sigmacc*2.*ffD);
+  MassScan(D0,  K,      mu, 1, 0, 0, "D^{0} #rightarrow K#muN",         M, 1.);//sigmacc*2.*ffD0);
+  MassScan(D0,  pi,     mu, 1, 0, 0, "D^{0} #rightarrow #pi#muN",       M, 1.);//sigmacc*2.*ffD0);
+  MassScan(D,   K0Star, e,  1, 0, 0, "D #rightarrow K^{0*}eN",          M, 1.);//sigmacc*2.*ffD);
+  MassScan(D0,  KStar,  e,  1, 0, 0, "D^{0} #rightarrow K^{*}eN",       M, 1.);//sigmacc*2.*ffD0);
+  MassScan(D,   K0Star, mu, 1, 0, 0, "D #rightarrow K^{0*}#muN",        M, 1.);//sigmacc*2.*ffD);
+  MassScan(D0,  KStar,  mu, 1, 0, 0, "D^{0} #rightarrow K^{*}#muN",     M, 1.);//sigmacc*2.*ffD0);
+  MassScan(tau, 0.1,    e,  1, 0, 0, "#tau #rightarrow Ne#nu_{#tau}",   M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, 0.01,   e,  1, 0, 0, "#tau #rightarrow Ne#nu_{e}",      M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, 0.1,    mu, 1, 0, 0, "#tau #rightarrow N#mu#nu_{#tau}", M, 1.);//sigmacc*2.*ffDS);
+  MassScan(tau, 0.01,   mu, 1, 0, 0, "#tau #rightarrow N#mu#nu_{#mu}",  M, 1.);//sigmacc*2.*ffDS);
 
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-  M->GetYaxis()->SetTitle("f*BR [#mubarn]");
+  M->GetYaxis()->SetTitle("BR");//"f*BR");
   M->GetXaxis()->SetTitleOffset(1.2);
   M->GetYaxis()->SetTitleOffset(1.2);
   M->GetXaxis()->SetTitleSize(labelSize);
@@ -1014,15 +1014,15 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetGridx();
   gPad->SetGridy();
   M->SetMinimum(1.E-24);
-  M->SetMaximum(1.E-16);
+  M->SetMaximum(1.E-11);
   M->GetXaxis()->SetLimits(0., 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MC\
-note/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1070,7 +1070,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1092,6 +1093,7 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   MassScan(rho,       mu,  0., 0, 1, 1, "N #rightarrow #rho#mu",     M, 1.);
   MassScan(etaprime,  0.,  0., 0, 1, 1, "N #rightarrow #eta'#nu",    M, 1.);
   MassScan(e,         tau, 0., 0, 0, 1, "N #rightarrow e#tau#nu",    M, 1.);
+
   MassScan(mu,        tau, 0., 0, 0, 1, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 1, "N #rightarrow #pi#tau",     M, 1.);
   MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
@@ -1118,7 +1120,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/gonnella/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
@@ -1129,7 +1132,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  //c->SetWindowSize(20000., 12000.);
+  c->SetWindowSize(20000., 12000.);
 
   TGaxis::SetMaxDigits(2);
 

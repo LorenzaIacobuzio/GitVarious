@@ -77,6 +77,8 @@ protected:
   fstream fTauFile;
   fstream fNEventsFile;
   fstream fSumGoodFile;
+  fstream fNEventsTomFile;
+  fstream fSumGoodTomFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
   std::map<Double_t, std::map<Double_t, Double_t>> fTau;

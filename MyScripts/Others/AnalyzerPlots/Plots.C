@@ -40,12 +40,15 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   if ((TString)h2->GetName() == "XYSpec0Mu" || (TString)h2->GetName() == "XYSpec0Pi") {
     h2->GetXaxis()->SetRangeUser(-1., 1.);
     h2->GetYaxis()->SetRangeUser(-1., 1.);
-
-    TString name = h2->GetName();
-
-    if (name.Contains("Res2D"))
-      gPad->SetLogy(0);
   }
+  
+  TString name = h2->GetName();
+  
+  if (name.Contains("Res2D"))
+    gPad->SetLogy(0);
+
+  //if (name.Contains("EnergyMassTom")) 
+  //h2->Scale(1650000/(h2->GetEntries()/17));
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
@@ -163,6 +166,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   }
 
   c->SaveAs(path + m->GetName() + ".pdf");
+  c->SaveAs(path + m->GetName() + ".png");
 
   delete m;
   delete c;
@@ -225,6 +229,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
 	  g->Draw("AL");                                         
 	  c->SaveAs(path + Name1 + ".pdf");
+	  c->SaveAs(path + Name1 + ".png");
 	}                                                           
 	else {                                                 
 	  if (Name.Contains("Yield")) {
@@ -255,6 +260,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TGraphCosmetics(g, labelSize, titleSize);
 	g->Draw("AP");
 	c->SaveAs(path + Name1 + ".pdf");
+	c->SaveAs(path + Name1 + ".png");
       }
     }
     else if (cl->InheritsFrom("TGraph")) {
@@ -278,6 +284,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	g->Draw("AC");
 
       c->SaveAs(path + Name1 + ".pdf");
+      c->SaveAs(path + Name1 + ".png");
     }
     else if (cl->InheritsFrom("TH2")) {
       TH2 *h2 = (TH2*)key->ReadObj();
@@ -293,12 +300,13 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TH2Cosmetics(h2, false, labelSize, titleSize, data);
       
       c->SaveAs(path + key->GetName() + ".pdf");
+      c->SaveAs(path + key->GetName() + ".png");
     }
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
 
       if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/DS")) {
-	TFile *f1 = TFile::Open("/Users/lorenza/Desktop/NewHistos/Lorenza_D2Nmu_Npimu_comparison.root");
+	TFile *f1 = TFile::Open("/home/li/Desktop/NewHistos/Lorenza_D2Nmu_Npimu_comparison.root");
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
@@ -307,12 +315,16 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
 	    TH1D* hMio = (TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->Draw("hist");
+	    hMio->SetMarkerStyle(21);
+	    hMio->SetMarkerSize(0.5);
+	    hMio->SetMarkerColor(38);
+	    hMio->SetLineWidth(3);
+	    hMio->Draw("E");
 	    TString mytitle = key->GetName();
 	    if (mytitle.Contains("t"))
 	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
-	    Float_t rightmax = hMio->GetMaximum();
-	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
+	    Float_t rightmax = hMio->Integral();
+	    Float_t scale = hMio->Integral()/hGaia->Integral();
 	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
@@ -327,7 +339,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	}
       }
       else if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/D0")) {
-	TFile *f1 = TFile::Open("/Users/lorenza/Desktop/NewHistos/Lorenza_D2NKmu_Npimu_toys.root");
+	TFile *f1 = TFile::Open("/home/li/Desktop/NewHistos/Lorenza_D2NKmu_Npimu_toys.root");
 	TIter next1(f1->GetListOfKeys());
 	TKey *key1;
 	while ((key1 = (TKey*)next1())) {
@@ -336,12 +348,16 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
 	    TH1D* hMio =	(TH1D*)(key->ReadObj());
 	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->Draw("hist");
+	    hMio->SetMarkerStyle(21);
+            hMio->SetMarkerSize(0.5);
+            hMio->SetMarkerColor(38);
+            hMio->SetLineWidth(3);
+            hMio->Draw("E");
 	    TString mytitle = key->GetName();
 	    if (mytitle.Contains("t"))
 	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
-	    Float_t rightmax = hMio->GetMaximum();
-	    Float_t scale = hMio->GetMaximum()/hGaia->GetMaximum();
+	    Float_t rightmax = hMio->Integral();
+	    Float_t scale = hMio->Integral()/hGaia->Integral();
 	    hGaia->Sumw2();
 	    hGaia->Scale(scale);
 	    hGaia->Draw("sames");
@@ -378,12 +394,14 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	  hBe->GetXaxis()->SetRangeUser(-0.25, 0.25);
 	  hBe->Draw();
 	  c->SaveAs(path + hBe->GetName() + ".pdf");
+	  c->SaveAs(path + hBe->GetName() + ".png");
 	  hTa = (TH1D*)h1->Clone("hTa");
 	  hTa->SetName("ZDProdTAX");
 	  hTa->SetTitle("Z of D meson production point in the TAXes");
 	  hTa->GetXaxis()->SetRangeUser(23., 25.);
 	  hTa->Draw();
 	  c->SaveAs(path + hTa->GetName() + ".pdf");
+	  c->SaveAs(path + hTa->GetName() + ".png");
 	}
 	if (!strcmp(key->GetName(), "ZDDecay")) {
 	  hBe1 = (TH1D*)h1->Clone("hBe1");
@@ -392,18 +410,21 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	  hBe1->GetXaxis()->SetRangeUser(-0.3, 0.3);
 	  hBe1->Draw();
 	  c->SaveAs(path + hBe1->GetName() + ".pdf");
+	  c->SaveAs(path + hBe1->GetName() + ".png");
 	  hTa1 = (TH1D*)h1->Clone("hTa1");
 	  hTa1->SetName("ZDDecayTAX");
 	  hTa1->SetTitle("Z of D meson decay point in the TAXes");
 	  hTa1->GetXaxis()->SetRangeUser(23., 25.);
 	  hTa1->Draw();
 	  c->SaveAs(path + hTa1->GetName() + ".pdf");
+	  c->SaveAs(path + hTa1->GetName() + ".png");
 	}
 	else {
 	  h1->Draw();
 	}
 	
 	c->SaveAs(path + key->GetName() + ".pdf");
+	c->SaveAs(path + key->GetName() + ".png");
       }
     }
   }
@@ -426,7 +447,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   if (dir != "")
     path = dir;
   else
-    path = "/Users/lorenza/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
@@ -459,7 +480,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
     TMultiGraph *m3 = CreateTMultiGraph("AccFVCoupling", "FV acceptance vs coupling");
-    
+
     ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path+"HeavyNeutrinoScan/CouplingScan/", c, m, m1, m2, m3, data);
     
     TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
@@ -470,7 +491,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     c = CreateTCanvas();
     TMultiGraphCosmetics(m3, "Log(U^{2})", "FV acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
     c = CreateTCanvas();
-    
+
     // Mass plots
         
     m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
@@ -488,7 +509,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     c = CreateTCanvas();      
     TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
     c = CreateTCanvas();
-    
+
     // Total scan plots
     
     TMultiGraph *M = CreateTMultiGraph("MergedContours", "Merged 90 CL contours");
@@ -496,7 +517,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
     TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
-    */
+    */    
     // Toy-MC comparison plots
     
     ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
