@@ -210,8 +210,8 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   TH1D* hTa1  = new TH1D();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-  
-  while ((key = (TKey*)next())) {    
+
+  while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
     TString Name = key->GetName();
     TString Name1 = Name.Remove(0, Name.First('/') + 1);
@@ -304,128 +304,59 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
     }
     else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
       TH1 *h1 = (TH1*)key->ReadObj();
-
-      if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/DS")) {
-	TFile *f1 = TFile::Open("/home/li/Desktop/NewHistos/Lorenza_D2Nmu_Npimu_comparison.root");
-	TIter next1(f1->GetListOfKeys());
-	TKey *key1;
-	while ((key1 = (TKey*)next1())) {
-	  TString title = key1->GetTitle();
-	  if ((title.Contains(" N p prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "pNS1")) || (title.Contains(" N pt prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "ptNS1")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmuS1")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmuS1"))) {
-	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
-	    TH1D* hMio = (TH1D*)(key->ReadObj());
-	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->SetMarkerStyle(21);
-	    hMio->SetMarkerSize(0.5);
-	    hMio->SetMarkerColor(38);
-	    hMio->SetLineWidth(3);
-	    hMio->Draw("E");
-	    TString mytitle = key->GetName();
-	    if (mytitle.Contains("t"))
-	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
-	    Float_t rightmax = hMio->Integral();
-	    Float_t scale = hMio->Integral()/hGaia->Integral();
-	    hGaia->Sumw2();
-	    hGaia->Scale(scale);
-	    hGaia->Draw("sames");
-	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
-	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
-	    legend->Draw();
-	    c->Update();
-	    c->SaveAs(path + key->GetName() + "_comp.pdf");
-	    c->SaveAs(path + key->GetName() + "_comp.png");
-	  }
-	}
+      TH1Cosmetics(h1, labelSize, titleSize);
+      
+      if (Name1.Contains("POT") || Name1.Contains("T10"))
+	gStyle->SetOptStat(1111111111);
+      
+      if (!strcmp(key->GetName(), "InvMassReco")) {
+	h1->Fit("gaus");
+	gStyle->SetStatW(0.2);
+	gStyle->SetStatH(0.2);
+	gStyle->SetOptFit(111111);
       }
-      else if (!strcmp(dirName, "HeavyNeutrinoScan/ToyMC/D0")) {
-	TFile *f1 = TFile::Open("/home/li/Desktop/NewHistos/Lorenza_D2NKmu_Npimu_toys.root");
-	TIter next1(f1->GetListOfKeys());
-	TKey *key1;
-	while ((key1 = (TKey*)next1())) {
-	  TString title	= key1->GetTitle();
-	  if ((title.Contains(" N p prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "pN01")) || (title.Contains(" N pt prodinacc") && !strcmp(key1->GetName(), "hN_p_prodinacc") && !strcmp(key->GetName(), "ptN01")) || (!strcmp(key1->GetName(), "hProd_p_prodinacc") && !strcmp(key->GetName(), "pmu01")) || (!strcmp(key1->GetName(), "hProd_pt_prodinacc") && !strcmp(key->GetName(), "ptmu01"))) {
-	    TH1D* hGaia = (TH1D*)(key1->ReadObj());
-	    TH1D* hMio =	(TH1D*)(key->ReadObj());
-	    TH1Cosmetics(hMio, labelSize, titleSize);
-	    hMio->SetMarkerStyle(21);
-            hMio->SetMarkerSize(0.5);
-            hMio->SetMarkerColor(38);
-            hMio->SetLineWidth(3);
-            hMio->Draw("E");
-	    TString mytitle = key->GetName();
-	    if (mytitle.Contains("t"))
-	      hMio->GetXaxis()->SetTitle("P_{t} [GeV/c]");
-	    Float_t rightmax = hMio->Integral();
-	    Float_t scale = hMio->Integral()/hGaia->Integral();
-	    hGaia->Sumw2();
-	    hGaia->Scale(scale);
-	    hGaia->Draw("sames");
-	    auto legend = new TLegend(0.71, 0.72, 0.98, 0.93);
-	    legend->AddEntry(hGaia, "Toy MC (G. Lanfranchi)");
-	    legend->AddEntry(hMio, "Full MC (L. Iacobuzio)");
-	    legend->Draw();
-	    c->Update();
-	    c->SaveAs(path + key->GetName() + "_comp.pdf");
-	    c->SaveAs(path + key->GetName() + "_comp.png");
-	  }
-	}
+      if (!strcmp(key->GetName(), "PhysicsEventsVsCuts")) {
+	h1->Draw("text");
+	h1->SetOption("text");
+      }
+      if (!strcmp(key->GetName(), "ZDProd")) {
+	hBe = (TH1D*)h1->Clone("hBe");
+	hBe->SetName("ZDProdTarget");
+	hBe->SetTitle("Z of D meson production point in the target");
+	hBe->GetXaxis()->SetRangeUser(-0.25, 0.25);
+	hBe->Draw();
+	c->SaveAs(path + hBe->GetName() + ".pdf");
+	c->SaveAs(path + hBe->GetName() + ".png");
+	hTa = (TH1D*)h1->Clone("hTa");
+	hTa->SetName("ZDProdTAX");
+	hTa->SetTitle("Z of D meson production point in the TAXes");
+	hTa->GetXaxis()->SetRangeUser(23., 25.);
+	hTa->Draw();
+	c->SaveAs(path + hTa->GetName() + ".pdf");
+	c->SaveAs(path + hTa->GetName() + ".png");
+      }
+      if (!strcmp(key->GetName(), "ZDDecay")) {
+	hBe1 = (TH1D*)h1->Clone("hBe1");
+	hBe1->SetName("ZDDecayTarget");
+	hBe1->SetTitle("Z of D meson decay point in the target");
+	hBe1->GetXaxis()->SetRangeUser(-0.3, 0.3);
+	hBe1->Draw();
+	c->SaveAs(path + hBe1->GetName() + ".pdf");
+	c->SaveAs(path + hBe1->GetName() + ".png");
+	hTa1 = (TH1D*)h1->Clone("hTa1");
+	hTa1->SetName("ZDDecayTAX");
+	hTa1->SetTitle("Z of D meson decay point in the TAXes");
+	hTa1->GetXaxis()->SetRangeUser(23., 25.);
+	hTa1->Draw();
+	c->SaveAs(path + hTa1->GetName() + ".pdf");
+	c->SaveAs(path + hTa1->GetName() + ".png");
       }
       else {
-	TH1Cosmetics(h1, labelSize, titleSize);
-	
-	if (Name1.Contains("POT") || Name1.Contains("T10"))
-	  gStyle->SetOptStat(1111111111);
-	
-	if (!strcmp(key->GetName(), "InvMassReco")) {
-	  h1->Fit("gaus");
-	  gStyle->SetStatW(0.2);
-	  gStyle->SetStatH(0.2);
-	  gStyle->SetOptFit(111111);
-	}
-	if (!strcmp(key->GetName(), "PhysicsEventsVsCuts")) {
-	  h1->Draw("text");
-	  h1->SetOption("text");
-	}
-	if (!strcmp(key->GetName(), "ZDProd")) {
-	  hBe = (TH1D*)h1->Clone("hBe");
-	  hBe->SetName("ZDProdTarget");
-	  hBe->SetTitle("Z of D meson production point in the target");
-	  hBe->GetXaxis()->SetRangeUser(-0.25, 0.25);
-	  hBe->Draw();
-	  c->SaveAs(path + hBe->GetName() + ".pdf");
-	  c->SaveAs(path + hBe->GetName() + ".png");
-	  hTa = (TH1D*)h1->Clone("hTa");
-	  hTa->SetName("ZDProdTAX");
-	  hTa->SetTitle("Z of D meson production point in the TAXes");
-	  hTa->GetXaxis()->SetRangeUser(23., 25.);
-	  hTa->Draw();
-	  c->SaveAs(path + hTa->GetName() + ".pdf");
-	  c->SaveAs(path + hTa->GetName() + ".png");
-	}
-	if (!strcmp(key->GetName(), "ZDDecay")) {
-	  hBe1 = (TH1D*)h1->Clone("hBe1");
-	  hBe1->SetName("ZDDecayTarget");
-	  hBe1->SetTitle("Z of D meson decay point in the target");
-	  hBe1->GetXaxis()->SetRangeUser(-0.3, 0.3);
-	  hBe1->Draw();
-	  c->SaveAs(path + hBe1->GetName() + ".pdf");
-	  c->SaveAs(path + hBe1->GetName() + ".png");
-	  hTa1 = (TH1D*)h1->Clone("hTa1");
-	  hTa1->SetName("ZDDecayTAX");
-	  hTa1->SetTitle("Z of D meson decay point in the TAXes");
-	  hTa1->GetXaxis()->SetRangeUser(23., 25.);
-	  hTa1->Draw();
-	  c->SaveAs(path + hTa1->GetName() + ".pdf");
-	  c->SaveAs(path + hTa1->GetName() + ".png");
-	}
-	else {
-	  h1->Draw();
-	}
-	
-	c->SaveAs(path + key->GetName() + ".pdf");
-	c->SaveAs(path + key->GetName() + ".png");
+	h1->Draw();
       }
+      
+      c->SaveAs(path + key->GetName() + ".pdf");
+      c->SaveAs(path + key->GetName() + ".png");
     }
   }
 }
@@ -463,19 +394,20 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     path += "2/";
   
   TFile *f = TFile::Open(histo1);
-  
+
   if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr) {
-    //ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
+
+    ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
   
   if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
     
     // One value plots for weight quantities
-    
-    //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
+    /*
+    ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
       
     // Coupling plots
-    /*
+    
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
@@ -517,10 +449,6 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
     TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
-    */    
-    // Toy-MC comparison plots
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/DS", path+ "HeavyNeutrinoScan/ToyMC/DS/", c, nullptr, nullptr, nullptr, nullptr, data);
-    ParseDir(histo1, "HeavyNeutrinoScan/ToyMC/D0", path+"HeavyNeutrinoScan/ToyMC/D0/", c, nullptr, nullptr, nullptr, nullptr, data);
+    */
   }
 }
