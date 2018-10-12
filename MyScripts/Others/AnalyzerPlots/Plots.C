@@ -47,8 +47,8 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   if (name.Contains("Res2D"))
     gPad->SetLogy(0);
 
-  //if (name.Contains("EnergyMassTom")) 
-  //h2->Scale(1650000/(h2->GetEntries()/17));
+  if (name.Contains("Prob"))
+    gPad->SetLogz();
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
@@ -397,14 +397,14 @@ void Plots(TString dir, TString histo1, Bool_t data) {
 
   if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr) {
 
-    ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
+    //ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
   
   if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
     
     // One value plots for weight quantities
-    /*
-    ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
+    
+    //ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
       
     // Coupling plots
     
@@ -449,6 +449,5 @@ void Plots(TString dir, TString histo1, Bool_t data) {
     ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
     
     TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
-    */
   }
 }
