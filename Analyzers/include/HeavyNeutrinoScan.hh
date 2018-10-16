@@ -14,6 +14,7 @@
 #include <vector>
 #include <TCanvas.h>
 #include <TGraphErrors.h>
+#include <TRandom3.h>
 #include "Analyzer.hh"
 #include "TwoLinesCDA.hh"
 #include "PointLineDistance.hh"
@@ -46,9 +47,11 @@ public:
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
   void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
+  //void Sample(TGraphAsymmErrors*, TH2D*, Double_t);
 
 protected:
   
+  TRandom3* r;
   TwoLinesCDA *fCDAcomp;
   PointLineDistance *fDistcomp;
   Bool_t fReadingData;
@@ -69,6 +72,7 @@ protected:
   Int_t fN;
   Int_t fNMom;
   Int_t fNMass;
+  Int_t fNContours;
   fstream fGammaTotFile;
   fstream fTauFile;
   fstream fNEventsFile;
