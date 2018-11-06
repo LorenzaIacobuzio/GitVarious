@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# to run: ./exe run type analyzer
+
 
 run=$1
-type=$2 # data/mc (doesn't really matter)
-roottools=/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/copyFiles
-analyzer=$3 # analyzer name
+type=$2
+roottools=/afs/cern.ch/work/p/piandani/NA62/na62fw/Analysis/jobs/mergedfiles/copyFiles
+analyzer=$3
 
 incuttedfile=root$run.list
 if  [[ -e $incuttedfile ]];
