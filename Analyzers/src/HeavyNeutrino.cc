@@ -17,7 +17,7 @@
 /// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
 /// \endcode
 /// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.
-/// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e.
+/// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e; a boolean is set to true if the signal regions are to be kept blinded.
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
 /// \EndDetailed               
@@ -41,6 +41,7 @@
 #include "DownstreamTrack.hh"
 #include "GeometricAcceptance.hh"
 #include "TriggerConditions.hh"
+#include "CalorimeterCluster.hh"
 #include "SpectrometerCHODAssociationOutput.hh"
 #include "SpectrometerNewCHODAssociationOutput.hh"
 #include "SpectrometerLKrAssociationOutput.hh"
@@ -75,10 +76,11 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.);
   AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
   AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
-  AddParam("InitialFV", &fInitialFV, 102500.);
-  AddParam("LFV", &fLFV, 77500.);
+  AddParam("InitialFV", &fInitialFV, 102425.);
+  AddParam("LFV", &fLFV, 77575.);
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
+  AddParam("BlindRegion", &fBlindRegion, true);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
   fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
@@ -142,7 +144,7 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hN2tracks", new TH1D("N2tracks", "Number of two-tracks events", 1, 0., 1.));
     BookHisto("hMomPi",    new TH1D("MomPi", "Pion momentum", 100, -0.5, 200.));
     BookHisto("hMomMu",    new TH1D("MomMu", "Muon momentum", 100, -0.5, 200.));
-    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 35, 0., 35.));
+    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 37, 0., 37.));
 
     // X,Y distributions
 
@@ -228,49 +230,49 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hBeamvsTAXAll_Geom",   new TH2D("BeamvsTAXAll_Geom", "N trajectory (TAX), after geometrical cuts",    50, 0., 0.5, 50, 0., 1.));
     BookHisto("hBeamvsTAXAll_Fin",    new TH2D("BeamvsTAXAll_Fin", "N trajectory (TAX), after all cuts",             50, 0., 0.5, 50, 0., 1.));
 
-    // Signal region
+    // Signal regions
 
-    BookHisto("hSignalRegionTar_In",     new TH2D("SignalRegionTar_In", "Signal region (target), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTar_Track",  new TH2D("SignalRegionTar_Track", "Signal region (target), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTar_Energy", new TH2D("SignalRegionTar_Energy", "Signal region (target), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTar_Vetoes", new TH2D("SignalRegionTar_Vetoes", "Signal region (target), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTar_Geom",   new TH2D("SignalRegionTar_Geom", "Signal region (target), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTar_Fin",    new TH2D("SignalRegionTar_Fin", "Signal region (target), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_In",     new TH2D("SignalRegionTar_In", "Signal region (target), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_Track",  new TH2D("SignalRegionTar_Track", "Signal region (target), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_Energy", new TH2D("SignalRegionTar_Energy", "Signal region (target), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_Vetoes", new TH2D("SignalRegionTar_Vetoes", "Signal region (target), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_Geom",   new TH2D("SignalRegionTar_Geom", "Signal region (target), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTar_Fin",    new TH2D("SignalRegionTar_Fin", "Signal region (target), after all cuts",             800, -200., 200., 20, 0., 1.));
 
-    BookHisto("hSignalRegionTarMismatched_In",     new TH2D("SignalRegionTarMismatched_In", "Signal region (target), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarMismatched_Track",  new TH2D("SignalRegionTarMismatched_Track", "Signal region (target), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarMismatched_Energy", new TH2D("SignalRegionTarMismatched_Energy", "Signal region (target), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarMismatched_Vetoes", new TH2D("SignalRegionTarMismatched_Vetoes", "Signal region (target), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarMismatched_Geom",   new TH2D("SignalRegionTarMismatched_Geom", "Signal region (target), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarMismatched_Fin",    new TH2D("SignalRegionTarMismatched_Fin", "Signal region (target), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_In",     new TH2D("SignalRegionTarMismatched_In", "Signal region (target), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_Track",  new TH2D("SignalRegionTarMismatched_Track", "Signal region (target), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_Energy", new TH2D("SignalRegionTarMismatched_Energy", "Signal region (target), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_Vetoes", new TH2D("SignalRegionTarMismatched_Vetoes", "Signal region (target), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_Geom",   new TH2D("SignalRegionTarMismatched_Geom", "Signal region (target), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarMismatched_Fin",    new TH2D("SignalRegionTarMismatched_Fin", "Signal region (target), after all cuts",             800, -200., 200., 20, 0., 1.));
 
-    BookHisto("hSignalRegionTarAll_In",     new TH2D("SignalRegionTarAll_In", "Signal region (target), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarAll_Track",  new TH2D("SignalRegionTarAll_Track", "Signal region (target), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarAll_Energy", new TH2D("SignalRegionTarAll_Energy", "Signal region (target), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarAll_Vetoes", new TH2D("SignalRegionTarAll_Vetoes", "Signal region (target), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarAll_Geom",   new TH2D("SignalRegionTarAll_Geom", "Signal region (target), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTarAll_Fin",    new TH2D("SignalRegionTarAll_Fin", "Signal region (target), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_In",     new TH2D("SignalRegionTarAll_In", "Signal region (target), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_Track",  new TH2D("SignalRegionTarAll_Track", "Signal region (target), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_Energy", new TH2D("SignalRegionTarAll_Energy", "Signal region (target), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_Vetoes", new TH2D("SignalRegionTarAll_Vetoes", "Signal region (target), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_Geom",   new TH2D("SignalRegionTarAll_Geom", "Signal region (target), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTarAll_Fin",    new TH2D("SignalRegionTarAll_Fin", "Signal region (target), after all cuts",             800, -200., 200., 20, 0., 1.));
 
-    BookHisto("hSignalRegionTAX_In",     new TH2D("SignalRegionTAX_In", "Signal region (TAX), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAX_Track",  new TH2D("SignalRegionTAX_Track", "Signal region (TAX), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAX_Energy", new TH2D("SignalRegionTAX_Energy", "Signal region (TAX), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAX_Vetoes", new TH2D("SignalRegionTAX_Vetoes", "Signal region (TAX), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAX_Geom",   new TH2D("SignalRegionTAX_Geom", "Signal region (TAX), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAX_Fin",    new TH2D("SignalRegionTAX_Fin", "Signal region (TAX), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_In",     new TH2D("SignalRegionTAX_In", "Signal region (TAX), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_Track",  new TH2D("SignalRegionTAX_Track", "Signal region (TAX), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_Energy", new TH2D("SignalRegionTAX_Energy", "Signal region (TAX), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_Vetoes", new TH2D("SignalRegionTAX_Vetoes", "Signal region (TAX), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_Geom",   new TH2D("SignalRegionTAX_Geom", "Signal region (TAX), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAX_Fin",    new TH2D("SignalRegionTAX_Fin", "Signal region (TAX), after all cuts",             800, -200., 200., 20, 0., 1.));
 
-    BookHisto("hSignalRegionTAXMismatched_In",     new TH2D("SignalRegionTAXMismatched_In", "Signal region (TAX), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXMismatched_Track",  new TH2D("SignalRegionTAXMismatched_Track", "Signal region (TAX), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXMismatched_Energy", new TH2D("SignalRegionTAXMismatched_Energy", "Signal region (TAX), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXMismatched_Vetoes", new TH2D("SignalRegionTAXMismatched_Vetoes", "Signal region (TAX), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXMismatched_Geom",   new TH2D("SignalRegionTAXMismatched_Geom", "Signal region (TAX), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXMismatched_Fin",    new TH2D("SignalRegionTAXMismatched_Fin", "Signal region (TAX), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_In",     new TH2D("SignalRegionTAXMismatched_In", "Signal region (TAX), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_Track",  new TH2D("SignalRegionTAXMismatched_Track", "Signal region (TAX), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_Energy", new TH2D("SignalRegionTAXMismatched_Energy", "Signal region (TAX), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_Vetoes", new TH2D("SignalRegionTAXMismatched_Vetoes", "Signal region (TAX), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_Geom",   new TH2D("SignalRegionTAXMismatched_Geom", "Signal region (TAX), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXMismatched_Fin",    new TH2D("SignalRegionTAXMismatched_Fin", "Signal region (TAX), after all cuts",             800, -200., 200., 20, 0., 1.));
 
-    BookHisto("hSignalRegionTAXAll_In",     new TH2D("SignalRegionTAXAll_In", "Signal region (TAX), before all cuts",             200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXAll_Track",  new TH2D("SignalRegionTAXAll_Track", "Signal region (TAX), after track-quality cuts", 200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXAll_Energy", new TH2D("SignalRegionTAXAll_Energy", "Signal region (TAX), after energy cuts",       200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXAll_Vetoes", new TH2D("SignalRegionTAXAll_Vetoes", "Signal region (TAX), after veto cuts",         200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXAll_Geom",   new TH2D("SignalRegionTAXAll_Geom", "Signal region (TAX), after geometrical cuts",    200, -200., 200., 20, 0., 1.));
-    BookHisto("hSignalRegionTAXAll_Fin",    new TH2D("SignalRegionTAXAll_Fin", "Signal region (TAX), after all cuts",             200, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_In",     new TH2D("SignalRegionTAXAll_In", "Signal region (TAX), before all cuts",             800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_Track",  new TH2D("SignalRegionTAXAll_Track", "Signal region (TAX), after track-quality cuts", 800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_Energy", new TH2D("SignalRegionTAXAll_Energy", "Signal region (TAX), after energy cuts",       800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_Vetoes", new TH2D("SignalRegionTAXAll_Vetoes", "Signal region (TAX), after veto cuts",         800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_Geom",   new TH2D("SignalRegionTAXAll_Geom", "Signal region (TAX), after geometrical cuts",    800, -200., 200., 20, 0., 1.));
+    BookHisto("hSignalRegionTAXAll_Fin",    new TH2D("SignalRegionTAXAll_Fin", "Signal region (TAX), after all cuts",             800, -200., 200., 20, 0., 1.));
 
     // CDA vs Z CDA
 
@@ -297,10 +299,10 @@ void HeavyNeutrino::InitHist() {
 
     // Others
 
-    BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
-    BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
-    BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
-    BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
+    BookHisto("hNMUV3Cand",                   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
+    BookHisto("hEoP",                         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
+    BookHisto("hEoPMuVsPi",                   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
+    BookHisto("hInvMassReco",                 new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
 
     BookHisto("hKTAG",    new TH1D("KTAG", "Trigger time - KTAG candidate time", 100, -30., 30.));
     BookHisto("hCHOD",    new TH1D("CHOD", "Trigger time - CHOD candidate time", 100, -30., 30.));
@@ -352,7 +354,7 @@ void HeavyNeutrino::Process(Int_t) {
   TRecoIRCEvent* IRCEvent = (TRecoIRCEvent*)GetEvent("IRC");
   TRecoSACEvent* SACEvent = (TRecoSACEvent*)GetEvent("SAC");
   TRecoCHANTIEvent* CHANTIEvent = (TRecoCHANTIEvent*)GetEvent("CHANTI");
-  TRecoMUV3Event* MUV3Event = (TRecoMUV3Event*)GetEvent("MUV3");
+  //TRecoMUV3Event* MUV3Event = (TRecoMUV3Event*)GetEvent("MUV3");
 
   // Counter for cuts
 
@@ -441,10 +443,9 @@ void HeavyNeutrino::Process(Int_t) {
   Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
 
   // CUT: L0 + L1
-
-  if (!TriggerOK)
-    return;
-  cout<<"physics trigger ok"<<endl;
+  
+  if (!TriggerOK) return;
+  
   // If real data
   // Select physics triggers and L0 trigger conditions
 
@@ -457,7 +458,7 @@ void HeavyNeutrino::Process(Int_t) {
     }
     
     if (!L0OK) return;
-    cout<<"L0 ok"<<endl;    
+
     // Check for notKTAG o KTAG don't care at L1                                         
     
     for (UInt_t i = 0; i < fID.size(); i++) {
@@ -472,7 +473,6 @@ void HeavyNeutrino::Process(Int_t) {
     }
     
     if (!L1OK) return;
-    cout<<"L1 ok"<<endl;
   }
   
   FillHisto("hCuts", CutID);
@@ -692,7 +692,7 @@ void HeavyNeutrino::Process(Int_t) {
 	FillHisto("hXYCHODReco", x/1000., y/1000.);
   }
 
-  // Compute CDA of track1 wrt track2 and of mother wrt beam axis
+  // CDA of track1 wrt track2
 
   fCDAcomp = new TwoLinesCDA();
   
@@ -706,6 +706,8 @@ void HeavyNeutrino::Process(Int_t) {
   TVector3 Vertex = fCDAcomp->GetVertex();
   Double_t Zvertex = fCDAcomp->GetVertex().z();
 
+  // CDA of HNL wrt beamline
+
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);
@@ -715,21 +717,32 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->ComputeVertexCDA();
 
   Double_t CDAMom = fCDAcomp->GetCDA();
-  Double_t ZVertexMom = fCDAcomp->GetVertex().z();
 
-  // Proton line
+  // CDA of HNL wrt target line
 
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1Point1(Vertex);
   fCDAcomp->SetDir1(TotMom);
   fCDAcomp->SetLine2Point1(0., 0., -26.5);
-  fCDAcomp->SetLine2Point2(0., -22., 23230.);
+  fCDAcomp->SetDir2(0., 0., 1.);
   fCDAcomp->ComputeVertexCDA();
 
-  Double_t ZVertexMomProtonLine = fCDAcomp->GetVertex().z();
+  Double_t ZVertexMomTarget = fCDAcomp->GetVertex().z();
 
-  // Compute distance of track1,2 wrt beam axis
+  // CDA of HNL wrt TAX line
+
+  fCDAcomp = new TwoLinesCDA();
+
+  fCDAcomp->SetLine1Point1(Vertex);
+  fCDAcomp->SetDir1(TotMom);
+  fCDAcomp->SetLine2Point1(0., -22., 23230.);
+  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->ComputeVertexCDA();
+
+  Double_t ZVertexMomTAX = fCDAcomp->GetVertex().z();
+
+  // CDA of track1,2 wrt beamline
 
   fCDAcomp = new TwoLinesCDA();
 
@@ -751,7 +764,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   Double_t CDA2 = fCDAcomp->GetCDA();
 
-  // Compute distance of two-track momentum wrt target/TAXs
+  // Distance of HNL wrt target/TAXs
 
   fDistcomp = new PointLineDistance();
   
@@ -771,20 +784,20 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t TAXDist = fDistcomp->GetDistance();
 
-  // Compute distance of two-track momentum wrt target-TAX line
+  // Distance of HNL wrt target-TAX line
 
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1Point1(Vertex);
   fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., 0.);
-  fCDAcomp->SetLine2Point2(0., -22., 23877.5);
+  fCDAcomp->SetLine2Point1(0., 0., -26.5);
+  fCDAcomp->SetLine2Point2(0., -22., 23230.);
   fCDAcomp->ComputeVertexCDA();
 
   Double_t CDALine = fCDAcomp->GetCDA();
   Double_t ZCDAline = fCDAcomp->GetVertex().z();
 
-  // Compute distance of two-track vertex wrt beam axis
+  // Distance of HNL vertex wrt beamline
 
   fDistcomp = new PointLineDistance();
   
@@ -811,33 +824,55 @@ void HeavyNeutrino::Process(Int_t) {
     }
   }
 
-  // Reference plot - 1
+  // Reference plot - 1 (* useless)
 
-  FillHisto("hCDAvsZ_In", Zvertex/1000., CDAMom/1000., Weight);
+  Double_t TargetXMin = -20000;
+  Double_t TargetXMax = 50000.;
+  Double_t TargetYMin = 0.;
+  Double_t TargetYMax = 150.;
+  Double_t TAXXMin = -20000;
+  Double_t TAXXMax = 50000.;
+  Double_t TAXYMin = 0.;
+  Double_t TAXYMax = 120.;
+
+  FillHisto("hCDAvsZ_In", Zvertex/1000., CDAMom/1000., Weight); //*
   FillHisto("hZvsBeam_In", Zvertex/1000., BeamlineDist/1000., Weight);
 
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_In", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_In", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTAXMismatched_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_In", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_In", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_In", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_In", ZCDAline/1000., CDALine/1000., Weight); //*
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_In", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_In", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
-      FillHisto("hBeamvsTAX_In", TAXDist/1000., BeamlineDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+      FillHisto("hSignalRegionTarMismatched_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+      FillHisto("hSignalRegionTAX_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
+      FillHisto("hBeamvsTAX_In", TAXDist/1000., BeamlineDist/1000., Weight); 
       FillHisto("hBeamvsTarMismatched_In", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_In", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_In", ZCDAline/1000., CDALine/1000., Weight); //*
     }
   }
 
-  FillHisto("hSignalRegionTarAll_In", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_In", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTAXAll_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_In", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_In", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_In", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_In", ZCDAline/1000., CDALine/1000., Weight); //*
 
   // Track selection, CUT: Two tracks in Spectrometer acceptance
 
@@ -1003,13 +1038,20 @@ void HeavyNeutrino::Process(Int_t) {
   Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
   Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
   Int_t Assoc   = 0;
+  Int_t NoAssoc = 0;
   
-  if (Assoc1 && !Assoc2)
+  if (Assoc1 && !Assoc2) {
     Assoc = 1;
-  else if (!Assoc1 && Assoc2)
+    NoAssoc = 2;
+  }
+  else if (!Assoc1 && Assoc2) {
     Assoc = 2;
-  else
+    NoAssoc = 1;
+  }
+  else {
     Assoc = 0;
+    NoAssoc = 0;
+  }
 
   if (Assoc != 1 && Assoc != 2)
     return;
@@ -1051,32 +1093,123 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_Track", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_Track", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_Track", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTAXMismatched_Track", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_Track", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Track", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATarget_Track", ZCDAline/1000., CDALine/1000., Weight);
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_Track", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_Track", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTarMismatched_Track", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTAX_Track", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTAX_Track", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Track", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATAX_Track", ZCDAline/1000., CDALine/1000., Weight);
     }
   }
   
-  FillHisto("hSignalRegionTarAll_Track", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_Track", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Track", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTAXAll_Track", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_Track", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Track", TAXDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hCDAvsZCDAAll_Track", ZCDAline/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
-    FillHisto("hCDAvsCDA_Track", CDA2/1000., CDA1/1000.);
+    FillHisto("hCDAvsCDA_Track", CDA2/1000., CDA1/1000.); //*
   else if (Assoc == 2)
-    FillHisto("hCDAvsCDA_Track", CDA1/1000., CDA2/1000.);
+    FillHisto("hCDAvsCDA_Track", CDA1/1000., CDA2/1000.); //*
+  /*
+  // RICH hand-made mass
 
+  Int_t iRICHCandClose = 999;                                                                     
+  Double_t RICHMinDist = 999.;                                                              
+  Bool_t MuonRICHOK = false;                                                                  
+  Bool_t PionRICHOK = false;                                                             
+  Double_t RICHMass = -9999.9;                                                
+  Double_t RICHDist = 10.;
+  Int_t BookedCand = 999;
+
+  for (Int_t i = 0; i < 2; i++) {
+
+    iRICHCandClose = 999;
+    RICHMinDist = 999.;
+    RICHMass = -9999.9;
+
+    Double_t FocalLength = 17020.0;
+    Double_t RefIndex = 1.0000627022;
+    Double_t trackCenter = TMath::Sqrt(FocalLength*Tracks[i].GetSlopeXAfterMagnet()*FocalLength*Tracks[i].GetSlopeXAfterMagnet() + FocalLength*Tracks[i].GetSlopeYAfterMagnet()*FocalLength*Tracks[i].GetSlopeYAfterMagnet());
+
+    if (RICHEvent->GetNRingCandidates() >= 2) {
+      for (Int_t iRICH = 0; iRICH < RICHEvent->GetNRingCandidates(); iRICH++) {
+	TRecoRICHCandidate* RICHCand =(TRecoRICHCandidate*)RICHEvent->GetRingCandidate(iRICH);
+	Double_t RICHRingCenter = TMath::Sqrt(RICHCand->GetRingCenter().X()*RICHCand->GetRingCenter().X() + RICHCand->GetRingCenter().Y()*RICHCand->GetRingCenter().Y());
+
+	if (TMath::Abs(RICHRingCenter - trackCenter) <= RICHMinDist) {
+	  RICHMinDist = TMath::Abs(RICHRingCenter - trackCenter);
+	  iRICHCandClose = iRICH;
+	}
+      }
+
+      if (i == 0)
+	BookedCand = iRICHCandClose;
+
+      if (RICHMinDist <= RICHDist) {
+	if (i == 0 || (i == 1 && BookedCand != iRICHCandClose)) {
+
+	  TRecoRICHCandidate* RICHCandClose = (TRecoRICHCandidate*)RICHEvent->GetRingCandidate(iRICHCandClose);
+	  Double_t RingRadius = RICHCandClose->GetRingRadius();
+	  Double_t RICHMass2 = -9999.9;
+	  Double_t cosTheta = (RingRadius/FocalLength);
+	  Double_t n2 = RefIndex*RefIndex;
+	  Double_t ptrack = Tracks[i].GetMomentum();
+	  
+	  RICHMass2 = ptrack*ptrack*((n2/(1+cosTheta*cosTheta)) - 1);
+	  
+	  if(RICHMass2 > 0) {
+	    RICHMass = TMath::Sqrt(RICHMass2);
+	  }
+	  else {
+	    RICHMass = -1.0*TMath::Sqrt(-1.0*RICHMass2);
+	  }
+	
+	  if ((Assoc == 1 && i == 0) || (Assoc == 2 && i == 1))
+	    FillHisto("hRICHMass1", RICHMass);
+	  else if ((Assoc == 1 && i == 1) || (Assoc == 2 && i == 0))
+	    FillHisto("hRICHMass2", RICHMass);
+	}
+      
+	if (Assoc == 1 && i == 0 && RICHMass >= 80. && RICHMass <= 120.)
+	  MuonRICHOK = true;
+	else if (Assoc == 2 && i == 1 && RICHMass >= 80. && RICHMass <= 120.)
+	  MuonRICHOK = true;
+	else if (Assoc == 1 && i == 1 && RICHMass >= 120. && RICHMass <= 160.)
+	  PionRICHOK = true;
+	else if (Assoc == 2 && i == 0 && RICHMass >= 120. && RICHMass <= 160.)
+	  PionRICHOK = true;
+	else {
+	  MuonRICHOK = false;
+	  PionRICHOK = false;
+	}
+      }
+    }
+  }
+    
+    if (!MuonRICHOK || !PionRICHOK)
+      return;
+  */    
   // X,Y of mu/pi at Straw1
 
   if (Assoc == 1) {  
@@ -1152,23 +1285,36 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_Energy", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_Energy", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_Energy", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAXMismatched_Energy", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATarget_Energy", ZCDAline/1000., CDALine/1000., Weight);
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_Energy", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_Energy", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTarMismatched_Energy", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAX_Energy", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTAX_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATAX_Energy", ZCDAline/1000., CDALine/1000., Weight);
     }
   }
-  
-  FillHisto("hSignalRegionTarAll_Energy", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_Energy", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Energy", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+    FillHisto("hSignalRegionTAXAll_Energy", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hCDAvsZCDAAll_Energy", ZCDAline/1000., CDALine/1000., Weight);
@@ -1262,23 +1408,36 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_Vetoes", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_Vetoes", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_Vetoes", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAXMismatched_Vetoes", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATarget_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_Vetoes", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_Vetoes", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTarMismatched_Vetoes", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAX_Vetoes", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTAX_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATAX_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
     }
   }
   
-  FillHisto("hSignalRegionTarAll_Vetoes", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_Vetoes", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Vetoes", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+    FillHisto("hSignalRegionTAXAll_Vetoes", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hCDAvsZCDAAll_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
@@ -1331,23 +1490,36 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_Geom", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_Geom", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_Geom", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAXMismatched_Geom", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATarget_Geom", ZCDAline/1000., CDALine/1000., Weight);
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_Geom", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_Geom", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTarMismatched_Geom", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAX_Geom", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTAX_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATAX_Geom", ZCDAline/1000., CDALine/1000., Weight);
     }
   }
   
-  FillHisto("hSignalRegionTarAll_Geom", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_Geom", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Geom", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+    FillHisto("hSignalRegionTAXAll_Geom", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hCDAvsZCDAAll_Geom", ZCDAline/1000., CDALine/1000., Weight);
@@ -1362,25 +1534,45 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCDAvsZ_Fin", Zvertex/1000., CDAMom/1000., Weight);
   FillHisto("hZvsBeam_Fin", Zvertex/1000., BeamlineDist/1000., Weight);
 
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Geom", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+    FillHisto("hSignalRegionTAXAll_Geom", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   if (GetWithMC()) {
     if (Target == true) {
-      FillHisto("hSignalRegionTar_Fin", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAXMismatched_Fin", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTar_Fin", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAXMismatched_Fin", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTar_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATarget_Fin", ZCDAline/1000., CDALine/1000., Weight);
     }
     else if (Target == false) {
-      FillHisto("hSignalRegionTarMismatched_Fin", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-      FillHisto("hSignalRegionTAX_Fin", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+      if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+	FillHisto("hSignalRegionTarMismatched_Fin", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+      }
+      if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+	FillHisto("hSignalRegionTAX_Fin", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+      }
       FillHisto("hBeamvsTAX_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hCDAvsZCDATAX_Fin", ZCDAline/1000., CDALine/1000., Weight);
     }
   }
   
-  FillHisto("hSignalRegionTarAll_Fin", ZVertexMomProtonLine/1000., TargetDist/1000., Weight);
-  FillHisto("hSignalRegionTAXAll_Fin", ZVertexMomProtonLine/1000., TAXDist/1000., Weight);
+  if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
+    FillHisto("hSignalRegionTarAll_Fin", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+  }
+  if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {  
+    FillHisto("hSignalRegionTAXAll_Fin", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+  }
+
   FillHisto("hBeamvsTarAll_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hCDAvsZCDAAll_Fin", ZCDAline/1000., CDALine/1000., Weight);
@@ -1888,7 +2080,7 @@ void HeavyNeutrino::EndOfJobUser() {
 
   // Plot residual number of events after each cut
 
-  const int NCuts = 33;
+  const int NCuts = 37;
   const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", "LKr assoc", "LKr time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Beam dist", "Z vertex"};
   
   for (Int_t i = 1; i <= NCuts; i++)

@@ -21,7 +21,7 @@ function findListFile() {
 	   isData=1
     fi
 
-    echo "Ahooooooooooooo ${isData} ......... "
+    echo "isData: ${isData}"
     if [ ${isData} -eq 1 ]; then
 
 	   ## Check if we are running with filtered or unfiltered data
@@ -52,7 +52,7 @@ function findListFile() {
             year=0
         fi
 
-        echo "CIAONE ......... ${year} ..."
+        echo "year: ${year}"
         if [ ${year} -eq 0 ]; then
             echo "Run: ${run} could not be assigned a year..."
             return
@@ -60,15 +60,15 @@ function findListFile() {
 	    #listsLocation=${dataListsLocation}/${year}
             #listsLocation=${dataListsLocation}/${year}A-v0.11.1
             #listsLocation=${dataListsLocation}/${year}A-v0.11.2
-	    #listsLocation=${dataListsLocation}/${year}A-v1.0.0
-	    listsLocation=${dataListsLocation}/${year}B-v1.0.0
+	    listsLocation=${dataListsLocation}/${year}A-v1.0.0
+	    #listsLocation=${dataListsLocation}/${year}B-v1.0.0
             #Modification for reprocessing stored in Karim's directory
             #listsLocation=${dataListsLocation}${year}
             #Modification for reprocessing unfiltered stored in my directory
             #listsLocation=${dataListsLocation}/Reco${year}
         fi
 
-        echo "CIAONE 2222 ......... ${listsLocation} ..."
+        echo "list location: ${listsLocation}"
         local listCandidates=( $(ls ${listsLocation} | grep ${listFilePattern}) )
         for i in "${listCandidates[@]}"
         do
@@ -76,7 +76,7 @@ function findListFile() {
                 #swVersion=${i#*.r}
 		# Modification for reprocessing unfiltered stored in my directory
                 swVersion=${i#*.p}
-		echo "SONO FINTEEEEEEEEEEEEE ${swVersion} "
+		echo "SW version: ${swVersion}"
             else
                 # TODO: Add check for filter revision
                 #swVersion=${i#*.r}
@@ -85,7 +85,7 @@ function findListFile() {
                 swVersion=${i#*.p}
                 # Modification for reprocessing stored in Karim's directory
                 #swVersion=${i#*.r}
-		echo "SONO FINTEEEEEEEEEEEEE ${swVersion} "
+		echo "SW version: ${swVersion}"
             fi
 
             # Find the latest available sw revision

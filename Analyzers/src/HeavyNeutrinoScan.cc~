@@ -63,14 +63,14 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.);
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
-  AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, -1.);
-  AddParam("CouplingStep", &fCouplingStep, 0.1);
+  AddParam("CouplingStart", &fCouplingStart, -6.);
+  AddParam("CouplingStop", &fCouplingStop, -2.);
+  AddParam("CouplingStep", &fCouplingStep, 2.);
   AddParam("MassStart", &fMassStart, 0.3);
   AddParam("MassStop", &fMassStop, 1.9);
   AddParam("MassStep", &fMassStep, 0.1);
-  AddParam("InitialFV", &fInitialFV, 102500.);
-  AddParam("LFV", &fLFV, 77500.);
+  AddParam("InitialFV", &fInitialFV, 102425.);
+  AddParam("LFV", &fLFV, 77575.);
   AddParam("Mode", &fMode, 0);
   AddParam("MomStop", &fMomStop, 150.);
   AddParam("MomStart", &fMomStart, 0.);
@@ -185,10 +185,10 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("MassScan/hN2", new TH1D("mN2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
 
     // Total scan for contours
-
+    /*
     BookHistoArray("TotalScan/hNum", new TH1D("Num", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.), fNMass+1);
     BookHistoArray("TotalScan/hDen", new TH1D("Den", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.), fNMass+1);
-
+    */
     // Toy-MC comparison: DS
 
     BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS", "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 40, 0., 200.));
@@ -277,13 +277,14 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hpmu01")->Sumw2();
     fHisto.GetTH1("ToyMC/D0/hptmu0")->Sumw2();
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
-
+    /*
     for (auto it = GetIteratorTH1("Num"); it != it.End(); it++) {
       it->Sumw2();
     }
     for (auto it = GetIteratorTH1("Den"); it != it.End(); it++) {
       it->Sumw2();
     }
+    */
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false);
@@ -1057,7 +1058,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     for (Int_t i = 1; i < static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->GetNbinsX()+1; i++) {      
       TH1D *h = static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->ProjectionY("", i, i+1, "");           
       fHisto.GetTGraph("MassScan/MeanMass")->SetPoint(i-1, static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->GetXaxis()->GetBinCenter(i), h->GetMean());
-    }  
+    }
     
     // Total scan for contour plots
     /*
