@@ -2,7 +2,7 @@
 
 scp -r $LX/Analyzers .
 scp $LX/Jobs/* MyScripts/Jobs
-scp $LX/HaddScripts/* MyScripts/Others/HaddScript
+scp $LX/HaddScript/* MyScripts/Others/HaddScript
 git status
 git add -A
 git commit -m "update"

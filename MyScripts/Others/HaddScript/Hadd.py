@@ -23,22 +23,28 @@ if len(sys.argv) != 4:
 condorpath = os.path.abspath(sys.argv[1])
 analyzer = sys.argv[2]
 copypath = os.path.abspath(sys.argv[3])
-hadd = "hadd " + condorpath + "/final.root"
+hadd = "hadd -f " + condorpath + "/final.root"
 
 def main():
-    
+
+    os.system("source ~/na62fw/NA62Reconstruction/scripts/env.sh")
+    os.system("source ~/NA62AnalysisTool/scripts/env.sh")
+
     for subdir, dirs, files in os.walk(condorpath):
         for file in files:
             if "root" in file and "final" not in file and "new" not in file:
                 os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new" + file)) + " " + analyzer)
                 global hadd 
                 hadd += " " + os.path.abspath(os.path.join(subdir, "new" + file))
-                
+
+    with open ("hadd.txt", "w") as f:
+        f.write(hadd)
+
     os.system(hadd)
 
     for subdir, dirs, files in os.walk(condorpath):
         for file in files:
-            if "new" in file:
+            if "new" in file and "final" not in file:
                 os.remove(os.path.abspath(os.path.join(subdir, file)))
     
 if __name__ == "__main__":
