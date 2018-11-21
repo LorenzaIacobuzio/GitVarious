@@ -80,7 +80,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("LFV", &fLFV, 77575.);
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
-  AddParam("BlindRegion", &fBlindRegion, 1);
+  AddParam("BlindRegion", &fBlindRegion, true);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
   fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
