@@ -27,9 +27,6 @@ hadd = "hadd -f " + condorpath + "/final.root"
 
 def main():
 
-    os.system("source ~/na62fw/NA62Reconstruction/scripts/env.sh")
-    os.system("source ~/NA62AnalysisTool/scripts/env.sh")
-
     for subdir, dirs, files in os.walk(condorpath):
         for file in files:
             if "root" in file and "final" not in file and "new" not in file:
@@ -37,8 +34,8 @@ def main():
                 global hadd 
                 hadd += " " + os.path.abspath(os.path.join(subdir, "new" + file))
 
-    with open ("hadd.txt", "w") as f:
-        f.write(hadd)
+#    with open ("hadd.txt", "w") as f:
+#        f.write(hadd)
 
     os.system(hadd)
 
