@@ -63,15 +63,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.);
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
-<<<<<<< HEAD
   AddParam("CouplingStart", &fCouplingStart, -10.);
   AddParam("CouplingStop", &fCouplingStop, 0.);
   AddParam("CouplingStep", &fCouplingStep, 0.1);
-=======
-  AddParam("CouplingStart", &fCouplingStart, -6.);
-  AddParam("CouplingStop", &fCouplingStop, 0.);
-  AddParam("CouplingStep", &fCouplingStep, 12.);
->>>>>>> 6d5df7e6bc24e9561ee632b3f8bd74cc74922400
   AddParam("MassStart", &fMassStart, 0.240);
   AddParam("MassStop", &fMassStop, 1.980);
   AddParam("MassStep", &fMassStep, 0.01);
