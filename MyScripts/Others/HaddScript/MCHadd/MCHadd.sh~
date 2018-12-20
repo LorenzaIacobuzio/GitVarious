@@ -8,4 +8,7 @@ for i in `seq 1 $ndir`;
 		hadd -f final$i.root $i/new*.root
 	done
 
-hadd -f Final.root final*.root
+for i in `seq 1 $ndir`;
+        do
+		hadd -f Final.root final*.root
+	done

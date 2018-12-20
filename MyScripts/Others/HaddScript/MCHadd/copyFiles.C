@@ -40,10 +40,8 @@ void CopyDir(TDirectory *source) {
 
 void CopyDir(TDirectory *source, const char *directory) {
   //copy all objects and subdirs of directory source as a subdir of the current directory   
-  //source->ls();
   TDirectory *savdir = gDirectory;
-  //TDirectory *adir = savdir->mkdir(source->GetName());
-  TDirectory *adir = savdir->mkdir("hdirectory");
+  TDirectory *adir = gDirectory;
   adir->cd();
   //loop on all entries of this directory
   TKey *key;
