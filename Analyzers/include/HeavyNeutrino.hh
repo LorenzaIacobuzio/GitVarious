@@ -52,6 +52,7 @@ protected:
   std::vector<std::string> fStream;
   Bool_t   fPassSelection;
   Bool_t   fReadingData;
+  Bool_t   fBlindRegion;
   Int_t    fMode;
   Int_t    fBurstCounter;
   Double_t fInitialFV;

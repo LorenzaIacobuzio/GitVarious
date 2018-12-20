@@ -64,13 +64,13 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
   AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, -1.);
+  AddParam("CouplingStop", &fCouplingStop, 0.);
   AddParam("CouplingStep", &fCouplingStep, 0.1);
-  AddParam("MassStart", &fMassStart, 0.3);
-  AddParam("MassStop", &fMassStop, 1.9);
-  AddParam("MassStep", &fMassStep, 0.1);
-  AddParam("InitialFV", &fInitialFV, 102500.);
-  AddParam("LFV", &fLFV, 77500.);
+  AddParam("MassStart", &fMassStart, 0.240);
+  AddParam("MassStop", &fMassStop, 1.980);
+  AddParam("MassStep", &fMassStep, 0.01);
+  AddParam("InitialFV", &fInitialFV, 102425.);
+  AddParam("LFV", &fLFV, 77575.);
   AddParam("Mode", &fMode, 0);
   AddParam("MomStop", &fMomStop, 150.);
   AddParam("MomStart", &fMomStart, 0.);
@@ -94,14 +94,10 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fDistcomp = new PointLineDistance();
 
   if (fReadingData) {  
-    fGammaTotFile.open("GammaTotFile.txt", ios::out);
-    fTauFile.open("TauFile.txt", ios::out);
     fNEventsFile.open("NEventsFile.txt", ios::out);
     fSumGoodFile.open("SumGoodFile.txt", ios::out);
   }
   else {
-    fGammaTotFile.open("GammaTotFile.txt", ios::in);
-    fTauFile.open("TauFile.txt", ios::in);
     fNEventsFile.open("NEventsFile.txt", ios::in);
     fSumGoodFile.open("SumGoodFile.txt", ios::in);
   }
@@ -185,10 +181,10 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("MassScan/hN2", new TH1D("mN2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
 
     // Total scan for contours
-
+    /*
     BookHistoArray("TotalScan/hNum", new TH1D("Num", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.), fNMass+1);
     BookHistoArray("TotalScan/hDen", new TH1D("Den", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.), fNMass+1);
-
+    */
     // Toy-MC comparison: DS
 
     BookHisto("ToyMC/DS/hpDS",   new TH1D("pDS", "D_{S} momentum from D_{S} #rightarrow N#mu, N #rightarrow #pi#mu, all HNLs", 40, 0., 200.));
@@ -277,13 +273,14 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hpmu01")->Sumw2();
     fHisto.GetTH1("ToyMC/D0/hptmu0")->Sumw2();
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
-
+    /*
     for (auto it = GetIteratorTH1("Num"); it != it.End(); it++) {
       it->Sumw2();
     }
     for (auto it = GetIteratorTH1("Den"); it != it.End(); it++) {
       it->Sumw2();
     }
+    */
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false);
@@ -417,8 +414,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
     Double_t fCoupling = -999.;  
     Double_t MN = 0.;
-    Double_t HNLTau = 0.;
-    Double_t gammaTot = 0.;
     Double_t momN = 0.;
     Double_t momBin = 0.;
     Double_t NDecayProb = 0.;
@@ -451,15 +446,11 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
 	for (UInt_t i = 0; i < Weights.size(); i++) {
 	  MN = Weights[i]["Mass"];
-	  HNLTau = Weights[i]["Lifetime"];
 	  momN = Weights[i]["Momentum"];
-	  gammaTot = GammaTot(MN, false);
 	  NReachProb = Weights[i]["ReachProb"];
 	  NDecayProb = Weights[i]["DecayProb"];
 	  Weight = Weights[i]["Weight"];    
 	  isGood = Weights[i]["IsGood"];
-	  fGammaTot[round(MN)][fCoupling] = gammaTot;
-	  fTau[round(MN)][fCoupling] = HNLTau;
 	  fMasses[round(MN)] = round(MN);
 
 	  // Maps for exclusion plot
@@ -930,15 +921,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       MN = it->first;
       for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
 	Coupling = it1->first;
-	fGammaTotFile << MN << " " << Coupling << " " << fGammaTot[MN][Coupling] << "\n";
-	fTauFile << MN << " " << Coupling << " " << fTau[MN][Coupling] << "\n";
 	fNEventsFile << MN << " " << Coupling << " " << fNEvents[MN][Coupling] << "\n";
 	fSumGoodFile << MN << " " << Coupling << " " << fSumGood[MN][Coupling] << "\n";
       }
     }
 
-    fGammaTotFile.close();
-    fTauFile.close();
     fNEventsFile.close();
     fSumGoodFile.close();
   }
@@ -994,32 +981,18 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Int_t massCounter = 0;
     string line;
 
-    while (getline(fGammaTotFile, line)) {
-      stringstream ss(line);
-      Double_t value;
-      ss >> MN >> Coupling >> value;
-      fGammaTot[MN][Coupling] = value;
-    }
-
-    while (getline(fTauFile, line)) {
-      stringstream ss(line);
-      Double_t value;
-      ss >> MN >> Coupling >> value;
-      fTau[MN][Coupling] = value;
-    }
-
     while (getline(fNEventsFile, line)) {
       stringstream ss(line);
       Double_t value;
       ss >> MN >> Coupling >> value;
-      fNEvents[MN][Coupling] = value;
+      fNEvents[MN][Coupling] += value;
     }
 
     while (getline(fSumGoodFile, line)) {
       stringstream ss(line);
       Double_t value;
       ss >> MN >> Coupling >> value;
-      fSumGood[MN][Coupling] = value;
+      fSumGood[MN][Coupling] += value;
     }
 
     // Lifetime and exclusion plots
@@ -1030,8 +1003,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	Coupling = j/10.;
 
 	if (MN/1000. == fMassForSingleValue) {
-	  fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetPoint(couplingCounter, Coupling, fGammaTot[MN][Coupling]);
-	  fHisto.GetTGraph("CouplingScan/TauCoupling")->SetPoint(couplingCounter, Coupling, fTau[MN][Coupling]);
+	  fUSquared = TMath::Power(10., -10.+couplingCounter/10.);
+	  fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetPoint(couplingCounter, Coupling, GammaTot(MN, false));
+	  fHisto.GetTGraph("CouplingScan/TauCoupling")->SetPoint(couplingCounter, Coupling, tauN(MN, false));
 	  couplingCounter++;
 	}
 
@@ -1040,8 +1014,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       }
     
       Coupling = fCouplingForSingleValue;
-      fHisto.GetTGraph("MassScan/GammaTotMass")->SetPoint(massCounter, MN/1000., fGammaTot[MN][Coupling]);
-      fHisto.GetTGraph("MassScan/TauMass")->SetPoint(massCounter, MN/1000., fTau[MN][Coupling]);
+      fUSquared = TMath::Power(10., fCouplingForSingleValue);
+      fHisto.GetTGraph("MassScan/GammaTotMass")->SetPoint(massCounter, MN/1000., GammaTot(MN, false));
+      fHisto.GetTGraph("MassScan/TauMass")->SetPoint(massCounter, MN/1000., tauN(MN, false));
       massCounter++;
     }
 
@@ -1057,7 +1032,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     for (Int_t i = 1; i < static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->GetNbinsX()+1; i++) {      
       TH1D *h = static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->ProjectionY("", i, i+1, "");           
       fHisto.GetTGraph("MassScan/MeanMass")->SetPoint(i-1, static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->GetXaxis()->GetBinCenter(i), h->GetMean());
-    }  
+    }
     
     // Total scan for contour plots
     /*
