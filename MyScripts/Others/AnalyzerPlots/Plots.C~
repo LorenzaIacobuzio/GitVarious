@@ -125,7 +125,7 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
 	gPad->SetLogy();
     }
   }
-
+    
   g->GetXaxis()->SetTitleOffset(1.4);
   g->GetYaxis()->SetTitleOffset(1.4);
   gPad->Update();
@@ -133,6 +133,7 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
   g->GetYaxis()->SetTitleSize(labelSize);
   g->GetXaxis()->SetLabelSize(labelSize);
   g->GetYaxis()->SetLabelSize(labelSize);
+  g->SetMarkerSize(0.5);
   gStyle->SetOptStat(0);
   gPad->Update();
 }
@@ -222,7 +223,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       TGraphCosmetics(g, labelSize, titleSize);
 
       if (Name1.Contains("Exclusion")) {
-	g->Draw("ALF");
+	g->Draw("AP*");
       }
       
       if (!Name.Contains("Mom")) {                                  
@@ -279,6 +280,9 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       else if (Name1.Contains("CL")) {
 	g->Draw("AC");
 	m->Add(g);
+      }
+      else if (Name1.Contains("Contours")) {
+	g->Draw("AP*L");
       }
       else
 	g->Draw("AC");
@@ -361,9 +365,9 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   }
 }
 
-void Plots(TString dir, TString histo1, Bool_t data) {
+void Plots(TString dir, TString histo1, Bool_t data, TString mode) {
 
-  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc?
+  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
 
   //TGaxis::SetMaxDigits(2);
 
@@ -380,7 +384,7 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
@@ -397,63 +401,78 @@ void Plots(TString dir, TString histo1, Bool_t data) {
   
   TFile *f = TFile::Open(histo1);
 
-  if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr && data == true) {
+  if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr && data == true && (mode == "all" || mode == "hn")) {
 
     ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
 
   if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
     
-    // HeavyNeutrino plots saved in HeavyNeutrinoScan directory
-
-    ParseDir(histo1, "HeavyNeutrinoScan", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
-
-    // One value plots for weight quantities
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
-      
-    // Coupling plots
-    
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
     TMultiGraph *m3 = CreateTMultiGraph("AccFVCoupling", "FV acceptance vs coupling");
+    
+    if (mode == "all" || mode == "hn") {
 
-    ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path+"HeavyNeutrinoScan/CouplingScan/", c, m, m1, m2, m3, data);
-    
-    TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
-    c = CreateTCanvas();
-    TMultiGraphCosmetics(m1, "Log(U^{2})", "Selection acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
-    c = CreateTCanvas();
-    TMultiGraphCosmetics(m2, "Log(U^{2})", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
-    c = CreateTCanvas();
-    TMultiGraphCosmetics(m3, "Log(U^{2})", "FV acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
-    c = CreateTCanvas();
+      // HeavyNeutrino plots saved in HeavyNeutrinoScan directory
 
-    // Mass plots
-        
-    m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
-    m1 = CreateTMultiGraph("AccSelMass", "Selection acceptance vs N mass");
-    m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
-    m3 = CreateTMultiGraph("AccFVMass", "FV acceptance vs N mass");
-    
-    ParseDir(histo1, "HeavyNeutrinoScan/MassScan", path+"HeavyNeutrinoScan/MassScan/", c, m, m1, m2, m3, data);
-    
-    TMultiGraphCosmetics(m, "N mass [GeV/c^{2}]", "Yield per POT", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
-    c = CreateTCanvas();      
-    TMultiGraphCosmetics(m1, "N mass [GeV/c^{2}]", "Selection acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
-    c = CreateTCanvas();      
-    TMultiGraphCosmetics(m2, "N mass [GeV/c^{2}]", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
-    c = CreateTCanvas();      
-    TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
-    c = CreateTCanvas();
+      ParseDir(histo1, "HeavyNeutrinoScan", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
+    }
 
-    // Total scan plots
-    
-    TMultiGraph *M = CreateTMultiGraph("MergedContours", "Merged 90 CL contours");
+    if (mode == "all" || mode == "hnss") {
+      
+      // One value plots for weight quantities
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr, data);
+    }
 
-    ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
-    
-    TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
+    if (mode == "all" || mode == "hnsc") {
+      
+      // Coupling plots
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path+"HeavyNeutrinoScan/CouplingScan/", c, m, m1, m2, m3, data);
+      
+      TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      c = CreateTCanvas();
+      TMultiGraphCosmetics(m1, "Log(U^{2})", "Selection acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      c = CreateTCanvas();
+      TMultiGraphCosmetics(m2, "Log(U^{2})", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      c = CreateTCanvas();
+      TMultiGraphCosmetics(m3, "Log(U^{2})", "FV acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      c = CreateTCanvas();
+    }
+
+    if (mode == "all" || mode == "hnsm") {
+      
+      // Mass plots
+      
+      m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
+      m1 = CreateTMultiGraph("AccSelMass", "Selection acceptance vs N mass");
+      m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
+      m3 = CreateTMultiGraph("AccFVMass", "FV acceptance vs N mass");
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/MassScan", path+"HeavyNeutrinoScan/MassScan/", c, m, m1, m2, m3, data);
+      
+      TMultiGraphCosmetics(m, "N mass [GeV/c^{2}]", "Yield per POT", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      c = CreateTCanvas();      
+      TMultiGraphCosmetics(m1, "N mass [GeV/c^{2}]", "Selection acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      c = CreateTCanvas();      
+      TMultiGraphCosmetics(m2, "N mass [GeV/c^{2}]", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      c = CreateTCanvas();      
+      TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      c = CreateTCanvas();
+    }
+
+    if (mode == "all" || mode == "hnst") {
+      
+      // Total scan plots
+      
+      TMultiGraph *M = CreateTMultiGraph("MergedContours", "90\% CL contours");
+      
+      ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, M, nullptr, nullptr, nullptr, data);
+      
+      TMultiGraphCosmetics(M, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path+"HeavyNeutrinoScan/TotalScan/", labelSize, titleSize);
+    }
   }
 }
