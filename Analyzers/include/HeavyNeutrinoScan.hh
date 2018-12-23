@@ -47,7 +47,6 @@ public:
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
   void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
-  //void Sample(TGraphAsymmErrors*, TH2D*, Double_t);
 
 protected:
   

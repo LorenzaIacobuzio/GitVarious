@@ -73,13 +73,9 @@ protected:
   Int_t fNMom;
   Int_t fNMass;
   Int_t fNContours;
-  fstream fGammaTotFile;
-  fstream fTauFile;
   fstream fNEventsFile;
   fstream fSumGoodFile;
 
-  std::map<Double_t, std::map<Double_t, Double_t>> fGammaTot;
-  std::map<Double_t, std::map<Double_t, Double_t>> fTau;
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
