@@ -241,13 +241,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       if (Name1.Contains("Exclusion")) {
 	g->Draw("AP*");
       }
-      /*
-      if (Name1.Contains("Yield") && Name1.Contains("Mass")) {
-	g->SetMaximum(1.E-16);
-	g->GetXaxis()->SetTitle("porcoddio");
-	cout<<name<<" "<<g->GetMinimum()<<" "<<g->GetMaximum()<<endl;
-      }
-      */
+
       if (!Name.Contains("Mom")) {                                  
 	if (!Name.Contains("Yield") && !Name.Contains("Acc")) {
 	  g->Draw("AL");                                         
@@ -314,6 +308,9 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
     }
     else if (cl->InheritsFrom("TH2")) {
       TH2 *h2 = (TH2*)key->ReadObj();
+
+      if (Name1.Contains("DThetaMom"))
+	h2->RebinX(4);
 
       if (Name.Contains("Exclusion"))
 	h2->Draw("cont z");

@@ -17,8 +17,8 @@ import subprocess
 usage = "%Hadd.py condorpath condorfolder analyzer1 analyzer2 copypath"
 parser = argparse.ArgumentParser(description = "Script for customized hadd. It calls copyFiles on each .root produced by Condor, creates a new .root with only the selected directory and hadds all of them in a final .root file")
 
-parser.add_argument("condorpath", metavar = "condorpath", type = str, help = "leads to the condor outFiles directory")
-parser.add_argument("condorfolder", metavar = "condorfolder", type = str, help = "name of the condor output folder")
+parser.add_argument("condorpath", metavar = "condorpath", default = "/afs/cern.ch/work/l/liacobuz/private/condorOutput/HNL/outFiles/", type = str, help = "leads to the condor outFiles directory")
+parser.add_argument("condorfolder", metavar = "condorfolder", default = "condorOutput", type = str, help = "name of the condor output folder")
 parser.add_argument("analyzer1", metavar = "analyzer1", type = str, help = "first analyzer directory name to be kept in the new .root file")
 parser.add_argument("analyzer2", metavar = "analyzer2", type = str, help = "second analyzer directory name to be kept in the new .root file")
 parser.add_argument("copypath", metavar = "copypath", type = str, help = "path to copyFiles.C")
@@ -38,14 +38,14 @@ def main():
     # Split files into subdirs (do only once at beginning)
 
 #    subprocess.check_call(['./SplitIntoSubfolders.sh', condorfolder])
-
+#
     for subdir, dirs, files in os.walk(condorpath):
         for file in files:
             if "root" in file and "final" not in file and "new" not in file:
                 os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new1" + file)) + " " + analyzer1 + "\n")
                 os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new2" + file)) + " " + analyzer2 + "\n")
 
-    subprocess.call(['./MCHadd.sh', condorpath])
+#    subprocess.call(['./MCHadd.sh', condorpath])
 
 #    for subdir, dirs, files in os.walk(condorpath):
 #        for file in files:

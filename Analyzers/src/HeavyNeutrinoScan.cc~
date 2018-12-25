@@ -60,9 +60,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6);
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.);
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.061);
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.);
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 4.3);
   AddParam("CouplingStart", &fCouplingStart, -10.);
   AddParam("CouplingStop", &fCouplingStop, -1.); // do not put 0
   AddParam("CouplingStep", &fCouplingStep, 0.1);
@@ -382,29 +382,6 @@ void HeavyNeutrinoScan::InitHist() {
 
     BookHisto("TotalScan/Contours", new TGraph());
     fHisto.GetTGraph("TotalScan/Contours")->SetNameTitle("TotalScan/Contours", "Contours for sensitivity");
-    /*    
-    BookHistoArray("TotalScan/Res", new TGraphAsymmErrors(), fNMass+1);
-    
-    Int_t counter = 0;
-
-    for (auto it = GetIteratorTGraph("TotalScan/Res"); it != it.End(); it++) {
-      (*it)->SetNameTitle(Form("Res%d", counter), "");
-      counter++;
-    }
-    
-    BookHistoArray("TotalScan/hRes2D", new TH2D("Res2D", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.), fNContours);
-
-    counter = 0;
-    
-    BookHistoArray("TotalScan/CL", new TGraph(), fNContours);
-    for (auto it = GetIteratorTGraph("TotalScan/CL"); it != it.End(); it++) {
-      (*it)->SetNameTitle(Form("CL%d", counter), "");
-      counter++;
-    }
-    
-    BookHisto("TotalScan/MergedContours", new TGraphErrors());
-    fHisto.GetTGraph("TotalScan/MergedContours")->SetNameTitle("TotalScan/MergedContours", "Contours for sensitivity");
-    */
   }
 }
 
@@ -767,35 +744,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	kineCounter++;
       }
     }
-    
-    // Scan on the coupling and mass for contour plots (Tommaso's new, twisted and vicious idea)
-    /*
-    for(Int_t couplingIndex  = fCouplingStart*10; couplingIndex <= fCouplingStop*10; couplingIndex += fCouplingStep*10) {
-      fCoupling = couplingIndex/10.;
-      fUSquared = TMath::Power(10., fCoupling);
-      fUeSquaredRatio = fInitialUeSquaredRatio;
-      fUmuSquaredRatio = fInitialUmuSquaredRatio;
-      fUtauSquaredRatio = fInitialUtauSquaredRatio;
-      fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
-      fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
-      fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
-      
-      if (GetWithMC()) {
-	Event *evt = GetMCEvent();
-	
-	std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fInitialUeSquaredRatio, fInitialUmuSquaredRatio, fInitialUtauSquaredRatio, fLInitialFV, fLFV, fMode);
-	
-	for (UInt_t i = 0; i < Weights.size(); i++) {
-	  Weight = Weights[i]["Weight"];    
-	  isGood = Weights[i]["IsGood"];
-	  Double_t mass = (Weights[i]["Mass"]/1000. - fMassStart)*10.;
-	  FillHistoArray("TotalScan/hDen", mass, fCoupling, scale);
-
-	  if (IsHNLGood == true && isGood == true)
-	    FillHistoArray("TotalScan/hNum", mass, fCoupling, Weight*scale);
-	}
-      }
-      }*/
   }
 }
 
@@ -1020,7 +968,6 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
 	if (fSumGood[MN][Coupling]/fNEvents[MN][Coupling] != 0.0/0.0 && fSumGood[MN][Coupling]/fNEvents[MN][Coupling] != 1.0/0.0)
 	  fYield[MN][Coupling] = fSumGood[MN][Coupling]/fNEvents[MN][Coupling];
-
 	FillHisto("TotalScan/hExclusion", MN/1000., Coupling, fYield[MN][Coupling]*POT);
       }
     
@@ -1060,95 +1007,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       TH1D *h = static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->ProjectionY("", i, i+1, "");           
       fHisto.GetTGraph("MassScan/MeanMass")->SetPoint(i-1, static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "MassScan/ProbMass", true))->GetXaxis()->GetBinCenter(i), h->GetMean());
     }
-    
-    // Total scan for contour plots
-    /*
-    auto itNum = GetIteratorTH1("Num");
-    auto itDen = GetIteratorTH1("Den");
-    auto itRes = GetIteratorTGraph("TotalScan/Res");
-    auto itRes2D = GetIteratorTH2("TotalScan/hRes2D");
-    auto itCont = GetIteratorTGraph("TotalScan/CL");
-    auto itCont0 = GetIteratorTGraph("TotalScan/CL");
 
-    // Yield plots
-
-    for (Int_t j = 0; j <= fNMass; j++) {
-      Double_t mass = fMassStart + j*fMassStep;
-      static_cast<TGraphAsymmErrors*>(*itRes)->Divide(static_cast<TH1D*>(*itNum), static_cast<TH1D*>(*itDen), "cl=0.683 mode");
-      itNum++;
-      itDen++;
-      itRes++;
-    }
-    
-    itRes = GetIteratorTGraph("TotalScan/Res");
-
-    // Random sampling
-
-    for (Int_t i = 0; i < fNContours; i++) {
-      for (Int_t j = 0; j <= fNMass; j++) {
-	Double_t mass = fMassStart + j*fMassStep;
-	Sample(static_cast<TGraphAsymmErrors*>(*itRes), static_cast<TH2D*>(*itRes2D), mass);
-	itRes++;
-      }
-      itRes2D++;
-      itRes = GetIteratorTGraph("TotalScan/Res");
-    }
-    
-    itRes2D = GetIteratorTH2("TotalScan/hRes2D");
-
-    // Single contour plots
-        
-    for (Int_t i = 0; i < fNContours; i++) {
-      EvaluateUL(static_cast<TH2D*>(*itRes2D), *itCont);
-      itRes2D++;
-      itCont++;
-    }
-    */
-    // Error bars for merged contour plot
-    /*
-    std::vector<TGraph> inv;
-    itCont = GetIteratorTGraph("TotalScan/CL");
-      
-    for (Int_t i = 0; i < fNContours; i++) {
-      inv.push_back(TGraph());
-      for (Int_t j = 0; j < itCont->GetN(); j++) {
-	Double_t x,y;
-	itCont->GetPoint(j, x, y);
-	inv.back().SetPoint(j, y, x);
-      }
-      inv.back().Print();
-      itCont++;
-    }
-    
-    for (Int_t i = 0; i < itCont0->GetN(); i++) {
-      itCont = GetIteratorTGraph("TotalScan/CL");
-      auto itInv = inv.begin();
-      Double_t x,y;
-      Double_t meanX = 0.;
-      Double_t sigmaX = 0.;
-      Double_t meanY = 0.;
-      Double_t sigmaY = 0.;
-      for (Int_t j = 0; j < fNContours; j++) {
-	itCont0->GetPoint(i, x, y);
-	meanX += itCont->Eval(x);
-	meanY += itInv->Eval(y);
-	itCont++;
-	itInv++;
-      }
-      itCont = GetIteratorTGraph("TotalScan/CL");
-      itInv = inv.begin();
-      for (Int_t j = 0; j < fNContours; j++) {
-	sigmaX += (itCont->Eval(x) - meanX)*(itCont->Eval(x) - meanX);
-        itCont++;
-	sigmaY += (itInv->Eval(y) - meanY)*(itInv->Eval(y) - meanY);
-	itInv++;
-      }
-      sigmaX = TMath::Sqrt(sigmaX/(fNContours - 1));
-      sigmaY = TMath::Sqrt(sigmaY/(fNContours - 1));
-      static_cast<TGraphErrors*>(fHisto.GetTGraph("TotalScan/MergedContours"))->SetPoint(i, meanX, meanY);
-      static_cast<TGraphErrors*>(fHisto.GetTGraph("TotalScan/MergedContours"))->SetPointError(i, sigmaX, sigmaY);
-    }
-    */
     // Cosmetics
   
     CosmeticsGraph(fHisto.GetTGraph("CouplingScan/GammaTotCoupling"), "Log(U^{2})", "Total decay width [MeV]", 2);
@@ -1331,19 +1190,3 @@ void HeavyNeutrinoScan::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1,
 
   return;
 }
-/*
-void HeavyNeutrinoScan::Sample(TGraphAsymmErrors* res, TH2D* res2D, Double_t mass) {
-
-  for (Int_t i = 0; i < res->GetN(); i++) {
-    Double_t x, y, z, yield, yieldmin, yieldmax;
-    res->GetPoint(i, y, z);
-    x = mass;
-    yieldmin = z - res->GetErrorYlow(i);
-    yieldmax = z + res->GetErrorYhigh(i);
-    yield = r->Rndm()*(yieldmax - yieldmin) + yieldmin;
-    res2D->Fill(x, y, yield*1.E18);
-  }
-
-   return;
- }
-*/
