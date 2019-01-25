@@ -27,6 +27,13 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   h2->GetYaxis()->SetTitleOffset(1.4);
   gStyle->SetOptStat(0);
   gPad->Update();
+
+  TString name = h2->GetName();
+  
+  if (name.Contains("EoP"))
+    gPad->SetLogz();
+  else
+    gPad->SetLogz(0);
   
   if (logScale == true) {
     gPad->SetLogy();
@@ -41,8 +48,6 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
     h2->GetXaxis()->SetRangeUser(-1., 1.);
     h2->GetYaxis()->SetRangeUser(-1., 1.);
   }
-  
-  TString name = h2->GetName();
   
   if (name.Contains("Res2D"))
     gPad->SetLogy(0);
@@ -403,7 +408,7 @@ void Plots(TString dir, TString histo1, Bool_t data, TString mode) {
   if (dir != "")
     path = dir;
   else
-    path = "/Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";
