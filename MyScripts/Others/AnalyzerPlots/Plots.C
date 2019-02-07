@@ -30,7 +30,7 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
 
   TString name = h2->GetName();
   
-  if (name.Contains("EoP"))
+  if (name.Contains("EoP") || name.Contains("CDAvsZCDA") || name.Contains("SR"))
     gPad->SetLogz();
   else
     gPad->SetLogz(0);
@@ -408,7 +408,7 @@ void Plots(TString dir, TString histo1, Bool_t data, TString mode) {
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
+    path = "/Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("1"))
     path += "1/";

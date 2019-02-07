@@ -78,8 +78,8 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
-  std::map<Double_t, Double_t>                     fCouplings;
-  std::map<Double_t, Double_t>                     fMasses;
+  std::map<Double_t, Double_t> fCouplings;
+  std::map<Double_t, Double_t> fMasses;
 };
 
 #endif

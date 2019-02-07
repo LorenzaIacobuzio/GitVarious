@@ -215,10 +215,17 @@ while read -r configLine || [[ -n "$configLine" ]]; do
     fi
 
     # Find executable options
-    myOptionsPrefix="myOptions= "
-    if [[ ${configLine} == ${myOptionsPrefix}* ]]; then
-	myOptions=${configLine#$myOptionsPrefix}
-	echo "My options:" ${myOptions}
+#    myOptionsPrefix="myOptions= "
+#    if [[ ${configLine} == ${myOptionsPrefix}* ]]; then
+#	myOptions=${configLine#$myOptionsPrefix}
+#	echo "My options:" ${myOptions}
+#    fi
+
+   # Find executable ignore
+    myIgnorePrefix="myIgnore= "
+    if [[ ${configLine} == ${myIgnorePrefix}* ]]; then
+        myIgnore=${configLine#$myIgnorePrefix}
+        echo "My ignore:" ${myIgnore}
     fi
 
 done < <(cat ${configFile})
@@ -324,7 +331,8 @@ for run in ${runs}; do
             head -${jobNumber} ${listFile} | tail -${finalList} > ${jobListFile}
         fi
 
-	   analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myOptions}"
+	   #analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myOptions}"
+analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myIgnore}"
 	   echo ${analysisJobInput} >> ${inputDir}/${analysisInputFile}
     done
 

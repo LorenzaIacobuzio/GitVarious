@@ -59,18 +59,18 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
   RequestAllMCTrees();
 
-  AddParam("USquared", &fUSquared, 1.E-6);
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.061);
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.);
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 4.3);
-  AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, -1.); // do not put 0
-  AddParam("CouplingStep", &fCouplingStep, 0.1);
+  //AddParam("USquared", &fUSquared, 1.E-6);
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.);
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
+  AddParam("CouplingStart", &fCouplingStart, -5.); // -10
+  AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
+  AddParam("CouplingStep", &fCouplingStep, 1); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
-  AddParam("MassStep", &fMassStep, 0.01);
-  AddParam("InitialFV", &fInitialFV, 102425.);
-  AddParam("LFV", &fLFV, 77575.);
+  AddParam("MassStep", &fMassStep, 0.01); // keep this step
+  AddParam("InitialFV", &fInitialFV, 102425.); // keep
+  AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MomStop", &fMomStop, 150.);
   AddParam("MomStart", &fMomStart, 0.);
@@ -84,9 +84,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fNMass = round((std::abs(fMassStop-fMassStart))/fMassStep);
-  fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
-  fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
-  fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
+  //fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
+  //fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
+  //fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
   fNContours = 20;
   r = new TRandom3(0);
 
@@ -403,6 +403,8 @@ void HeavyNeutrinoScan::Process(Int_t) {
 
     // Scan on the coupling                          
   
+    cout<<fUSquared<<" "<<fUeSquared<<endl;
+
     for(Int_t couplingIndex  = fCouplingStart*10; couplingIndex <= fCouplingStop*10; couplingIndex += fCouplingStep*10) {
       fCoupling = couplingIndex/10.;
       fUSquared = TMath::Power(10., fCoupling);
@@ -413,7 +415,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
       fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
       fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
       fCouplings[fCoupling] = fCoupling;
-
+      
       // Retrieve HNL weights
 
       if (GetWithMC()) {
@@ -980,21 +982,21 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
     EvaluateUL(fHisto.GetTH2("TotalScan/hExclusion"), fHisto.GetTGraph("TotalScan/Contours"));
 
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(350, 1.96, -3.5);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(351, 1.96, -3.5);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(352, 1.96, -3.7);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(353, 1.96, -3.8);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(354, 1.96, -4.2);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(355, 1.96, -4.3);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(356, 1.96, -4.4);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(357, 1.96, -4.7);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(358, 1.96, -4.9);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(359, 1.96, -5.1);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(360, 1.96, -5.2);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(361, 1.96, -5.6);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(362, 1.96, -5.7);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(363, 1.96, -5.8);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(364, 1.96, -6.0);
+    Int_t N = fHisto.GetTGraph("TotalScan/Contours")->GetN();
+    Double_t X[N], Y[N];
+    
+    for (Int_t i = 0; i < N; i++)
+      fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
+
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N,   1.96, Y[N-1]-0.2);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+1, 1.96, Y[N-1]-0.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+2, 1.96, Y[N-1]-0.8);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+3, 1.96, Y[N-1]-1.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+4, 1.96, Y[N-1]-1.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+5, 1.96, Y[N-1]-1.9);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+6, 1.96, Y[N-1]-2.0);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
 
     // Mean probability vs mass and coupling
 

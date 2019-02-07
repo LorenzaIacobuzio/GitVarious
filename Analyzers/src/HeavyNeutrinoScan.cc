@@ -59,18 +59,18 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
   RequestAllMCTrees();
 
-  AddParam("USquared", &fUSquared, 1.E-6);
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.061);
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.);
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 4.3);
-  AddParam("CouplingStart", &fCouplingStart, -10.);
-  AddParam("CouplingStop", &fCouplingStop, -1.); // do not put 0
-  AddParam("CouplingStep", &fCouplingStep, 0.1);
+  AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("CouplingStart", &fCouplingStart, -6.); // -10
+  AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
+  AddParam("CouplingStep", &fCouplingStep, 6); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
-  AddParam("MassStep", &fMassStep, 0.01);
-  AddParam("InitialFV", &fInitialFV, 102425.);
-  AddParam("LFV", &fLFV, 77575.);
+  AddParam("MassStep", &fMassStep, 0.01); // keep this step
+  AddParam("InitialFV", &fInitialFV, 102425.); // keep
+  AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MomStop", &fMomStop, 150.);
   AddParam("MomStart", &fMomStart, 0.);
@@ -84,9 +84,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fNMom = round((std::abs(fMomStop - fMomStart))/fMomStep);
   fN = round((std::abs(fCouplingStop-fCouplingStart))/fCouplingStep);
   fNMass = round((std::abs(fMassStop-fMassStart))/fMassStep);
-  fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
-  fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
-  fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
+  //fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
+  //fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
+  //fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
   fNContours = 20;
   r = new TRandom3(0);
 
@@ -413,7 +413,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
       fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
       fUtauSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio;
       fCouplings[fCoupling] = fCoupling;
-
+      
       // Retrieve HNL weights
 
       if (GetWithMC()) {

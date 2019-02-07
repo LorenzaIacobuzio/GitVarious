@@ -17,7 +17,8 @@
 /// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
 /// \endcode
 /// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.
-/// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e; a boolean is set to true if the signal regions are to be kept blinded.
+/// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e; a boolean is set to true if the signal regions are to be kept blinded; a boolean is set to true if MC samples are analysed for studying sidebands (it just changes the weight of the distributions to 1); a boolean that ensures plots are filled only for a certain mass and coupling (set by the user).
+
 ///
 /// \author Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch)
 /// \EndDetailed               
@@ -72,15 +73,19 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestL0SpecialTrigger();
   RequestBeamSpecialTrigger();
 
-  AddParam("USquared", &fUSquared, 1.E-6);
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.);
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.);
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8);
-  AddParam("InitialFV", &fInitialFV, 102425.);
-  AddParam("LFV", &fLFV, 77575.);
+  AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("InitialFV", &fInitialFV, 102425.); // keep
+  AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
   AddParam("BlindRegion", &fBlindRegion, false);
+  AddParam("MCsample", &fMCsample, false);
+  AddParam("EnableChecks", &fEnableChecks, false);
+  AddParam("MassForChecks", &fMassForChecks, 1.6);
+  AddParam("CouplingForChecks", &fCouplingForChecks, 1.E-6);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
   fUmuSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUmuSquaredRatio;
@@ -299,12 +304,12 @@ void HeavyNeutrino::InitHist() {
 
     // CDA vs Z CDA
 
-    BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before all cuts",             100, -5., 5., 30, 0., 0.15));
-    BookHisto("hCDAvsZCDATarget_Track",  new TH2D("CDAvsZCDATarget_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 100, -5., 5., 30, 0., 0.15));
-    BookHisto("hCDAvsZCDATarget_Energy", new TH2D("CDAvsZCDATarget_Energy", "N trajectory wrt target-TAX line, after energy cuts",       100, -5., 5., 30, 0., 0.15));
-    BookHisto("hCDAvsZCDATarget_Vetoes", new TH2D("CDAvsZCDATarget_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         100, -5., 5., 30, 0., 0.15));
-    BookHisto("hCDAvsZCDATarget_Geom",   new TH2D("CDAvsZCDATarget_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    100, -5., 5., 30, 0., 0.15));
-    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after all cuts",             100, -5., 5., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before all cuts",             100, -50., 50., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_Track",  new TH2D("CDAvsZCDATarget_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 100, -50., 50., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_Energy", new TH2D("CDAvsZCDATarget_Energy", "N trajectory wrt target-TAX line, after energy cuts",       100, -50., 50., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_Vetoes", new TH2D("CDAvsZCDATarget_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         100, -50., 50., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_Geom",   new TH2D("CDAvsZCDATarget_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    100, -50., 50., 30, 0., 0.15));
+    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after all cuts",             100, -50., 50., 30, 0., 0.15));
 
     BookHisto("hCDAvsZCDATAX_In",     new TH2D("CDAvsZCDATAX_In", "N trajectory wrt target-TAX line, before all cuts",             100, -50., 50., 30, 0., 0.15));
     BookHisto("hCDAvsZCDATAX_Track",  new TH2D("CDAvsZCDATAX_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 100, -50., 50., 30, 0., 0.15));
@@ -325,12 +330,20 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hThetavsZCDA_Tar", new TH2D("ThetavsZCDA_Tar", "N angular distribution for target-produced events", 200, -15., 15., 50, 0., 0.005));
     BookHisto("hThetavsZCDA_TAX", new TH2D("ThetavsZCDA_TAX", "N angular distribution for TAX-produced events", 200, 0., 50., 50, 0., 0.005));
 
+
+    // Sidebands 
+
+    BookHisto("hCDA",  new TH1D("CDA", "Vertex-beamline distance for parasitic background", 200, 0., 1000.));
+    BookHisto("hTime", new TH1D("Time", "Track time difference for combinatorial background", 500, -15., 15.));
+    BookHisto("hZ", new TH1D("Z", "Z of vertex for prompt background", 300, 100., 190.));
+    BookHisto("hBeamdistvsMass", new TH2D("BeamdistvsMass", "Vertex-beamline distance vs reconstructed mass", 200, 0., 2., 200, 0., 1000.));
+
     // Others
 
-    BookHisto("hNMUV3Cand",                   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
-    BookHisto("hEoP",                         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
-    BookHisto("hEoPMuVsPi",                   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
-    BookHisto("hInvMassReco",                 new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
+    BookHisto("hNMUV3Cand",   new TH1D("NMUV3Cand", "MUV3 candidates for each track", 4, -0.5, 3.5));
+    BookHisto("hEoP",         new TH1D("EoP", "E/p in LKr", 100, 0., 1.2));
+    BookHisto("hEoPMuVsPi",   new TH2D("EoPMuVsPi", "Muon E/p vs pion E/p in LKr", 100, 0., 1.4, 100, 0., 0.3));  
+    BookHisto("hInvMassReco", new TH1D("InvMassReco", "Invariant mass Reco", 50, 0.96, 1.04));
 
     BookHisto("hKTAG",    new TH1D("KTAG", "Trigger time - KTAG candidate time", 100, -30., 30.));
     BookHisto("hCHOD",    new TH1D("CHOD", "Trigger time - CHOD candidate time", 100, -30., 30.));
@@ -350,7 +363,7 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hPOTT10", new TH1D("POTT10", "", 1, 0., 1.));
     BookHisto("hPOTFit", new TH1D("POTFit", "", 1, 0., 1.));
 
-    BookHisto("hSpare1", new TH1D("Spare1", "", 100, 117., 122.));
+    BookHisto("hSpare1", new TH1D("Spare1", "", 50, 0., 30.));
     BookHisto("hSpare2", new TH2D("Spare2", "", 100, 110., 130., 100, 110., 130.));
 
     BookHisto("T10", new TGraph());
@@ -382,7 +395,6 @@ void HeavyNeutrino::Process(Int_t) {
   TRecoIRCEvent* IRCEvent = (TRecoIRCEvent*)GetEvent("IRC");
   TRecoSACEvent* SACEvent = (TRecoSACEvent*)GetEvent("SAC");
   TRecoCHANTIEvent* CHANTIEvent = (TRecoCHANTIEvent*)GetEvent("CHANTI");
-  //TRecoMUV3Event* MUV3Event = (TRecoMUV3Event*)GetEvent("MUV3");
 
   // Counter for cuts
 
@@ -399,7 +411,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Some plots of KinePart quantities
 
-  if (GetWithMC()) {
+  if (GetWithMC() && !fMCsample) {
     Event *evt = GetMCEvent();
     counter = 0;
     for (Int_t i = 0; i < evt->GetNKineParts(); i++) {
@@ -427,8 +439,15 @@ void HeavyNeutrino::Process(Int_t) {
       }
     }
   }
+
+  // Plots with only one mass and coupling (for checks)
+
+  if (fEnableChecks)
+    fUSquared = fCouplingForChecks;
   
   // Retrieve weight associated to good HNL
+
+  Double_t MN = 0.;
   
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
@@ -438,10 +457,16 @@ void HeavyNeutrino::Process(Int_t) {
     for (UInt_t i = 0; i < Weights.size(); i++) {
       if ((Bool_t)(Weights[i]["IsGood"]) == true) {
 	Weight = Weights[i]["Weight"];
+	MN = round(Weights[i]["Mass"])/1000.;
       }  
     }
   }
+
+  // Plots with only one mass and coupling (for checks)
   
+  if (fEnableChecks && MN != fMassForChecks)
+    return;
+
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
   Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
   Double_t L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
@@ -476,7 +501,7 @@ void HeavyNeutrino::Process(Int_t) {
   
   // If real data
   // Select physics triggers and L0 trigger conditions
-
+  
   if (!GetWithMC()) {  
     Bool_t L0OK = kFALSE;
     Bool_t L1OK = kFALSE;
@@ -704,19 +729,19 @@ void HeavyNeutrino::Process(Int_t) {
     for (Int_t j = 0; j < 4; j++) {
       Double_t x = Cand->xAt(fzStraw[j]);
       Double_t y = Cand->yAt(fzStraw[j]);
-      Double_t r = sqrt(x*x + y*y); 
-      Double_t rShifted = sqrt(pow(x-fxStrawChamberCentre[j],2) + y*y); 
-      if (rShifted > frMinStraw && r < frMaxStraw) {
+      //Double_t r = sqrt(x*x + y*y); 
+      //Double_t rShifted = sqrt(pow(x-fxStrawChamberCentre[j],2) + y*y); 
+      //if (rShifted > frMinStraw && r < frMaxStraw) {
 	TString name = Form("hXYSpec%dReco",j);
 	FillHisto(name, x/1000., y/1000.);
-      }
+	//}
     }
     Double_t x = Cand->xAtAfterMagnet(fzCHODPlane);
     Double_t y = Cand->yAtAfterMagnet(fzCHODPlane);
-    Double_t r = sqrt(x*x+y*y);
-    Double_t r1 = frMinCHOD;
-    Double_t r2 = frMaxCHOD;
-    if (r > r1 && r < r2)
+    //Double_t r = sqrt(x*x+y*y);
+    //Double_t r1 = frMinCHOD;
+    //Double_t r2 = frMaxCHOD;
+    //if (r > r1 && r < r2)
 	FillHisto("hXYCHODReco", x/1000., y/1000.);
   }
 
@@ -738,8 +763,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   fCDAcomp = new TwoLinesCDA();
 
-  fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.0);
-  fCDAcomp->SetDir1(0., 0., 1.);
+  fCDAcomp->SetLine1Point1(0.0, 0.0, 102000.);
+  fCDAcomp->SetDir1(0., 0., 1.2E-3);
   fCDAcomp->SetLine2Point1(Vertex);
   fCDAcomp->SetDir2(TotMom);
   fCDAcomp->ComputeVertexCDA();
@@ -753,7 +778,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
   fCDAcomp->SetDir1(Mom1);
   fCDAcomp->SetLine2Point1(0.0, 0.0, 102000.);
-  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->SetDir2(0., 0., 1.2E-3);
   fCDAcomp->ComputeVertexCDA();
 
   Double_t CDA1 = fCDAcomp->GetCDA();
@@ -763,7 +788,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->SetLine1Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
   fCDAcomp->SetDir1(Mom2);
   fCDAcomp->SetLine2Point1(0.0, 0.0, 102000.);
-  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->SetDir2(0., 0., 1.2E-3);
   fCDAcomp->ComputeVertexCDA();
 
   Double_t CDA2 = fCDAcomp->GetCDA();
@@ -779,14 +804,14 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->ComputeVertexCDA();
 
   Double_t CDALine = fCDAcomp->GetCDA();
-  Double_t ZCDAline = fCDAcomp->GetVertex().z();
+  Double_t ZCDALine = fCDAcomp->GetVertex().z();
 
   // Distance of HNL vertex wrt beamline
 
   fDistcomp = new PointLineDistance();
   
   fDistcomp->SetLinePoint1(0., 0., 102000.);
-  fDistcomp->SetLineDir(0., 0., 1.);
+  fDistcomp->SetLineDir(0., 0., 1.2E-3);
   fDistcomp->SetPoint(Vertex);
   
   fDistcomp->ComputeDistance();
@@ -878,27 +903,25 @@ void HeavyNeutrino::Process(Int_t) {
   Double_t ZBrokenTAX = fCDAcomp->GetVertex().z();
   Double_t CDABrokenTAX = fCDAcomp->GetCDA();
 
-  Double_t xSR = 0.;
-  Double_t ySR = 0.;
-  Double_t minCDA = 999.;
+  Double_t xSR = -999.;
+  Double_t ySR = -999.;
+  Double_t minCDA = 999999.;
+  Double_t xRes = 3.*12000.;
 
-  if (ZBrokenTarget <= 14960. && CDABrokenTarget < minCDA) {
+  if (ZBrokenTarget <= (14960. + xRes) && CDABrokenTarget < minCDA) {
     minCDA = CDABrokenTarget;
     xSR = ZBrokenTarget;
   }
-  if (ZBrokenProtonLine > 14960. && ZBrokenProtonLine <= 22760. && CDABrokenProtonLine < minCDA) {
+  if (ZBrokenProtonLine > (14960. - xRes) && ZBrokenProtonLine <= (22760. + xRes) && CDABrokenProtonLine < minCDA) {
     minCDA = CDABrokenProtonLine;
     xSR = ZBrokenProtonLine;
   }
-  if (ZBrokenTAX > 22760. && CDABrokenTAX < minCDA) {
+  if (ZBrokenTAX > (22760. - xRes) && CDABrokenTAX < minCDA) {
     minCDA = CDABrokenTAX;
     xSR = ZBrokenTAX;
   }
 
-  if (TargetDist <= TAXDist)
-    ySR = TargetDist;
-  else
-    ySR = TAXDist;
+  ySR = minCDA;
 
   // MC studies on extrapolation to target/TAX
 
@@ -922,18 +945,18 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Reference plot - 1 (* useless)
 
-  Double_t TargetXMin = -20000.;
-  Double_t TargetXMax = 50000.;
+  Double_t TargetXMin = -15000.;
+  Double_t TargetXMax = 40000.;
   Double_t TargetYMin = 0.;
-  Double_t TargetYMax = 150.;
-  Double_t TAXXMin = -20000.;
-  Double_t TAXXMax = 50000.;
+  Double_t TargetYMax = 50.;
+  Double_t TAXXMin = -15000.;
+  Double_t TAXXMax = 40000.;
   Double_t TAXYMin = 0.;
-  Double_t TAXYMax = 120.;
-  Double_t xMin = -20000.;
-  Double_t xMax = 50000.;
+  Double_t TAXYMax = 50.;
+  Double_t xMin = -15000.;
+  Double_t xMax = 40000.;
   Double_t yMin = 0.;
-  Double_t yMax = 150.;
+  Double_t yMax = 50.;
 
   FillHisto("hCDAvsZ_In", Zvertex/1000., CDAMom/1000., Weight); //*
   FillHisto("hZvsBeam_In", Zvertex/1000., BeamlineDist/1000., Weight);
@@ -941,28 +964,28 @@ void HeavyNeutrino::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
-	FillHisto("hSignalRegionTar_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+	FillHisto("hSignalRegionTar_In", ZVertexMomTarget/1000., TargetDist/1000., Weight); //*
       }
       if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
-	FillHisto("hSignalRegionTAXMismatched_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+	FillHisto("hSignalRegionTAXMismatched_In", ZVertexMomTAX/1000., TAXDist/1000., Weight); //*
       }
-      FillHisto("hBeamvsTar_In", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hBeamvsTAXMismatched_In", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_In", ZCDAline/1000., CDALine/1000., Weight); //*
+      FillHisto("hBeamvsTar_In", TargetDist/1000., BeamlineDist/1000., Weight); //*
+      FillHisto("hBeamvsTAXMismatched_In", TAXDist/1000., BeamlineDist/1000., Weight); //*
+      FillHisto("hCDAvsZCDATarget_In", ZCDALine/1000., CDALine/1000., Weight); //*
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_In", xSR/1000., ySR/1000., Weight);
       }
     }
     else if (Target == false) {
       if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
-      FillHisto("hSignalRegionTarMismatched_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+	FillHisto("hSignalRegionTarMismatched_In", ZVertexMomTarget/1000., TargetDist/1000., Weight); //*
       }
       if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
-      FillHisto("hSignalRegionTAX_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+	FillHisto("hSignalRegionTAX_In", ZVertexMomTAX/1000., TAXDist/1000., Weight); //*
       }
-      FillHisto("hBeamvsTAX_In", TAXDist/1000., BeamlineDist/1000., Weight); 
-      FillHisto("hBeamvsTarMismatched_In", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_In", ZCDAline/1000., CDALine/1000., Weight); //*
+      FillHisto("hBeamvsTAX_In", TAXDist/1000., BeamlineDist/1000., Weight); //*
+      FillHisto("hBeamvsTarMismatched_In", TargetDist/1000., BeamlineDist/1000., Weight); //*
+      FillHisto("hCDAvsZCDATAX_In", ZCDALine/1000., CDALine/1000., Weight); //*
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_In", xSR/1000., ySR/1000., Weight);
       }
@@ -970,19 +993,19 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   if ((fBlindRegion && (ZVertexMomTarget <= TargetXMin || ZVertexMomTarget >= TargetXMax) && (TargetDist <= TargetYMin || TargetDist >= TargetYMax)) || !fBlindRegion) {
-    FillHisto("hSignalRegionTarAll_In", ZVertexMomTarget/1000., TargetDist/1000., Weight);
+    FillHisto("hSignalRegionTarAll_In", ZVertexMomTarget/1000., TargetDist/1000., Weight); //*
   }
   if ((fBlindRegion && (ZVertexMomTAX <= TAXXMin || ZVertexMomTAX >= TAXXMax) && (TAXDist <= TAXYMin || TAXDist >= TAXYMax)) || !fBlindRegion) {
-    FillHisto("hSignalRegionTAXAll_In", ZVertexMomTAX/1000., TAXDist/1000., Weight);
+    FillHisto("hSignalRegionTAXAll_In", ZVertexMomTAX/1000., TAXDist/1000., Weight); //*
   }
 
   if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
     FillHisto("hSR_In", xSR/1000., ySR/1000., Weight);
   }
 
-  FillHisto("hBeamvsTarAll_In", TargetDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hBeamvsTAXAll_In", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_In", ZCDAline/1000., CDALine/1000., Weight); //*
+  FillHisto("hBeamvsTarAll_In", TargetDist/1000., BeamlineDist/1000., Weight); //*
+  FillHisto("hBeamvsTAXAll_In", TAXDist/1000., BeamlineDist/1000., Weight); //*
+  FillHisto("hCDAvsZCDAAll_In", ZCDALine/1000., CDALine/1000., Weight);
 
   // Track selection, CUT: Two tracks in Spectrometer acceptance
 
@@ -1002,7 +1025,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Track selection, CUT: Chambers
 
-  if (SpectrometerCand1->GetNChambers() <= 3 || SpectrometerCand2->GetNChambers() <= 3)
+  if (SpectrometerCand1->GetNChambers() < 3 || SpectrometerCand2->GetNChambers() < 3)
     return;
 
   FillHisto("hCuts", CutID);
@@ -1040,7 +1063,7 @@ void HeavyNeutrino::Process(Int_t) {
   // CUT: CHOD timing
   
   if (!GetWithMC()) {
-    if (!CHODEvent->GetNCandidates())
+    if (!CHODEvent->GetNCandidates() || CHODTime1 < 0. || CHODTime2 < 0. || Tracks[0].isCHODShowerLikeEvent() || Tracks[1].isCHODShowerLikeEvent())
       return;
   }
 
@@ -1091,51 +1114,23 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-
+  
   // Downstream track selection, CUT: Extrapolation and association to LKr
-
-  Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
-
+  
+  //Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
+  
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr))
     return;
-
+  
   FillHisto("hCuts", CutID);
   CutID++;
-
+  /*
   if (!LKrAssoc)
     return;
 
   FillHisto("hCuts", CutID);
   CutID++;
-
-  // CUT: LKr timing
-
-  if (!GetWithMC()) {
-    Int_t inTime = 0;
-    std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
-    for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
-      if (TMath::Abs(dT) <= LKrWindow)
-        inTime++;
-    }
-
-    if (!inTime)
-      return;
-
-    inTime = 0;
-
-    for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
-      if (TMath::Abs(dT) <= LKrWindow)
-        inTime++;
-    }
-
-    if (!inTime)
-      return;
-  }
-
-  FillHisto("hCuts", CutID);
-  CutID++;
+  */
 
   // Downstream track selection, CUT: Extrapolation and association to MUV3
     
@@ -1144,7 +1139,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-
+  
   Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
   Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
   Int_t Assoc   = 0;
@@ -1187,7 +1182,25 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-
+  
+  // CUT: LKr timing
+  
+  if (!GetWithMC()) {
+    Int_t inTime = 0;
+    std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
+    for (UInt_t i = 0; i < SpecLKr[NoAssoc-1].GetNAssociationRecords(); i++) {
+      Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      if (TMath::Abs(dT) <= LKrWindow)
+        inTime++;
+    }
+    
+    if (!inTime)
+      return;
+  }
+  
+  FillHisto("hCuts", CutID);
+  CutID++;
+  
   // Downstream track selection, CUT: LAV12 acceptance
 
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLAV12) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLAV12))
@@ -1211,7 +1224,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTar_Track", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Track", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_Track", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_Track", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_Track", xSR/1000., ySR/1000., Weight);
       }
@@ -1225,7 +1238,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTAX_Track", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Track", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_Track", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_Track", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_Track", xSR/1000., ySR/1000., Weight);
       }
@@ -1245,7 +1258,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hBeamvsTarAll_Track", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Track", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_Track", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_Track", ZCDALine/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
     FillHisto("hCDAvsCDA_Track", CDA2/1000., CDA1/1000.); //*
@@ -1364,7 +1377,7 @@ void HeavyNeutrino::Process(Int_t) {
       FillHisto("hXYSpec0Pi", x/1000., y/1000.);
     }
   }
-
+  
   // Energy cuts, CUT: Cut on E/p in LKr
   
   Double_t EoP1 = Tracks[0].GetLKrEoP();
@@ -1392,7 +1405,7 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  if (PiEoP <= 0.2 || PiEoP >= 0.8)
+  if (PiEoP >= 0.8)
     return;
 
   FillHisto("hCuts", CutID);
@@ -1413,7 +1426,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTar_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_Energy", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_Energy", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_Energy", xSR/1000., ySR/1000., Weight);
       }
@@ -1427,7 +1440,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTAX_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_Energy", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_Energy", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_Energy", xSR/1000., ySR/1000., Weight);
       }
@@ -1447,7 +1460,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hBeamvsTarAll_Energy", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Energy", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_Energy", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_Energy", ZCDALine/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
     FillHisto("hCDAvsCDA_Energy", CDA2/1000., CDA1/1000.);
@@ -1546,7 +1559,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTar_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_Vetoes", xSR/1000., ySR/1000., Weight);
       }
@@ -1560,7 +1573,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTAX_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_Vetoes", xSR/1000., ySR/1000., Weight);
       }
@@ -1580,7 +1593,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hBeamvsTarAll_Vetoes", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Vetoes", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_Vetoes", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
     FillHisto("hCDAvsCDA_Vetoes", CDA2/1000., CDA1/1000.);
@@ -1592,7 +1605,7 @@ void HeavyNeutrino::Process(Int_t) {
   Double_t X = SpectrometerCand1->xAt(fzStraw[0]) - SpectrometerCand2->xAt(fzStraw[0]);
   Double_t Y = SpectrometerCand1->yAt(fzStraw[0]) - SpectrometerCand2->yAt(fzStraw[0]);
   Double_t R = TMath::Sqrt(X*X + Y*Y);
-
+  
   if (R < 20.)
     return;
 
@@ -1609,7 +1622,7 @@ void HeavyNeutrino::Process(Int_t) {
     
   // Geometrical cuts, CUT: Cut on Z of two-track vertex
 
-  if (Zvertex <= 110000. || Zvertex >= (fInitialFV + fLFV))
+  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
     return;
 
   FillHisto("hCuts", CutID);
@@ -1623,10 +1636,10 @@ void HeavyNeutrino::Process(Int_t) {
     FillHisto("hThetavsZCDA_TAX", ZVertexMomTAX/1000., Theta, Weight);
 
   // Geometrical cuts, CUT: Cut on two-track vertex wrt beamline
-
+  /*
   if (BeamlineDist <= 100.)
     return;
-
+  */
   FillHisto("hCuts", CutID);
   CutID++;
 
@@ -1645,7 +1658,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTar_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_Geom", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_Geom", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_Geom", xSR/1000., ySR/1000., Weight);
       }
@@ -1659,7 +1672,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTAX_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_Geom", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_Geom", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_Geom", xSR/1000., ySR/1000., Weight);
       }
@@ -1679,7 +1692,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hBeamvsTarAll_Geom", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Geom", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_Geom", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_Geom", ZCDALine/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
     FillHisto("hCDAvsCDA_Geom", CDA2/1000., CDA1/1000.);
@@ -1708,7 +1721,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTar_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTAXMismatched_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATarget_Fin", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATarget_Fin", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTar_Fin", xSR/1000., ySR/1000., Weight);
       }
@@ -1722,7 +1735,7 @@ void HeavyNeutrino::Process(Int_t) {
       }
       FillHisto("hBeamvsTAX_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
       FillHisto("hBeamvsTarMismatched_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
-      FillHisto("hCDAvsZCDATAX_Fin", ZCDAline/1000., CDALine/1000., Weight);
+      FillHisto("hCDAvsZCDATAX_Fin", ZCDALine/1000., CDALine/1000., Weight);
       if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
 	FillHisto("hSRTAX_Fin", xSR/1000., ySR/1000., Weight);
       }
@@ -1742,12 +1755,32 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hBeamvsTarAll_Fin", TargetDist/1000., BeamlineDist/1000., Weight);
   FillHisto("hBeamvsTAXAll_Fin", TAXDist/1000., BeamlineDist/1000., Weight);
-  FillHisto("hCDAvsZCDAAll_Fin", ZCDAline/1000., CDALine/1000., Weight);
+  FillHisto("hCDAvsZCDAAll_Fin", ZCDALine/1000., CDALine/1000., Weight);
 
   if (Assoc == 1) 
     FillHisto("hCDAvsCDA_Fin", CDA2/1000., CDA1/1000.);
   else if (Assoc == 2)
     FillHisto("hCDAvsCDA_Fin", CDA1/1000., CDA2/1000.);
+
+  // Sideband studies for parasitic, combinatorial and prompt background
+
+  Double_t x1CDA = 100.;
+  Double_t x2CDA = 125.;
+  Double_t x1Time = -6.;
+  Double_t x2Time = -3.;
+  Double_t x3Time = 3.;
+  Double_t x4Time = 6.;
+  Double_t x1Z = 100000.;
+  Double_t x2Z = 120000.;
+
+  if (BeamlineDist > x1CDA && BeamlineDist < x2CDA)
+    FillHisto("hCDA", BeamlineDist, Weight);
+
+  if ((CHODTime1 - CHODTime2 > x1Time && CHODTime1 - CHODTime2 < x2Time) || (CHODTime1 - CHODTime2 > x3Time && CHODTime1 - CHODTime2 < x4Time))
+    FillHisto("hTime", CHODTime1 - CHODTime2, Weight);
+  
+  if (Zvertex > x1Z && Zvertex < x2Z)
+    FillHisto("hZ", Zvertex/1000., Weight);
 
   // Computation of invariant mass
   
@@ -1772,6 +1805,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (TMath::Abs(invMass - fMassForReco*1000.) <= 10.)
     FillHisto("hInvMassReco", invMass/1000.);
+
+  FillHisto("hBeamdistvsMass", invMass/1000., BeamlineDist, Weight);
 
   // Output of selection
 
@@ -2004,6 +2039,11 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of mother wrt target line [m]");
   fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of mother wrt TAX line [m]");
 
+  fHisto.GetTH1("hCDA")->GetXaxis()->SetTitle("Vertex-beamline distance [mm]");
+  fHisto.GetTH1("hTime")->GetXaxis()->SetTitle("Track time difference [ns]");
+  fHisto.GetTH1("hZ")->GetXaxis()->SetTitle("Z of vertex [m]");
+  fHisto.GetTH2("hBeamdistvsMass")->GetXaxis()->SetTitle("Mass [GeV/c^{2}]");
+
   fHisto.GetTH1("hNMUV3Cand")->GetXaxis()->SetTitle("Number of candidates");
   fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
   fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
@@ -2139,26 +2179,26 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH2("hSignalRegionTAXAll_Geom")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
   fHisto.GetTH2("hSignalRegionTAXAll_Fin")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
 
-  fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
+  fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
+  fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
-  fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("Impact parameter of mother [m]");
+  fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+  fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
   fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
   fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
@@ -2183,6 +2223,8 @@ void HeavyNeutrino::EndOfJobUser() {
 
   fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
   fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
+
+  fHisto.GetTH2("hBeamdistvsMass")->GetYaxis()->SetTitle("Vertex-beamline distance [mm]");
 
   fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
   fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
@@ -2316,12 +2358,12 @@ void HeavyNeutrino::EndOfJobUser() {
   fHisto.GetTH2("hSRTAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
   fHisto.GetTH2("hSRTAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
 
-  fHisto.GetTH2("hCDAvsZCDATarget_In")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetZaxis()->SetTitle("Normalized to POT and 5 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+  fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
 
   fHisto.GetTH2("hCDAvsZCDATAX_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
   fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
@@ -2339,6 +2381,8 @@ void HeavyNeutrino::EndOfJobUser() {
 
   fHisto.GetTH2("hThetavsZCDA_Tar")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
   fHisto.GetTH2("hThetavsZCDA_TAX")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
+
+  fHisto.GetTH2("hBeamdistvsMass")->GetZaxis()->SetTitle("Normalized to POT, 10 MeV/c^{2} and 0.5 cm");
 
   if (!GetWithMC()) {
     fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);
@@ -2374,7 +2418,7 @@ void HeavyNeutrino::EndOfJobUser() {
   // Plot residual number of events after each cut
 
   const int NCuts = 37;
-  const char *CutNames[NCuts]  = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", "LKr assoc", "LKr time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
+  const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
   
   for (Int_t i = 1; i <= NCuts; i++)
     fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);

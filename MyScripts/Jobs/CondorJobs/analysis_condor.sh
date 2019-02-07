@@ -24,8 +24,11 @@ echo "NA62 analysis directory: ${analysisDir}"
 jobListFile="$6"
 echo "List file: ${jobListFile}"
 
-myOptions="$7 $8"
-echo "Executable options: ${myOptions}"
+#myOptions="$7 $8"
+#echo "Executable options: ${myOptions}"
+
+myIgnore="$7"
+echo "Executable options: ${myIgnore=}"
 
 ## CASTOR
 castorPrefix="root://castorpublic.cern.ch/"
@@ -124,7 +127,8 @@ outFile=outFiles/${run}_${jobNumber}.root
 
 #${executableFile} -l ${usedList} -p "ThreeTrackAnalysis:Reference=3" -o ${outFile} > ${outputFile} 2>&1
 #${executableFile} -l ${usedList} -o ${outFile} > ${outputFile} 2>&1
-${executableFile} -l ${usedList} -e 2 -o ${outFile} ${myOptions} > ${outputFile} 2>&1
+#${executableFile} -l ${usedList} -e 2 -o ${outFile} ${myOptions} > ${outputFile} 2>&1
+${executableFile} -l ${usedList} -e 2 -o ${outFile} ${myIgnore} > ${outputFile} 2>&1 
 cat ${outputFile}
 cat NEventsFile.txt >> /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/NEventsFile.txt
 cat SumGoodFile.txt >> /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/SumGoodFile.txt

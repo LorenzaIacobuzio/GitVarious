@@ -1,0 +1,16 @@
+## "Constants" 
+analysisScript= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/analysis_condor.sh 
+executableFile= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/bin-slc6/MyAnalyzer
+executableName= MyAnalyzer
+
+## Parameters
+runs= K3PiListBKGStudies.list
+
+filesPerJob= 10
+jobFlavour= longlunch
+numberOfCPUs= 1
+outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputK3pi/
+analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
+myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/
+##myOptions= -n 10
+myIgnore= --ignore
