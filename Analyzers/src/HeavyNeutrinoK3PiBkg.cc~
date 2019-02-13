@@ -135,9 +135,6 @@ void HeavyNeutrino::InitOutput() {
 
   RegisterOutput("Output", &fPassSelection);
 
-  OpenNewTree("Passed", "Events that passed the selection");
-  AddBranch("Passed", "", &pointer);
-
   return;
 }
 

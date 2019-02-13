@@ -5,8 +5,8 @@
 //                                                                                                    
 // --------------------------------------------------------------- 
 
-#ifndef HEAVYNEUTRINO_HH
-#define HEAVYNEUTRINO_HH
+#ifndef HEAVYNEUTRINOK3PIBKG_HH
+#define HEAVYNEUTRINOK3PIBKG_HH
 
 #include <stdlib.h>
 #include <iostream>
@@ -23,11 +23,11 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrino : public NA62Analysis::Analyzer {
+class HeavyNeutrinoK3PiBkg : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrino(NA62Analysis::Core::BaseAnalysis *ba);
+  HeavyNeutrinoK3PiBkg(NA62Analysis::Core::BaseAnalysis *ba);
   ~HeavyNeutrino() {}
   void InitHist();
   void InitOutput();
@@ -78,32 +78,6 @@ protected:
   Double_t fNK;
   Double_t fNPOT;
   std::vector<Double_t> fNKaons;
-
-  // Variables for TTrees
-
-  Double_t Weight;
-  Double_t CHODTime1;
-  Double_t CHODTime2;
-  Double_t CDA;
-  Double_t Zvertex;
-  Double_t CDALine;
-  Double_t ZCDALine;
-  Double_t BeamlineDist;
-  Double_t xSR;
-  Double_t ySR;
-  Double_t MuEoP;
-  Double_t PiEoP;
-  Double_t R;
-  Double_t energyPi;
-  Double_t energyMu;
-  TVector3 Mom1;
-  TVector3 Mom2;
-  TVector3 TotMom;
-  TVector3 Vertex;
-  TVector3 threeMomPi;
-  TVector3 threeMomMu;
-  Bool_t Target;
-  Bool_t Assoc;
 };
 
 #endif

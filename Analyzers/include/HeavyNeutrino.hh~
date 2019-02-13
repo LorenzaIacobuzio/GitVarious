@@ -57,7 +57,6 @@ protected:
   Bool_t fEnableChecks;
   Int_t fMode;
   Int_t fBurstCounter;
-  Int_t counter;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
