@@ -131,12 +131,44 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrino::InitOutput() {
 
-  if (!fReadingData) return;
+  if (fReadingData) {
 
-  RegisterOutput("Output", &fPassSelection);
+    RegisterOutput("Output", &fPassSelection);
+    
+    OpenNewTree("Passed", "Events");
+    
+    //AddBranch("Passed", "Weight", &Weight);
+    //AddBranch("Passed", "CHODTime1", &CHODTime1);
+    //AddBranch("Passed", "CHODTime2", &CHODTime2);
+    //AddBranch("Passed", "CDA", &CDA);
+    //AddBranch("Passed", "Zvertex", &Zvertex);
+    //AddBranch("Passed", "CDALine", &CDALine);
+    //AddBranch("Passed", "ZCDALine", &ZCDALine);
+    //AddBranch("Passed", "BeamlineDist", &BeamlineDist);
+    //AddBranch("Passed", "xSR", &xSR);
+    //AddBranch("Passed", "ySR", &ySR);
+    //AddBranch("Passed", "MuEoP", &MuEoP);
+    //AddBranch("Passed", "PiEoP", &PiEoP);
+    //AddBranch("Passed", "R", &R);
+    AddBranch("Passed", "energyPi", &energyPi);
+    //AddBranch("Passed", "energyMu", &energyMu);
+    //AddBranch("Passed", "Mom1", &Mom1);
+    //AddBranch("Passed", "Mom2", &Mom2);
+    //AddBranch("Passed", "TotMom", &TotMom);
+    //AddBranch("Passed", "Vertex", &Vertex);
+    //AddBranch("Passed", "threeMomPi", &threeMomPi);
+    //AddBranch("Passed", "threeMomMu", &threeMomMu);
+    //AddBranch("Passed", "Target", &Target);
+    //AddBranch("Passed", "Assoc", &Assoc);
+  }
+  else {
+    ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
+  }
 
-  OpenNewTree("Passed", "Events that passed the selection");
-  AddBranch("Passed", "", &pointer);
+  return;
+}
+
+void HeavyNeutrino::StartOfRunUser() {
 
   return;
 }
@@ -301,7 +333,7 @@ void HeavyNeutrino::Process(Int_t) {
   TLorentzVector mom1;
   TLorentzVector mom2;
   Double_t p1,p2;
-  Double_t Weight = 1.;
+  Weight = 1.;
 
   // Some plots of KinePart quantities
 
@@ -445,11 +477,11 @@ void HeavyNeutrino::Process(Int_t) {
   Double_t ChiSquare2 = Tracks[1].GetChi2();
   TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
   TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
-  TVector3 Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
-  TVector3 Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
-  TVector3 TotMom = Mom1 + Mom2;
-  Double_t CHODTime1 = Tracks[0].GetCHODTime();
-  Double_t CHODTime2 = Tracks[1].GetCHODTime();
+  Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
+  Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
+  TotMom = Mom1 + Mom2;
+  CHODTime1 = Tracks[0].GetCHODTime();
+  CHODTime2 = Tracks[1].GetCHODTime();
 
   // TIMING PLOTS
 
@@ -639,9 +671,9 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->SetDir2(Mom2);
   fCDAcomp->ComputeVertexCDA();
   
-  Double_t CDA = fCDAcomp->GetCDA();
-  TVector3 Vertex = fCDAcomp->GetVertex();
-  Double_t Zvertex = fCDAcomp->GetVertex().z();
+  CDA = fCDAcomp->GetCDA();
+  Vertex = fCDAcomp->GetVertex();
+  Zvertex = fCDAcomp->GetVertex().z();
 
   // Distance of HNL wrt target-TAX line
 
@@ -653,8 +685,8 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->SetLine2Point2(0., -22., 23230.);
   fCDAcomp->ComputeVertexCDA();
 
-  Double_t CDALine = fCDAcomp->GetCDA();
-  Double_t ZCDALine = fCDAcomp->GetVertex().z();
+  CDALine = fCDAcomp->GetCDA();
+  ZCDALine = fCDAcomp->GetVertex().z();
 
   // Distance of HNL vertex wrt beamline
 
@@ -666,7 +698,7 @@ void HeavyNeutrino::Process(Int_t) {
   
   fDistcomp->ComputeDistance();
   
-  Double_t BeamlineDist = fDistcomp->GetDistance();
+  BeamlineDist = fDistcomp->GetDistance();
 
   // SR studies 1: target line + TAX line -> 2 SR
   // CDA of HNL wrt target line
@@ -733,8 +765,8 @@ void HeavyNeutrino::Process(Int_t) {
   Double_t ZBrokenTAX = fCDAcomp->GetVertex().z();
   Double_t CDABrokenTAX = fCDAcomp->GetCDA();
 
-  Double_t xSR = -999.;
-  Double_t ySR = -999.;
+  xSR = -999.;
+  ySR = -999.;
   Double_t minCDA = 999999.;
   Double_t xRes = 3.*12000.;
 
@@ -755,7 +787,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   // MC studies on extrapolation to target/TAX
 
-  Bool_t Target = false;
+  Target = false;
   Double_t Theta = 0.;
 
   if (GetWithMC()) {
@@ -933,8 +965,9 @@ void HeavyNeutrino::Process(Int_t) {
   
   Bool_t Assoc1 = Tracks[0].MUV3AssociationExists();
   Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
-  Int_t Assoc   = 0;
   Int_t NoAssoc = 0;
+
+  Assoc   = 0;
   
   if (Assoc1 && !Assoc2) {
     Assoc = 1;
@@ -1064,8 +1097,8 @@ void HeavyNeutrino::Process(Int_t) {
   
   Double_t EoP1 = Tracks[0].GetLKrEoP();
   Double_t EoP2 = Tracks[1].GetLKrEoP();
-  Double_t MuEoP = 0.;
-  Double_t PiEoP = 0.;
+  MuEoP = 0.;
+  PiEoP = 0.;
 
   if (Assoc == 1) {
     MuEoP = EoP1;
@@ -1224,7 +1257,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   Double_t X = SpectrometerCand1->xAt(fzStraw[0]) - SpectrometerCand2->xAt(fzStraw[0]);
   Double_t Y = SpectrometerCand1->yAt(fzStraw[0]) - SpectrometerCand2->yAt(fzStraw[0]);
-  Double_t R = TMath::Sqrt(X*X + Y*Y);
+  R = TMath::Sqrt(X*X + Y*Y);
   
   if (R < 20.)
     return;
@@ -1335,10 +1368,6 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Computation of invariant mass
   
-  TVector3 threeMomPi;
-  TVector3 threeMomMu;
-  Double_t energyMu;
-  Double_t energyPi;
   Double_t invMass = 0.;
 
   if (Assoc == 1) {
@@ -1362,6 +1391,7 @@ void HeavyNeutrino::Process(Int_t) {
   // Output of selection
 
   fPassSelection = true;
+  FillTrees();
 
   return;
 }
@@ -1419,269 +1449,273 @@ void HeavyNeutrino::EndOfBurstUser() {
 
 void HeavyNeutrino::EndOfJobUser() {
 
-  if (!fReadingData) return;
+  if (fReadingData) {
 
-  // X axis
+    // X axis
 
-  fHisto.GetTH1("hNk3pi")->GetXaxis()->SetTitle("Number of k3pi");
-  fHisto.GetTH1("hNbursts")->GetXaxis()->SetTitle("Number of bursts");
-  fHisto.GetTH1("hNEvents")->GetXaxis()->SetTitle("Number of events");
-  fHisto.GetTH1("hNtracks")->GetXaxis()->SetTitle("Number of tracks");
-  fHisto.GetTH1("hMomPi")->GetXaxis()->SetTitle("P [GeV/c]");
-  fHisto.GetTH1("hMomMu")->GetXaxis()->SetTitle("P [GeV/c]");
-  fHisto.GetTH2("hXYSpec0Reco")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYSpec1Reco")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYSpec2Reco")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYSpec3Reco")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYCHODReco")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYCHODTrue")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYMUV3True")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYSpec0Mu")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH2("hXYSpec0Pi")->GetXaxis()->SetTitle("X [m]");
-  fHisto.GetTH1("hCuts")->GetXaxis()->SetTitle("Cut ID");
+    fHisto.GetTH1("hNk3pi")->GetXaxis()->SetTitle("Number of k3pi");
+    fHisto.GetTH1("hNbursts")->GetXaxis()->SetTitle("Number of bursts");
+    fHisto.GetTH1("hNEvents")->GetXaxis()->SetTitle("Number of events");
+    fHisto.GetTH1("hNtracks")->GetXaxis()->SetTitle("Number of tracks");
+    fHisto.GetTH1("hMomPi")->GetXaxis()->SetTitle("P [GeV/c]");
+    fHisto.GetTH1("hMomMu")->GetXaxis()->SetTitle("P [GeV/c]");
+    fHisto.GetTH2("hXYSpec0Reco")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYSpec1Reco")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYSpec2Reco")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYSpec3Reco")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYCHODReco")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYCHODTrue")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYMUV3True")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYSpec0Mu")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH2("hXYSpec0Pi")->GetXaxis()->SetTitle("X [m]");
+    fHisto.GetTH1("hCuts")->GetXaxis()->SetTitle("Cut ID");
 
-  fHisto.GetTH2("hZvsBeam_In")->GetXaxis()->SetTitle("Vertex position along Z [m]");
-  fHisto.GetTH2("hZvsBeam_Track")->GetXaxis()->SetTitle("Vertex position along Z [m]");
-  fHisto.GetTH2("hZvsBeam_Energy")->GetXaxis()->SetTitle("Vertex position along Z [m]");
-  fHisto.GetTH2("hZvsBeam_Vetoes")->GetXaxis()->SetTitle("Vertex position along Z [m]");
-  fHisto.GetTH2("hZvsBeam_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
-  fHisto.GetTH2("hZvsBeam_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_In")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_Track")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_Energy")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_Vetoes")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
+    fHisto.GetTH2("hZvsBeam_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
 
-  fHisto.GetTH2("hSR_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTar_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDATarget_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDATAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDAAll_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of mother wrt target line [m]");
-  fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of mother wrt TAX line [m]");
+    fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of mother wrt target line [m]");
+    fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of mother wrt TAX line [m]");
 
-  fHisto.GetTH1("hCDA")->GetXaxis()->SetTitle("Vertex-beamline distance [mm]");
-  fHisto.GetTH1("hTime")->GetXaxis()->SetTitle("Track time difference [ns]");
-  fHisto.GetTH1("hZ")->GetXaxis()->SetTitle("Z of vertex [m]");
-  fHisto.GetTH2("hBeamdistvsMass")->GetXaxis()->SetTitle("Mass [GeV/c^{2}]");
+    fHisto.GetTH1("hCDA")->GetXaxis()->SetTitle("Vertex-beamline distance [mm]");
+    fHisto.GetTH1("hTime")->GetXaxis()->SetTitle("Track time difference [ns]");
+    fHisto.GetTH1("hZ")->GetXaxis()->SetTitle("Z of vertex [m]");
+    fHisto.GetTH2("hBeamdistvsMass")->GetXaxis()->SetTitle("Mass [GeV/c^{2}]");
 
-  fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
-  fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
-  fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
-  fHisto.GetTH1("hKTAG")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hNewCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hLKr")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hMUV3")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hStraw")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hLAV")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hSAV")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
-  fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
-  fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
-  fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
-  fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
-  fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
+    fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
+    fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
+    fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
+    fHisto.GetTH1("hKTAG")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hNewCHOD")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hLKr")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hMUV3")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hStraw")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hLAV")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hSAV")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
+    fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
+    fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
+    fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
+    fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
 
-  // Y axis
+    // Y axis
 
-  fHisto.GetTH2("hXYSpec0Reco")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYSpec1Reco")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYSpec2Reco")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYSpec3Reco")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYCHODReco")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYCHODTrue")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYMUV3True")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYSpec0Mu")->GetYaxis()->SetTitle("Y [m]");
-  fHisto.GetTH2("hXYSpec0Pi")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec0Reco")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec1Reco")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec2Reco")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec3Reco")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYCHODReco")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYCHODTrue")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYMUV3True")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec0Mu")->GetYaxis()->SetTitle("Y [m]");
+    fHisto.GetTH2("hXYSpec0Pi")->GetYaxis()->SetTitle("Y [m]");
 
-  fHisto.GetTH2("hZvsBeam_In")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
-  fHisto.GetTH2("hZvsBeam_Track")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
-  fHisto.GetTH2("hZvsBeam_Energy")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
-  fHisto.GetTH2("hZvsBeam_Vetoes")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
-  fHisto.GetTH2("hZvsBeam_Geom")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
-  fHisto.GetTH2("hZvsBeam_Fin")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_In")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_Track")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_Energy")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_Vetoes")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_Geom")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("hZvsBeam_Fin")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
 
-  fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-  fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDATAX_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hCDAvsZCDAAll_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-  fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
 
-  fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
-  fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
+    fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
+    fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
-  fHisto.GetTH2("hBeamdistvsMass")->GetYaxis()->SetTitle("Vertex-beamline distance [mm]");
+    fHisto.GetTH2("hBeamdistvsMass")->GetYaxis()->SetTitle("Vertex-beamline distance [mm]");
 
-  fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
-  fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
-  fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
-  fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
+    fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
+    fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
+    fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
+    fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
 
-  // Colz axis
+    // Colz axis
 
-  fHisto.GetTH2("hZvsBeam_In")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-  fHisto.GetTH2("hZvsBeam_Track")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-  fHisto.GetTH2("hZvsBeam_Energy")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-  fHisto.GetTH2("hZvsBeam_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-  fHisto.GetTH2("hZvsBeam_Geom")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-  fHisto.GetTH2("hZvsBeam_Fin")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_In")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_Track")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_Energy")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_Geom")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
+    fHisto.GetTH2("hZvsBeam_Fin")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
 
-  fHisto.GetTH2("hSR_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSR_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSR_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSR_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSR_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSR_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSR_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
 
-  fHisto.GetTH2("hSRTar_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTar_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTar_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTar_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTar_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTar_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTar_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
 
-  fHisto.GetTH2("hSRTAX_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTAX_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTAX_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-  fHisto.GetTH2("hSRTAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
+    fHisto.GetTH2("hSRTAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
 
-  fHisto.GetTH2("hCDAvsZCDATarget_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
 
-  fHisto.GetTH2("hCDAvsZCDATAX_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
 
-  fHisto.GetTH2("hCDAvsZCDAAll_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
-  fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
 
-  fHisto.GetTH2("hThetavsZCDA_Tar")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
-  fHisto.GetTH2("hThetavsZCDA_TAX")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
+    fHisto.GetTH2("hThetavsZCDA_Tar")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
+    fHisto.GetTH2("hThetavsZCDA_TAX")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
 
-  fHisto.GetTH2("hBeamdistvsMass")->GetZaxis()->SetTitle("Normalized to POT, 10 MeV/c^{2} and 0.5 cm");
+    fHisto.GetTH2("hBeamdistvsMass")->GetZaxis()->SetTitle("Normalized to POT, 10 MeV/c^{2} and 0.5 cm");
 
-  if (!GetWithMC()) {
-    fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);
-    fHisto.GetTH1("hCHOD")->Fit("gaus", "", "", -4., 4.);
-    fHisto.GetTH1("hNewCHOD")->Fit("gaus", "", "", -4., 4.);
-    fHisto.GetTH1("hLKr")->Fit("gaus", "", "", -2., 6.);
-    fHisto.GetTH1("hMUV3")->Fit("gaus", "", "", -4., 4.);
-    fHisto.GetTH1("hStraw")->Fit("gaus", "", "", -2., 2.);
-    fHisto.GetTH1("hLAV")->Fit("gaus", "", "", -10., 10.);
-    fHisto.GetTH1("hSAV")->Fit("gaus", "", "", -10., 10.);
-    fHisto.GetTH1("hCHANTI")->Fit("gaus", "", "", -10., 10.);
+    if (!GetWithMC()) {
+      fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);
+      fHisto.GetTH1("hCHOD")->Fit("gaus", "", "", -4., 4.);
+      fHisto.GetTH1("hNewCHOD")->Fit("gaus", "", "", -4., 4.);
+      fHisto.GetTH1("hLKr")->Fit("gaus", "", "", -2., 6.);
+      fHisto.GetTH1("hMUV3")->Fit("gaus", "", "", -4., 4.);
+      fHisto.GetTH1("hStraw")->Fit("gaus", "", "", -2., 2.);
+      fHisto.GetTH1("hLAV")->Fit("gaus", "", "", -10., 10.);
+      fHisto.GetTH1("hSAV")->Fit("gaus", "", "", -10., 10.);
+      fHisto.GetTH1("hCHANTI")->Fit("gaus", "", "", -10., 10.);
     
-    // POT computation (works for parasitic mode only)
+      // POT computation (works for parasitic mode only)
 
-    TF1 *func = new TF1("func", "[0]*x");
-    fHisto.GetTGraph("T10")->Fit(func);
-    fHisto.GetTGraph("T10")->Draw("AP*");
+      TF1 *func = new TF1("func", "[0]*x");
+      fHisto.GetTGraph("T10")->Fit(func);
+      fHisto.GetTGraph("T10")->Draw("AP*");
     
-    for (Int_t i = 0; i < fHisto.GetTGraph("POT1")->GetN(); i++) {
-      fHisto.GetTGraph("POT2")->SetPoint(i, i, fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKaons[i]);
-      Double_t x;
-      Double_t y;
-      fHisto.GetTGraph("POT1")->GetPoint(i,x,y);
+      for (Int_t i = 0; i < fHisto.GetTGraph("POT1")->GetN(); i++) {
+	fHisto.GetTGraph("POT2")->SetPoint(i, i, fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKaons[i]);
+	Double_t x;
+	Double_t y;
+	fHisto.GetTGraph("POT1")->GetPoint(i,x,y);
+      }
+    
+      fNPOTFit = fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKTot;
+      FillHisto("hPOTT10", 0.5, fNPOTT10);
+      FillHisto("hPOTFit", 0.5, fNPOTFit);
+    
+      cout << endl << "Total number of K decays, POT (T10 method) and POT (fit method) in this job: " << fNKTot << " " << fNPOTT10 << " " << fNPOTFit << endl;
     }
-    
-    fNPOTFit = fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKTot;
-    FillHisto("hPOTT10", 0.5, fNPOTT10);
-    FillHisto("hPOTFit", 0.5, fNPOTFit);
-    
-    cout << endl << "Total number of K decays, POT (T10 method) and POT (fit method) in this job: " << fNKTot << " " << fNPOTT10 << " " << fNPOTFit << endl;
+
+    // Plot residual number of events after each cut
+
+    const int NCuts = 37;
+    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
+  
+    for (Int_t i = 1; i <= NCuts; i++)
+      fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
+  
+    fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
-
-  // Plot residual number of events after each cut
-
-  const int NCuts = 37;
-  const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
-  
-  for (Int_t i = 1; i <= NCuts; i++)
-    fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
-  
-  fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
+  else {
+    static_cast<TTree*>(GetCurrentFile()->Get("Passed"))->Write();
+  }
   
   SaveAllPlots();
 

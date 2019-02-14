@@ -35,7 +35,7 @@ public:
   void Process(Int_t);
   void StartOfBurstUser() {}
   void EndOfBurstUser();
-  void StartOfRunUser() {}
+  void StartOfRunUser();
   void EndOfRunUser() {}
   void EndOfJobUser();
   void PostProcess() {}

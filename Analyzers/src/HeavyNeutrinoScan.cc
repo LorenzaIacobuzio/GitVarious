@@ -269,11 +269,9 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrino", false);
     ImportAllInputHistogram("HeavyNeutrinoScan/SingleValue", false, "SingleValue");
     ImportAllInputHistogram("HeavyNeutrinoScan/CouplingScan", false, "CouplingScan");
     ImportAllInputHistogram("HeavyNeutrinoScan/MassScan", false, "MassScan");
-    ImportAllInputHistogram("HeavyNeutrinoScan/TotalScan", false, "TotalScan");
     ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/DS", false, "ToyMC/DS");
     ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/D0", false, "ToyMC/D0");
     

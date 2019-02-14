@@ -119,8 +119,8 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("SingleValue/hHNLTheta",      new TH1D("HNLTheta", "N polar angle", 100., 0., 0.5));
     BookHisto("SingleValue/hHNLMom",        new TH1D("HNLMom", "N momentum", 100., -0.5, 200.));
     BookHisto("SingleValue/hTransverse",    new TH1D("Transverse", "N transverse position at decay point", 30, 0., 2.));
-    BookHisto("SingleValue/hDProd",         new TH2D("DProd", "D meson production point in the TAXes", 100, -15., 15., 100, -30., -15.));
-    BookHisto("SingleValue/hXYProd",        new TH2D("XYProd", "D meson production point", 100, -20., 20., 100, -35., 5.));
+    BookHisto("SingleValue/hDProd",         new TH2D("DProd", "D meson production point in the TAXes", 50, -20., 20., 50, -35., -10.));
+    BookHisto("SingleValue/hXYProd",        new TH2D("XYProd", "N production point", 40, -20., 20., 40, -35., 5.));
     BookHisto("SingleValue/hDThetaMom",     new TH2D("DThetaMom", "D meson polar angle vs momentum", 300, 0., 150., 50, 0., 0.5));
     BookHisto("SingleValue/hXYDecay",       new TH2D("XYDecay", "X, Y of N at decay point", 20, -1., 1., 20, -1., 1.));
     BookHisto("SingleValue/hXYDecay2Body",  new TH2D("XYDecay2Body", "X, Y of N at decay point", 20, -1., 1., 20, -1., 1.));
@@ -269,7 +269,6 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrino", false);
     ImportAllInputHistogram("HeavyNeutrinoScan/SingleValue", false, "SingleValue");
     ImportAllInputHistogram("HeavyNeutrinoScan/CouplingScan", false, "CouplingScan");
     ImportAllInputHistogram("HeavyNeutrinoScan/MassScan", false, "MassScan");

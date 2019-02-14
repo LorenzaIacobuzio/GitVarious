@@ -35,8 +35,8 @@ public:
   void Process(Int_t);
   void StartOfBurstUser() {}
   void EndOfBurstUser();
-  void StartOfRunUser() {}
-  void EndOfRunUser() {}
+  void StartOfRunUser();
+  void EndOfRunUser();
   void EndOfJobUser();
   void PostProcess() {}
   void DrawPlot() {}
@@ -78,6 +78,32 @@ protected:
   Double_t fNK;
   Double_t fNPOT;
   std::vector<Double_t> fNKaons;
+
+  // Variables for TTrees
+
+  Double_t Weight;
+  Double_t CHODTime1;
+  Double_t CHODTime2;
+  Double_t CDA;
+  Double_t Zvertex;
+  Double_t CDALine;
+  Double_t ZCDALine;
+  Double_t BeamlineDist;
+  Double_t xSR;
+  Double_t ySR;
+  Double_t MuEoP;
+  Double_t PiEoP;
+  Double_t R;
+  Double_t energyPi;
+  Double_t energyMu;
+  TVector3 Mom1;
+  TVector3 Mom2;
+  TVector3 TotMom;
+  TVector3 Vertex;
+  TVector3 threeMomPi;
+  TVector3 threeMomMu;
+  Bool_t Target;
+  Bool_t Assoc;
 };
 
 #endif
