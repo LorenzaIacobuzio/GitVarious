@@ -389,20 +389,13 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   }
 }
 
-void Plots(TString dir, TString histo1, Bool_t data, TString mode) {
+void Plots(TString dir, TString histo1, TString mode) {
 
-  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
-
-  //TGaxis::SetMaxDigits(2);
+  // dir = output dir, histo1 = histo to do cosmetics on, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
 
   TCanvas *c = CreateTCanvas();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
-  
-  // FIRST STEP HISTOS
-    
-  // One value plots for selection analyzer
-
   TString path = "";
   
   if (dir != "")
@@ -425,12 +418,12 @@ void Plots(TString dir, TString histo1, Bool_t data, TString mode) {
   
   TFile *f = TFile::Open(histo1);
 
-  if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr && data == true && (mode == "all" || mode == "hn")) {
+  if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr && (mode == "all" || mode == "hn")) {
 
     ParseDir(histo1, "HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr, data);
   }
 
-  if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr && data == false) {
+  if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr) {
     
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");

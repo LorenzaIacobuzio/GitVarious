@@ -1,0 +1,45 @@
+void TreePlots(TString dir, TString histo1) {
+
+  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
+
+  TCanvas *c = CreateTCanvas();
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;  
+  TString path = "";
+  
+  if (dir != "")
+    path = dir;
+  else
+    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
+  
+  if (histo1.Contains("1"))
+    path += "1/";
+  else if (histo1.Contains("2"))
+    path += "2/";
+  else if (histo1.Contains("3"))
+    path += "3/";
+  else if (histo1.Contains("Data"))
+    path += "Data/";
+  else if (histo1.Contains("POT"))
+    path += "POT/";
+  else
+    path += "2/";
+
+  TFile *f = TFile::Open(histo1);
+
+  if (f == 0) {
+    cout << "Error: cannot open " << histo1 << endl;
+    return;
+  }
+  
+  TTreeReader myReader("Passed", f);
+  TTreeReaderValue<Double_t> Weight(myReader, "Weight");
+  TTreeReaderValue<TVector3> Mom1(myReader, "Mom1");
+
+  TH2D h("h", "h", 100, 1.E-14, 1.E-12, 100, 0., 100.);
+
+  h.Fill(Weight, Mom1.x()/1000.);
+  h.Draw("colz");
+  c->SaveAs(path + "HeavyNeutrino/" + h.GetName() + ".pdf");
+  c->SaveAs(path + "HeavyNeutrino/" + h.GetName() + ".png");  
+}
