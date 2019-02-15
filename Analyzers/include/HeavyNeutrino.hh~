@@ -36,7 +36,7 @@ public:
   void StartOfBurstUser() {}
   void EndOfBurstUser();
   void StartOfRunUser();
-  void EndOfRunUser();
+  void EndOfRunUser() {}
   void EndOfJobUser();
   void PostProcess() {}
   void DrawPlot() {}
@@ -103,7 +103,7 @@ protected:
   TVector3 threeMomPi;
   TVector3 threeMomMu;
   Bool_t Target;
-  Bool_t Assoc;
+  Int_t Assoc;
 };
 
 #endif

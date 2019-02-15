@@ -96,6 +96,7 @@ protected:
   Double_t R;
   Double_t energyPi;
   Double_t energyMu;
+  Double_t invMass;
   TVector3 Mom1;
   TVector3 Mom2;
   TVector3 TotMom;
@@ -103,7 +104,7 @@ protected:
   TVector3 threeMomPi;
   TVector3 threeMomMu;
   Bool_t Target;
-  Bool_t Assoc;
+  Int_t Assoc;
 };
 
 #endif

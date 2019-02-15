@@ -137,29 +137,29 @@ void HeavyNeutrino::InitOutput() {
     
     OpenNewTree("Passed", "Events");
     
-    //AddBranch("Passed", "Weight", &Weight);
-    //AddBranch("Passed", "CHODTime1", &CHODTime1);
-    //AddBranch("Passed", "CHODTime2", &CHODTime2);
-    //AddBranch("Passed", "CDA", &CDA);
-    //AddBranch("Passed", "Zvertex", &Zvertex);
-    //AddBranch("Passed", "CDALine", &CDALine);
-    //AddBranch("Passed", "ZCDALine", &ZCDALine);
-    //AddBranch("Passed", "BeamlineDist", &BeamlineDist);
-    //AddBranch("Passed", "xSR", &xSR);
-    //AddBranch("Passed", "ySR", &ySR);
-    //AddBranch("Passed", "MuEoP", &MuEoP);
-    //AddBranch("Passed", "PiEoP", &PiEoP);
-    //AddBranch("Passed", "R", &R);
+    AddBranch("Passed", "Weight", &Weight);
+    AddBranch("Passed", "CHODTime1", &CHODTime1);
+    AddBranch("Passed", "CHODTime2", &CHODTime2);
+    AddBranch("Passed", "CDA", &CDA);
+    AddBranch("Passed", "Zvertex", &Zvertex);
+    AddBranch("Passed", "CDALine", &CDALine);
+    AddBranch("Passed", "ZCDALine", &ZCDALine);
+    AddBranch("Passed", "BeamlineDist", &BeamlineDist);
+    AddBranch("Passed", "xSR", &xSR);
+    AddBranch("Passed", "ySR", &ySR);
+    AddBranch("Passed", "MuEoP", &MuEoP);
+    AddBranch("Passed", "PiEoP", &PiEoP);
+    AddBranch("Passed", "R", &R);
     AddBranch("Passed", "energyPi", &energyPi);
-    //AddBranch("Passed", "energyMu", &energyMu);
-    //AddBranch("Passed", "Mom1", &Mom1);
-    //AddBranch("Passed", "Mom2", &Mom2);
-    //AddBranch("Passed", "TotMom", &TotMom);
-    //AddBranch("Passed", "Vertex", &Vertex);
-    //AddBranch("Passed", "threeMomPi", &threeMomPi);
-    //AddBranch("Passed", "threeMomMu", &threeMomMu);
-    //AddBranch("Passed", "Target", &Target);
-    //AddBranch("Passed", "Assoc", &Assoc);
+    AddBranch("Passed", "energyMu", &energyMu);
+    AddBranch("Passed", "Mom1", &Mom1);
+    AddBranch("Passed", "Mom2", &Mom2);
+    AddBranch("Passed", "TotMom", &TotMom);
+    AddBranch("Passed", "Vertex", &Vertex);
+    AddBranch("Passed", "threeMomPi", &threeMomPi);
+    AddBranch("Passed", "threeMomMu", &threeMomMu);
+    AddBranch("Passed", "Target", &Target);
+    AddBranch("Passed", "Assoc", &Assoc);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
@@ -480,8 +480,17 @@ void HeavyNeutrino::Process(Int_t) {
   Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
   Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
   TotMom = Mom1 + Mom2;
-  CHODTime1 = Tracks[0].GetCHODTime();
-  CHODTime2 = Tracks[1].GetCHODTime();
+
+  // Handle fast MC and data
+
+  if (!GetWithMC()) {
+    CHODTime1 = Tracks[0].GetCHODTime();
+    CHODTime2 = Tracks[1].GetCHODTime();
+  }
+  else {
+    CHODTime1 = 0.;
+    CHODTime2 = 0.;
+  }
 
   // TIMING PLOTS
 
@@ -662,7 +671,12 @@ void HeavyNeutrino::Process(Int_t) {
     FillHisto("hXYCHODReco", x/1000., y/1000.);
   }
 
-  // CDA of track1 wrt track2                                                                            
+  Double_t avgTarZ = -26.5;
+  Double_t avgTAXZ = 23230.;
+  Double_t avgTAXX = 0.;
+  Double_t avgTAXY = -22.;
+
+  // CDA of track1 wrt track2                                                                           
 
   fCDAcomp = new TwoLinesCDA();
   fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
@@ -681,8 +695,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   fCDAcomp->SetLine1Point1(Vertex);
   fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., -26.5);
-  fCDAcomp->SetLine2Point2(0., -22., 23230.);
+  fCDAcomp->SetLine2Point1(0., 0., avgTarZ);
+  fCDAcomp->SetLine2Point2(avgTAXX, avgTAXY, avgTAXZ);
   fCDAcomp->ComputeVertexCDA();
 
   CDALine = fCDAcomp->GetCDA();
@@ -707,7 +721,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   fCDAcomp->SetLine1Point1(Vertex);
   fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., -26.5);
+  fCDAcomp->SetLine2Point1(0., 0., avgTarZ);
   fCDAcomp->SetDir2(0., 0., 1.);
   fCDAcomp->ComputeVertexCDA();
 
@@ -719,7 +733,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   fCDAcomp->SetLine1Point1(Vertex);
   fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., -22., 23230.);
+  fCDAcomp->SetLine2Point1(avgTAXX, avgTAXY, avgTAXZ);
   fCDAcomp->SetDir2(0., 0., 1.);
   fCDAcomp->ComputeVertexCDA();
 
@@ -735,7 +749,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp->SetLine2Point1(0., 0., 14960.); // Acromat bending
   fCDAcomp->SetDir2(0., 0., 1.);
   fCDAcomp->ComputeVertexCDA();
-
+  
   Double_t ZBrokenTarget = fCDAcomp->GetVertex().z();
   Double_t CDABrokenTarget = fCDAcomp->GetCDA();
 
@@ -967,7 +981,7 @@ void HeavyNeutrino::Process(Int_t) {
   Bool_t Assoc2 = Tracks[1].MUV3AssociationExists();
   Int_t NoAssoc = 0;
 
-  Assoc   = 0;
+  Assoc = 0;
   
   if (Assoc1 && !Assoc2) {
     Assoc = 1;
@@ -988,13 +1002,19 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // CUT: MUV3 timing
-
-  if (!GetWithMC()) {
+  // CUT: MUV3 timing (also for MC)
+  
+  if (!GetWithMC() || GetWithMC()) {
     Int_t inTime = 0;
     std::vector<SpectrometerMUV3AssociationOutput> SpecMUV3 = *(std::vector<SpectrometerMUV3AssociationOutput>*)GetOutput("SpectrometerMUV3Association.Output");
     for (Int_t i = 0; i < SpecMUV3[Assoc-1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+      Double_t dT = 0.;
+
+      if (!GetWithMC())
+	dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+      else
+	dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime(); // to handle fast MC, CHODtime = 0 in MC
+
       FillHisto("hMUV3", dT);
       if (TMath::Abs(dT) <= MUV3Window)
 	inTime++;
@@ -1003,7 +1023,7 @@ void HeavyNeutrino::Process(Int_t) {
     if (!inTime)
       return;
   }
-
+  
   FillHisto("hCuts", CutID);
   CutID++;
   
@@ -1113,8 +1133,13 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hEoP", EoP2);
   
   FillHisto("hEoPMuVsPi", PiEoP, MuEoP);
-
-  if (MuEoP >= 0.2)
+  
+  if (GetWithMC()) { // to handle fast MC, E/p is 0 for all MC tracks
+    PiEoP = 0.;
+    MuEoP = 0.;
+  }
+  
+  if (MuEoP >= 0.2) 
     return;
 
   FillHisto("hCuts", CutID);
@@ -1714,7 +1739,8 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
   else {
-    static_cast<TTree*>(GetCurrentFile()->Get("Passed"))->Write();
+    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("Passed"))->CloneTree();
+    tree->Write();
   }
   
   SaveAllPlots();

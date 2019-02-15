@@ -55,6 +55,7 @@ void TreePlots(TString dir, TString histo1) {
   Double_t R;
   Double_t energyPi;
   Double_t energyMu;
+  Double_t invMass;
   TVector3 *Mom1 = new TVector3();
   TVector3 *Mom2 = new TVector3();
   TVector3 *TotMom = new TVector3();
@@ -62,7 +63,7 @@ void TreePlots(TString dir, TString histo1) {
   TVector3 *threeMomPi = new TVector3();
   TVector3 *threeMomMu = new TVector3();
   Bool_t Target;
-  Bool_t Assoc;
+  Int_t Assoc;
 
   tree->SetBranchAddress("Weight", &Weight);
   tree->SetBranchAddress("CHODTime1", &CHODTime1);
@@ -79,6 +80,7 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("R", &R);
   tree->SetBranchAddress("energyPi", &energyPi);
   tree->SetBranchAddress("energyMu", &energyMu);
+  tree->SetBranchAddress("invMass", &invMass);
   tree->SetBranchAddress("Mom1", &Mom1);
   tree->SetBranchAddress("Mom2", &Mom2);
   tree->SetBranchAddress("TotMom", &TotMom);
