@@ -127,6 +127,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   fNK = 0.;
   fNPOT = 0.;
   fBurstCounter = 0;
+  KTAGcand = new TRecoCedarCandidate();
 }
 
 void HeavyNeutrino::InitOutput() {
@@ -152,6 +153,8 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("Passed", "R", &R);
     AddBranch("Passed", "energyPi", &energyPi);
     AddBranch("Passed", "energyMu", &energyMu);
+    AddBranch("Passed", "invMass", &invMass);
+    AddBranch("Passed", "L0TPTime", &L0TPTime);
     AddBranch("Passed", "Mom1", &Mom1);
     AddBranch("Passed", "Mom2", &Mom2);
     AddBranch("Passed", "TotMom", &TotMom);
@@ -159,16 +162,14 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("Passed", "threeMomPi", &threeMomPi);
     AddBranch("Passed", "threeMomMu", &threeMomMu);
     AddBranch("Passed", "Target", &Target);
+    AddBranch("Passed", "K3pi", &K3pi);
+    AddBranch("Passed", "autoPass", &autoPass);
     AddBranch("Passed", "Assoc", &Assoc);
+    AddBranch("Passed", "KTAGcand", KTAGcand);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
   }
-
-  return;
-}
-
-void HeavyNeutrino::StartOfRunUser() {
 
   return;
 }
@@ -199,71 +200,63 @@ void HeavyNeutrino::InitHist() {
 
     // Beam vs Z
   
-    BookHisto("hZvsBeam_In",     new TH2D("ZvsBeam_In", "Two-track vertex, before all cuts",             50, 100., 200., 50, 0., 1.));
+    BookHisto("hZvsBeam_In",     new TH2D("ZvsBeam_In", "Two-track vertex, before any cut",             50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Track",  new TH2D("ZvsBeam_Track", "Two-track vertex, after track-quality cuts", 50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Energy", new TH2D("ZvsBeam_Energy", "Two-track vertex, after energy cuts",       50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Vetoes", new TH2D("ZvsBeam_Vetoes", "Two-track vertex, after veto cuts",         50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom", "Two-track vertex, after geometrical cuts",    50, 100., 200., 50, 0., 1.));
-    BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after all cuts",             50, 100., 200., 50, 0., 1.));
+    BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after any cut",             50, 100., 200., 50, 0., 1.));
 
     // Unique signal region (3-segment line)
 
-    BookHisto("hSR_In",     new TH2D("SR_In",     "Signal region, before all cuts",          500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSR_In",     new TH2D("SR_In",     "Signal region, before any cut",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Track",  new TH2D("SR_Track",  "Signal region, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Energy", new TH2D("SR_Energy", "Signal region, after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Vetoes", new TH2D("SR_Vetoes", "Signal region, after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Geom",   new TH2D("SR_Geom",   "Signal region, after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Fin",    new TH2D("SR_Fin",    "Signal region, after all cuts",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSR_Fin",    new TH2D("SR_Fin",    "Signal region, after any cut",           500, -50., 50., 50, 0., 0.1));
 
-    BookHisto("hSRTar_In",     new TH2D("SRTar_In",     "Signal region (target), before all cuts",          500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTar_In",     new TH2D("SRTar_In",     "Signal region (target), before any cut",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Track",  new TH2D("SRTar_Track",  "Signal region (target), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Energy", new TH2D("SRTar_Energy", "Signal region (target), after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Vetoes", new TH2D("SRTar_Vetoes", "Signal region (target), after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Geom",   new TH2D("SRTar_Geom",   "Signal region (target), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Fin",    new TH2D("SRTar_Fin",    "Signal region (target), after all cuts",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTar_Fin",    new TH2D("SRTar_Fin",    "Signal region (target), after any cut",           500, -50., 50., 50, 0., 0.1));
 
-    BookHisto("hSRTAX_In",     new TH2D("SRTAX_In",     "Signal region (TAX), before all cuts",          500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTAX_In",     new TH2D("SRTAX_In",     "Signal region (TAX), before any cut",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Track",  new TH2D("SRTAX_Track",  "Signal region (TAX), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Energy", new TH2D("SRTAX_Energy", "Signal region (TAX), after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Vetoes", new TH2D("SRTAX_Vetoes", "Signal region (TAX), after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Geom",   new TH2D("SRTAX_Geom",   "Signal region (TAX), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Fin",    new TH2D("SRTAX_Fin",    "Signal region (TAX), after all cuts",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTAX_Fin",    new TH2D("SRTAX_Fin",    "Signal region (TAX), after any cut",           500, -50., 50., 50, 0., 0.1));
 
     // Unique signal region (one line)
 
-    BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Track",  new TH2D("CDAvsZCDATarget_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Energy", new TH2D("CDAvsZCDATarget_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Vetoes", new TH2D("CDAvsZCDATarget_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Geom",   new TH2D("CDAvsZCDATarget_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
 
-    BookHisto("hCDAvsZCDATAX_In",     new TH2D("CDAvsZCDATAX_In", "N trajectory wrt target-TAX line, before all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATAX_In",     new TH2D("CDAvsZCDATAX_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Track",  new TH2D("CDAvsZCDATAX_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Energy", new TH2D("CDAvsZCDATAX_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Vetoes", new TH2D("CDAvsZCDATAX_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Geom",   new TH2D("CDAvsZCDATAX_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDATAX_Fin",    new TH2D("CDAvsZCDATAX_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATAX_Fin",    new TH2D("CDAvsZCDATAX_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
 
-    BookHisto("hCDAvsZCDAAll_In",     new TH2D("CDAvsZCDAAll_In", "N trajectory wrt target-TAX line, before all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAll_In",     new TH2D("CDAvsZCDAAll_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Track",  new TH2D("CDAvsZCDAAll_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Energy", new TH2D("CDAvsZCDAAll_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Vetoes", new TH2D("CDAvsZCDAAll_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Geom",   new TH2D("CDAvsZCDAAll_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDAAll_Fin",    new TH2D("CDAvsZCDAAll_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAll_Fin",    new TH2D("CDAvsZCDAAll_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
 
     // Theta vs Z CDA (studies on SR resolution)
 
     BookHisto("hThetavsZCDA_Tar", new TH2D("ThetavsZCDA_Tar", "N angular distribution for target-produced events", 200, -15., 15., 50, 0., 0.005));
     BookHisto("hThetavsZCDA_TAX", new TH2D("ThetavsZCDA_TAX", "N angular distribution for TAX-produced events", 200, 0., 50., 50, 0., 0.005));
-
-
-    // Sidebands 
-
-    BookHisto("hCDA",  new TH1D("CDA", "Vertex-beamline distance for parasitic background", 200, 0., 1000.));
-    BookHisto("hTime", new TH1D("Time", "Track time difference for combinatorial background", 500, -15., 15.));
-    BookHisto("hZ", new TH1D("Z", "Z of vertex for prompt background", 300, 100., 190.));
-    BookHisto("hBeamdistvsMass", new TH2D("BeamdistvsMass", "Vertex-beamline distance vs reconstructed mass", 200, 0., 2., 200, 0., 1000.));
 
     // Others
 
@@ -322,6 +315,12 @@ void HeavyNeutrino::Process(Int_t) {
   TRecoSACEvent* SACEvent = (TRecoSACEvent*)GetEvent("SAC");
   TRecoCHANTIEvent* CHANTIEvent = (TRecoCHANTIEvent*)GetEvent("CHANTI");
 
+  if (GetWithMC()) {
+    for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
+      *KTAGcand = *(TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+    }
+  }
+
   // Counter for cuts
 
   Int_t CutID = 0;
@@ -370,7 +369,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (fEnableChecks)
     fUSquared = fCouplingForChecks;
-  
+
   // Retrieve weight associated to good HNL
 
   Double_t MN = 0.;
@@ -395,7 +394,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
   Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
-  Double_t L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
+  L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
   L0TPTime *= TdcCalib;
   Double_t L0Window = 1.22*5.;
   Double_t KTAGWindow = 0.96*5.;
@@ -403,11 +402,13 @@ void HeavyNeutrino::Process(Int_t) {
   Double_t LKrWindow = 1.96*5.;
   Double_t MUV3Window = 1.55*5.;
   Double_t CHANTIWindow = 2.60*5.;
-  Bool_t k3pi = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
-  
+
+  K3pi = *(Bool_t*) GetOutput("K3piSelection.EventSelected");
+  autoPass = TriggerConditions::GetInstance()->L1TriggerAutopass(GetEventHeader());
+
   // K3Pi
 
-  if (k3pi && 0x10) {
+  if (K3pi && 0x10) {
     fNK3Pi++;
     FillHisto("hNk3pi", 0.5);
   }
@@ -505,9 +506,9 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
-      TRecoCedarCandidate* cand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
-      if (cand->GetNSectors() >= 5)
-	FillHisto("hKTAG", cand->GetTime() - L0TPTime);
+      TRecoCedarCandidate *Cedarcand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+      if (Cedarcand->GetNSectors() >= 5)
+	FillHisto("hKTAG", Cedarcand->GetTime() - L0TPTime);
     }
   }
 
@@ -515,8 +516,8 @@ void HeavyNeutrino::Process(Int_t) {
   
   if (!GetWithMC()) {
     for(int i = 0; i < CHODEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)CHODEvent->GetCandidate(i);
-      FillHisto("hCHOD", cand->GetTime() - L0TPTime);
+      TRecoVCandidate* CHODcand = (TRecoVCandidate*)CHODEvent->GetCandidate(i);
+      FillHisto("hCHOD", CHODcand->GetTime() - L0TPTime);
     }
   }
   
@@ -591,8 +592,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < LAVEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)LAVEvent->GetCandidate(i);
-      FillHisto("hLAV", cand->GetTime() - L0TPTime);
+      TRecoVCandidate* LAVcand = (TRecoVCandidate*)LAVEvent->GetCandidate(i);
+      FillHisto("hLAV", LAVcand->GetTime() - L0TPTime);
     }
   }
 
@@ -600,12 +601,12 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < IRCEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)IRCEvent->GetCandidate(i);
-      FillHisto("hSAV", cand->GetTime() - L0TPTime);
+      TRecoVCandidate* IRCcand = (TRecoVCandidate*)IRCEvent->GetCandidate(i);
+      FillHisto("hSAV", IRCcand->GetTime() - L0TPTime);
     }
     for(int i = 0; i < SACEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)SACEvent->GetCandidate(i);
-      FillHisto("hSAV", cand->GetTime() - L0TPTime);
+      TRecoVCandidate* SACcand = (TRecoVCandidate*)SACEvent->GetCandidate(i);
+      FillHisto("hSAV", SACcand->GetTime() - L0TPTime);
     }
   }
 
@@ -613,8 +614,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
-      FillHisto("hCHANTI", cand->GetTime() - L0TPTime);
+      TRecoVCandidate* CHANTIcand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      FillHisto("hCHANTI", CHANTIcand->GetTime() - L0TPTime);
     }
   }
 
@@ -623,8 +624,8 @@ void HeavyNeutrino::Process(Int_t) {
   if (!GetWithMC()) {
     Int_t inTime = 0;
     for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
-      if (TMath::Abs(cand->GetTime() - L0TPTime) <= CHANTIWindow)
+      TRecoVCandidate* CHANTIcand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      if (TMath::Abs(CHANTIcand->GetTime() - L0TPTime) <= CHANTIWindow)
 	inTime++;
     }
     FillHisto("hCHANTImult", inTime);
@@ -646,9 +647,9 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
-      TRecoCedarCandidate* cand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
-      Double_t dT = cand->GetTime() - L0TPTime;
-      if (cand->GetNSectors() >= 5 && TMath::Abs(dT) <= KTAGWindow)
+      *KTAGcand = *(TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+      Double_t dT = KTAGcand->GetTime() - L0TPTime;
+      if (KTAGcand->GetNSectors() >= 5 && TMath::Abs(dT) <= KTAGWindow)
 	return;
     }
   }
@@ -659,15 +660,15 @@ void HeavyNeutrino::Process(Int_t) {
   // (X,Y) of reconstructed tracks for all Spectrometer chambers
     
   for (UInt_t i = 0; i < Tracks.size(); i++) {
-    TRecoSpectrometerCandidate* Cand = Tracks[i].GetSpectrometerCandidate();
+    TRecoSpectrometerCandidate* STRAWcand = Tracks[i].GetSpectrometerCandidate();
     for (Int_t j = 0; j < 4; j++) {
-      Double_t x = Cand->xAt(fzStraw[j]);
-      Double_t y = Cand->yAt(fzStraw[j]);
+      Double_t x = STRAWcand->xAt(fzStraw[j]);
+      Double_t y = STRAWcand->yAt(fzStraw[j]);
       TString name = Form("hXYSpec%dReco",j);
       FillHisto(name, x/1000., y/1000.);
     }
-    Double_t x = Cand->xAtAfterMagnet(fzCHODPlane);
-    Double_t y = Cand->yAtAfterMagnet(fzCHODPlane);
+    Double_t x = STRAWcand->xAtAfterMagnet(fzCHODPlane);
+    Double_t y = STRAWcand->yAtAfterMagnet(fzCHODPlane);
     FillHisto("hXYCHODReco", x/1000., y/1000.);
   }
 
@@ -1219,8 +1220,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (!GetWithMC()) {
     for(int i = 0; i < CHANTIEvent->GetNCandidates(); i++) {
-      TRecoVCandidate* cand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
-      Double_t dT = cand->GetTime() - L0TPTime;
+      TRecoVCandidate* CHANTIcand = (TRecoVCandidate*)CHANTIEvent->GetCandidate(i);
+      Double_t dT = CHANTIcand->GetTime() - L0TPTime;
       if (TMath::Abs(dT) <= CHANTIWindow)
 	return;
     }
@@ -1297,29 +1298,6 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-    
-  // Geometrical cuts, CUT: Cut on Z of two-track vertex
-
-  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
-
-  // Studies on SR resolution
-
-  if (Target == true)
-    FillHisto("hThetavsZCDA_Tar", ZVertexMomTarget/1000., Theta, Weight);
-  else
-    FillHisto("hThetavsZCDA_TAX", ZVertexMomTAX/1000., Theta, Weight);
-
-  // Geometrical cuts, CUT: Cut on two-track vertex wrt beamline
-
-  if (BeamlineDist <= 100.)
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
 
   // Reference plot - 5 
 
@@ -1345,6 +1323,29 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   FillHisto("hCDAvsZCDAAll_Geom", ZCDALine/1000., CDALine/1000., Weight);
+    
+  // Geometrical cuts, CUT: Cut on Z of two-track vertex
+
+  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // Studies on SR resolution
+
+  if (Target == true)
+    FillHisto("hThetavsZCDA_Tar", ZVertexMomTarget/1000., Theta, Weight);
+  else
+    FillHisto("hThetavsZCDA_TAX", ZVertexMomTAX/1000., Theta, Weight);
+
+  // Geometrical cuts, CUT: Cut on two-track vertex wrt beamline
+
+  if (BeamlineDist <= 100.)
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // Reference plot - 6
 
@@ -1371,26 +1372,6 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCDAvsZCDAAll_Fin", ZCDALine/1000., CDALine/1000., Weight);
 
-  // Sideband studies for parasitic, combinatorial and prompt background
-
-  Double_t x1CDA = 100.;
-  Double_t x2CDA = 125.;
-  Double_t x1Time = -6.;
-  Double_t x2Time = -3.;
-  Double_t x3Time = 3.;
-  Double_t x4Time = 6.;
-  Double_t x1Z = 100000.;
-  Double_t x2Z = 120000.;
-
-  if (BeamlineDist > x1CDA && BeamlineDist < x2CDA)
-    FillHisto("hCDA", BeamlineDist, Weight);
-
-  if ((CHODTime1 - CHODTime2 > x1Time && CHODTime1 - CHODTime2 < x2Time) || (CHODTime1 - CHODTime2 > x3Time && CHODTime1 - CHODTime2 < x4Time))
-    FillHisto("hTime", CHODTime1 - CHODTime2, Weight);
-  
-  if (Zvertex > x1Z && Zvertex < x2Z)
-    FillHisto("hZ", Zvertex/1000., Weight);
-
   // Computation of invariant mass
   
   invMass = 0.;
@@ -1411,13 +1392,11 @@ void HeavyNeutrino::Process(Int_t) {
   if (TMath::Abs(invMass - fMassForReco*1000.) <= 10.)
     FillHisto("hInvMassReco", invMass/1000.);
 
-  FillHisto("hBeamdistvsMass", invMass/1000., BeamlineDist, Weight);
-
   // Output of selection
 
   fPassSelection = true;
   FillTrees();
-
+  
   return;
 }
 
@@ -1547,11 +1526,6 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of mother wrt target line [m]");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of mother wrt TAX line [m]");
 
-    fHisto.GetTH1("hCDA")->GetXaxis()->SetTitle("Vertex-beamline distance [mm]");
-    fHisto.GetTH1("hTime")->GetXaxis()->SetTitle("Track time difference [ns]");
-    fHisto.GetTH1("hZ")->GetXaxis()->SetTitle("Z of vertex [m]");
-    fHisto.GetTH2("hBeamdistvsMass")->GetXaxis()->SetTitle("Mass [GeV/c^{2}]");
-
     fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
     fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
     fHisto.GetTH1("hInvMassReco")->GetXaxis()->SetTitle("Invariant mass [GeV/c^{2}]");
@@ -1634,8 +1608,6 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
-    fHisto.GetTH2("hBeamdistvsMass")->GetYaxis()->SetTitle("Vertex-beamline distance [mm]");
-
     fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
     fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
     fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
@@ -1694,8 +1666,6 @@ void HeavyNeutrino::EndOfJobUser() {
 
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
-
-    fHisto.GetTH2("hBeamdistvsMass")->GetZaxis()->SetTitle("Normalized to POT, 10 MeV/c^{2} and 0.5 cm");
 
     if (!GetWithMC()) {
       fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);

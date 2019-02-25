@@ -6,8 +6,8 @@ executableName= MyAnalyzer
 ## Parameters
 runs= K3PiListBKGStudies.list
 
-filesPerJob= 10
-jobFlavour= longlunch
+filesPerJob= 20
+jobFlavour= workday
 numberOfCPUs= 1
 outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputK3pi/
 analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/

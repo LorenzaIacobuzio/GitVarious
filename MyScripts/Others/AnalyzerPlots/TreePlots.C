@@ -1,16 +1,37 @@
-void Save(TString path, TCanvas *c, TH1D* h, TString x) {
+void Save(TString path, TCanvas *c, TH1D* h, TString x, Double_t labelSize, Double_t titleSize) {
 
+  h->Draw();
   h->GetXaxis()->SetTitle(x);
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".pdf");
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".png");
+  h->SetFillColor(38);
+  h->SetTitleSize(titleSize, "t");
+  h->GetXaxis()->SetTitleSize(labelSize);
+  h->GetXaxis()->SetLabelSize(labelSize);
+  h->GetYaxis()->SetTitleSize(labelSize);
+  h->GetYaxis()->SetLabelSize(labelSize);
+  h->GetXaxis()->SetTitleOffset(1.4);
+  h->GetYaxis()->SetTitleOffset(1.4);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + h->GetName() + ".pdf");
+  c->SaveAs(path + h->GetName() + ".png");
 }
 
-void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y) {
+void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labelSize, Double_t titleSize) {
 
+  h->Draw("colz");
   h->GetXaxis()->SetTitle(x);
   h->GetYaxis()->SetTitle(y);
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".pdf");
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".png");
+  h->SetTitleSize(titleSize, "t");
+  h->GetXaxis()->SetTitleSize(labelSize);
+  h->GetYaxis()->SetTitleSize(labelSize);
+  h->GetXaxis()->SetLabelSize(labelSize);
+  h->GetYaxis()->SetLabelSize(labelSize);
+  h->GetXaxis()->SetTitleOffset(1.4);
+  h->GetYaxis()->SetTitleOffset(1.4);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + h->GetName() + ".pdf");
+  c->SaveAs(path + h->GetName() + ".png");
 }
 
 void TreePlots(TString dir, TString histo1) {
@@ -32,20 +53,7 @@ void TreePlots(TString dir, TString histo1) {
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
-  
-  if (histo1.Contains("1"))
-    path += "1/";
-  else if (histo1.Contains("2"))
-    path += "2/";
-  else if (histo1.Contains("3"))
-    path += "3/";
-  else if (histo1.Contains("Data"))
-    path += "Data/";
-  else if (histo1.Contains("POT"))
-    path += "POT/";
-  else
-    path += "2/";
+    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
 
   TFile *f = TFile::Open(histo1);
 
@@ -54,7 +62,7 @@ void TreePlots(TString dir, TString histo1) {
     return;
   }
 
-  TTree* tree = (TTree*)f->Get("HeavyNeutrino/Passed");
+  TTree* tree = (TTree*)f->Get("Passed");
   Double_t Weight;
   Double_t CHODTime1;
   Double_t CHODTime2;
@@ -82,7 +90,7 @@ void TreePlots(TString dir, TString histo1) {
   Bool_t K3pi;
   Bool_t autoPass;
   Int_t Assoc;
-  TRecoCedarCandidate *KTAGcand;
+  //TRecoCedarCandidate *KTAGcand;
 
   tree->SetBranchAddress("Weight", &Weight);
   tree->SetBranchAddress("CHODTime1", &CHODTime1);
@@ -111,25 +119,25 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("K3pi", &K3pi);
   tree->SetBranchAddress("autoPass", &autoPass);
   tree->SetBranchAddress("Assoc", &Assoc);
-  tree->SetBranchAddress("KTAGcand", KTAGcand);
+  //tree->SetBranchAddress("KTAGcand", KTAGcand);
     
-  TH1D *hDist = new TH1D("hDist", "Parasitic background studies", 1000, 0., 2000.);
+  TH1D *hDist = new TH1D("hDist", "Parasitic background studies", 100, 0., 1000.);
   TH1D *hTime = new TH1D("hTime", "Combinatorial background studies", 100, -15., 15.);
-  TH1D *hZ = new TH1D("hZ", "Prompt background studies", 1000, 100., 190.);
-  TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 1000, 0.2, 2., 100, 0., 500.);
+  TH1D *hZ = new TH1D("hZ", "Prompt background studies", 500, 100., 190.);
+  TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
   
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
     hDist->Fill(BeamlineDist, Weight);
     hTime->Fill(CHODTime1-CHODTime2, Weight);
-    hZ->Fill(Zvertex, Weight);
-    hDistvsMass->Fill(BeamlineDist, invMass/1000., Weight);
+    hZ->Fill(Zvertex/1000., Weight);
+    hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
   }
 
-  Save(path, c, hDist, "Vertex-beamline distance [mm]");
-  Save(path, c, hTime, "Track time difference [ns]");
-  Save(path, c, hZ, "Z coordinate of vertex [m]");
-  Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]");
-  
+  Save(path, c, hDist, "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hTime, "Track time difference [ns]", labelSize, titleSize);
+  Save(path, c, hZ, "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+
   tree->ResetBranchAddresses();
 }

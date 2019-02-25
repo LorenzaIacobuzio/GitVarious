@@ -17,6 +17,7 @@
 #include "PointLineDistance.hh"
 #include "LAVMatching.hh"
 #include "SAVMatching.hh"
+#include "TriggerConditions.hh"
 
 class TH1I;
 class TH2F;
@@ -35,7 +36,7 @@ public:
   void Process(Int_t);
   void StartOfBurstUser() {}
   void EndOfBurstUser();
-  void StartOfRunUser();
+  void StartOfRunUser() {}
   void EndOfRunUser() {}
   void EndOfJobUser();
   void PostProcess() {}
@@ -97,6 +98,7 @@ protected:
   Double_t energyPi;
   Double_t energyMu;
   Double_t invMass;
+  Double_t L0TPTime;
   TVector3 Mom1;
   TVector3 Mom2;
   TVector3 TotMom;
@@ -104,7 +106,10 @@ protected:
   TVector3 threeMomPi;
   TVector3 threeMomMu;
   Bool_t Target;
+  Bool_t K3pi;
+  Bool_t autoPass;
   Int_t Assoc;
+  TRecoCedarCandidate *KTAGcand;
 };
 
 #endif

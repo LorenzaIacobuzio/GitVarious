@@ -257,6 +257,7 @@ for run in ${runs}; do
 
         ## Check if a list was found
         if [ -z "${listFile}" ]; then
+	    echo ${listFile}
             echo "Could not find list file for run: ${run}, and filter: ${filter}. Skipping ..."
             continue
         fi
@@ -331,7 +332,7 @@ for run in ${runs}; do
             head -${jobNumber} ${listFile} | tail -${finalList} > ${jobListFile}
         fi
 
-	   #analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myOptions} ${myIgnore}"
+	   #analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myOptions}"
 analysisJobInput="${executableFile} ${isData} ${run} ${jobNumber} ${analysisDir} ${jobListFile} ${myIgnore}"
 	   echo ${analysisJobInput} >> ${inputDir}/${analysisInputFile}
     done

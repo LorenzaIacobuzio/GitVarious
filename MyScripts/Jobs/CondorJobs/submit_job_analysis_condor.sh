@@ -29,11 +29,11 @@ function findListFile() {
 	       #listFilePattern="Run${run}Raw.EOSlist.r"
 	       #listFilePattern="Run${run}Raw.EOSlist.r"
                #Modification for reprocessing unfiltered lists stored in my directory
-	       listFilePattern="Run${run}.EOSlist.${filter}.p"
+	       listFilePattern="Run00${run}.EOSlist.${filter}.p"
 	   else
 	       #listFilePattern="Run${run}Raw.EOSlist.${filter}.r"
                #Modification for reprocessing > r1666
-	       listFilePattern="Run${run}.EOSlist.${filter}.p"
+	       listFilePattern="Run00${run}.EOSlist.${filter}.p"
                #Modification for reprocessing stored in Karim's directory
 	       #listFilePattern="Run00${run}.${filter}.r"
 
