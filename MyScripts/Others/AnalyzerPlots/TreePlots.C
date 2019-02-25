@@ -1,6 +1,21 @@
+void Save(TString path, TCanvas *c, TH1D* h, TString x) {
+
+  h->GetXaxis()->SetTitle(x);
+  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".pdf");
+  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".png");
+}
+
+void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y) {
+
+  h->GetXaxis()->SetTitle(x);
+  h->GetYaxis()->SetTitle(y);
+  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".pdf");
+  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".png");
+}
+
 void TreePlots(TString dir, TString histo1) {
 
-  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
+  // dir = output dir, histo1 = histo to do cosmetics on
 
   TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
@@ -56,6 +71,7 @@ void TreePlots(TString dir, TString histo1) {
   Double_t energyPi;
   Double_t energyMu;
   Double_t invMass;
+  Double_t L0TPTime;
   TVector3 *Mom1 = new TVector3();
   TVector3 *Mom2 = new TVector3();
   TVector3 *TotMom = new TVector3();
@@ -63,7 +79,10 @@ void TreePlots(TString dir, TString histo1) {
   TVector3 *threeMomPi = new TVector3();
   TVector3 *threeMomMu = new TVector3();
   Bool_t Target;
+  Bool_t K3pi;
+  Bool_t autoPass;
   Int_t Assoc;
+  TRecoCedarCandidate *KTAGcand;
 
   tree->SetBranchAddress("Weight", &Weight);
   tree->SetBranchAddress("CHODTime1", &CHODTime1);
@@ -81,6 +100,7 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("energyPi", &energyPi);
   tree->SetBranchAddress("energyMu", &energyMu);
   tree->SetBranchAddress("invMass", &invMass);
+  tree->SetBranchAddress("L0TPTime", &L0TPTime);
   tree->SetBranchAddress("Mom1", &Mom1);
   tree->SetBranchAddress("Mom2", &Mom2);
   tree->SetBranchAddress("TotMom", &TotMom);
@@ -88,18 +108,28 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("threeMomPi", &threeMomPi);
   tree->SetBranchAddress("threeMomMu", &threeMomMu);
   tree->SetBranchAddress("Target", &Target);
+  tree->SetBranchAddress("K3pi", &K3pi);
+  tree->SetBranchAddress("autoPass", &autoPass);
   tree->SetBranchAddress("Assoc", &Assoc);
+  tree->SetBranchAddress("KTAGcand", KTAGcand);
     
-  TH2D *h = new TH2D("h", "h", 100, 1.E-14, 1.E-12, 100, 0., 100.);
+  TH1D *hDist = new TH1D("hDist", "Parasitic background studies", 1000, 0., 2000.);
+  TH1D *hTime = new TH1D("hTime", "Combinatorial background studies", 100, -15., 15.);
+  TH1D *hZ = new TH1D("hZ", "Prompt background studies", 1000, 100., 190.);
+  TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 1000, 0.2, 2., 100, 0., 500.);
   
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
-    h->Fill(Weight, Mom1->X()/1000.);
+    hDist->Fill(BeamlineDist, Weight);
+    hTime->Fill(CHODTime1-CHODTime2, Weight);
+    hZ->Fill(Zvertex, Weight);
+    hDistvsMass->Fill(BeamlineDist, invMass/1000., Weight);
   }
 
-  h->Draw("text");
-  gPad->SetLogx();
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".pdf");
-  c->SaveAs(path + "HeavyNeutrino/" + h->GetName() + ".png");
+  Save(path, c, hDist, "Vertex-beamline distance [mm]");
+  Save(path, c, hTime, "Track time difference [ns]");
+  Save(path, c, hZ, "Z coordinate of vertex [m]");
+  Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]");
+  
   tree->ResetBranchAddresses();
 }
