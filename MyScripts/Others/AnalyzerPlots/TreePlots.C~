@@ -1,29 +1,59 @@
+void Save(TString path, TCanvas *c, TH1D* h, TString x, Double_t labelSize, Double_t titleSize) {
+
+  h->Draw();
+  h->GetXaxis()->SetTitle(x);
+  h->SetFillColor(38);
+  h->SetTitleSize(titleSize, "t");
+  h->GetXaxis()->SetTitleSize(labelSize);
+  h->GetXaxis()->SetLabelSize(labelSize);
+  h->GetYaxis()->SetTitleSize(labelSize);
+  h->GetYaxis()->SetLabelSize(labelSize);
+  h->GetXaxis()->SetTitleOffset(1.4);
+  h->GetYaxis()->SetTitleOffset(1.4);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + h->GetName() + ".pdf");
+  c->SaveAs(path + h->GetName() + ".png");
+}
+
+void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labelSize, Double_t titleSize) {
+
+  h->Draw("colz");
+  h->GetXaxis()->SetTitle(x);
+  h->GetYaxis()->SetTitle(y);
+  h->SetTitleSize(titleSize, "t");
+  h->GetXaxis()->SetTitleSize(labelSize);
+  h->GetYaxis()->SetTitleSize(labelSize);
+  h->GetXaxis()->SetLabelSize(labelSize);
+  h->GetYaxis()->SetLabelSize(labelSize);
+  h->GetXaxis()->SetTitleOffset(1.4);
+  h->GetYaxis()->SetTitleOffset(1.4);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + h->GetName() + ".pdf");
+  c->SaveAs(path + h->GetName() + ".png");
+}
+
 void TreePlots(TString dir, TString histo1) {
 
-  // dir = output dir, histo1 = histo to do cosmetics on, data = data or mc, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
+  // dir = output dir, histo1 = histo to do cosmetics on
 
-  TCanvas *c = CreateTCanvas();
+  TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
   TString path = "";
-  
+
+  c->SetRightMargin(0.2);
+  c->SetLeftMargin(0.2);
+  c->SetBottomMargin(0.25);
+  c->SetTopMargin(0.15);
+  c->SetGrid();
+  c->RedrawAxis();
+
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
-  
-  if (histo1.Contains("1"))
-    path += "1/";
-  else if (histo1.Contains("2"))
-    path += "2/";
-  else if (histo1.Contains("3"))
-    path += "3/";
-  else if (histo1.Contains("Data"))
-    path += "Data/";
-  else if (histo1.Contains("POT"))
-    path += "POT/";
-  else
-    path += "2/";
+    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
 
   TFile *f = TFile::Open(histo1);
 
@@ -31,15 +61,83 @@ void TreePlots(TString dir, TString histo1) {
     cout << "Error: cannot open " << histo1 << endl;
     return;
   }
+
+  TTree* tree = (TTree*)f->Get("Passed");
+  Double_t Weight;
+  Double_t CHODTime1;
+  Double_t CHODTime2;
+  Double_t CDA;
+  Double_t Zvertex;
+  Double_t CDALine;
+  Double_t ZCDALine;
+  Double_t BeamlineDist;
+  Double_t xSR;
+  Double_t ySR;
+  Double_t MuEoP;
+  Double_t PiEoP;
+  Double_t R;
+  Double_t energyPi;
+  Double_t energyMu;
+  Double_t invMass;
+  Double_t L0TPTime;
+  TVector3 *Mom1 = new TVector3();
+  TVector3 *Mom2 = new TVector3();
+  TVector3 *TotMom = new TVector3();
+  TVector3 *Vertex = new TVector3();
+  TVector3 *threeMomPi = new TVector3();
+  TVector3 *threeMomMu = new TVector3();
+  Bool_t Target;
+  Bool_t K3pi;
+  Bool_t autoPass;
+  Int_t Assoc;
+  //TRecoCedarCandidate *KTAGcand;
+
+  tree->SetBranchAddress("Weight", &Weight);
+  tree->SetBranchAddress("CHODTime1", &CHODTime1);
+  tree->SetBranchAddress("CHODTime2", &CHODTime2);
+  tree->SetBranchAddress("CDA", &CDA);
+  tree->SetBranchAddress("Zvertex", &Zvertex);
+  tree->SetBranchAddress("CDALine", &CDALine);
+  tree->SetBranchAddress("ZCDALine", &ZCDALine);
+  tree->SetBranchAddress("BeamlineDist", &BeamlineDist);
+  tree->SetBranchAddress("xSR", &xSR);
+  tree->SetBranchAddress("ySR", &ySR);
+  tree->SetBranchAddress("MuEoP", &MuEoP);
+  tree->SetBranchAddress("PiEoP", &PiEoP);
+  tree->SetBranchAddress("R", &R);
+  tree->SetBranchAddress("energyPi", &energyPi);
+  tree->SetBranchAddress("energyMu", &energyMu);
+  tree->SetBranchAddress("invMass", &invMass);
+  tree->SetBranchAddress("L0TPTime", &L0TPTime);
+  tree->SetBranchAddress("Mom1", &Mom1);
+  tree->SetBranchAddress("Mom2", &Mom2);
+  tree->SetBranchAddress("TotMom", &TotMom);
+  tree->SetBranchAddress("Vertex", &Vertex);
+  tree->SetBranchAddress("threeMomPi", &threeMomPi);
+  tree->SetBranchAddress("threeMomMu", &threeMomMu);
+  tree->SetBranchAddress("Target", &Target);
+  tree->SetBranchAddress("K3pi", &K3pi);
+  tree->SetBranchAddress("autoPass", &autoPass);
+  tree->SetBranchAddress("Assoc", &Assoc);
+  //tree->SetBranchAddress("KTAGcand", KTAGcand);
+    
+  TH1D *hDist = new TH1D("hDist", "Parasitic background studies", 100, 0., 1000.);
+  TH1D *hTime = new TH1D("hTime", "Combinatorial background studies", 100, -15., 15.);
+  TH1D *hZ = new TH1D("hZ", "Prompt background studies", 500, 100., 190.);
+  TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
   
-  TTreeReader myReader("Passed", f);
-  TTreeReaderValue<Double_t> Weight(myReader, "Weight");
-  TTreeReaderValue<TVector3> Mom1(myReader, "Mom1");
+  for(Int_t i = 0; i < tree->GetEntries(); ++i) {
+    tree->GetEntry(i);
+    hDist->Fill(BeamlineDist, Weight);
+    hTime->Fill(CHODTime1-CHODTime2, Weight);
+    hZ->Fill(Zvertex/1000., Weight);
+    hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
+  }
 
-  TH2D h("h", "h", 100, 1.E-14, 1.E-12, 100, 0., 100.);
+  Save(path, c, hDist, "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hTime, "Track time difference [ns]", labelSize, titleSize);
+  Save(path, c, hZ, "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
 
-  h.Fill(Weight, Mom1.x()/1000.);
-  h.Draw("colz");
-  c->SaveAs(path + "HeavyNeutrino/" + h.GetName() + ".pdf");
-  c->SaveAs(path + "HeavyNeutrino/" + h.GetName() + ".png");  
+  tree->ResetBranchAddresses();
 }

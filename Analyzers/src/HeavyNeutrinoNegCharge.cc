@@ -5,7 +5,7 @@
 // Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                    
 //                                                                                        
 // ---------------------------------------------------------------                         
-/// \class HeavyNeutrino              
+/// \class HeavyNeutrinoNegCharge              
 /// \Brief                                                                         
 /// Heavy neutral lepton selection
 /// \EndBrief                                                                            
@@ -14,7 +14,7 @@
 /// Several histograms are plotted after each series of cuts.
 /// A boolean with the outcome of the selection (whether the HNL passes or not the whole selection) is stored as output and can be retrieved from another analyzer in the following way:
 /// \code
-/// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
+/// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrinoNegCharge".Output);
 /// \endcode
 /// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.
 /// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e; a boolean is set to true if the signal regions are to be kept blinded; a boolean is set to true if MC samples are analysed for studying sidebands (it just changes the weight of the distributions to 1); a boolean that ensures plots are filled only for a certain mass and coupling (set by the user).
@@ -49,7 +49,7 @@
 #include "SpectrometerMUV3AssociationOutput.hh"
 #include "HNLFunctions.hh"
 #include "HNLWeight.hh"
-#include "HeavyNeutrino.hh"
+#include "HeavyNeutrinoNegCharge.hh"
 
 using namespace std;
 using namespace NA62Analysis;
@@ -58,10 +58,10 @@ using namespace NA62Constants;
 #define TRIGGER_L0_PHYSICS_TYPE 1
 #define MCTriggerMask 0xFF
 
-/// \class HeavyNeutrino
+/// \class HeavyNeutrinoNegCharge
 
-HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrino") {
+HeavyNeutrinoNegCharge::HeavyNeutrinoNegCharge(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrinoNegCharge") {
 
   fReadingData = GetIsTree();
   if (!fReadingData) return;
@@ -130,7 +130,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   KTAGcand = new TRecoCedarCandidate();
 }
 
-void HeavyNeutrino::InitOutput() {
+void HeavyNeutrinoNegCharge::InitOutput() {
 
   if (fReadingData) {
 
@@ -168,13 +168,13 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("Passed", "KTAGcand", KTAGcand);
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
+    ImportAllInputHistogram("HeavyNeutrinoNegCharge", false, "HeavyNeutrinoNegCharge");
   }
 
   return;
 }
 
-void HeavyNeutrino::InitHist() {
+void HeavyNeutrinoNegCharge::InitHist() {
 
   if (fReadingData) {
 
@@ -298,7 +298,7 @@ void HeavyNeutrino::InitHist() {
   return;
 }
 
-void HeavyNeutrino::Process(Int_t) {
+void HeavyNeutrinoNegCharge::Process(Int_t) {
 
   if (!fReadingData) return;
     
@@ -876,7 +876,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Track selection, CUT: Opposite-charged tracks
   
-  if (Charge1 + Charge2 != 0)
+  if (Charge1 + Charge2 != -2)
     return;
 
   FillHisto("hCuts", CutID);
@@ -1400,7 +1400,7 @@ void HeavyNeutrino::Process(Int_t) {
   return;
 }
 
-void HeavyNeutrino::ProcessEOBEvent() {
+void HeavyNeutrinoNegCharge::ProcessEOBEvent() {
 
   if (!fReadingData) return;
 
@@ -1417,7 +1417,7 @@ void HeavyNeutrino::ProcessEOBEvent() {
   return;
 }
 
-void HeavyNeutrino::EndOfBurstUser() {
+void HeavyNeutrinoNegCharge::EndOfBurstUser() {
 
   if (!fReadingData) return;
   
@@ -1451,7 +1451,7 @@ void HeavyNeutrino::EndOfBurstUser() {
   return;
 }
 
-void HeavyNeutrino::EndOfJobUser() {
+void HeavyNeutrinoNegCharge::EndOfJobUser() {
 
   if (fReadingData) {
 
