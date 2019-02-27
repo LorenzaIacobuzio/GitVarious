@@ -1,9 +1,0 @@
-## to run: condor_submit configHadd
-
-Universe   = vanilla
-Executable = DataHadd.sh
-+JobFlavour = testmatch
-Arguments  = /afs/cern.ch/work/l/liacobuz/private/condorOutput/*/outFiles/ HeavyNeutrinoScan /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/
-Log        = hadd.log
-Error      = hadd.error
-Queue
