@@ -57,11 +57,8 @@ function findListFile() {
             echo "Run: ${run} could not be assigned a year..."
             return
         else
-	    #listsLocation=${dataListsLocation}/${year}
-            #listsLocation=${dataListsLocation}/${year}A-v0.11.1
-            #listsLocation=${dataListsLocation}/${year}A-v0.11.2
-	    listsLocation=${dataListsLocation}/${year}A-v1.0.0
-	    #listsLocation=${dataListsLocation}/${year}B-v1.0.0
+	    #listsLocation=${dataListsLocation}/${year}A-v1.0.2
+	    listsLocation=${dataListsLocation}/${year}D-v1.0.3
             #Modification for reprocessing stored in Karim's directory
             #listsLocation=${dataListsLocation}${year}
             #Modification for reprocessing unfiltered stored in my directory

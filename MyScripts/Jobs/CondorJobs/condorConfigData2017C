@@ -1,0 +1,21 @@
+## "Constants"
+dataListsLocation= /afs/cern.ch/na62/offline/lists/Data/Reco/2017
+##dataListsLocation= /afs/cern.ch/na62/offline/lists/Data/Reco/2016
+analysisScript= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/analysis_condor.sh
+executableFile= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/bin-slc6/MyAnalyzer
+executableName= MyAnalyzer
+
+## Parameters
+
+##BadBurstList for Sample 2017C, revision v1.0.3
+runs= 7747 7748 7751 7781 7782 7784 7785 7787 7788 7789 7790 7791 7794 7808 7809 7810 7811 7812 7813 7814 7819 7820 7821 7822 7823 7826 7872 7873
+
+filter= HNLV
+filesPerJob= 70
+jobFlavour= workday
+numberOfCPUs= 2
+
+outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputData2017C/
+analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
+myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/
+

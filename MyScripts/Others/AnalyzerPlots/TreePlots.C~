@@ -125,19 +125,34 @@ void TreePlots(TString dir, TString histo1) {
   TH1D *hTime = new TH1D("hTime", "Combinatorial background studies", 100, -15., 15.);
   TH1D *hZ = new TH1D("hZ", "Prompt background studies", 500, 100., 190.);
   TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
-  
+  TH2D *hSR = new TH2D("hSR", "Signal region", 500, -50., 50., 50, 0., 0.1);
+
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
-    hDist->Fill(BeamlineDist, Weight);
-    hTime->Fill(CHODTime1-CHODTime2, Weight);
-    hZ->Fill(Zvertex/1000., Weight);
-    hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
+
+    if ((ZCDALine < -10000.) || (ZCDALine > 35000.) || ((ZCDALine >= -10000. && ZCDALine <= 35000.) && CDALine > 40.)) {
+      hDist->Fill(BeamlineDist, Weight);
+      hTime->Fill(CHODTime1-CHODTime2, Weight);
+      hZ->Fill(Zvertex/1000., Weight);
+      hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
+      hSR->Fill(ZCDALine/1000., CDALine, Weight);
+    }
+    /*
+    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) 
+      hDist->Fill(BeamlineDist, Weight);
+      hTime->Fill(CHODTime1-CHODTime2, Weight);
+      hZ->Fill(Zvertex/1000., Weight);
+      hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
+      hSR->Fill(ZCDALine/1000., CDALine, Weight);
+    }
+    */
   }
 
   Save(path, c, hDist, "Vertex-beamline distance [mm]", labelSize, titleSize);
   Save(path, c, hTime, "Track time difference [ns]", labelSize, titleSize);
   Save(path, c, hZ, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hSR, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
   tree->ResetBranchAddresses();
 }

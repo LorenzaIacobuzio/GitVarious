@@ -29,11 +29,11 @@ function findListFile() {
 	       #listFilePattern="Run${run}Raw.EOSlist.r"
 	       #listFilePattern="Run${run}Raw.EOSlist.r"
                #Modification for reprocessing unfiltered lists stored in my directory
-	       listFilePattern="Run${run}.EOSlist.${filter}.p"
+	       listFilePattern="Run00${run}.EOSlist.${filter}.p"
 	   else
 	       #listFilePattern="Run${run}Raw.EOSlist.${filter}.r"
                #Modification for reprocessing > r1666
-	       listFilePattern="Run${run}.EOSlist.${filter}.p"
+	       listFilePattern="Run00${run}.EOSlist.${filter}.p"
                #Modification for reprocessing stored in Karim's directory
 	       #listFilePattern="Run00${run}.${filter}.r"
 
@@ -57,11 +57,8 @@ function findListFile() {
             echo "Run: ${run} could not be assigned a year..."
             return
         else
-	    #listsLocation=${dataListsLocation}/${year}
-            #listsLocation=${dataListsLocation}/${year}A-v0.11.1
-            #listsLocation=${dataListsLocation}/${year}A-v0.11.2
-	    listsLocation=${dataListsLocation}/${year}A-v1.0.0
-	    #listsLocation=${dataListsLocation}/${year}B-v1.0.0
+	    #listsLocation=${dataListsLocation}/${year}A-v1.0.2
+	    listsLocation=${dataListsLocation}/${year}C-v1.0.3
             #Modification for reprocessing stored in Karim's directory
             #listsLocation=${dataListsLocation}${year}
             #Modification for reprocessing unfiltered stored in my directory
@@ -257,7 +254,6 @@ for run in ${runs}; do
 
         ## Check if a list was found
         if [ -z "${listFile}" ]; then
-	    echo ${listFile}
             echo "Could not find list file for run: ${run}, and filter: ${filter}. Skipping ..."
             continue
         fi

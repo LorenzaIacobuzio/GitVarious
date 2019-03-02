@@ -52,9 +52,19 @@ void TreePlots(TString dir, TString histo1) {
 
   if (dir != "")
     path = dir;
-  else
-    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/"; ///Users/lorenza/cernbox/PhD/Talks and papers/Notes/MCnote/images/Plots/
+  else {
+    if (histo1.Contains("2016"))
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/2016/";
+    else if (histo1.Contains("2017"))
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/2017/";
+    else if (histo1.Contains("Capped"))
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/K3piCapped/";
+    else if (!histo1.Contains("Capped") && histo1.Contains("K3pi"))
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/K3pi/";
 
+  //path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/";
+  }
+  
   TFile *f = TFile::Open(histo1);
 
   if (f == 0) {
@@ -91,7 +101,7 @@ void TreePlots(TString dir, TString histo1) {
   Bool_t autoPass;
   Int_t Assoc;
   //TRecoCedarCandidate *KTAGcand;
-
+  
   tree->SetBranchAddress("Weight", &Weight);
   tree->SetBranchAddress("CHODTime1", &CHODTime1);
   tree->SetBranchAddress("CHODTime2", &CHODTime2);
@@ -121,38 +131,49 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("Assoc", &Assoc);
   //tree->SetBranchAddress("KTAGcand", KTAGcand);
     
-  TH1D *hDist = new TH1D("hDist", "Parasitic background studies", 100, 0., 1000.);
-  TH1D *hTime = new TH1D("hTime", "Combinatorial background studies", 100, -15., 15.);
-  TH1D *hZ = new TH1D("hZ", "Prompt background studies", 500, 100., 190.);
-  TH2D *hDistvsMass = new TH2D("hDistvsMass", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
-  TH2D *hSR = new TH2D("hSR", "Signal region", 500, -50., 50., 50, 0., 0.1);
+  TH1D *hDistTime = new TH1D("hDistTime", "Parasitic background studies", 100, 0., 1000.);
+  TH1D *hTimeTime = new TH1D("hTimeTime", "Combinatorial background studies", 100, -15., 15.);
+  TH1D *hZTime = new TH1D("hZTime", "Prompt background studies", 500, 100., 190.);
+  TH2D *hDistvsMassTime = new TH2D("hDistvsMassTime", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
+  TH2D *hSRTime = new TH2D("hSRTime", "Signal region", 500, -50., 50., 50, 0., 0.1);
 
+  TH1D *hDistSR = new TH1D("hDistSR", "Parasitic background studies", 100, 0., 1000.);
+  TH1D *hTimeSR = new TH1D("hTimeSR", "Combinatorial background studies", 100, -15., 15.);
+  TH1D *hZSR = new TH1D("hZSR", "Prompt background studies", 500, 100., 190.);
+  TH2D *hDistvsMassSR = new TH2D("hDistvsMassSR", "Parasitic background studies", 200, 0.2, 2., 50, 0., 1000.);
+  TH2D *hSRSR = new TH2D("hSRSR", "Signal region", 500, -50., 50., 50, 0., 0.1);
+  
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
 
     if ((ZCDALine < -10000.) || (ZCDALine > 35000.) || ((ZCDALine >= -10000. && ZCDALine <= 35000.) && CDALine > 40.)) {
-      hDist->Fill(BeamlineDist, Weight);
-      hTime->Fill(CHODTime1-CHODTime2, Weight);
-      hZ->Fill(Zvertex/1000., Weight);
-      hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
-      hSR->Fill(ZCDALine/1000., CDALine, Weight);
+      hDistSR->Fill(BeamlineDist, Weight);
+      hTimeSR->Fill(CHODTime1-CHODTime2, Weight);
+      hZSR->Fill(Zvertex/1000., Weight);
+      hDistvsMassSR->Fill(invMass/1000., BeamlineDist, Weight);
+      hSRSR->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
-    /*
-    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) 
-      hDist->Fill(BeamlineDist, Weight);
-      hTime->Fill(CHODTime1-CHODTime2, Weight);
-      hZ->Fill(Zvertex/1000., Weight);
-      hDistvsMass->Fill(invMass/1000., BeamlineDist, Weight);
-      hSR->Fill(ZCDALine/1000., CDALine, Weight);
+    
+    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) {
+      hDistTime->Fill(BeamlineDist, Weight);
+      hTimeTime->Fill(CHODTime1-CHODTime2, Weight);
+      hZTime->Fill(Zvertex/1000., Weight);
+      hDistvsMassTime->Fill(invMass/1000., BeamlineDist, Weight);
+      hSRTime->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
-    */
   }
 
-  Save(path, c, hDist, "Vertex-beamline distance [mm]", labelSize, titleSize);
-  Save(path, c, hTime, "Track time difference [ns]", labelSize, titleSize);
-  Save(path, c, hZ, "Z coordinate of vertex [m]", labelSize, titleSize);
-  Save(path, c, hDistvsMass, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
-  Save(path, c, hSR, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
+  Save(path, c, hDistSR, "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hTimeSR, "Track time difference [ns]", labelSize, titleSize);
+  Save(path, c, hZSR, "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path, c, hDistvsMassSR, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hSRSR, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
+
+  Save(path, c, hDistTime, "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hTimeTime, "Track time difference [ns]", labelSize, titleSize);
+  Save(path, c, hZTime, "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path, c, hDistvsMassTime, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hSRTime, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
   tree->ResetBranchAddresses();
 }

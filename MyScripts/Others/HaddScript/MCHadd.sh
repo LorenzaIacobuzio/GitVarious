@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd $1
-ndir=`ls -lR | grep \d | wc -l`
+ndir=`ls -l . | grep -c ^d`
 
 for i in `seq 1 $ndir`;
 	do
