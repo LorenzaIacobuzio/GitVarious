@@ -81,7 +81,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
-  AddParam("BlindRegion", &fBlindRegion, true);
+  AddParam("BlindRegion", &fBlindRegion, false);
   AddParam("MCsample", &fMCsample, false);
   AddParam("EnableChecks", &fEnableChecks, false);
   AddParam("MassForChecks", &fMassForChecks, 1.6);

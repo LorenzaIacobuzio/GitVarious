@@ -81,7 +81,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
-  AddParam("BlindRegion", &fBlindRegion, false);
+  AddParam("BlindRegion", &fBlindRegion, true);
   AddParam("MCsample", &fMCsample, false);
   AddParam("EnableChecks", &fEnableChecks, false);
   AddParam("MassForChecks", &fMassForChecks, 1.6);
@@ -1298,29 +1298,6 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
-    
-  // Geometrical cuts, CUT: Cut on Z of two-track vertex
-
-  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
-
-  // Studies on SR resolution
-
-  if (Target == true)
-    FillHisto("hThetavsZCDA_Tar", ZVertexMomTarget/1000., Theta, Weight);
-  else
-    FillHisto("hThetavsZCDA_TAX", ZVertexMomTAX/1000., Theta, Weight);
-
-  // Geometrical cuts, CUT: Cut on two-track vertex wrt beamline
-
-  if (BeamlineDist <= 100.)
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
 
   // Reference plot - 5 
 
@@ -1346,6 +1323,29 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   FillHisto("hCDAvsZCDAAll_Geom", ZCDALine/1000., CDALine/1000., Weight);
+    
+  // Geometrical cuts, CUT: Cut on Z of two-track vertex
+
+  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // Studies on SR resolution
+
+  if (Target == true)
+    FillHisto("hThetavsZCDA_Tar", ZVertexMomTarget/1000., Theta, Weight);
+  else
+    FillHisto("hThetavsZCDA_TAX", ZVertexMomTAX/1000., Theta, Weight);
+
+  // Geometrical cuts, CUT: Cut on two-track vertex wrt beamline
+
+  if (BeamlineDist <= 100.)
+    return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // Reference plot - 6
 
