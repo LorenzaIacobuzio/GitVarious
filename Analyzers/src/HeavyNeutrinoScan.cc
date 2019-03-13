@@ -60,9 +60,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 52.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
@@ -278,94 +278,94 @@ void HeavyNeutrinoScan::InitHist() {
     // One value
 
     BookHisto("SingleValue/ErrorAccMomSel", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomSel")->SetNameTitle("SingleValue/ErrorAccMomSel", "Selection acceptance vs N momentum");
+    fHisto.GetTGraph("SingleValue/ErrorAccMomSel")->SetNameTitle("ErrorAccMomSel", "Selection acceptance vs N momentum");
     BookHisto("SingleValue/ErrorAccMomReg", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomReg")->SetNameTitle("SingleValue/ErrorAccMomReg", "Regeneration acceptance vs N momentum");
+    fHisto.GetTGraph("SingleValue/ErrorAccMomReg")->SetNameTitle("ErrorAccMomReg", "Regeneration acceptance vs N momentum");
     BookHisto("SingleValue/ErrorAccMomFV", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomFV")->SetNameTitle("SingleValue/ErrorAccMomFV", "FV acceptance vs N momentum");
+    fHisto.GetTGraph("SingleValue/ErrorAccMomFV")->SetNameTitle("ErrorAccMomFV", "FV acceptance vs N momentum");
 
     BookHisto("SingleValue/ErrorYieldMom", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorYieldMom")->SetNameTitle("SingleValue/ErrorYieldMom", "Yield per POT vs N momentum");
+    fHisto.GetTGraph("SingleValue/ErrorYieldMom")->SetNameTitle("ErrorYieldMom", "Yield per POT vs N momentum");
 
     // Coupling
 
     BookHisto("CouplingScan/MeanCoupling", new TGraph());
-    fHisto.GetTGraph("CouplingScan/MeanCoupling")->SetNameTitle("CouplingScan/MeanCoupling", "Mean probability of N reaching and decaying in the FV vs coupling");
+    fHisto.GetTGraph("CouplingScan/MeanCoupling")->SetNameTitle("MeanCoupling", "Mean probability of N reaching and decaying in the FV vs coupling");
         
     BookHisto("CouplingScan/GammaTotCoupling", new TGraph());
-    fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetNameTitle("CouplingScan/GammaTotCoupling", "N total decay width vs coupling");
+    fHisto.GetTGraph("CouplingScan/GammaTotCoupling")->SetNameTitle("GammaTotCoupling", "N total decay width vs coupling");
     BookHisto("CouplingScan/TauCoupling", new TGraph());
-    fHisto.GetTGraph("CouplingScan/TauCoupling")->SetNameTitle("CouplingScan/TauCoupling", "N mean lifetime vs coupling");
+    fHisto.GetTGraph("CouplingScan/TauCoupling")->SetNameTitle("TauCoupling", "N mean lifetime vs coupling");
 
     BookHisto("CouplingScan/ErrorAccCouplingSelTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget")->SetNameTitle("CouplingScan/ErrorAccCouplingSelTarget", "Selection Target");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget")->SetNameTitle("ErrorAccCouplingSelTarget", "Selection Target");
     BookHisto("CouplingScan/ErrorAccCouplingRegTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTarget")->SetNameTitle("CouplingScan/ErrorAccCouplingRegTarget", "Regeneration Target");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTarget")->SetNameTitle("ErrorAccCouplingRegTarget", "Regeneration Target");
     BookHisto("CouplingScan/ErrorAccCouplingFVTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTarget")->SetNameTitle("CouplingScan/ErrorAccCouplingFVTarget", "FV Target");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTarget")->SetNameTitle("ErrorAccCouplingFVTarget", "FV Target");
     BookHisto("CouplingScan/ErrorYieldCouplingTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget")->SetNameTitle("CouplingScan/ErrorYieldCouplingTarget", "Target");
+    fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget")->SetNameTitle("ErrorYieldCouplingTarget", "Target");
 
     BookHisto("CouplingScan/ErrorAccCouplingSelTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTAX")->SetNameTitle("CouplingScan/ErrorAccCouplingSelTAX", "Selection TAX");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTAX")->SetNameTitle("ErrorAccCouplingSelTAX", "Selection TAX");
     BookHisto("CouplingScan/ErrorAccCouplingRegTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTAX")->SetNameTitle("CouplingScan/ErrorAccCouplingRegTAX", "Regeneration TAX");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTAX")->SetNameTitle("ErrorAccCouplingRegTAX", "Regeneration TAX");
     BookHisto("CouplingScan/ErrorAccCouplingFVTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTAX")->SetNameTitle("CouplingScan/ErrorAccCouplingFVTAX", "FV TAX");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTAX")->SetNameTitle("ErrorAccCouplingFVTAX", "FV TAX");
     BookHisto("CouplingScan/ErrorYieldCouplingTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX")->SetNameTitle("CouplingScan/ErrorYieldCouplingTAX", "TAX");
+    fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX")->SetNameTitle("ErrorYieldCouplingTAX", "TAX");
 
     BookHisto("CouplingScan/ErrorAccCouplingSel", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")->SetNameTitle("CouplingScan/ErrorAccCouplingSel", "Selection");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")->SetNameTitle("ErrorAccCouplingSel", "Selection");
     BookHisto("CouplingScan/ErrorAccCouplingReg", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg")->SetNameTitle("CouplingScan/ErrorAccCouplingReg", "Regeneration");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg")->SetNameTitle("ErrorAccCouplingReg", "Regeneration");
     BookHisto("CouplingScan/ErrorAccCouplingFV", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV")->SetNameTitle("CouplingScan/ErrorAccCouplingFV", "FV");
+    fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV")->SetNameTitle("ErrorAccCouplingFV", "FV");
     BookHisto("CouplingScan/ErrorYieldCoupling", new TGraphAsymmErrors());
-    fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling")->SetNameTitle("CouplingScan/ErrorYieldCoupling", "All");
+    fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling")->SetNameTitle("ErrorYieldCoupling", "All");
 
     // Mass
 
     BookHisto("MassScan/MeanMass", new TGraph());
-    fHisto.GetTGraph("MassScan/MeanMass")->SetNameTitle("MassScan/MeanMass", "Mean probability of N reaching and decaying in the FV vs N mass");
+    fHisto.GetTGraph("MassScan/MeanMass")->SetNameTitle("MeanMass", "Mean probability of N reaching and decaying in the FV vs N mass");
     BookHisto("MassScan/GammaTotMass", new TGraph());
-    fHisto.GetTGraph("MassScan/GammaTotMass")->SetNameTitle("MassScan/GammaTotMass", "N total decay width vs N mass");
+    fHisto.GetTGraph("MassScan/GammaTotMass")->SetNameTitle("GammaTotMass", "N total decay width vs N mass");
     BookHisto("MassScan/TauMass", new TGraph());
-    fHisto.GetTGraph("MassScan/TauMass")->SetNameTitle("MassScan/TauMass", "N mean lifetime vs N mass");
+    fHisto.GetTGraph("MassScan/TauMass")->SetNameTitle("TauMass", "N mean lifetime vs N mass");
 
     BookHisto("MassScan/ErrorAccMassSelTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassSelTarget")->SetNameTitle("MassScan/ErrorAccMassSelTarget", "Selection Target");
+    fHisto.GetTGraph("MassScan/ErrorAccMassSelTarget")->SetNameTitle("ErrorAccMassSelTarget", "Selection Target");
     BookHisto("MassScan/ErrorAccMassRegTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassRegTarget")->SetNameTitle("MassScan/ErrorAccMassRegTarget", "Regeneration Target");
+    fHisto.GetTGraph("MassScan/ErrorAccMassRegTarget")->SetNameTitle("ErrorAccMassRegTarget", "Regeneration Target");
     BookHisto("MassScan/ErrorAccMassFVTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassFVTarget")->SetNameTitle("MassScan/ErrorAccMassFVTarget", "FV Target");
+    fHisto.GetTGraph("MassScan/ErrorAccMassFVTarget")->SetNameTitle("ErrorAccMassFVTarget", "FV Target");
     BookHisto("MassScan/ErrorYieldMassTarget", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorYieldMassTarget")->SetNameTitle("MassScan/ErrorYieldMassTarget", "Target");
+    fHisto.GetTGraph("MassScan/ErrorYieldMassTarget")->SetNameTitle("ErrorYieldMassTarget", "Target");
 
     BookHisto("MassScan/ErrorAccMassSelTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassSelTAX")->SetNameTitle("MassScan/ErrorAccMassSelTAX", "Selection TAX");
+    fHisto.GetTGraph("MassScan/ErrorAccMassSelTAX")->SetNameTitle("ErrorAccMassSelTAX", "Selection TAX");
     BookHisto("MassScan/ErrorAccMassRegTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX")->SetNameTitle("MassScan/ErrorAccMassRegTAX", "Regeneration TAX");
+    fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX")->SetNameTitle("ErrorAccMassRegTAX", "Regeneration TAX");
     BookHisto("MassScan/ErrorAccMassFVTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX")->SetNameTitle("MassScan/ErrorAccMassFVTAX", "FV TAX");
+    fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX")->SetNameTitle("ErrorAccMassFVTAX", "FV TAX");
     BookHisto("MassScan/ErrorYieldMassTAX", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")->SetNameTitle("MassScan/ErrorYieldMassTAX", "TAX");
+    fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")->SetNameTitle("ErrorYieldMassTAX", "TAX");
 
     BookHisto("MassScan/ErrorAccMassSel", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassSel")->SetNameTitle("MassScan/ErrorAccMassSel", "Selection");
+    fHisto.GetTGraph("MassScan/ErrorAccMassSel")->SetNameTitle("ErrorAccMassSel", "Selection");
     BookHisto("MassScan/ErrorAccMassReg", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassReg")->SetNameTitle("MassScan/ErrorAccMassReg", "Regeneration");
+    fHisto.GetTGraph("MassScan/ErrorAccMassReg")->SetNameTitle("ErrorAccMassReg", "Regeneration");
     BookHisto("MassScan/ErrorAccMassFV", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorAccMassFV")->SetNameTitle("MassScan/ErrorAccMassFV", "FV");
+    fHisto.GetTGraph("MassScan/ErrorAccMassFV")->SetNameTitle("ErrorAccMassFV", "FV");
     BookHisto("MassScan/ErrorYieldMass", new TGraphAsymmErrors());
-    fHisto.GetTGraph("MassScan/ErrorYieldMass")->SetNameTitle("MassScan/ErrorYieldMass", "All");
+    fHisto.GetTGraph("MassScan/ErrorYieldMass")->SetNameTitle("ErrorYieldMass", "All");
 
     // Total
 
     BookHisto("TotalScan/hExclusion", new TH2D("Exclusion", "Sensitivity as a function of N mass and coupling", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
 
     BookHisto("TotalScan/Contours", new TGraph());
-    fHisto.GetTGraph("TotalScan/Contours")->SetNameTitle("TotalScan/Contours", "Contours for sensitivity");
+    fHisto.GetTGraph("TotalScan/Contours")->SetNameTitle("Contours", "Contours for sensitivity");
   }
 }
 

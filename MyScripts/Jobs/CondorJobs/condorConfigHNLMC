@@ -7,9 +7,9 @@ executableName= MyAnalyzer
 runs= HNLMC.list
 
 filesPerJob= 1
-jobFlavour= testmatch
+jobFlavour= tomorrow
 numberOfCPUs= 1
-outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputMC/
+outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputMC1/
 analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
 myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/
 ##myOptions= -n 10
