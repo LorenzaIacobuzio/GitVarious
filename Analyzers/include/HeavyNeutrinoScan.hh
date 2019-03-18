@@ -32,7 +32,7 @@ public:
   HeavyNeutrinoScan(NA62Analysis::Core::BaseAnalysis *ba);
   ~HeavyNeutrinoScan() {}
   void InitHist();
-  void InitOutput() {}
+  void InitOutput();
   void DefineMCSimple() {}
   void Process(Int_t);
   void StartOfBurstUser() {}
@@ -67,13 +67,15 @@ protected:
   Double_t fMassStart;
   Double_t fMassStop;
   Double_t fMassStep;
+  Double_t fTMass;
+  Double_t fTCoupling;
+  Double_t fTNEvents;
+  Double_t fTSumGood;
   Int_t fMode;
   Int_t fN;
   Int_t fNMom;
   Int_t fNMass;
   Int_t fNContours;
-  fstream fNEventsFile;
-  fstream fSumGoodFile;
 
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;

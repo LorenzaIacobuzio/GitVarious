@@ -160,7 +160,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   }
 
   if (name.Contains("Yield") && name.Contains("Mass")) {
-    m->GetYaxis()->SetRangeUser(1.E-20, 1.E-16);
+    m->GetYaxis()->SetRangeUser(1.E-20, 1.E-15);
   }
 
   if (name.Contains("Mass") && name.Contains("FV")) {
@@ -291,7 +291,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       
       TGraphCosmetics(g, labelSize, titleSize);
 
-      if ((histo1.Contains("1") || histo1.Contains("2") || histo1.Contains("3")) && Name1.Contains("Contours")) {
+      if (histo1.Contains("1") && Name1.Contains("Contours")) {
 	for (Int_t i = 0; i < 17; i++){
 	  g->RemovePoint(207);
 	}

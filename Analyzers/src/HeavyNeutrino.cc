@@ -74,9 +74,9 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 52.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -1395,7 +1395,7 @@ void HeavyNeutrino::Process(Int_t) {
   // Output of selection
 
   fPassSelection = true;
-  FillTrees();
+  FillTree("Passed");
   
   return;
 }

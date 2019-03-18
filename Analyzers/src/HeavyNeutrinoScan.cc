@@ -60,9 +60,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 52.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
@@ -89,15 +89,16 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
   fCDAcomp = new TwoLinesCDA();
   fDistcomp = new PointLineDistance();
+}
 
-  if (fReadingData) {  
-    fNEventsFile.open("NEventsFile.txt", ios::out);
-    fSumGoodFile.open("SumGoodFile.txt", ios::out);
-  }
-  else {
-    fNEventsFile.open("NEventsFile.txt", ios::in);
-    fSumGoodFile.open("SumGoodFile.txt", ios::in);
-  }
+void HeavyNeutrinoScan::InitOutput() {
+
+  OpenNewTree("Scan", "Scan");
+
+  AddBranch("Scan", "Mass", &fTMass);
+  AddBranch("Scan", "Coupling", &fTCoupling);
+  AddBranch("Scan", "NEvents", &fTNEvents);
+  AddBranch("Scan", "SumGood", &fTSumGood);
 }
 
 void HeavyNeutrinoScan::InitHist() {
@@ -858,19 +859,17 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Double_t Coupling = 0.;
     Double_t MN = 0.;
 
-    // Write to files for exclusion plot
-
     for (auto it = fMasses.begin(); it != fMasses.end(); it++) {
       MN = it->first;
       for (auto it1 = fCouplings.begin(); it1 != fCouplings.end(); it1++) {
 	Coupling = it1->first;
-	fNEventsFile << MN << " " << Coupling << " " << fNEvents[MN][Coupling] << "\n";
-	fSumGoodFile << MN << " " << Coupling << " " << fSumGood[MN][Coupling] << "\n";
+	fTMass = MN;
+	fTCoupling = Coupling;
+	fTNEvents = fNEvents[MN][Coupling];
+	fTSumGood = fSumGood[MN][Coupling];
+	FillTree("Scan");
       }
     }
-
-    fNEventsFile.close();
-    fSumGoodFile.close();
   }
   else {
 
@@ -924,22 +923,17 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Int_t massCounter = 0;
     string line;
 
-    while (getline(fNEventsFile, line)) {
-      stringstream ss(line);
-      Double_t value;
-      TString dummy;
-      ss >> MN >> Coupling >> value >> dummy;
-      if (dummy == "" && value != -1.0/0.0 && value != 1.0/0.0 && value != 0.0/0.0)
-        fNEvents[MN][Coupling] += value;
-    }
+    TTree *tree = (TTree*)GetCurrentFile()->Get("Scan");
 
-    while (getline(fSumGoodFile, line)) {
-      stringstream ss(line);
-      Double_t value;
-      TString dummy;
-      ss >> MN >> Coupling >> value >> dummy;
-      if (dummy == "" && value != -1.0/0.0 && value != 1.0/0.0 && value != 0.0/0.0 && value < 1.E1)
-	fSumGood[MN][Coupling] += value;
+    tree->SetBranchAddress("Mass", &fTMass);
+    tree->SetBranchAddress("Coupling", &fTCoupling);
+    tree->SetBranchAddress("NEvents", &fTNEvents);
+    tree->SetBranchAddress("SumGood", &fTSumGood);
+
+    for (Int_t i = 0; i < tree->GetEntries(); ++i) {
+      tree->GetEntry(i);
+      fNEvents[fTMass][fTCoupling] += fTNEvents;
+      fSumGood[fTMass][fTCoupling] += fTSumGood;
     }
 
     // Lifetime and exclusion plots
