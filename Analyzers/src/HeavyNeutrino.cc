@@ -109,6 +109,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   fzCHODPlane = GeometricAcceptance::GetInstance()->GetZCHODVPlane();
   frMinCHOD = GeometricAcceptance::GetInstance()->GetCHODRmin();
   frMaxCHOD = GeometricAcceptance::GetInstance()->GetCHODRmax();
+  fZGTK3 = GeometricAcceptance::GetInstance()->GetZGTK3();
 
   // Parameters for L0 trigger conditions
 
@@ -136,36 +137,42 @@ void HeavyNeutrino::InitOutput() {
 
     RegisterOutput("Output", &fPassSelection);
     
-    OpenNewTree("Passed", "Events");
+    OpenNewTree("HeavyNeutrinoPassed", "Events");
     
-    AddBranch("Passed", "Weight", &Weight);
-    AddBranch("Passed", "CHODTime1", &CHODTime1);
-    AddBranch("Passed", "CHODTime2", &CHODTime2);
-    AddBranch("Passed", "CDA", &CDA);
-    AddBranch("Passed", "Zvertex", &Zvertex);
-    AddBranch("Passed", "CDALine", &CDALine);
-    AddBranch("Passed", "ZCDALine", &ZCDALine);
-    AddBranch("Passed", "BeamlineDist", &BeamlineDist);
-    AddBranch("Passed", "xSR", &xSR);
-    AddBranch("Passed", "ySR", &ySR);
-    AddBranch("Passed", "MuEoP", &MuEoP);
-    AddBranch("Passed", "PiEoP", &PiEoP);
-    AddBranch("Passed", "R", &R);
-    AddBranch("Passed", "energyPi", &energyPi);
-    AddBranch("Passed", "energyMu", &energyMu);
-    AddBranch("Passed", "invMass", &invMass);
-    AddBranch("Passed", "L0TPTime", &L0TPTime);
-    AddBranch("Passed", "Mom1", &Mom1);
-    AddBranch("Passed", "Mom2", &Mom2);
-    AddBranch("Passed", "TotMom", &TotMom);
-    AddBranch("Passed", "Vertex", &Vertex);
-    AddBranch("Passed", "threeMomPi", &threeMomPi);
-    AddBranch("Passed", "threeMomMu", &threeMomMu);
-    AddBranch("Passed", "Target", &Target);
-    AddBranch("Passed", "K3pi", &K3pi);
-    AddBranch("Passed", "autoPass", &autoPass);
-    AddBranch("Passed", "Assoc", &Assoc);
-    AddBranch("Passed", "KTAGcand", KTAGcand);
+    AddBranch("HeavyNeutrinoPassed", "Weight", &Weight);
+    AddBranch("HeavyNeutrinoPassed", "CHODTime1", &CHODTime1);
+    AddBranch("HeavyNeutrinoPassed", "CHODTime2", &CHODTime2);
+    AddBranch("HeavyNeutrinoPassed", "CDA", &CDA);
+    AddBranch("HeavyNeutrinoPassed", "Zvertex", &Zvertex);
+    AddBranch("HeavyNeutrinoPassed", "CDALine", &CDALine);
+    AddBranch("HeavyNeutrinoPassed", "ZCDALine", &ZCDALine);
+    AddBranch("HeavyNeutrinoPassed", "BeamlineDist", &BeamlineDist);
+    AddBranch("HeavyNeutrinoPassed", "xSR", &xSR);
+    AddBranch("HeavyNeutrinoPassed", "ySR", &ySR);
+    AddBranch("HeavyNeutrinoPassed", "MuEoP", &MuEoP);
+    AddBranch("HeavyNeutrinoPassed", "PiEoP", &PiEoP);
+    AddBranch("HeavyNeutrinoPassed", "R", &R);
+    AddBranch("HeavyNeutrinoPassed", "energyPi", &energyPi);
+    AddBranch("HeavyNeutrinoPassed", "energyMu", &energyMu);
+    AddBranch("HeavyNeutrinoPassed", "invMass", &invMass);
+    AddBranch("HeavyNeutrinoPassed", "L0TPTime", &L0TPTime);
+    AddBranch("HeavyNeutrinoPassed", "xGTK31", &xGTK31);
+    AddBranch("HeavyNeutrinoPassed", "yGTK31", &yGTK31);
+    AddBranch("HeavyNeutrinoPassed", "xGTK32", &xGTK32);
+    AddBranch("HeavyNeutrinoPassed", "yGTK32", &yGTK32);
+    AddBranch("HeavyNeutrinoPassed", "Mom1", &Mom1);
+    AddBranch("HeavyNeutrinoPassed", "Mom2", &Mom2);
+    AddBranch("HeavyNeutrinoPassed", "TotMom", &TotMom);
+    AddBranch("HeavyNeutrinoPassed", "Vertex", &Vertex);
+    AddBranch("HeavyNeutrinoPassed", "threeMomPi", &threeMomPi);
+    AddBranch("HeavyNeutrinoPassed", "threeMomMu", &threeMomMu);
+    AddBranch("HeavyNeutrinoPassed", "Target", &Target);
+    AddBranch("HeavyNeutrinoPassed", "K3pi", &K3pi);
+    AddBranch("HeavyNeutrinoPassed", "autoPass", &autoPass);
+    AddBranch("HeavyNeutrinoPassed", "Assoc", &Assoc);
+    AddBranch("HeavyNeutrinoPassed", "Charge1", &Charge1);
+    AddBranch("HeavyNeutrinoPassed", "Charge2", &Charge2);
+    AddBranch("HeavyNeutrinoPassed", "KTAGcand", KTAGcand);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
@@ -471,16 +478,16 @@ void HeavyNeutrino::Process(Int_t) {
   CutID++;
 
   // Track features
-    
-  Int_t Charge1 = Tracks[0].GetCharge();
-  Int_t Charge2 = Tracks[1].GetCharge();
+
   Double_t ChiSquare1 = Tracks[0].GetChi2();
   Double_t ChiSquare2 = Tracks[1].GetChi2();
   TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
   TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
   Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
   Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
-  TotMom = Mom1 + Mom2;
+  TotMom = Mom1 + Mom2;    
+  Charge1 = Tracks[0].GetCharge();
+  Charge2 = Tracks[1].GetCharge();
 
   // Handle fast MC and data
 
@@ -1299,6 +1306,16 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  // Geometrical cuts, CUT: Extrapoolation to GTK
+
+  xGTK31 = SpectrometerCand1->xAt(fZGTK3);
+  xGTK32 = SpectrometerCand2->xAt(fZGTK3);
+  yGTK31 = SpectrometerCand1->yAt(fZGTK3);
+  yGTK32 = SpectrometerCand2->yAt(fZGTK3);
+
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Reference plot - 5 
 
   FillHisto("hZvsBeam_Geom", Zvertex/1000., BeamlineDist/1000., Weight);
@@ -1326,8 +1343,10 @@ void HeavyNeutrino::Process(Int_t) {
     
   // Geometrical cuts, CUT: Cut on Z of two-track vertex
 
-  if (Zvertex <= fInitialFV || Zvertex >= (fInitialFV + fLFV))
-    return;
+  if (GetWithMC()) {
+    if (Zvertex <= 120000. || Zvertex >= (fInitialFV + fLFV))
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
@@ -1395,7 +1414,7 @@ void HeavyNeutrino::Process(Int_t) {
   // Output of selection
 
   fPassSelection = true;
-  FillTree("Passed");
+  FillTree("HeavyNeutrinoPassed");
   
   return;
 }
@@ -1700,8 +1719,8 @@ void HeavyNeutrino::EndOfJobUser() {
 
     // Plot residual number of events after each cut
 
-    const int NCuts = 37;
-    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
+    const int NCuts = 40;
+    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
   
     for (Int_t i = 1; i <= NCuts; i++)
       fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);

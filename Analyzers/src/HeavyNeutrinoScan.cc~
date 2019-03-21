@@ -60,12 +60,12 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.061); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 4.3); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 10.); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step
@@ -93,12 +93,12 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrinoScan::InitOutput() {
 
-  OpenNewTree("Scan", "Scan");
+  OpenNewTree("HeavyNeutrinoScan/Scan", "Scan");
 
-  AddBranch("Scan", "Mass", &fTMass);
-  AddBranch("Scan", "Coupling", &fTCoupling);
-  AddBranch("Scan", "NEvents", &fTNEvents);
-  AddBranch("Scan", "SumGood", &fTSumGood);
+  AddBranch("HeavyNeutrinoScan/Scan", "Mass", &fTMass);
+  AddBranch("HeavyNeutrinoScan/Scan", "Coupling", &fTCoupling);
+  AddBranch("HeavyNeutrinoScan/Scan", "NEvents", &fTNEvents);
+  AddBranch("HeavyNeutrinoScan/Scan", "SumGood", &fTSumGood);
 }
 
 void HeavyNeutrinoScan::InitHist() {
@@ -867,7 +867,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	fTCoupling = Coupling;
 	fTNEvents = fNEvents[MN][Coupling];
 	fTSumGood = fSumGood[MN][Coupling];
-	FillTree("Scan");
+	FillTree("HeavyNeutrinoScan/Scan");
       }
     }
   }
@@ -923,7 +923,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Int_t massCounter = 0;
     string line;
 
-    TTree *tree = (TTree*)GetCurrentFile()->Get("Scan");
+    TTree *tree = (TTree*)GetCurrentFile()->Get("HeavyNeutrinoScan/Scan");
 
     tree->SetBranchAddress("Mass", &fTMass);
     tree->SetBranchAddress("Coupling", &fTCoupling);

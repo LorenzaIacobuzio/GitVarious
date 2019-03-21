@@ -40,48 +40,51 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
   c->SaveAs(path + h->GetName() + ".png");
 }
 
-void TreePlots(TString dir, TString histo1) {
 
-  // dir = output dir, histo1 = histo to do cosmetics on
-
-  TCanvas *c = new TCanvas();  
-  Double_t labelSize = 0.05;
-  Double_t titleSize = 0.07;  
+void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
+  
   TString path = "";
+  TString analyzer = "";
   Int_t counterComb = 0;
   Int_t counterPrompt = 0;
   Int_t counterPar = 0;
+  Int_t counterParPosNeg = 0;
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;  
 
-  c->SetRightMargin(0.2);
-  c->SetLeftMargin(0.2);
-  c->SetBottomMargin(0.25);
-  c->SetTopMargin(0.15);
-  c->SetGrid();
-  c->RedrawAxis();
-
+  if (an.Contains("Pos"))
+    analyzer = "Pos";
+  else if (an.Contains("Neg"))
+    analyzer = "Neg";
+  else if (!an.Contains("Pos") && !an.Contains("Neg"))
+    analyzer = "Zero";
+  
   if (dir != "")
     path = dir;
   else {
     if (histo1.Contains("2016"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/2016/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/2016/";
     else if (histo1.Contains("2017"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/2017/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/2017/";
     else if (histo1.Contains("Capped"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/K3piCapped/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/K3piCapped/";
     else if (!histo1.Contains("Capped") && histo1.Contains("K3pi"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/K3pi/";
-
-  //path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/K3pi/";
+    else
+      cout<<"I don't know which directory to put the plots into. Histo name is weird!"<<endl;
+    
+    //path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/";
   }
   
   TFile *f = TFile::Open(histo1);
-
+  
   if (f == 0) {
     cout << "Error: cannot open " << histo1 << endl;
     return;
   }
 
-  TTree* tree = (TTree*)f->Get("Passed");
+  TString treeName = an + "Passed";
+  TTree* tree = (TTree*)f->Get(treeName);
   Double_t Weight;
   Double_t CHODTime1;
   Double_t CHODTime2;
@@ -99,6 +102,10 @@ void TreePlots(TString dir, TString histo1) {
   Double_t energyMu;
   Double_t invMass;
   Double_t L0TPTime;
+  Double_t xGTK31;
+  Double_t yGTK31;
+  Double_t xGTK32;
+  Double_t yGTK32;
   TVector3 *Mom1 = new TVector3();
   TVector3 *Mom2 = new TVector3();
   TVector3 *TotMom = new TVector3();
@@ -109,6 +116,8 @@ void TreePlots(TString dir, TString histo1) {
   Bool_t K3pi;
   Bool_t autoPass;
   Int_t Assoc;
+  Int_t Charge1;
+  Int_t Charge2;
   //TRecoCedarCandidate *KTAGcand;
   
   tree->SetBranchAddress("Weight", &Weight);
@@ -138,6 +147,12 @@ void TreePlots(TString dir, TString histo1) {
   tree->SetBranchAddress("K3pi", &K3pi);
   tree->SetBranchAddress("autoPass", &autoPass);
   tree->SetBranchAddress("Assoc", &Assoc);
+  tree->SetBranchAddress("Charge1", &Charge1);
+  tree->SetBranchAddress("Charge2", &Charge2);
+  tree->SetBranchAddress("xGTK31", &xGTK31);
+  tree->SetBranchAddress("yGTK31", &yGTK31);
+  tree->SetBranchAddress("xGTK32", &xGTK32);
+  tree->SetBranchAddress("yGTK32", &yGTK32);
   //tree->SetBranchAddress("KTAGcand", KTAGcand);
 
   // Combinatorial
@@ -151,6 +166,7 @@ void TreePlots(TString dir, TString histo1) {
   TH1D *hMomPiComb = new TH1D("hMomPiComb", "Combinatorial background studies", 100, 0., 200.);
   TH1D *hMomMuComb = new TH1D("hMomMuComb", "Combinatorial background studies", 100, 0., 200.);
   TH2D *hDistvsMassComb = new TH2D("hDistvsMassComb", "Combinatorial background studies", 300, 0.2, 2., 50, 0., 1000.);
+  TH2D *hGTK3Comb = new TH2D("hGTK3Comb", "Combinatorial background studies", 100, 0., 200., 100, 0., 1.);
   TH2D *hSRComb = new TH2D("hSRComb", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalComb = new TH2D("hSRFinalComb", "Signal region", 500, -50., 50., 50, 0., 0.1);
 
@@ -196,8 +212,8 @@ void TreePlots(TString dir, TString histo1) {
   
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
-
-    if ((ZCDALine < -10000.) || (ZCDALine > 35000.) || ((ZCDALine >= -10000. && ZCDALine <= 35000.) && CDALine > 40.)) {
+    
+    if ((ZCDALine < -10000.) || (ZCDALine > 35000.) || ((ZCDALine >= -10000. && ZCDALine <= 35000.) && CDALine > 40.)) { // all events outside blinded region
       hDistSR->Fill(BeamlineDist, Weight);
       hTimeSR->Fill(CHODTime1-CHODTime2, Weight);
       hZSR->Fill(Zvertex/1000., Weight);
@@ -209,7 +225,7 @@ void TreePlots(TString dir, TString histo1) {
       hSRSR->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
     
-    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) {
+    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) { // all events inside time sidebands
       hDistComb->Fill(BeamlineDist, Weight);
       hTimeComb->Fill(CHODTime1-CHODTime2, Weight);
       hZComb->Fill(Zvertex/1000., Weight);
@@ -221,7 +237,7 @@ void TreePlots(TString dir, TString histo1) {
       hSRComb->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (Zvertex >= 100000. && Zvertex <= 120000.) {
+    if (Zvertex >= 100000. && Zvertex <= 120000.) { // all events inside vertex sidebands
       hDistPrompt->Fill(BeamlineDist, Weight);
       hTimePrompt->Fill(CHODTime1-CHODTime2, Weight);
       hZPrompt->Fill(Zvertex/1000., Weight);
@@ -233,7 +249,7 @@ void TreePlots(TString dir, TString histo1) {
       hSRPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (BeamlineDist >= 100. && BeamlineDist <= 150.) {
+    if (BeamlineDist >= 100. && BeamlineDist <= 150.) { // all events inside beam distance sidebands
       hDistPar->Fill(BeamlineDist, Weight);
       hTimePar->Fill(CHODTime1-CHODTime2, Weight);
       hZPar->Fill(Zvertex/1000., Weight);
@@ -244,34 +260,35 @@ void TreePlots(TString dir, TString histo1) {
       hDistvsMassPar->Fill(invMass/1000., BeamlineDist, Weight);
       hSRPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
-
-    if (ZCDALine >= -10000. && ZCDALine <= 35000. && CDALine <= 40.) {
-      if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) {
-	if (threeMomPi->Mag()/1000. < 70. || threeMomPi->Mag()/1000. > 80.) {
-	  hSRFinalComb->Fill(ZCDALine/1000., CDALine/1000., Weight);
-	  counterComb++;
-	  hInvMassCombSR->Fill(invMass/1000., Weight);
-	}
+    
+    if (ZCDALine >= -10000. && ZCDALine <= 35000. && CDALine <= 40.) { // all events insided blinded region
+      if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) { // and time sidebands
+	hSRFinalComb->Fill(ZCDALine/1000., CDALine/1000., Weight);
+	counterComb++;
+	hInvMassCombSR->Fill(invMass/1000., Weight);
+	hGTK3Comb->Fill(Mom1->Mag()/1000., TMath::Sqrt(xGTK31*xGTK31 + yGTK31*yGTK31)/1000.);
+	hGTK3Comb->Fill(Mom2->Mag()/1000., TMath::Sqrt(xGTK32*xGTK32 + yGTK32*yGTK32)/1000.);
       }
-      if (Zvertex >= 100000. && Zvertex <= 120000.) {
-	if (threeMomPi->Mag()/1000. < 70. || threeMomPi->Mag()/1000. > 80.) {
-	  hSRFinalPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
-	  counterPrompt++;
-	  hInvMassPromptSR->Fill(invMass/1000., Weight);
-	}
+      if (Zvertex >= 100000. && Zvertex <= 120000.) { // and vertex sidebands
+	hSRFinalPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
+	counterPrompt++;
+	hInvMassPromptSR->Fill(invMass/1000., Weight);
       }
-      if (BeamlineDist >= 100. && BeamlineDist <= 150.) {
-	if (threeMomPi->Mag()/1000. < 70. || threeMomPi->Mag()/1000. > 80.) {
-	  hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
-	  counterPar++;
-	  hInvMassParSR->Fill(invMass/1000., Weight);
-	}
+      if (BeamlineDist >= 100. && BeamlineDist <= 150.) { // and beam distance sidebands
+	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
+	counterPar++;
+	hInvMassParSR->Fill(invMass/1000., Weight);
+      }
+      if (CHODTime1-CHODTime2 >= -2. && CHODTime1-CHODTime2 <= 2. && (histo1.Contains("Pos") || histo1.Contains("Neg"))) { // and in time with each other and total charge +-2
+	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
+	counterParPosNeg++;
+	hInvMassParSR->Fill(invMass/1000., Weight);	
       }
     }
   }
-
-  cout<<"Number of events in SR and time sidebands: "<<counterComb<<", and Z sidebands: "<<counterPrompt<<", and beamdist sidebands: "<<counterPar<<endl;
-
+  
+  cout<<"Number of events in SR and time sidebands: "<<counterComb<<", and Z sidebands: "<<counterPrompt<<", and beamdist sidebands: "<<counterPar<<", and in time with charge +-2: "<<counterParPosNeg<<endl;
+  
   Save(path, c, hDistSR, "Vertex-beamline distance [mm]", labelSize, titleSize);
   Save(path, c, hTimeSR, "Track time difference [ns]", labelSize, titleSize);
   Save(path, c, hZSR, "Z coordinate of vertex [m]", labelSize, titleSize);
@@ -319,4 +336,24 @@ void TreePlots(TString dir, TString histo1) {
   Save(path, c, hSRFinalPar, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
   tree->ResetBranchAddresses();
+}
+
+void TreePlots(TString dir, TString histo1) {
+
+  // dir = output dir, histo1 = histo to do cosmetics on
+
+  TCanvas *c = new TCanvas();  
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;  
+
+  c->SetRightMargin(0.2);
+  c->SetLeftMargin(0.2);
+  c->SetBottomMargin(0.25);
+  c->SetTopMargin(0.15);
+  c->SetGrid();
+  c->RedrawAxis();
+
+  Analyzer(dir, histo1, "HeavyNeutrino", c);
+  Analyzer(dir, histo1, "HeavyNeutrinoPos", c);
+  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c);
 }

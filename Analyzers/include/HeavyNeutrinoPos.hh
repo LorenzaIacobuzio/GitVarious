@@ -5,8 +5,8 @@
 //                                                                                                    
 // --------------------------------------------------------------- 
 
-#ifndef HEAVYNEUTRINO_HH
-#define HEAVYNEUTRINO_HH
+#ifndef HEAVYNEUTRINOPOS_HH
+#define HEAVYNEUTRINOPOS_HH
 
 #include <stdlib.h>
 #include <iostream>
@@ -24,12 +24,12 @@ class TH2F;
 class TGraph;
 class TTree;
 
-class HeavyNeutrino : public NA62Analysis::Analyzer {
+class HeavyNeutrinoPos : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrino(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrino() {}
+  HeavyNeutrinoPos(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoPos() {}
   void InitHist();
   void InitOutput();
   void DefineMCSimple() {}
@@ -72,6 +72,7 @@ protected:
   Double_t fzCHODPlane;
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
+  Double_t fZGTK3;
   Double_t fNPOTT10;
   Double_t fNPOTFit;
   Double_t fNKTot;
@@ -99,6 +100,10 @@ protected:
   Double_t energyMu;
   Double_t invMass;
   Double_t L0TPTime;
+  Double_t xGTK31;
+  Double_t yGTK31;
+  Double_t xGTK32;
+  Double_t yGTK32;
   TVector3 Mom1;
   TVector3 Mom2;
   TVector3 TotMom;
