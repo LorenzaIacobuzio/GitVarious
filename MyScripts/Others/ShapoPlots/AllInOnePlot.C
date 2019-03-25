@@ -1021,8 +1021,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1070,8 +1070,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1120,8 +1120,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/Dropbox/PhD/Talks and papers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
@@ -1132,7 +1132,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
-  c->SetWindowSize(20000., 12000.);
+  //c->SetWindowSize(20000., 12000.);
 
   TGaxis::SetMaxDigits(2);
 
