@@ -1,5 +1,7 @@
 void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
 
+  TString name = h1->GetName();
+
   h1->SetFillColor(38);
   h1->SetTitleSize(titleSize, "t");
   h1->GetXaxis()->SetTitleSize(labelSize);
@@ -12,7 +14,12 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.2);
   gStyle->SetOptStat(0);
-  gPad->SetLogy(0);
+
+  if (name.Contains("EoP"))
+    gPad->SetLogy(1);
+  else
+    gPad->SetLogy(0);
+
   gPad->Update();
 }
 
