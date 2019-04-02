@@ -1,4 +1,4 @@
-// couplings according to model I, II, III, IV
+// couplings according to model I, II, III
 
 Double_t USquared = 1.;
 Double_t UeSquared = 0.;
@@ -1042,8 +1042,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1091,8 +1091,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1141,8 +1141,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
