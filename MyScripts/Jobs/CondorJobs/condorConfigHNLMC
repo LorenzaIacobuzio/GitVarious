@@ -9,6 +9,7 @@ runs= HNLMC.list
 filesPerJob= 1
 jobFlavour= tomorrow
 numberOfCPUs= 1
+operatingSystem= CentOS7
 outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputMC2/
 analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
 myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/

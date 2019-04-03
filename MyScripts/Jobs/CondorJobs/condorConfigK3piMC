@@ -9,6 +9,7 @@ runs= K3PiListBKGStudies.list
 filesPerJob= 20
 jobFlavour= workday
 numberOfCPUs= 1
+operatingSystem= CentOS7
 outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputK3pi/
 analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
 myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/

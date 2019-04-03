@@ -17,8 +17,8 @@ usage = "%Hadd.py condorpath analyzer1 analyzer2 tree1 tree2 copypath"
 parser = argparse.ArgumentParser(description = "Script for customized hadd. It calls copyFiles on each .root produced by Condor, creates a new .root with only the selected directory and hadds all of them in a final .root file")
 
 parser.add_argument("condorpath", metavar = "condorpath", default = "/afs/cern.ch/work/l/liacobuz/private/condorOutput/HNL/outFiles/", type = str, help = "leads to the condor outFiles directory")
-parser.add_argument("analyzer1", metavar = "analyzer1", type = str, help = "first analyzer directory name to be kept in the new .root file")
-parser.add_argument("analyzer2", metavar = "analyzer2", type = str, help = "second analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer1", metavar = "analyzer1", type = str, help = "analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer2", metavar = "analyzer2", type = str, help = "analyzer directory name to be kept in the new .root file")
 parser.add_argument("tree1", metavar = "tree1", type = str, help = "tree name to be kept in the new .root file")
 parser.add_argument("tree2", metavar = "tree2", type = str, help = "tree name to be kept in the new .root file")
 parser.add_argument("copypath", metavar = "copypath", type = str, help = "path to copyFiles.C")
@@ -50,7 +50,7 @@ def main():
 
 #    for subdir, dirs, files in os.walk(condorpath):
 #        for file in files:
-#            if "new" in file and "final" not in file:
+#            if "new" in file and "final" not in file and "Final" not in file:
 #                os.remove(os.path.abspath(os.path.join(subdir, file)))
 
 if __name__ == "__main__":

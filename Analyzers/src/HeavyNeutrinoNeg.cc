@@ -113,7 +113,8 @@ HeavyNeutrinoNeg::HeavyNeutrinoNeg(Core::BaseAnalysis *ba) :
 
   // Parameters for L0 trigger conditions
 
-  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
+  //fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
+  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1"};
 
   for (UInt_t i = 0; i < fStream.size(); i++) {
     fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
@@ -1300,8 +1301,10 @@ void HeavyNeutrinoNeg::Process(Int_t) {
 
   // Geometrical cuts, CUT: Cut on CDA of two tracks
 
-  if (CDA >= 10.)
-    return;
+  if (GetWithMC()) {
+    if (CDA >= 10.)
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
@@ -1345,6 +1348,10 @@ void HeavyNeutrinoNeg::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Zvertex <= 120000. || Zvertex >= (fInitialFV + fLFV))
+      return;
+  }
+  else {
+    if (Zvertex <= 100000. || Zvertex >= (fInitialFV + fLFV))
       return;
   }
 
@@ -1728,7 +1735,7 @@ void HeavyNeutrinoNeg::EndOfJobUser() {
     fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
   else {
-    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("Passed"))->CloneTree();
+    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoNegPassed"))->CloneTree();
     tree->Write();
   }
   

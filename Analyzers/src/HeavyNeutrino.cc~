@@ -113,7 +113,8 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
   // Parameters for L0 trigger conditions
 
-  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
+  //fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
+  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1"};
 
   for (UInt_t i = 0; i < fStream.size(); i++) {
     fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
@@ -137,42 +138,42 @@ void HeavyNeutrino::InitOutput() {
 
     RegisterOutput("Output", &fPassSelection);
     
-    OpenNewTree("HeavyNeutrino/Passed", "Events");
+    OpenNewTree("HeavyNeutrinoPassed", "Events");
     
-    AddBranch("HeavyNeutrino/Passed", "Weight", &Weight);
-    AddBranch("HeavyNeutrino/Passed", "CHODTime1", &CHODTime1);
-    AddBranch("HeavyNeutrino/Passed", "CHODTime2", &CHODTime2);
-    AddBranch("HeavyNeutrino/Passed", "CDA", &CDA);
-    AddBranch("HeavyNeutrino/Passed", "Zvertex", &Zvertex);
-    AddBranch("HeavyNeutrino/Passed", "CDALine", &CDALine);
-    AddBranch("HeavyNeutrino/Passed", "ZCDALine", &ZCDALine);
-    AddBranch("HeavyNeutrino/Passed", "BeamlineDist", &BeamlineDist);
-    AddBranch("HeavyNeutrino/Passed", "xSR", &xSR);
-    AddBranch("HeavyNeutrino/Passed", "ySR", &ySR);
-    AddBranch("HeavyNeutrino/Passed", "MuEoP", &MuEoP);
-    AddBranch("HeavyNeutrino/Passed", "PiEoP", &PiEoP);
-    AddBranch("HeavyNeutrino/Passed", "R", &R);
-    AddBranch("HeavyNeutrino/Passed", "energyPi", &energyPi);
-    AddBranch("HeavyNeutrino/Passed", "energyMu", &energyMu);
-    AddBranch("HeavyNeutrino/Passed", "invMass", &invMass);
-    AddBranch("HeavyNeutrino/Passed", "L0TPTime", &L0TPTime);
-    AddBranch("HeavyNeutrino/Passed", "xGTK31", &xGTK31);
-    AddBranch("HeavyNeutrino/Passed", "yGTK31", &yGTK31);
-    AddBranch("HeavyNeutrino/Passed", "xGTK32", &xGTK32);
-    AddBranch("HeavyNeutrino/Passed", "yGTK32", &yGTK32);
-    AddBranch("HeavyNeutrino/Passed", "Mom1", &Mom1);
-    AddBranch("HeavyNeutrino/Passed", "Mom2", &Mom2);
-    AddBranch("HeavyNeutrino/Passed", "TotMom", &TotMom);
-    AddBranch("HeavyNeutrino/Passed", "Vertex", &Vertex);
-    AddBranch("HeavyNeutrino/Passed", "threeMomPi", &threeMomPi);
-    AddBranch("HeavyNeutrino/Passed", "threeMomMu", &threeMomMu);
-    AddBranch("HeavyNeutrino/Passed", "Target", &Target);
-    AddBranch("HeavyNeutrino/Passed", "K3pi", &K3pi);
-    AddBranch("HeavyNeutrino/Passed", "autoPass", &autoPass);
-    AddBranch("HeavyNeutrino/Passed", "Assoc", &Assoc);
-    AddBranch("HeavyNeutrino/Passed", "Charge1", &Charge1);
-    AddBranch("HeavyNeutrino/Passed", "Charge2", &Charge2);
-    AddBranch("HeavyNeutrino/Passed", "KTAGcand", KTAGcand);
+    AddBranch("HeavyNeutrinoPassed", "Weight", &Weight);
+    AddBranch("HeavyNeutrinoPassed", "CHODTime1", &CHODTime1);
+    AddBranch("HeavyNeutrinoPassed", "CHODTime2", &CHODTime2);
+    AddBranch("HeavyNeutrinoPassed", "CDA", &CDA);
+    AddBranch("HeavyNeutrinoPassed", "Zvertex", &Zvertex);
+    AddBranch("HeavyNeutrinoPassed", "CDALine", &CDALine);
+    AddBranch("HeavyNeutrinoPassed", "ZCDALine", &ZCDALine);
+    AddBranch("HeavyNeutrinoPassed", "BeamlineDist", &BeamlineDist);
+    AddBranch("HeavyNeutrinoPassed", "xSR", &xSR);
+    AddBranch("HeavyNeutrinoPassed", "ySR", &ySR);
+    AddBranch("HeavyNeutrinoPassed", "MuEoP", &MuEoP);
+    AddBranch("HeavyNeutrinoPassed", "PiEoP", &PiEoP);
+    AddBranch("HeavyNeutrinoPassed", "R", &R);
+    AddBranch("HeavyNeutrinoPassed", "energyPi", &energyPi);
+    AddBranch("HeavyNeutrinoPassed", "energyMu", &energyMu);
+    AddBranch("HeavyNeutrinoPassed", "invMass", &invMass);
+    AddBranch("HeavyNeutrinoPassed", "L0TPTime", &L0TPTime);
+    AddBranch("HeavyNeutrinoPassed", "xGTK31", &xGTK31);
+    AddBranch("HeavyNeutrinoPassed", "yGTK31", &yGTK31);
+    AddBranch("HeavyNeutrinoPassed", "xGTK32", &xGTK32);
+    AddBranch("HeavyNeutrinoPassed", "yGTK32", &yGTK32);
+    AddBranch("HeavyNeutrinoPassed", "Mom1", &Mom1);
+    AddBranch("HeavyNeutrinoPassed", "Mom2", &Mom2);
+    AddBranch("HeavyNeutrinoPassed", "TotMom", &TotMom);
+    AddBranch("HeavyNeutrinoPassed", "Vertex", &Vertex);
+    AddBranch("HeavyNeutrinoPassed", "threeMomPi", &threeMomPi);
+    AddBranch("HeavyNeutrinoPassed", "threeMomMu", &threeMomMu);
+    AddBranch("HeavyNeutrinoPassed", "Target", &Target);
+    AddBranch("HeavyNeutrinoPassed", "K3pi", &K3pi);
+    AddBranch("HeavyNeutrinoPassed", "autoPass", &autoPass);
+    AddBranch("HeavyNeutrinoPassed", "Assoc", &Assoc);
+    AddBranch("HeavyNeutrinoPassed", "Charge1", &Charge1);
+    AddBranch("HeavyNeutrinoPassed", "Charge2", &Charge2);
+    AddBranch("HeavyNeutrinoPassed", "KTAGcand", KTAGcand);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
@@ -1300,8 +1301,10 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Geometrical cuts, CUT: Cut on CDA of two tracks
 
-  if (CDA >= 10.)
-    return;
+  if (GetWithMC()) {
+    if (CDA >= 10.)
+      return;
+  }
 
   FillHisto("hCuts", CutID);
   CutID++;
@@ -1345,6 +1348,10 @@ void HeavyNeutrino::Process(Int_t) {
 
   if (GetWithMC()) {
     if (Zvertex <= 120000. || Zvertex >= (fInitialFV + fLFV))
+      return;
+  }
+  else {
+    if (Zvertex <= 100000. || Zvertex >= (fInitialFV + fLFV))
       return;
   }
 
@@ -1414,7 +1421,7 @@ void HeavyNeutrino::Process(Int_t) {
   // Output of selection
 
   fPassSelection = true;
-  FillTree("HeavyNeutrino/Passed");
+  FillTree("HeavyNeutrinoPassed");
   
   return;
 }
@@ -1728,7 +1735,7 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
   else {
-    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("Passed"))->CloneTree();
+    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoPassed"))->CloneTree();
     tree->Write();
   }
   

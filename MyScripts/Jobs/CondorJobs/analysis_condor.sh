@@ -130,5 +130,3 @@ outFile=outFiles/${run}_${jobNumber}.root
 #${executableFile} -l ${usedList} -e 2 -o ${outFile} ${myOptions} > ${outputFile} 2>&1
 ${executableFile} -l ${usedList} -e 2 -o ${outFile} ${myIgnore} > ${outputFile} 2>&1 
 cat ${outputFile}
-cat NEventsFile.txt >> /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/NEventsFile.txt
-cat SumGoodFile.txt >> /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/SumGoodFile.txt

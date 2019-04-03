@@ -93,12 +93,12 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
 void HeavyNeutrinoScan::InitOutput() {
 
-  OpenNewTree("HeavyNeutrinoScan/Scan", "Scan");
+  OpenNewTree("Scan", "Scan");
 
-  AddBranch("HeavyNeutrinoScan/Scan", "Mass", &fTMass);
-  AddBranch("HeavyNeutrinoScan/Scan", "Coupling", &fTCoupling);
-  AddBranch("HeavyNeutrinoScan/Scan", "NEvents", &fTNEvents);
-  AddBranch("HeavyNeutrinoScan/Scan", "SumGood", &fTSumGood);
+  AddBranch("Scan", "Mass", &fTMass);
+  AddBranch("Scan", "Coupling", &fTCoupling);
+  AddBranch("Scan", "NEvents", &fTNEvents);
+  AddBranch("Scan", "SumGood", &fTSumGood);
 }
 
 void HeavyNeutrinoScan::InitHist() {
@@ -469,7 +469,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    FillHisto("CouplingScan/hReachCoupling", fCoupling, NReachProb);
 	    FillHisto("CouplingScan/hDecayCoupling", fCoupling, NDecayProb);
 	    FillHisto("CouplingScan/hProbCoupling", fCoupling, NReachProb*NDecayProb);
-	    FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);	
+	    FillHisto("CouplingScan/hWeightCoupling", fCoupling);	
 	    FillHisto("CouplingScan/hEnergyCoupling", fCoupling, TMath::Sqrt(momN/1000.*momN/1000. + MN/1000.*MN/1000.));
 	  }
 
@@ -515,7 +515,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    FillHisto("MassScan/hReachMass", round(MN)/1000., NReachProb);
 	    FillHisto("MassScan/hDecayMass", round(MN)/1000., NDecayProb);
 	    FillHisto("MassScan/hProbMass", round(MN)/1000., NReachProb*NDecayProb);
-	    FillHisto("MassScan/hWeightMass", round(MN)/1000., Weight);
+	    FillHisto("MassScan/hWeightMass", round(MN)/1000.);
 	    FillHisto("MassScan/hEnergyMass", round(MN)/1000., TMath::Sqrt(momN/1000.*momN/1000. + round(MN)/1000.*round(MN)/1000.));
 
 	    for (Int_t j = 0; j < evt->GetNKineParts(); j++) {
@@ -867,7 +867,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	fTCoupling = Coupling;
 	fTNEvents = fNEvents[MN][Coupling];
 	fTSumGood = fSumGood[MN][Coupling];
-	FillTree("HeavyNeutrinoScan/Scan");
+	FillTree("Scan");
       }
     }
   }
@@ -923,7 +923,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Int_t massCounter = 0;
     string line;
 
-    TTree *tree = (TTree*)GetCurrentFile()->Get("HeavyNeutrinoScan/Scan");
+    TTree *tree = (TTree*)GetCurrentFile()->Get("Scan");
 
     tree->SetBranchAddress("Mass", &fTMass);
     tree->SetBranchAddress("Coupling", &fTCoupling);

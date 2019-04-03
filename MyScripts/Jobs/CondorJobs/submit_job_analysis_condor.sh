@@ -13,6 +13,7 @@ function findListFile() {
     listFile=""
     year=""
     isData=""
+    version=""
 
     ## Check if we are working with data or MC
     if [[ ${run} =~ ${regex} ]]; then
@@ -52,24 +53,32 @@ function findListFile() {
             year=0
         fi
 
+	if [[ ${sample} == *"2016"* ]]; then
+	    version="v1.0.0"
+	elif [[ ${sample} == *"2017A"* ]]; then
+	    version="v1.0.2"
+	elif [[ ${sample} == *"2017B"* ]]; then
+	    version="v1.0.3"
+	elif [[ ${sample} == *"2017C"* ]]; then
+	    version="v1.0.3"
+	elif [[ ${sample} == *"2017D"* ]]; then
+	    version="v1.0.3"
+	elif [[ ${sample} == *"2018E"* ]]; then
+	    version="v1.0.4"
+	fi
+
+	echo "sample and version: " ${sample} ${version}
+
         echo "year: ${year}"
         if [ ${year} -eq 0 ]; then
             echo "Run: ${run} could not be assigned a year..."
             return
         else
-	    #listsLocation=${dataListsLocation}/${year}A-v1.0.0
-	    #listsLocation=${dataListsLocation}/${year}A-v1.0.2
-	    #listsLocation=${dataListsLocation}/${year}B-v1.0.3
-	    #listsLocation=${dataListsLocation}/${year}C-v1.0.3
-	    #listsLocation=${dataListsLocation}/${year}D-v1.0.3
-	    listsLocation=${dataListsLocation}/${year}E-v1.0.4
-            #Modification for reprocessing stored in Karim's directory
-            #listsLocation=${dataListsLocation}${year}
-            #Modification for reprocessing unfiltered stored in my directory
-            #listsLocation=${dataListsLocation}/Reco${year}
+	    listsLocation=${dataListsLocation}/${sample}-${version}
         fi
 
         echo "list location: ${listsLocation}"
+
         local listCandidates=( $(ls ${listsLocation} | grep ${listFilePattern}) )
         for i in "${listCandidates[@]}"
         do
@@ -201,6 +210,13 @@ while read -r configLine || [[ -n "$configLine" ]]; do
 	echo "Output dir:" ${outputDir}
     fi
 
+    # Find sample
+    samplePrefix="outputDir= "
+    if [[ ${configLine} == ${samplePrefix}* ]]; then
+	sample=${configLine: -6:5}
+	echo "Sample:" ${sample}
+    fi
+
     # Find analysis directory
     analysisDirPrefix="analysisDir= "
     if [[ ${configLine} == ${analysisDirPrefix}* ]]; then
@@ -254,7 +270,7 @@ for run in ${runs}; do
         fi
     else
         ## Function to find the relevant list file, based on run number and filter, or MC sample.
-        findListFile
+        findListFile "$sample"
 
         ## Check if a list was found
         if [ -z "${listFile}" ]; then

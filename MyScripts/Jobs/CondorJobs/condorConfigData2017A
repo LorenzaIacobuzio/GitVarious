@@ -14,7 +14,7 @@ filter= HNLV
 filesPerJob= 70
 jobFlavour= workday
 numberOfCPUs= 2
-
+operatingSystem= CentOS7
 outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputData2017A/
 analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
 myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/

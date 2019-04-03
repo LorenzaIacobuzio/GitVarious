@@ -13,26 +13,34 @@ import sys
 import argparse
 import subprocess
 
-usage = "%Hadd.py condorpath analyzer1 analyzer2 tree1 tree2 copypath"
+usage = "%Hadd.py condorpath analyzer1 analyzer2 analyzer3 analyzer4 tree1 tree2 tree3 tree4 copypath"
 parser = argparse.ArgumentParser(description = "Script for customized hadd. It calls copyFiles on each .root produced by Condor, creates a new .root with only the selected directory and hadds all of them in a final .root file")
 
 parser.add_argument("condorpath", metavar = "condorpath", default = "/afs/cern.ch/work/l/liacobuz/private/condorOutput/HNL/outFiles/", type = str, help = "leads to the condor outFiles directory")
-parser.add_argument("analyzer1", metavar = "analyzer1", type = str, help = "first analyzer directory name to be kept in the new .root file")
-parser.add_argument("analyzer2", metavar = "analyzer2", type = str, help = "second analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer1", metavar = "analyzer1", type = str, help = "analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer2", metavar = "analyzer2", type = str, help = "analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer3", metavar = "analyzer3", type = str, help = "analyzer directory name to be kept in the new .root file")
+parser.add_argument("analyzer4", metavar = "analyzer4", type = str, help = "analyzer directory name to be kept in the new .root file")
 parser.add_argument("tree1", metavar = "tree1", type = str, help = "tree name to be kept in the new .root file")
 parser.add_argument("tree2", metavar = "tree2", type = str, help = "tree name to be kept in the new .root file")
+parser.add_argument("tree3", metavar = "tree3", type = str, help = "tree name to be kept in the new .root file")
+parser.add_argument("tree4", metavar = "tree4", type = str, help = "tree name to be kept in the new .root file")
 parser.add_argument("copypath", metavar = "copypath", type = str, help = "path to copyFiles.C")
 
-if len(sys.argv) != 7:
+if len(sys.argv) != 11:
     parser.print_help()
     sys.exit(1)
 
 condorpath = os.path.abspath(sys.argv[1])
 analyzer1 = sys.argv[2]
 analyzer2 = sys.argv[3]
-tree1 = sys.argv[4]
-tree2 = sys.argv[5]
-copypath = os.path.abspath(sys.argv[5])
+analyzer3 = sys.argv[4]
+analyzer3 = sys.argv[5]
+tree1 = sys.argv[6]
+tree2 = sys.argv[7]
+tree3 = sys.argv[8]
+tree4 = sys.argv[9]
+copypath = os.path.abspath(sys.argv[10])
 
 def main():
 
@@ -45,12 +53,14 @@ def main():
             if "root" in file and "final" not in file and "new" not in file:
                 os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new1" + file)) + " " + analyzer1 + " " + tree1 + "\n")
                 os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new2" + file)) + " " + analyzer2 + " " + tree2 + "\n")
+                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new3" + file)) + " " + analyzer3 + " " + tree3 + "\n")
+                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new4" + file)) + " " + analyzer4 + " " + tree4 + "\n")
 
     subprocess.call(['/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/MCHadd.sh', condorpath])
 
 #    for subdir, dirs, files in os.walk(condorpath):
 #        for file in files:
-#            if "new" in file and "final" not in file:
+#            if "new" in file and "final" not in file and "Final" not in file:
 #                os.remove(os.path.abspath(os.path.join(subdir, file)))
 
 if __name__ == "__main__":

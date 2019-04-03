@@ -63,9 +63,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
-  AddParam("CouplingStart", &fCouplingStart, -10.); // -10
+  AddParam("CouplingStart", &fCouplingStart, -6.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 10.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 4.); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step
@@ -143,6 +143,7 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling", "Probability of N decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, -0.1, 1.1));
     BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling", "Probability of N reaching and decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 1.));
     BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, 1.E-12, 1.E-8));
+    BookHisto("CouplingScan/hGoodWeightCoupling", new TH2D("GoodWeightCoupling", "Good N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, 1.E-12, 1.E-8));
     BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 100.));
 
     BookHisto("CouplingScan/hG",  new TH1D("cG", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
@@ -164,6 +165,7 @@ void HeavyNeutrinoScan::InitHist() {
     BookHisto("MassScan/hDecayMass",     new TH2D("DecayMass", "Probability of N decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, -0.1, 1.1));
     BookHisto("MassScan/hProbMass",      new TH2D("ProbMass", "Probability of N reaching and decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, -0.1, 1.1));
     BookHisto("MassScan/hWeightMass",    new TH2D("WeightMass", "N weight vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 10000, 1.E-13, 1.E-9));
+    BookHisto("MassScan/hGoodWeightMass",    new TH2D("GoodWeightMass", "Good N weight vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 10000, 1.E-13, 1.E-9));
     BookHisto("MassScan/hEnergyMass",    new TH2D("EnergyMass", "N energy vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, 0., 100.));
     BookHisto("MassScan/hEnergyMassTom", new TH2D("EnergyMassTom", "N energy vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, 0., 100.));
 
@@ -412,7 +414,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  NReachProb = Weights[i]["ReachProb"];
 	  NDecayProb = Weights[i]["DecayProb"];
 
-	  if (Weights[i]["Weight"] < 1.E-1)
+	  //if (Weights[i]["Weight"] < 1.E-1)
 	    Weight = Weights[i]["Weight"];   
  
 	  isGood = Weights[i]["IsGood"];
@@ -471,6 +473,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    FillHisto("CouplingScan/hProbCoupling", fCoupling, NReachProb*NDecayProb);
 	    FillHisto("CouplingScan/hWeightCoupling", fCoupling, Weight);	
 	    FillHisto("CouplingScan/hEnergyCoupling", fCoupling, TMath::Sqrt(momN/1000.*momN/1000. + MN/1000.*MN/1000.));
+
+	    if (isGood)
+	      FillHisto("CouplingScan/hGoodWeightCoupling", fCoupling);	
 	  }
 
 	  // Histos for acceptance and yield: mass
@@ -517,6 +522,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    FillHisto("MassScan/hProbMass", round(MN)/1000., NReachProb*NDecayProb);
 	    FillHisto("MassScan/hWeightMass", round(MN)/1000., Weight);
 	    FillHisto("MassScan/hEnergyMass", round(MN)/1000., TMath::Sqrt(momN/1000.*momN/1000. + round(MN)/1000.*round(MN)/1000.));
+
+	    if (isGood)
+	      FillHisto("MassScan/hGoodWeightMass", round(MN)/1000., Weight);
 
 	    for (Int_t j = 0; j < evt->GetNKineParts(); j++) {
 	      KinePart *p = evt->GetKinePart(j);
@@ -768,11 +776,13 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     fHisto.GetTH2("CouplingScan/hDecayCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hProbCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hWeightCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
+    fHisto.GetTH2("CouplingScan/hGoodWeightCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hEnergyCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("MassScan/hReachMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hDecayMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hProbMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hWeightMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
+    fHisto.GetTH2("MassScan/hGoodWeightMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hEnergyMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hEnergyMassTom")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH1("ToyMC/DS/hpDS")->GetXaxis()->SetTitle("P [GeV/c]");
@@ -817,11 +827,13 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     fHisto.GetTH2("CouplingScan/hDecayCoupling")->GetYaxis()->SetTitle("Decay probability");
     fHisto.GetTH2("CouplingScan/hProbCoupling")->GetYaxis()->SetTitle("Reach and decay probability");
     fHisto.GetTH2("CouplingScan/hWeightCoupling")->GetYaxis()->SetTitle("Weight");
+    fHisto.GetTH2("CouplingScan/hGoodWeightCoupling")->GetYaxis()->SetTitle("Weight");
     fHisto.GetTH2("CouplingScan/hEnergyCoupling")->GetYaxis()->SetTitle("N energy [GeV]");
     fHisto.GetTH2("MassScan/hReachMass")->GetYaxis()->SetTitle("Reach probability");
     fHisto.GetTH2("MassScan/hDecayMass")->GetYaxis()->SetTitle("Decay probability");
     fHisto.GetTH2("MassScan/hProbMass")->GetYaxis()->SetTitle("Reach and decay probability");
     fHisto.GetTH2("MassScan/hWeightMass")->GetYaxis()->SetTitle("Weight");
+    fHisto.GetTH2("MassScan/hGoodWeightMass")->GetYaxis()->SetTitle("Weight");
     fHisto.GetTH2("MassScan/hEnergyMass")->GetYaxis()->SetTitle("N energy [GeV]");
     fHisto.GetTH2("MassScan/hEnergyMassTom")->GetYaxis()->SetTitle("N energy [GeV]");
     fHisto.GetTH1("ToyMC/DS/hpDS")->GetYaxis()->SetTitle("Entries/5 GeV/c");
