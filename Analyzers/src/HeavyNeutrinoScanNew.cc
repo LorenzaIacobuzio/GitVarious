@@ -1013,7 +1013,11 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     CosmeticsGraph(fHisto.GetTGraph("MassScan/GammaTotMass"), "N mass [GeV/c^{2}]", "Total decay width [MeV]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"), "N mass [GeV/c^{2}]", "Lifetime [ns]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"), "N mass [GeV/c^{2}]", "Mean probability", 2);
-    CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2})", 2);  
+
+    if (fInitialUeSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{e})", 2);
+    if (fInitialUtauSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{#tau})", 2);
 
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg")), "Log(U^{2})", "Acceptance", 2);
@@ -1051,7 +1055,11 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "Log(U^{2})", "Yield per POT", 2);
 
     fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-    fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2})");
+
+    if (fInitialUeSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{e})");
+    if (fInitialUtauSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{#tau})");
   }
 
   SaveAllPlots();

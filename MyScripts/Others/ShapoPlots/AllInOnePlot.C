@@ -6,7 +6,6 @@ Double_t UmuSquared = 0.;
 Double_t UtauSquared = 0.;
 
 void SetModel(Int_t model) {
-  /*	      
   if (model == 1) {
     UmuSquared = USquared/54.;
     UtauSquared = UmuSquared;
@@ -22,7 +21,7 @@ void SetModel(Int_t model) {
     UeSquared = 0.061*UmuSquared;
     UtauSquared = 4.3*UmuSquared;
   }
-  */
+  /*
   if (model == 1) {
     UmuSquared = USquared/3;
     UtauSquared = UmuSquared;
@@ -43,6 +42,7 @@ void SetModel(Int_t model) {
     UeSquared = 10.;
     UtauSquared = 0.;
   }
+  */
 }
 
 // physical constants
@@ -975,6 +975,26 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   }
 }
 
+
+TGraph* SumAllGraphs(TMultiGraph* M) {
+
+  TList* list = M->GetListOfGraphs();
+  TGraph* g = new TGraph();
+
+  for (Int_t i = 0; i < ((TGraph*)list->At(0))->GetN(); ++i) {
+    Double_t val = 0.;
+    Double_t x, y;
+    for (Int_t j = 0; j < list->GetEntries(); ++j) {
+      TGraph* gg = (TGraph*)list->At(j);
+      gg->GetPoint(i, x, y);
+      val += y;
+    }
+    g->SetPoint(i, x, val);
+  }
+
+  return g;
+}
+
 // Function to call al Dalitz plots
 
 void AllDalitz(Int_t model) {
@@ -1044,6 +1064,10 @@ void AllProd (Int_t model, TMultiGraph* M) {
   
   gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
   gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
+
+  new TCanvas;
+  TGraph* sum = SumAllGraphs(M);
+  sum->Draw("AP");
 }
 
 // Function to call all N decay modes
@@ -1157,7 +1181,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   TGaxis::SetMaxDigits(2);
 
-  if (model == 1 || model == 2 || model == 3 || model == 4)
+  if (model == 1 || model == 2 || model == 3)// || model == 4)
     SetModel(model);
   else {
     cout<<"[GeneralPlots] Unknown model:"<<endl;
@@ -1182,8 +1206,8 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
     HistoTitle = "II (0:1:0)";
   else if (model == 3)
     HistoTitle = "III (0:1:10)";
-  else if (model == 4)
-    HistoTitle = "IV (10:1:0)";
+  //else if (model == 4)
+  //HistoTitle = "IV (10:1:0)";
 
   Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());

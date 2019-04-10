@@ -65,7 +65,7 @@ HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -6.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 6.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 2.); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step
@@ -931,7 +931,7 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     
     Double_t Coupling = 0.;
     Double_t MN = 0.;
-    Double_t POT = 1.E28;
+    Double_t POT = 1.E38;
     Int_t couplingCounter = 0;
     Int_t massCounter = 0;
     string line;
@@ -1129,12 +1129,10 @@ void HeavyNeutrinoScanNew::EvaluateUL(TH2* h, TGraph* gr) {
 
   for (Int_t i = 0; i < nn; i++) {
     if (fInitialUeSquaredRatio != 0.)
-      yyNew[i] = TMath::Log(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio);
+      yyNew[i] = TMath::Log10(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio);
     else if (fInitialUtauSquaredRatio != 0.)
-      yyNew[i] = TMath::Log(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio);
-
-    cout<<fUSquared<<" "<<yy[i]<<" "<<fInitialUeSquaredRatio<<" "<<fInitialUmuSquaredRatio<<" "<<fInitialUtauSquaredRatio<<" "<<yyNew[i]<<endl;
-
+      yyNew[i] = TMath::Log10(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio);
+    
     gr->SetPoint(i, xx[i], yyNew[i]);
   }
   
