@@ -41,17 +41,25 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
 }
 
 
-void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
-  
+void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Int_t counterComb, Int_t counterPrompt, Int_t counterPar, Int_t counterParPosNeg) {
+
   TString path = "";
   TString analyzer = "";
-  Int_t counterComb = 0;
-  Int_t counterPrompt = 0;
-  Int_t counterPar = 0;
-  Int_t counterParPosNeg = 0;
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-
+  Double_t ZCDALineMax = 35000.;
+  Double_t ZCDALineMin = -10000.;
+  Double_t CDALineMax = 40.;
+  Double_t Time1Max = -3.;
+  Double_t Time1Min = -6.;
+  Double_t Time2Max = 6.;
+  Double_t Time2Min = 3.;
+  Double_t CDAMax = 10.;
+  Double_t ZVertexMax = 120000.;
+  Double_t ZVertexMin = 100000.;
+  Double_t BeamdistMax = 150.;
+  Double_t BeamdistMin = 100.;
+  
   if (an.Contains("Pos"))
     analyzer = "Pos";
   else if (an.Contains("Neg"))
@@ -213,7 +221,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
     
-    if ((ZCDALine < -10000.) || (ZCDALine > 35000.) || ((ZCDALine >= -10000. && ZCDALine <= 35000.) && CDALine > 40.)) { // all events outside blinded region
+    if ((ZCDALine < ZCDALineMin) || (ZCDALine > ZCDALineMax) || ((ZCDALine >= ZCDALineMin && ZCDALine <= ZCDALineMax) && CDALine > CDALineMax) && CDA < CDAMax) { // all events outside blinded region
       hDistSR->Fill(BeamlineDist, Weight);
       hTimeSR->Fill(CHODTime1-CHODTime2, Weight);
       hZSR->Fill(Zvertex/1000., Weight);
@@ -225,7 +233,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
       hSRSR->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
     
-    if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) { // all events inside time sidebands
+    if ((CHODTime1-CHODTime2 < Time1Max && CHODTime1-CHODTime2 > Time1Min) || (CHODTime1-CHODTime2 > Time2Min && CHODTime1-CHODTime2 < Time2Max) && CDA < CDAMax) { // all events inside time sidebands
       hDistComb->Fill(BeamlineDist, Weight);
       hTimeComb->Fill(CHODTime1-CHODTime2, Weight);
       hZComb->Fill(Zvertex/1000., Weight);
@@ -237,7 +245,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
       hSRComb->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (Zvertex >= 100000. && Zvertex <= 120000.) { // all events inside vertex sidebands
+    if (Zvertex >= ZVertexMin && Zvertex <= ZVertexMax && CDA < CDAMax) { // all events inside vertex sidebands
       hDistPrompt->Fill(BeamlineDist, Weight);
       hTimePrompt->Fill(CHODTime1-CHODTime2, Weight);
       hZPrompt->Fill(Zvertex/1000., Weight);
@@ -249,7 +257,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
       hSRPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (BeamlineDist >= 100. && BeamlineDist <= 150.) { // all events inside beam distance sidebands
+    if (BeamlineDist >= BeamdistMin && BeamlineDist <= BeamdistMax && CDA < CDAMax) { // all events inside beam distance sidebands
       hDistPar->Fill(BeamlineDist, Weight);
       hTimePar->Fill(CHODTime1-CHODTime2, Weight);
       hZPar->Fill(Zvertex/1000., Weight);
@@ -261,25 +269,25 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
       hSRPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
     
-    if (ZCDALine >= -10000. && ZCDALine <= 35000. && CDALine <= 40.) { // all events insided blinded region
-      if ((CHODTime1-CHODTime2 < -3. && CHODTime1-CHODTime2 > -5.) || (CHODTime1-CHODTime2 > 3. && CHODTime1-CHODTime2 < 5.)) { // and time sidebands
+    if (ZCDALine >= ZCDALineMin && ZCDALine <= ZCDALineMax && CDALine <= CDALineMax) { // all events inside blinded region
+      if ((CHODTime1-CHODTime2 < Time1Max && CHODTime1-CHODTime2 > Time1Min) || (CHODTime1-CHODTime2 > Time2Min && CHODTime1-CHODTime2 < Time2Max) && CDA < 100.) { // and time sidebands (enriched sample)
 	hSRFinalComb->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterComb++;
 	hInvMassCombSR->Fill(invMass/1000., Weight);
 	hGTK3Comb->Fill(Mom1->Mag()/1000., TMath::Sqrt(xGTK31*xGTK31 + yGTK31*yGTK31)/1000.);
 	hGTK3Comb->Fill(Mom2->Mag()/1000., TMath::Sqrt(xGTK32*xGTK32 + yGTK32*yGTK32)/1000.);
       }
-      if (Zvertex >= 100000. && Zvertex <= 120000.) { // and vertex sidebands
+      if (Zvertex >= ZVertexMin && Zvertex <= ZVertexMax && CDA < CDAMax) { // and vertex sidebands
 	hSRFinalPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPrompt++;
 	hInvMassPromptSR->Fill(invMass/1000., Weight);
       }
-      if (BeamlineDist >= 100. && BeamlineDist <= 150.) { // and beam distance sidebands
+      if (BeamlineDist >= BeamdistMin && BeamlineDist <= Beamdistmax && CDA < CDAMax) { // and beam distance sidebands
 	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPar++;
 	hInvMassParSR->Fill(invMass/1000., Weight);
       }
-      if (CHODTime1-CHODTime2 >= -2. && CHODTime1-CHODTime2 <= 2. && (histo1.Contains("Pos") || histo1.Contains("Neg"))) { // and in time with each other and total charge +-2
+      if ((histo1.Contains("Pos") || histo1.Contains("Neg")) && CDA < 10.) { // and total charge +-2
 	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterParPosNeg++;
 	hInvMassParSR->Fill(invMass/1000., Weight);	
@@ -287,7 +295,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c) {
     }
   }
   
-  cout<<"Number of events in SR and time sidebands: "<<counterComb<<", and Z sidebands: "<<counterPrompt<<", and beamdist sidebands: "<<counterPar<<", and in time with charge +-2: "<<counterParPosNeg<<endl;
+  cout<<histo1<<"; number of events in SR and time sidebands: "<<counterComb<<", and Z sidebands: "<<counterPrompt<<", and beamdist sidebands: "<<counterPar<<", and in time with charge +-2: "<<counterParPosNeg<<endl;
   
   Save(path, c, hDistSR, "Vertex-beamline distance [mm]", labelSize, titleSize);
   Save(path, c, hTimeSR, "Track time difference [ns]", labelSize, titleSize);
@@ -345,6 +353,10 @@ void TreePlots(TString dir, TString histo1) {
   TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
+  Int_t counterComb = 0;
+  Int_t counterPrompt = 0;
+  Int_t counterPar = 0;
+  Int_t counterParPosNeg = 0;
 
   c->SetRightMargin(0.2);
   c->SetLeftMargin(0.2);
@@ -353,7 +365,7 @@ void TreePlots(TString dir, TString histo1) {
   c->SetGrid();
   c->RedrawAxis();
 
-  Analyzer(dir, histo1, "HeavyNeutrino", c);
-  Analyzer(dir, histo1, "HeavyNeutrinoPos", c);
-  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c);
+  Analyzer(dir, histo1, "HeavyNeutrino", c, counterComb, counterPrompt, counterPar, counterParPosNeg);
+  Analyzer(dir, histo1, "HeavyNeutrinoPos", c, counterComb, counterPrompt, counterPar, counterParPosNeg);
+  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c, counterComb, counterPrompt, counterPar, counterParPosNeg);
 }

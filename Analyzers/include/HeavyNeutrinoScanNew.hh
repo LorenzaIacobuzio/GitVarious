@@ -5,8 +5,8 @@
 //                                                                                
 // --------------------------------------------------------------- 
 
-#ifndef HEAVYNEUTRINOSCAN_HH
-#define HEAVYNEUTRINOSCAN_HH
+#ifndef HEAVYNEUTRINOSCANNEW_HH
+#define HEAVYNEUTRINOSCANNEW_HH
 
 #include <stdlib.h>
 #include <iostream>
@@ -25,12 +25,12 @@ class TGraph;
 class TTree;
 class TGraphAsymmErrors;
 
-class HeavyNeutrinoScan : public NA62Analysis::Analyzer {
+class HeavyNeutrinoScanNew : public NA62Analysis::Analyzer {
 
 public:
 
-  HeavyNeutrinoScan(NA62Analysis::Core::BaseAnalysis *ba);
-  ~HeavyNeutrinoScan() {}
+  HeavyNeutrinoScanNew(NA62Analysis::Core::BaseAnalysis *ba);
+  ~HeavyNeutrinoScanNew() {}
   void InitHist();
   void InitOutput();
   void DefineMCSimple() {}
@@ -67,6 +67,7 @@ protected:
   Double_t fMassStart;
   Double_t fMassStop;
   Double_t fMassStep;
+  Double_t fUForPlot;
   Double_t fTMass;
   Double_t fTCoupling;
   Double_t fTNEvents;
@@ -82,9 +83,6 @@ protected:
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, Double_t> fCouplings;
   std::map<Double_t, Double_t> fMasses;
-
-  Int_t c1;
-  Int_t c2;
 };
 
 #endif

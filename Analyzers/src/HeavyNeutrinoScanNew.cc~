@@ -5,7 +5,7 @@
 // Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018    
 //                                                                                
 // ---------------------------------------------------------------              
-/// \class HeavyNeutrinoScan
+/// \class HeavyNeutrinoScanNew
 /// \Brief                                                                       
 /// Produce expected sensitivity curves for HNL MC samples of different masses, according to the chosen theoretical model
 /// \EndBrief                                                                  
@@ -44,25 +44,25 @@
 #include "GeometricAcceptance.hh"
 #include "HNLFunctions.hh"
 #include "HNLWeight.hh"
-#include "HeavyNeutrinoScan.hh"
+#include "HeavyNeutrinoScanNew.hh"
 
 using namespace std;
 using namespace NA62Analysis;
 using namespace NA62Constants;
 
-/// \class HeavyNeutrinoScan
+/// \class HeavyNeutrinoScanNew
 
-HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrinoScan") {
+HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrinoScanNew") {
 
   fReadingData = GetIsTree();
 
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -6.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 6.); // 0.1
@@ -78,6 +78,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("MassForSingleValue", &fMassForSingleValue, 1.);
   AddParam("CouplingForSingleValue", &fCouplingForSingleValue, -6.);
 
+  fUForPlot = 0.;
   fUeSquaredRatio = fInitialUeSquaredRatio;
   fUmuSquaredRatio = fInitialUmuSquaredRatio;
   fUtauSquaredRatio = fInitialUtauSquaredRatio;
@@ -91,7 +92,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fDistcomp = new PointLineDistance();
 }
 
-void HeavyNeutrinoScan::InitOutput() {
+void HeavyNeutrinoScanNew::InitOutput() {
 
   OpenNewTree("Scan", "Scan");
 
@@ -101,7 +102,7 @@ void HeavyNeutrinoScan::InitOutput() {
   AddBranch("Scan", "SumGood", &fTSumGood);
 }
 
-void HeavyNeutrinoScan::InitHist() {
+void HeavyNeutrinoScanNew::InitHist() {
 
   if (fReadingData) {
     
@@ -272,11 +273,11 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrinoScan/SingleValue", false, "SingleValue");
-    ImportAllInputHistogram("HeavyNeutrinoScan/CouplingScan", false, "CouplingScan");
-    ImportAllInputHistogram("HeavyNeutrinoScan/MassScan", false, "MassScan");
-    ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/DS", false, "ToyMC/DS");
-    ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/D0", false, "ToyMC/D0");
+    ImportAllInputHistogram("HeavyNeutrinoScanNew/SingleValue", false, "SingleValue");
+    ImportAllInputHistogram("HeavyNeutrinoScanNew/CouplingScan", false, "CouplingScan");
+    ImportAllInputHistogram("HeavyNeutrinoScanNew/MassScan", false, "MassScan");
+    ImportAllInputHistogram("HeavyNeutrinoScanNew/ToyMC/DS", false, "ToyMC/DS");
+    ImportAllInputHistogram("HeavyNeutrinoScanNew/ToyMC/D0", false, "ToyMC/D0");
     
     // One value
 
@@ -372,7 +373,7 @@ void HeavyNeutrinoScan::InitHist() {
   }
 }
 
-void HeavyNeutrinoScan::Process(Int_t) {
+void HeavyNeutrinoScanNew::Process(Int_t) {
 
   if (fReadingData) {
 
@@ -742,7 +743,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
   }
 }
 
-void HeavyNeutrinoScan::EndOfJobUser() {
+void HeavyNeutrinoScanNew::EndOfJobUser() {
  
   if (fReadingData) {
 
@@ -930,7 +931,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     
     Double_t Coupling = 0.;
     Double_t MN = 0.;
-    Double_t POT = 1.E18;
+    Double_t POT = 1.E28;
     Int_t couplingCounter = 0;
     Int_t massCounter = 0;
     string line;
@@ -1058,7 +1059,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   return;
 }
 
-void HeavyNeutrinoScan::CosmeticsGraph(TGraph* g, const char* x, const char* y, Int_t col) {
+void HeavyNeutrinoScanNew::CosmeticsGraph(TGraph* g, const char* x, const char* y, Int_t col) {
 
   g->GetXaxis()->SetTitle(x);
   g->GetYaxis()->SetTitle(y);
@@ -1069,7 +1070,7 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraph* g, const char* x, const char* y, 
   return;
 }
 
-void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, const char* y, Int_t col) {
+void HeavyNeutrinoScanNew::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, const char* y, Int_t col) {
 
   g->GetXaxis()->SetTitle(x);
   g->GetYaxis()->SetTitle(y);
@@ -1082,7 +1083,7 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, cons
   return;
 }
 
-void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
+void HeavyNeutrinoScanNew::EvaluateUL(TH2* h, TGraph* gr) {
 
   Int_t nContours = 6;
   Double_t* CLs = new Double_t[nContours];
@@ -1121,12 +1122,20 @@ void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
   
   Double_t* xx = new Double_t[nn];
   Double_t* yy = new Double_t[nn];
+  Double_t* yyNew = new Double_t[nn];
 
   xx = contoursHisto[level]->GetX();
   yy = contoursHisto[level]->GetY();
 
   for (Int_t i = 0; i < nn; i++) {
-    gr->SetPoint(i, xx[i], yy[i]);
+    if (fInitialUeSquaredRatio != 0.)
+      yyNew[i] = TMath::Log(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio);
+    else if (fInitialUtauSquaredRatio != 0.)
+      yyNew[i] = TMath::Log(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio);
+
+    cout<<fUSquared<<" "<<yy[i]<<" "<<fInitialUeSquaredRatio<<" "<<fInitialUmuSquaredRatio<<" "<<fInitialUtauSquaredRatio<<" "<<yyNew[i]<<endl;
+
+    gr->SetPoint(i, xx[i], yyNew[i]);
   }
   
   gr->SetLineColor(kRed);
@@ -1136,7 +1145,7 @@ void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
   return;
 }
   
-std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
+std::vector<TGraph*> HeavyNeutrinoScanNew::ExtractContours(TH2* h) {
   
   // Draw contours as filled regions and save points 
   
@@ -1169,7 +1178,7 @@ std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
   return graf;
 }
 
-void HeavyNeutrinoScan::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
+void HeavyNeutrinoScanNew::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
 
   for (Int_t i = 0; i < g1->GetN(); i++) {
     Double_t x1, y1, x2, y2;

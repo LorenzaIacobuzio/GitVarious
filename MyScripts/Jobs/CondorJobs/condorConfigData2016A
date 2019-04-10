@@ -1,7 +1,7 @@
 ## "Constants"
 dataListsLocation= /afs/cern.ch/na62/offline/lists/Data/Reco/2016
 analysisScript= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/analysis_condor.sh
-executableFile= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/bin-slc6/MyAnalyzer
+executableFile= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/bin-cc7/MyAnalyzer
 executableName= MyAnalyzer
 
 ## Parameters

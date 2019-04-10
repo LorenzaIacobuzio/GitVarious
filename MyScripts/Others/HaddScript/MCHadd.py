@@ -40,13 +40,13 @@ def main():
 
     subprocess.check_call(['/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/SplitIntoSubfolders.sh', condorpath])
 
-    for subdir, dirs, files in os.walk(condorpath):
-        for file in files:
-            if "root" in file and "final" not in file and "new" not in file:
-                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new1" + file)) + " " + analyzer1 + " " + tree1 + "\n")
-                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new2" + file)) + " " + analyzer2 + " " + tree2 + "\n")
-
-    subprocess.call(['/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/MCHadd.sh', condorpath])
+#    for subdir, dirs, files in os.walk(condorpath):
+#        for file in files:
+#            if "root" in file and "final" not in file and "new" not in file:
+#                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new1" + file)) + " " + analyzer1 + " " + tree1 + "\n")
+#                os.system(copypath + "/copyFiles " + os.path.abspath(os.path.join(subdir, file)) + " " + os.path.abspath(os.path.join(subdir, "new2" + file)) + " " + analyzer2 + " " + tree2 + "\n")
+#
+#    subprocess.call(['/afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/HaddScript/MCHadd.sh', condorpath])
 
 #    for subdir, dirs, files in os.walk(condorpath):
 #        for file in files:

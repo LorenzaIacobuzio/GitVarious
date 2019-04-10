@@ -84,7 +84,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("BlindRegion", &fBlindRegion, false);
   AddParam("MCsample", &fMCsample, false);
   AddParam("EnableChecks", &fEnableChecks, false);
-  AddParam("MassForChecks", &fMassForChecks, 1.6);
+  AddParam("MassForChecks", &fMassForChecks, 1.);
   AddParam("CouplingForChecks", &fCouplingForChecks, 1.E-6);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
@@ -396,7 +396,7 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   // Plots with only one mass and coupling (for checks)
-  
+
   if (fEnableChecks && MN != fMassForChecks)
     return;
 
@@ -421,23 +421,21 @@ void HeavyNeutrino::Process(Int_t) {
     FillHisto("hNk3pi", 0.5);
   }
 
-  // L0 data
-  
-  L0TPData *L0TPData = GetL0Data();
-  UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
-  UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
-  Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
-  Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
-  Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
-
-  // CUT: L0 + L1
-  
-  if (!TriggerOK) return;
-  
   // If real data
-  // Select physics triggers and L0 trigger conditions
   
   if (!GetWithMC()) {  
+    
+    L0TPData *L0TPData = GetL0Data();
+    UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
+    UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
+    Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
+    Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
+    Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
+    
+    // CUT: L0 + L1
+    
+    if (!TriggerOK) return;
+    
     Bool_t L0OK = kFALSE;
     Bool_t L1OK = kFALSE;
     
@@ -1415,7 +1413,7 @@ void HeavyNeutrino::Process(Int_t) {
   energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
-  if (TMath::Abs(invMass - fMassForReco*1000.) <= 10.)
+  if (MN == fMassForReco)
     FillHisto("hInvMassReco", invMass/1000.);
 
   // Output of selection
