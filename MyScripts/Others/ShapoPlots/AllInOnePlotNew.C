@@ -7,19 +7,24 @@ Double_t UtauSquared = 0.;
 
 void SetModel(Int_t model) {
   if (model == 1) {
-    UmuSquared = USquared/54.;
+    UmuSquared = USquared/3;
     UtauSquared = UmuSquared;
-    UeSquared = 52.*UmuSquared;
+    UeSquared = UmuSquared;
   }
   else if (model == 2) {
-    UeSquared = USquared/20.8;
-    UmuSquared = 16.*UeSquared;
-    UtauSquared = 3.8*UeSquared;
+    UeSquared = 0.;
+    UmuSquared = 1.;
+    UtauSquared = 0.;
   }
   else if (model == 3) {
-    UmuSquared = USquared/5.361;
-    UeSquared = 0.061*UmuSquared;
-    UtauSquared = 4.3*UmuSquared;
+    UmuSquared = 1.;
+    UeSquared = 0.;
+    UtauSquared = 10.;
+  }
+  else if (model == 4) {
+    UmuSquared = 1.;
+    UeSquared = 10.;
+    UtauSquared = 0.;
   }
 }
 
@@ -1040,14 +1045,14 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
   sum->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-  sum->GetYaxis()->SetTitle("Sum of BRs");    
-  sum->SetTitle("Sum of N production modes vs N mass, model II (1:16:3.8)");
+  sum->GetYaxis()->SetTitle("Sum of BRs");
+  sum->SetTitle("Sum of N production modes vs N mass");
   sum->GetXaxis()->SetTitleOffset(0.9);
   sum->GetYaxis()->SetTitleOffset(1.);
   sum->GetXaxis()->SetTitleSize(labelSize);
@@ -1064,6 +1069,7 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Write();
   gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
   gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
+
 }
 
 // Function to call all N decay modes
@@ -1111,8 +1117,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1161,8 +1167,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
 }
 
 // Main
@@ -1177,13 +1183,14 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   TGaxis::SetMaxDigits(2);
 
-  if (model == 1 || model == 2 || model == 3)
+  if (model == 1 || model == 2 || model == 3) || model == 4)
     SetModel(model);
   else {
     cout<<"[GeneralPlots] Unknown model:"<<endl;
-    cout<<"1: 52:1:1"<<endl;
-    cout<<"2: 1:16:3.8"<<endl;
-    cout<<"3: 0.061:1:4.3"<<endl;
+    cout<<"1: 1:1:1"<<endl;
+    cout<<"2: 0:1:0"<<endl;
+    cout<<"3: 0:1:10"<<endl;
+    cout<<"4: 10:1:0"<<endl;
     exit(1);
   }
     
@@ -1196,11 +1203,13 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   std::string HistoTitle = "";
   
   if (model == 1) 
-    HistoTitle = "I (52:1:1)";
+    HistoTitle = "I (1:1:1)";
   else if (model == 2)
-    HistoTitle = "II (1:16:3.8)";
+    HistoTitle = "II (0:1:0)";
   else if (model == 3)
-    HistoTitle = "III (0.061:1:4.3)";
+    HistoTitle = "III (0:1:10)";
+  else if (model == 4)
+    HistoTitle = "IV (10:1:0)";
 
   Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
