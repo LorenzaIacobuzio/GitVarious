@@ -63,9 +63,9 @@ HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
-  AddParam("CouplingStart", &fCouplingStart, -6.); // -10
+  AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 2.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 1.); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step
@@ -78,7 +78,6 @@ HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
   AddParam("MassForSingleValue", &fMassForSingleValue, 1.);
   AddParam("CouplingForSingleValue", &fCouplingForSingleValue, -6.);
 
-  fUForPlot = 0.;
   fUeSquaredRatio = fInitialUeSquaredRatio;
   fUmuSquaredRatio = fInitialUmuSquaredRatio;
   fUtauSquaredRatio = fInitialUtauSquaredRatio;
@@ -931,7 +930,7 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     
     Double_t Coupling = 0.;
     Double_t MN = 0.;
-    Double_t POT = 1.E38;
+    Double_t POT = 1.E18;
     Int_t couplingCounter = 0;
     Int_t massCounter = 0;
     string line;
@@ -1013,7 +1012,11 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     CosmeticsGraph(fHisto.GetTGraph("MassScan/GammaTotMass"), "N mass [GeV/c^{2}]", "Total decay width [MeV]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"), "N mass [GeV/c^{2}]", "Lifetime [ns]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"), "N mass [GeV/c^{2}]", "Mean probability", 2);
-    CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2})", 2);  
+
+    if (fInitialUeSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{e})", 2);
+    if (fInitialUtauSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{#tau})", 2);
 
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg")), "Log(U^{2})", "Acceptance", 2);
@@ -1051,7 +1054,11 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "Log(U^{2})", "Yield per POT", 2);
 
     fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-    fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2})");
+
+    if (fInitialUeSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{e})");
+    if (fInitialUtauSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{#tau})");
   }
 
   SaveAllPlots();

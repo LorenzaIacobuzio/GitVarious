@@ -426,11 +426,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	    fNEvents[round(MN)][fCoupling] = 0;
 	  fNEvents[round(MN)][fCoupling]++;
 
-	  if (fCoupling==-6) {
-	  if (round(MN)==1320 || round(MN)==1330)
-	    cout<<round(MN)<<" "<<fNEvents[1320][fCoupling]<<" "<<fNEvents[1330][fCoupling]<<endl;
-	  }
-
 	  if (IsHNLGood == true && isGood == true) {
 	    fSumGood[round(MN)][fCoupling] += Weight;
 	  }

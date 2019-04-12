@@ -65,6 +65,8 @@ function findListFile() {
 	    version="v1.0.3"
 	elif [[ ${sample} == *"2018E"* ]]; then
 	    version="v1.0.4"
+	elif [[ ${sample} == *"2018H"* ]]; then
+	    version="v1.0.5"
 	fi
 
 	echo "sample and version: " ${sample} ${version}

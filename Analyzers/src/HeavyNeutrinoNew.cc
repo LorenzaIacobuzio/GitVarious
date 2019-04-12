@@ -5,7 +5,7 @@
 // Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018                    
 //                                                                                        
 // ---------------------------------------------------------------                         
-/// \class HeavyNeutrino              
+/// \class HeavyNeutrinoNew              
 /// \Brief                                                                         
 /// Heavy neutral lepton selection
 /// \EndBrief                                                                            
@@ -14,7 +14,7 @@
 /// Several histograms are plotted after each series of cuts.
 /// A boolean with the outcome of the selection (whether the HNL passes or not the whole selection) is stored as output and can be retrieved from another analyzer in the following way:
 /// \code
-/// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrino".Output);
+/// Bool_t IsGood = *(Bool_t*)GetOutput("HeavyNeutrinoNew".Output);
 /// \endcode
 /// This analyzer makes use of two ToolsLib, called HNLFunctions and HNLWeight.
 /// Several parameters can be set: the value of the squared HNL coupling and the values of the ratios between specific-flavour couplings; the values of the beginning of the fiducial volume and its length; the value of the HNL mass for which the reconstructed invariant mass is computed; the HNL decay mode: 0 for pi-mu final states, 1 for pi-e, 2 for rho-mu and 3 for rho-e; a boolean is set to true if the signal regions are to be kept blinded; a boolean is set to true if MC samples are analysed for studying sidebands (it just changes the weight of the distributions to 1); a boolean that ensures plots are filled only for a certain mass and coupling (set by the user).
@@ -49,7 +49,7 @@
 #include "SpectrometerMUV3AssociationOutput.hh"
 #include "HNLFunctions.hh"
 #include "HNLWeight.hh"
-#include "HeavyNeutrino.hh"
+#include "HeavyNeutrinoNew.hh"
 
 using namespace std;
 using namespace NA62Analysis;
@@ -58,10 +58,10 @@ using namespace NA62Constants;
 #define TRIGGER_L0_PHYSICS_TYPE 1
 #define MCTriggerMask 0xFF
 
-/// \class HeavyNeutrino
+/// \class HeavyNeutrinoNew
 
-HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrino") {
+HeavyNeutrinoNew::HeavyNeutrinoNew(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrinoNew") {
 
   fReadingData = GetIsTree();
   if (!fReadingData) return;
@@ -74,7 +74,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 52.); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
   AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
   AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
@@ -132,57 +132,57 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   KTAGcand = new TRecoCedarCandidate();
 }
 
-void HeavyNeutrino::InitOutput() {
+void HeavyNeutrinoNew::InitOutput() {
 
   if (fReadingData) {
 
     RegisterOutput("Output", &fPassSelection);
     
-    OpenNewTree("HeavyNeutrinoPassed", "Events");
+    OpenNewTree("HeavyNeutrinoNewPassed", "Events");
     
-    AddBranch("HeavyNeutrinoPassed", "Weight", &Weight);
-    AddBranch("HeavyNeutrinoPassed", "CHODTime1", &CHODTime1);
-    AddBranch("HeavyNeutrinoPassed", "CHODTime2", &CHODTime2);
-    AddBranch("HeavyNeutrinoPassed", "CDA", &CDA);
-    AddBranch("HeavyNeutrinoPassed", "Zvertex", &Zvertex);
-    AddBranch("HeavyNeutrinoPassed", "CDALine", &CDALine);
-    AddBranch("HeavyNeutrinoPassed", "ZCDALine", &ZCDALine);
-    AddBranch("HeavyNeutrinoPassed", "BeamlineDist", &BeamlineDist);
-    AddBranch("HeavyNeutrinoPassed", "xSR", &xSR);
-    AddBranch("HeavyNeutrinoPassed", "ySR", &ySR);
-    AddBranch("HeavyNeutrinoPassed", "MuEoP", &MuEoP);
-    AddBranch("HeavyNeutrinoPassed", "PiEoP", &PiEoP);
-    AddBranch("HeavyNeutrinoPassed", "R", &R);
-    AddBranch("HeavyNeutrinoPassed", "energyPi", &energyPi);
-    AddBranch("HeavyNeutrinoPassed", "energyMu", &energyMu);
-    AddBranch("HeavyNeutrinoPassed", "invMass", &invMass);
-    AddBranch("HeavyNeutrinoPassed", "L0TPTime", &L0TPTime);
-    AddBranch("HeavyNeutrinoPassed", "xGTK31", &xGTK31);
-    AddBranch("HeavyNeutrinoPassed", "yGTK31", &yGTK31);
-    AddBranch("HeavyNeutrinoPassed", "xGTK32", &xGTK32);
-    AddBranch("HeavyNeutrinoPassed", "yGTK32", &yGTK32);
-    AddBranch("HeavyNeutrinoPassed", "Mom1", &Mom1);
-    AddBranch("HeavyNeutrinoPassed", "Mom2", &Mom2);
-    AddBranch("HeavyNeutrinoPassed", "TotMom", &TotMom);
-    AddBranch("HeavyNeutrinoPassed", "Vertex", &Vertex);
-    AddBranch("HeavyNeutrinoPassed", "threeMomPi", &threeMomPi);
-    AddBranch("HeavyNeutrinoPassed", "threeMomMu", &threeMomMu);
-    AddBranch("HeavyNeutrinoPassed", "Target", &Target);
-    AddBranch("HeavyNeutrinoPassed", "K3pi", &K3pi);
-    AddBranch("HeavyNeutrinoPassed", "autoPass", &autoPass);
-    AddBranch("HeavyNeutrinoPassed", "Assoc", &Assoc);
-    AddBranch("HeavyNeutrinoPassed", "Charge1", &Charge1);
-    AddBranch("HeavyNeutrinoPassed", "Charge2", &Charge2);
-    AddBranch("HeavyNeutrinoPassed", "KTAGcand", KTAGcand);
+    AddBranch("HeavyNeutrinoNewPassed", "Weight", &Weight);
+    AddBranch("HeavyNeutrinoNewPassed", "CHODTime1", &CHODTime1);
+    AddBranch("HeavyNeutrinoNewPassed", "CHODTime2", &CHODTime2);
+    AddBranch("HeavyNeutrinoNewPassed", "CDA", &CDA);
+    AddBranch("HeavyNeutrinoNewPassed", "Zvertex", &Zvertex);
+    AddBranch("HeavyNeutrinoNewPassed", "CDALine", &CDALine);
+    AddBranch("HeavyNeutrinoNewPassed", "ZCDALine", &ZCDALine);
+    AddBranch("HeavyNeutrinoNewPassed", "BeamlineDist", &BeamlineDist);
+    AddBranch("HeavyNeutrinoNewPassed", "xSR", &xSR);
+    AddBranch("HeavyNeutrinoNewPassed", "ySR", &ySR);
+    AddBranch("HeavyNeutrinoNewPassed", "MuEoP", &MuEoP);
+    AddBranch("HeavyNeutrinoNewPassed", "PiEoP", &PiEoP);
+    AddBranch("HeavyNeutrinoNewPassed", "R", &R);
+    AddBranch("HeavyNeutrinoNewPassed", "energyPi", &energyPi);
+    AddBranch("HeavyNeutrinoNewPassed", "energyMu", &energyMu);
+    AddBranch("HeavyNeutrinoNewPassed", "invMass", &invMass);
+    AddBranch("HeavyNeutrinoNewPassed", "L0TPTime", &L0TPTime);
+    AddBranch("HeavyNeutrinoNewPassed", "xGTK31", &xGTK31);
+    AddBranch("HeavyNeutrinoNewPassed", "yGTK31", &yGTK31);
+    AddBranch("HeavyNeutrinoNewPassed", "xGTK32", &xGTK32);
+    AddBranch("HeavyNeutrinoNewPassed", "yGTK32", &yGTK32);
+    AddBranch("HeavyNeutrinoNewPassed", "Mom1", &Mom1);
+    AddBranch("HeavyNeutrinoNewPassed", "Mom2", &Mom2);
+    AddBranch("HeavyNeutrinoNewPassed", "TotMom", &TotMom);
+    AddBranch("HeavyNeutrinoNewPassed", "Vertex", &Vertex);
+    AddBranch("HeavyNeutrinoNewPassed", "threeMomPi", &threeMomPi);
+    AddBranch("HeavyNeutrinoNewPassed", "threeMomMu", &threeMomMu);
+    AddBranch("HeavyNeutrinoNewPassed", "Target", &Target);
+    AddBranch("HeavyNeutrinoNewPassed", "K3pi", &K3pi);
+    AddBranch("HeavyNeutrinoNewPassed", "autoPass", &autoPass);
+    AddBranch("HeavyNeutrinoNewPassed", "Assoc", &Assoc);
+    AddBranch("HeavyNeutrinoNewPassed", "Charge1", &Charge1);
+    AddBranch("HeavyNeutrinoNewPassed", "Charge2", &Charge2);
+    AddBranch("HeavyNeutrinoNewPassed", "KTAGcand", KTAGcand);
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
+    ImportAllInputHistogram("HeavyNeutrinoNew", false, "HeavyNeutrinoNew");
   }
 
   return;
 }
 
-void HeavyNeutrino::InitHist() {
+void HeavyNeutrinoNew::InitHist() {
 
   if (fReadingData) {
 
@@ -306,7 +306,7 @@ void HeavyNeutrino::InitHist() {
   return;
 }
 
-void HeavyNeutrino::Process(Int_t) {
+void HeavyNeutrinoNew::Process(Int_t) {
 
   if (!fReadingData) return;
     
@@ -1419,12 +1419,12 @@ void HeavyNeutrino::Process(Int_t) {
   // Output of selection
 
   fPassSelection = true;
-  FillTree("HeavyNeutrinoPassed");
+  FillTree("HeavyNeutrinoNewPassed");
   
   return;
 }
 
-void HeavyNeutrino::ProcessEOBEvent() {
+void HeavyNeutrinoNew::ProcessEOBEvent() {
 
   if (!fReadingData) return;
 
@@ -1441,7 +1441,7 @@ void HeavyNeutrino::ProcessEOBEvent() {
   return;
 }
 
-void HeavyNeutrino::EndOfBurstUser() {
+void HeavyNeutrinoNew::EndOfBurstUser() {
 
   if (!fReadingData) return;
   
@@ -1475,7 +1475,7 @@ void HeavyNeutrino::EndOfBurstUser() {
   return;
 }
 
-void HeavyNeutrino::EndOfJobUser() {
+void HeavyNeutrinoNew::EndOfJobUser() {
 
   if (fReadingData) {
 
@@ -1733,7 +1733,7 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
   else {
-    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoPassed"))->CloneTree();
+    TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoNewPassed"))->CloneTree();
     tree->Write();
   }
   

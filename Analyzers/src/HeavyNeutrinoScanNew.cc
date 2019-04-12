@@ -63,9 +63,9 @@ HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
-  AddParam("CouplingStart", &fCouplingStart, -6.); // -10
+  AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 2.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step
@@ -78,7 +78,6 @@ HeavyNeutrinoScanNew::HeavyNeutrinoScanNew(Core::BaseAnalysis *ba) :
   AddParam("MassForSingleValue", &fMassForSingleValue, 1.);
   AddParam("CouplingForSingleValue", &fCouplingForSingleValue, -6.);
 
-  fUForPlot = 0.;
   fUeSquaredRatio = fInitialUeSquaredRatio;
   fUmuSquaredRatio = fInitialUmuSquaredRatio;
   fUtauSquaredRatio = fInitialUtauSquaredRatio;
@@ -931,7 +930,7 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
     
     Double_t Coupling = 0.;
     Double_t MN = 0.;
-    Double_t POT = 1.E38;
+    Double_t POT = 1.E18;
     Int_t couplingCounter = 0;
     Int_t massCounter = 0;
     string line;
@@ -979,19 +978,6 @@ void HeavyNeutrinoScanNew::EndOfJobUser() {
 
     Int_t N = fHisto.GetTGraph("TotalScan/Contours")->GetN();
     Double_t X[N], Y[N];
-    
-    for (Int_t i = 0; i < N; i++)
-      fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
-
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N,   1.96, Y[N-1]-0.2);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+1, 1.96, Y[N-1]-0.4);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+2, 1.96, Y[N-1]-0.8);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+3, 1.96, Y[N-1]-1.1);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+4, 1.96, Y[N-1]-1.4);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+5, 1.96, Y[N-1]-1.9);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+6, 1.96, Y[N-1]-2.0);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
-    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
 
     // Mean probability vs mass and coupling
 

@@ -60,12 +60,12 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
-  AddParam("CouplingStart", &fCouplingStart, -6.); // -10
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 52.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 6.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
   AddParam("MassStep", &fMassStep, 0.01); // keep this step

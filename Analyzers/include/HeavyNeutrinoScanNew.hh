@@ -67,7 +67,6 @@ protected:
   Double_t fMassStart;
   Double_t fMassStop;
   Double_t fMassStep;
-  Double_t fUForPlot;
   Double_t fTMass;
   Double_t fTCoupling;
   Double_t fTNEvents;
