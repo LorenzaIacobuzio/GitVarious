@@ -425,7 +425,7 @@ void Plots(TString dir, TString histo1, TString mode) {
     path += "ShapoOld/3/";
   else if (histo1.Contains("1-1-1"))
     path += "ShapoNew/All/";
-  else if (histo1.Contains("0-1-0"))
+  else if (histo1.Contains("0-1-0") && !histo1.Contains("20-1-0") && !histo1.Contains("10-1-0"))
     path += "ShapoNew/Muon/";
   else if (histo1.Contains("1-1-0"))
     path += "ShapoNew/El/1/";
@@ -445,13 +445,24 @@ void Plots(TString dir, TString histo1, TString mode) {
   }
   
   TFile *f = TFile::Open(histo1);
-
-  if ((TDirectory*)f->Get("HeavyNeutrino") != nullptr && (mode == "all" || mode == "hn")) {
-
-    ParseDir(histo1, "HeavyNeutrino/HeavyNeutrino", path+"HeavyNeutrino/", c, nullptr, nullptr, nullptr, nullptr);
+  TString hnDir = "HeavyNeutrino";
+  TString hnsDir = "HeavyNeutrinoScan";
+  
+  if (path.Contains("El")) {
+    hnDir += "NewEl";
+    hnsDir += "NewEl";
+  }
+  else if (path.Contains("Tau")) {
+    hnDir += "NewTau";
+    hnsDir += "NewTau";
   }
 
-  if ((TDirectory*)f->Get("HeavyNeutrinoScan") != nullptr) {
+  if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) {
+    
+    ParseDir(histo1, hnDir + "/" + hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
+  }
+
+  if (f->Get(hnsDir) != nullptr) {
     
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
@@ -462,22 +473,22 @@ void Plots(TString dir, TString histo1, TString mode) {
       
       // One value plots for weight quantities
       
-      ParseDir(histo1, "HeavyNeutrinoScan/SingleValue", path+"HeavyNeutrinoScan/SingleValue/", c, nullptr, nullptr, nullptr, nullptr);
+      ParseDir(histo1, hnsDir + "/SingleValue", path + hnsDir + "/SingleValue/", c, nullptr, nullptr, nullptr, nullptr);
     }
 
     if (mode == "all" || mode == "hnsc") {
       
       // Coupling plots
       
-      ParseDir(histo1, "HeavyNeutrinoScan/CouplingScan", path+"HeavyNeutrinoScan/CouplingScan/", c, m, m1, m2, m3);
+      ParseDir(histo1, hnsDir + "/CouplingScan", path + hnsDir + "/CouplingScan/", c, m, m1, m2, m3);
       
-      TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
       c = CreateTCanvas();
-      TMultiGraphCosmetics(m1, "Log(U^{2})", "Selection acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m1, "Log(U^{2})", "Selection acceptance", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
       c = CreateTCanvas();
-      TMultiGraphCosmetics(m2, "Log(U^{2})", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m2, "Log(U^{2})", "Regeneration acceptance", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
       c = CreateTCanvas();
-      TMultiGraphCosmetics(m3, "Log(U^{2})", "FV acceptance", c, path+"HeavyNeutrinoScan/CouplingScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m3, "Log(U^{2})", "FV acceptance", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
       c = CreateTCanvas();
     }
 
@@ -490,15 +501,15 @@ void Plots(TString dir, TString histo1, TString mode) {
       m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
       m3 = CreateTMultiGraph("AccFVMass", "FV acceptance vs N mass");
       
-      ParseDir(histo1, "HeavyNeutrinoScan/MassScan", path+"HeavyNeutrinoScan/MassScan/", c, m, m1, m2, m3);
+      ParseDir(histo1, hnsDir + "/MassScan", path + hnsDir + "/MassScan/", c, m, m1, m2, m3);
       
-      TMultiGraphCosmetics(m, "N mass [GeV/c^{2}]", "Yield per POT", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m, "N mass [GeV/c^{2}]", "Yield per POT", c, path + hnsDir + "/MassScan/", labelSize, titleSize);
       c = CreateTCanvas();      
-      TMultiGraphCosmetics(m1, "N mass [GeV/c^{2}]", "Selection acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m1, "N mass [GeV/c^{2}]", "Selection acceptance", c, path + hnsDir + "/MassScan/", labelSize, titleSize);
       c = CreateTCanvas();      
-      TMultiGraphCosmetics(m2, "N mass [GeV/c^{2}]", "Regeneration acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m2, "N mass [GeV/c^{2}]", "Regeneration acceptance", c, path + hnsDir + "/MassScan/", labelSize, titleSize);
       c = CreateTCanvas();      
-      TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path+"HeavyNeutrinoScan/MassScan/", labelSize, titleSize);
+      TMultiGraphCosmetics(m3, "N mass [GeV/c^{2}]", "FV acceptance", c, path + hnsDir + "/MassScan/", labelSize, titleSize);
       c = CreateTCanvas();
     }
 
@@ -506,7 +517,8 @@ void Plots(TString dir, TString histo1, TString mode) {
       
       // Total scan plots
 
-      ParseDir(histo1, "HeavyNeutrinoScan/TotalScan", path+"HeavyNeutrinoScan/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
+      ParseDir(histo1, hnsDir + "/TotalScan", path + hnsDir + "/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
     }
-  }
+  }	
+  exit(0);
 }
