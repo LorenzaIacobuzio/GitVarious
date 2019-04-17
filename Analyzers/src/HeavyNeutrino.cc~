@@ -76,7 +76,7 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
   AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
   AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -192,7 +192,7 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hNtracks",  new TH1D("Ntracks", "Number of tracks", 10, -0.5, 9.5));
     BookHisto("hMomPi",    new TH1D("MomPi", "Pion momentum", 100, -0.5, 200.));
     BookHisto("hMomMu",    new TH1D("MomMu", "Muon momentum", 100, -0.5, 200.));
-    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 37, 0., 37.));
+    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 32, 0., 32.));
 
     // X,Y distributions
 
@@ -1724,7 +1724,7 @@ void HeavyNeutrino::EndOfJobUser() {
 
     // Plot residual number of events after each cut
 
-    const int NCuts = 40;
+    const int NCuts = 32;
     const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
   
     for (Int_t i = 1; i <= NCuts; i++)

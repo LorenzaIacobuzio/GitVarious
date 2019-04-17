@@ -74,9 +74,9 @@ HeavyNeutrinoNeg::HeavyNeutrinoNeg(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -84,7 +84,7 @@ HeavyNeutrinoNeg::HeavyNeutrinoNeg(Core::BaseAnalysis *ba) :
   AddParam("BlindRegion", &fBlindRegion, false);
   AddParam("MCsample", &fMCsample, false);
   AddParam("EnableChecks", &fEnableChecks, false);
-  AddParam("MassForChecks", &fMassForChecks, 1.6);
+  AddParam("MassForChecks", &fMassForChecks, 1.);
   AddParam("CouplingForChecks", &fCouplingForChecks, 1.E-6);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
@@ -192,7 +192,7 @@ void HeavyNeutrinoNeg::InitHist() {
     BookHisto("hNtracks",  new TH1D("Ntracks", "Number of tracks", 10, -0.5, 9.5));
     BookHisto("hMomPi",    new TH1D("MomPi", "Pion momentum", 100, -0.5, 200.));
     BookHisto("hMomMu",    new TH1D("MomMu", "Muon momentum", 100, -0.5, 200.));
-    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 37, 0., 37.));
+    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 32, 0., 32.));
 
     // X,Y distributions
 
@@ -213,7 +213,7 @@ void HeavyNeutrinoNeg::InitHist() {
     BookHisto("hZvsBeam_Energy", new TH2D("ZvsBeam_Energy", "Two-track vertex, after energy cuts",       50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Vetoes", new TH2D("ZvsBeam_Vetoes", "Two-track vertex, after veto cuts",         50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom", "Two-track vertex, after geometrical cuts",    50, 100., 200., 50, 0., 1.));
-    BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after any cut",             50, 100., 200., 50, 0., 1.));
+    BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after all cuts",             50, 100., 200., 50, 0., 1.));
 
     // Unique signal region (3-segment line)
 
@@ -222,21 +222,21 @@ void HeavyNeutrinoNeg::InitHist() {
     BookHisto("hSR_Energy", new TH2D("SR_Energy", "Signal region, after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Vetoes", new TH2D("SR_Vetoes", "Signal region, after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSR_Geom",   new TH2D("SR_Geom",   "Signal region, after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Fin",    new TH2D("SR_Fin",    "Signal region, after any cut",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSR_Fin",    new TH2D("SR_Fin",    "Signal region, after all cuts",           500, -50., 50., 50, 0., 0.1));
 
     BookHisto("hSRTar_In",     new TH2D("SRTar_In",     "Signal region (target), before any cut",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Track",  new TH2D("SRTar_Track",  "Signal region (target), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Energy", new TH2D("SRTar_Energy", "Signal region (target), after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Vetoes", new TH2D("SRTar_Vetoes", "Signal region (target), after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTar_Geom",   new TH2D("SRTar_Geom",   "Signal region (target), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Fin",    new TH2D("SRTar_Fin",    "Signal region (target), after any cut",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTar_Fin",    new TH2D("SRTar_Fin",    "Signal region (target), after all cuts",           500, -50., 50., 50, 0., 0.1));
 
     BookHisto("hSRTAX_In",     new TH2D("SRTAX_In",     "Signal region (TAX), before any cut",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Track",  new TH2D("SRTAX_Track",  "Signal region (TAX), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Energy", new TH2D("SRTAX_Energy", "Signal region (TAX), after energy cuts",        500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Vetoes", new TH2D("SRTAX_Vetoes", "Signal region (TAX), after veto cuts",          500, -50., 50., 50, 0., 0.1));
     BookHisto("hSRTAX_Geom",   new TH2D("SRTAX_Geom",   "Signal region (TAX), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Fin",    new TH2D("SRTAX_Fin",    "Signal region (TAX), after any cut",           500, -50., 50., 50, 0., 0.1));
+    BookHisto("hSRTAX_Fin",    new TH2D("SRTAX_Fin",    "Signal region (TAX), after all cuts",           500, -50., 50., 50, 0., 0.1));
 
     // Unique signal region (one line)
 
@@ -245,21 +245,21 @@ void HeavyNeutrinoNeg::InitHist() {
     BookHisto("hCDAvsZCDATarget_Energy", new TH2D("CDAvsZCDATarget_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Vetoes", new TH2D("CDAvsZCDATarget_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATarget_Geom",   new TH2D("CDAvsZCDATarget_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATarget_Fin",    new TH2D("CDAvsZCDATarget_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
 
     BookHisto("hCDAvsZCDATAX_In",     new TH2D("CDAvsZCDATAX_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Track",  new TH2D("CDAvsZCDATAX_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Energy", new TH2D("CDAvsZCDATAX_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Vetoes", new TH2D("CDAvsZCDATAX_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDATAX_Geom",   new TH2D("CDAvsZCDATAX_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDATAX_Fin",    new TH2D("CDAvsZCDATAX_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDATAX_Fin",    new TH2D("CDAvsZCDATAX_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
 
     BookHisto("hCDAvsZCDAAll_In",     new TH2D("CDAvsZCDAAll_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Track",  new TH2D("CDAvsZCDAAll_Track", "N trajectory wrt target-TAX line, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Energy", new TH2D("CDAvsZCDAAll_Energy", "N trajectory wrt target-TAX line, after energy cuts",       500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Vetoes", new TH2D("CDAvsZCDAAll_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Geom",   new TH2D("CDAvsZCDAAll_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDAAll_Fin",    new TH2D("CDAvsZCDAAll_Fin", "N trajectory wrt target-TAX line, after any cut",             500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAll_Fin",    new TH2D("CDAvsZCDAAll_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
 
     // Theta vs Z CDA (studies on SR resolution)
 
@@ -396,7 +396,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
   }
 
   // Plots with only one mass and coupling (for checks)
-  
+
   if (fEnableChecks && MN != fMassForChecks)
     return;
 
@@ -421,23 +421,21 @@ void HeavyNeutrinoNeg::Process(Int_t) {
     FillHisto("hNk3pi", 0.5);
   }
 
-  // L0 data
-  
-  L0TPData *L0TPData = GetL0Data();
-  UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
-  UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
-  Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
-  Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
-  Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
-
-  // CUT: L0 + L1
-  
-  if (!TriggerOK) return;
-  
   // If real data
-  // Select physics triggers and L0 trigger conditions
   
   if (!GetWithMC()) {  
+    
+    L0TPData *L0TPData = GetL0Data();
+    UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
+    UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
+    Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
+    Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
+    Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
+    
+    // CUT: L0 + L1
+    
+    if (!TriggerOK) return;
+    
     Bool_t L0OK = kFALSE;
     Bool_t L1OK = kFALSE;
     
@@ -1415,7 +1413,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
   energyMu = TMath::Sqrt(threeMomMu.Px()*threeMomMu.Px() + threeMomMu.Py()*threeMomMu.Py() + threeMomMu.Pz()*threeMomMu.Pz() + fMmu*fMmu);
   invMass = TMath::Sqrt((energyPi + energyMu)*(energyPi + energyMu) - (threeMomPi + threeMomMu).Mag2());
 
-  if (TMath::Abs(invMass - fMassForReco*1000.) <= 10.)
+  if (MN == fMassForReco)
     FillHisto("hInvMassReco", invMass/1000.);
 
   // Output of selection
@@ -1726,7 +1724,7 @@ void HeavyNeutrinoNeg::EndOfJobUser() {
 
     // Plot residual number of events after each cut
 
-    const int NCuts = 40;
+    const int NCuts = 32;
     const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
   
     for (Int_t i = 1; i <= NCuts; i++)

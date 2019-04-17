@@ -71,17 +71,14 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Int_t counter
     path = dir;
   else {
     if (histo1.Contains("2016"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/2016/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/2016/" + analyzer;
     else if (histo1.Contains("2017"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/2017/";
-    else if (histo1.Contains("Capped"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/K3piCapped/";
-    else if (!histo1.Contains("Capped") && histo1.Contains("K3pi"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/" + analyzer + "/K3pi/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/2017/" + analyzer;
+    else if (histo1.Contains("2018"))
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/2018/" + analyzer;    
     else
       cout<<"I don't know which directory to put the plots into. Histo name is weird!"<<endl;
-    
-    //path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/2/HeavyNeutrino/";
+    _exit(1);
   }
   
   TFile *f = TFile::Open(histo1);

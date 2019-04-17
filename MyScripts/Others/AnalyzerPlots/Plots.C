@@ -417,18 +417,32 @@ void Plots(TString dir, TString histo1, TString mode) {
   else
     path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
   
-  if (histo1.Contains("1"))
-    path += "1/";
-  else if (histo1.Contains("2"))
-    path += "2/";
-  else if (histo1.Contains("3"))
-    path += "3/";
-  else if (histo1.Contains("Data"))
-    path += "Data/";
-  else if (histo1.Contains("POT"))
-    path += "POT/";
-  else
-    path += "2/";
+  if (histo1.Contains("52"))
+    path += "ShapoOld/1/";
+  else if (histo1.Contains("16"))
+    path += "ShapoOld/2/";
+  else if (histo1.Contains("0.061"))
+    path += "ShapoOld/3/";
+  else if (histo1.Contains("1-1-1"))
+    path += "ShapoNew/All/";
+  else if (histo1.Contains("0-1-0"))
+    path += "ShapoNew/Muon/";
+  else if (histo1.Contains("1-1-0"))
+    path += "ShapoNew/El/1/";
+  else if (histo1.Contains("10-1-0"))
+    path += "ShapoNew/El/10/";
+  else if (histo1.Contains("20-1-0"))
+    path += "ShapoNew/El/20/";
+  else if (histo1.Contains("0-1-1"))
+    path += "ShapoNew/Tau/1/";
+  else if (histo1.Contains("0-1-10"))
+    path += "ShapoNew/Tau/10/";
+  else if (histo1.Contains("0-1-20"))
+    path += "ShapoNew/Tau/20/";
+  else {
+    cout<<"Don't know which directory to put them into!"<<endl;
+    _exit(1);
+  }
   
   TFile *f = TFile::Open(histo1);
 

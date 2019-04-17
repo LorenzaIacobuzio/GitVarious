@@ -5,7 +5,7 @@
 // Created by Lorenza Iacobuzio (lorenza.iacobuzio@cern.ch) February 2018    
 //                                                                                
 // ---------------------------------------------------------------              
-/// \class HeavyNeutrinoScan
+/// \class HeavyNeutrinoScanNewEl
 /// \Brief                                                                       
 /// Produce expected sensitivity curves for HNL MC samples of different masses, according to the chosen theoretical model
 /// \EndBrief                                                                  
@@ -44,25 +44,25 @@
 #include "GeometricAcceptance.hh"
 #include "HNLFunctions.hh"
 #include "HNLWeight.hh"
-#include "HeavyNeutrinoScan.hh"
+#include "HeavyNeutrinoScanNewEl.hh"
 
 using namespace std;
 using namespace NA62Analysis;
 using namespace NA62Constants;
 
-/// \class HeavyNeutrinoScan
+/// \class HeavyNeutrinoScanNewEl
 
-HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
-  Analyzer(ba, "HeavyNeutrinoScan") {
+HeavyNeutrinoScanNewEl::HeavyNeutrinoScanNewEl(Core::BaseAnalysis *ba) :
+  Analyzer(ba, "HeavyNeutrinoScanNewEl") {
 
   fReadingData = GetIsTree();
 
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 20.); // change accordingly
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
@@ -91,7 +91,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   fDistcomp = new PointLineDistance();
 }
 
-void HeavyNeutrinoScan::InitOutput() {
+void HeavyNeutrinoScanNewEl::InitOutput() {
 
   OpenNewTree("Scan", "Scan");
 
@@ -101,7 +101,7 @@ void HeavyNeutrinoScan::InitOutput() {
   AddBranch("Scan", "SumGood", &fTSumGood);
 }
 
-void HeavyNeutrinoScan::InitHist() {
+void HeavyNeutrinoScanNewEl::InitHist() {
 
   if (fReadingData) {
     
@@ -272,11 +272,11 @@ void HeavyNeutrinoScan::InitHist() {
     fHisto.GetTH1("ToyMC/D0/hptmu01")->Sumw2();
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrinoScan/SingleValue", false, "SingleValue");
-    ImportAllInputHistogram("HeavyNeutrinoScan/CouplingScan", false, "CouplingScan");
-    ImportAllInputHistogram("HeavyNeutrinoScan/MassScan", false, "MassScan");
-    ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/DS", false, "ToyMC/DS");
-    ImportAllInputHistogram("HeavyNeutrinoScan/ToyMC/D0", false, "ToyMC/D0");
+    ImportAllInputHistogram("HeavyNeutrinoScanNewEl/SingleValue", false, "SingleValue");
+    ImportAllInputHistogram("HeavyNeutrinoScanNewEl/CouplingScan", false, "CouplingScan");
+    ImportAllInputHistogram("HeavyNeutrinoScanNewEl/MassScan", false, "MassScan");
+    ImportAllInputHistogram("HeavyNeutrinoScanNewEl/ToyMC/DS", false, "ToyMC/DS");
+    ImportAllInputHistogram("HeavyNeutrinoScanNewEl/ToyMC/D0", false, "ToyMC/D0");
     
     // One value
 
@@ -372,7 +372,7 @@ void HeavyNeutrinoScan::InitHist() {
   }
 }
 
-void HeavyNeutrinoScan::Process(Int_t) {
+void HeavyNeutrinoScanNewEl::Process(Int_t) {
 
   if (fReadingData) {
 
@@ -742,7 +742,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
   }
 }
 
-void HeavyNeutrinoScan::EndOfJobUser() {
+void HeavyNeutrinoScanNewEl::EndOfJobUser() {
  
   if (fReadingData) {
 
@@ -979,20 +979,18 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     Int_t N = fHisto.GetTGraph("TotalScan/Contours")->GetN();
     Double_t X[N], Y[N];
 
-    if (fInitialUeSquaredRatio != 0. && fInitialUmuSquaredRatio != 0. && fInitialUtauSquaredRatio != 0.) {
-      for (Int_t i = 0; i < N; i++)
-	fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
-      
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N,   1.96, Y[N-1]-0.2);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+1, 1.96, Y[N-1]-0.4);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+2, 1.96, Y[N-1]-0.8);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+3, 1.96, Y[N-1]-1.1);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+4, 1.96, Y[N-1]-1.4);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+5, 1.96, Y[N-1]-1.9);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+6, 1.96, Y[N-1]-2.0);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
-      fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
-    }
+    for (Int_t i = 0; i < N; i++)
+      fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
+
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N,   1.96, Y[N-1]-0.2);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+1, 1.96, Y[N-1]-0.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+2, 1.96, Y[N-1]-0.8);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+3, 1.96, Y[N-1]-1.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+4, 1.96, Y[N-1]-1.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+5, 1.96, Y[N-1]-1.9);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+6, 1.96, Y[N-1]-2.0);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
 
     // Mean probability vs mass and coupling
 
@@ -1014,7 +1012,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     CosmeticsGraph(fHisto.GetTGraph("MassScan/GammaTotMass"), "N mass [GeV/c^{2}]", "Total decay width [MeV]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"), "N mass [GeV/c^{2}]", "Lifetime [ns]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"), "N mass [GeV/c^{2}]", "Mean probability", 2);
-    CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2})", 2);  
+
+    if (fInitialUeSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{e})", 2);
+    if (fInitialUtauSquaredRatio != 0.)
+      CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2}_{#tau})", 2);
 
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg")), "Log(U^{2})", "Acceptance", 2);
@@ -1052,7 +1054,11 @@ void HeavyNeutrinoScan::EndOfJobUser() {
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "Log(U^{2})", "Yield per POT", 2);
 
     fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-    fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2})");
+
+    if (fInitialUeSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{e})");
+    if (fInitialUtauSquaredRatio != 0.)
+      fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2}_{#tau})");
   }
 
   SaveAllPlots();
@@ -1060,7 +1066,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   return;
 }
 
-void HeavyNeutrinoScan::CosmeticsGraph(TGraph* g, const char* x, const char* y, Int_t col) {
+void HeavyNeutrinoScanNewEl::CosmeticsGraph(TGraph* g, const char* x, const char* y, Int_t col) {
 
   g->GetXaxis()->SetTitle(x);
   g->GetYaxis()->SetTitle(y);
@@ -1071,7 +1077,7 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraph* g, const char* x, const char* y, 
   return;
 }
 
-void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, const char* y, Int_t col) {
+void HeavyNeutrinoScanNewEl::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, const char* y, Int_t col) {
 
   g->GetXaxis()->SetTitle(x);
   g->GetYaxis()->SetTitle(y);
@@ -1084,7 +1090,7 @@ void HeavyNeutrinoScan::CosmeticsGraph(TGraphAsymmErrors* g, const char* x, cons
   return;
 }
 
-void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
+void HeavyNeutrinoScanNewEl::EvaluateUL(TH2* h, TGraph* gr) {
 
   Int_t nContours = 6;
   Double_t* CLs = new Double_t[nContours];
@@ -1123,12 +1129,18 @@ void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
   
   Double_t* xx = new Double_t[nn];
   Double_t* yy = new Double_t[nn];
+  Double_t* yyNew = new Double_t[nn];
 
   xx = contoursHisto[level]->GetX();
   yy = contoursHisto[level]->GetY();
 
   for (Int_t i = 0; i < nn; i++) {
-    gr->SetPoint(i, xx[i], yy[i]);
+    if (fInitialUeSquaredRatio != 0.)
+      yyNew[i] = TMath::Log10(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio);
+    else if (fInitialUtauSquaredRatio != 0.)
+      yyNew[i] = TMath::Log10(TMath::Power(10., yy[i])/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUtauSquaredRatio);
+    
+    gr->SetPoint(i, xx[i], yyNew[i]);
   }
   
   gr->SetLineColor(kRed);
@@ -1138,7 +1150,7 @@ void HeavyNeutrinoScan::EvaluateUL(TH2* h, TGraph* gr) {
   return;
 }
   
-std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
+std::vector<TGraph*> HeavyNeutrinoScanNewEl::ExtractContours(TH2* h) {
   
   // Draw contours as filled regions and save points 
   
@@ -1171,7 +1183,7 @@ std::vector<TGraph*> HeavyNeutrinoScan::ExtractContours(TH2* h) {
   return graf;
 }
 
-void HeavyNeutrinoScan::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
+void HeavyNeutrinoScanNewEl::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors* g1, TGraphAsymmErrors* g2) {
 
   for (Int_t i = 0; i < g1->GetN(); i++) {
     Double_t x1, y1, x2, y2;
