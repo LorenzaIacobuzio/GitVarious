@@ -231,6 +231,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 
   TFile *f = TFile::Open(fName);
   TString histo1 = (TString)(fName);
+  TString histo1Name = (TString)(fName);
   TDirectory * dir = (TDirectory*)f->Get(dirName);
   TIter next(dir->GetListOfKeys());
   TKey *key;
@@ -324,6 +325,11 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 
       c->SaveAs(path + Name1 + ".pdf");
       c->SaveAs(path + Name1 + ".png");
+
+      if (Name1.Contains("Contours")) {
+	TString modName = histo1Name.Remove(0, histo1Name.First('/') + 16);
+	c->SaveAs("~/Desktop/Histos/" + modName + ".png");
+      }
     }
     else if (cl->InheritsFrom("TH2")) {
       TH2 *h2 = (TH2*)key->ReadObj();
@@ -519,6 +525,6 @@ void Plots(TString dir, TString histo1, TString mode) {
 
       ParseDir(histo1, hnsDir + "/TotalScan", path + hnsDir + "/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
     }
-  }	
+  }
   exit(0);
 }
