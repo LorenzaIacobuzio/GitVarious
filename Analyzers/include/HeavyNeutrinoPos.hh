@@ -41,7 +41,7 @@ public:
   void EndOfJobUser();
   void PostProcess() {}
   void DrawPlot() {}
-  void ProcessEOBEvent();
+  void ProcessEOBEvent() {}
 
 protected:
 
@@ -58,6 +58,7 @@ protected:
   Bool_t fEnableChecks;
   Int_t fMode;
   Int_t fBurstCounter;
+  Int_t fNK3Pi;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
@@ -73,13 +74,7 @@ protected:
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
   Double_t fZGTK3;
-  Double_t fNPOTT10;
-  Double_t fNPOTFit;
-  Double_t fNKTot;
-  Double_t fNK3Pi;
-  Double_t fNK;
-  Double_t fNPOT;
-  std::vector<Double_t> fNKaons;
+  TRecoCedarCandidate *KTAGcand;
 
   // Variables for TTrees
 
@@ -104,19 +99,33 @@ protected:
   Double_t yGTK31;
   Double_t xGTK32;
   Double_t yGTK32;
+  Double_t BeamCDA1;
+  Double_t BeamCDA2;
+  Double_t EtotLKr;
   TVector3 Mom1;
   TVector3 Mom2;
-  TVector3 TotMom;
-  TVector3 Vertex;
   TVector3 threeMomPi;
   TVector3 threeMomMu;
+  TVector3 TotMom;
+  TVector3 Vertex;
+  TVector3 Pos1;
+  TVector3 Pos2;
+  TVector3 BeamVtx1;
+  TVector3 BeamVtx2;
   Bool_t Target;
   Bool_t K3pi;
   Bool_t autoPass;
+  Bool_t CHANTIAssoc1;
+  Bool_t CHANTIAssoc2;
   Int_t Assoc;
   Int_t Charge1;
   Int_t Charge2;
-  TRecoCedarCandidate *KTAGcand;
+  Int_t nSec;
+  Int_t nCHOD;
+  Int_t nNewCHOD;
+  Int_t nLKr;
+  std::vector<Double_t> RICHInfo1;
+  std::vector<Double_t> RICHInfo2;
 };
 
 #endif

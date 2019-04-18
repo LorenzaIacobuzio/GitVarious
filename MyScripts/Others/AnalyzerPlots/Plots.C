@@ -462,7 +462,7 @@ void Plots(TString dir, TString histo1, TString mode) {
     hnDir += "NewTau";
     hnsDir += "NewTau";
   }
-
+  
   if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) {
     
     ParseDir(histo1, hnDir + "/" + hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
