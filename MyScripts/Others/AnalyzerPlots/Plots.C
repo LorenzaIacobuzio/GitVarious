@@ -154,10 +154,10 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
 
   TString name = m->GetName();
 
-  if (!name.Contains("MergedContours"))
+  if (!name.Contains("El") && !name.Contains("Tau"))
     m->Draw("AP");
   else 
-    m->Draw("AC");
+    m->Draw("AL");
 
   if (name.Contains("Coupling") && name.Contains("Sel"))
     m->GetYaxis()->SetRangeUser(1.E-4, 1.);
@@ -178,6 +178,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
     m->GetYaxis()->SetRangeUser(1.E-4, 1.E-3);
   }
 
+  gPad->Update();
   m->GetXaxis()->SetTitle(x);
   m->GetYaxis()->SetTitle(y);
   m->GetXaxis()->SetTitleOffset(1.4);
@@ -190,12 +191,22 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
   if (!name.Contains("MergedContours")) {
     gPad->BuildLegend(0.77, 0.77, 0.98, 0.93);
     gPad->Update();
-    gPad->SetLogy();
-    gPad->Update();
+    if (!name.Contains("El") && !name.Contains("Tau")) {
+      gPad->SetLogy();
+      gPad->Update();
+    }
   }
 
-  c->SaveAs(path + m->GetName() + ".pdf");
-  c->SaveAs(path + m->GetName() + ".png");
+  gPad->Update();
+
+  if (!name.Contains("El") && !name.Contains("Tau")) {
+    c->SaveAs(path + m->GetName() + ".pdf");
+    c->SaveAs(path + m->GetName() + ".png");
+  }
+  else {
+    c->SaveAs("/Users/lorenza/Desktop/Histos/" + name + ".pdf");
+    c->SaveAs("/Users/lorenza/Desktop/Histos/" + name + ".png");
+  }
 
   delete m;
   delete c;
@@ -227,7 +238,7 @@ TCanvas* CreateTCanvas() {
   return c;
 }
 
-void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, TMultiGraph* m, TMultiGraph* m1, TMultiGraph* m2, TMultiGraph* m3) {
+TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, TMultiGraph* m, TMultiGraph* m1, TMultiGraph* m2, TMultiGraph* m3) {
 
   TFile *f = TFile::Open(fName);
   TString histo1 = (TString)(fName);
@@ -241,6 +252,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
   TH1D* hTa1  = new TH1D();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
+  TGraph *retG = new TGraph();
 
   while ((key = (TKey*)next())) {
     TClass *cl = gROOT->GetClass(key->GetClassName());
@@ -298,13 +310,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       TGraph *g = (TGraph*)(key->ReadObj());
       
       TGraphCosmetics(g, labelSize, titleSize);
-
-      if (histo1.Contains("1") && Name1.Contains("Contours")) {
-	for (Int_t i = 0; i < 17; i++){
-	  g->RemovePoint(207);
-	}
-      }
-
+      /*
       if (Name1.Contains("T10") && !Name1.Contains("POT")) {
 	gStyle->SetOptFit(0);
       }
@@ -317,19 +323,21 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	g->Draw("AC");
 	m->Add(g);
       }
-      else if (Name1.Contains("Contours")) {
+      */
+      if (Name1.Contains("Contours")) {
 	g->Draw("AL");
+	retG = g;
+	TString modName = histo1Name.Remove(0, histo1Name.First('/') + 35);
+	modName.Remove(modName.Last('.'), modName.Last('.') + 4);
+	histo1Name = histo1;
+	c->SaveAs("/Users/lorenza/Desktop/Histos/" + modName + ".png");
+	g->SetTitle(modName);
       }
       else
 	g->Draw("AC");
 
       c->SaveAs(path + Name1 + ".pdf");
       c->SaveAs(path + Name1 + ".png");
-
-      if (Name1.Contains("Contours")) {
-	TString modName = histo1Name.Remove(0, histo1Name.First('/') + 16);
-	c->SaveAs("~/Desktop/Histos/" + modName + ".png");
-      }
     }
     else if (cl->InheritsFrom("TH2")) {
       TH2 *h2 = (TH2*)key->ReadObj();
@@ -346,7 +354,7 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
 	TH2Cosmetics(h2, true, labelSize, titleSize);
       else 
 	TH2Cosmetics(h2, false, labelSize, titleSize);
-      
+
       c->SaveAs(path + key->GetName() + ".pdf");
       c->SaveAs(path + key->GetName() + ".png");
     }
@@ -407,21 +415,23 @@ void ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, 
       c->SaveAs(path + key->GetName() + ".png");
     }
   }
+
+  return retG;
 }
 
-void Plots(TString dir, TString histo1, TString mode) {
+TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t suf, TCanvas *c) {
 
   // dir = output dir, histo1 = histo to do cosmetics on, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
 
-  TCanvas *c = CreateTCanvas();
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;
   TString path = "";
-  
+  TGraph* retG = new TGraph();
+
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
+    path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("52"))
     path += "ShapoOld/1/";
@@ -431,22 +441,18 @@ void Plots(TString dir, TString histo1, TString mode) {
     path += "ShapoOld/3/";
   else if (histo1.Contains("1-1-1"))
     path += "ShapoNew/All/";
-  else if (histo1.Contains("0-1-0") && !histo1.Contains("20-1-0") && !histo1.Contains("10-1-0"))
+  else if (histo1.Contains("0-1-0") && val == 0)
     path += "ShapoNew/Muon/";
-  else if (histo1.Contains("1-1-0"))
-    path += "ShapoNew/El/1/";
-  else if (histo1.Contains("10-1-0"))
-    path += "ShapoNew/El/10/";
-  else if (histo1.Contains("20-1-0"))
-    path += "ShapoNew/El/20/";
-  else if (histo1.Contains("0-1-1"))
-    path += "ShapoNew/Tau/1/";
-  else if (histo1.Contains("0-1-10"))
-    path += "ShapoNew/Tau/10/";
-  else if (histo1.Contains("0-1-20"))
-    path += "ShapoNew/Tau/20/";
+  else if (histo1.Contains("-1-0") && val != 0) {
+    TString prefix = Form("%d", val);
+    path += "ShapoNew/El/" + prefix + "/";
+  }
+  else if (histo1.Contains("0-1-") && suf != 0) {
+    TString prefix = Form("%d", suf);
+    path += "ShapoNew/Tau/" + prefix + "/";
+  }
   else {
-    cout<<"Don't know which directory to put them into!"<<endl;
+    cout<<"Don't know which directory to put " << histo1 << " into!"<<endl;
     _exit(1);
   }
   
@@ -469,7 +475,7 @@ void Plots(TString dir, TString histo1, TString mode) {
   }
 
   if (f->Get(hnsDir) != nullptr) {
-    
+
     TMultiGraph *m  = CreateTMultiGraph("YieldCoupling", "Yield per POT vs coupling");
     TMultiGraph *m1 = CreateTMultiGraph("AccSelCoupling", "Selection acceptance vs coupling");
     TMultiGraph *m2 = CreateTMultiGraph("AccRegCoupling", "Regeneration acceptance vs coupling");
@@ -487,7 +493,8 @@ void Plots(TString dir, TString histo1, TString mode) {
       // Coupling plots
       
       ParseDir(histo1, hnsDir + "/CouplingScan", path + hnsDir + "/CouplingScan/", c, m, m1, m2, m3);
-      
+
+      c = CreateTCanvas();      
       TMultiGraphCosmetics(m, "Log(U^{2})", "Yield per POT", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
       c = CreateTCanvas();
       TMultiGraphCosmetics(m1, "Log(U^{2})", "Selection acceptance", c, path + hnsDir + "/CouplingScan/", labelSize, titleSize);
@@ -501,7 +508,8 @@ void Plots(TString dir, TString histo1, TString mode) {
     if (mode == "all" || mode == "hnsm") {
       
       // Mass plots
-      
+
+      c = CreateTCanvas();      
       m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
       m1 = CreateTMultiGraph("AccSelMass", "Selection acceptance vs N mass");
       m2 = CreateTMultiGraph("AccRegMass", "Regeneration acceptance vs N mass");
@@ -523,8 +531,102 @@ void Plots(TString dir, TString histo1, TString mode) {
       
       // Total scan plots
 
-      ParseDir(histo1, hnsDir + "/TotalScan", path + hnsDir + "/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
+      retG = nullptr;
+      retG = ParseDir(histo1, hnsDir + "/TotalScan", path + hnsDir + "/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
     }
   }
+
+  return retG;
+}
+
+void MultiHisto(TString direc, TString mode) {
+
+  TMultiGraph *mEl = CreateTMultiGraph("El", "Electron model");
+  TMultiGraph *mTau = CreateTMultiGraph("Tau", "Tau model");
+  Double_t labelSize = 0.05;
+  Double_t titleSize = 0.07;
+  TString path;
+  Bool_t multi = false;
+  Int_t colors[14] = {602, 434, 887, 861, 623, 632, 797, 803, 402, 419, 416, 1, 922, 886}; //blue+2, cyan+2, violet+7, azure+1, red-9, red, orange-3, orange+3, yellow+2, green+3, green, black, grey+2, violet+6
+  Int_t colC = 0;
+
+  if (direc != "")
+    path = direc;
+  else
+    path = "/Users/lorenza/Desktop/Histos/";
+
+  TSystemDirectory dir("/Users/lorenza/Desktop/FinalHistos/", "/Users/lorenza/Desktop/FinalHistos/");
+  TList *files = dir.GetListOfFiles();
+  TCanvas *c = CreateTCanvas();
+
+  if (files) {
+    TSystemFile *file;
+    TString fname;
+    TString prefix;
+    TString suffix;
+    Int_t val;
+    Int_t suf;
+    TGraph *g = new TGraph();
+    TIter next(files);
+
+    while ((file = (TSystemFile*)next())) {
+      fname = file->GetName();
+      TString name = fname;
+      if (!file->IsDirectory() && fname.EndsWith(".root")) {
+        prefix = name.Remove(name.First('-'), name.Last('.') + 4);
+        val = prefix.Atoi();
+	name = fname;
+	suffix = name.Remove(name.Last('.'), name.Last('.') + 4);
+	suffix.Remove(0, suffix.Last('-') + 1);
+	suf = suffix.Atoi();
+	name = fname;
+	cout << "****************** I am processing file " << fname << endl;
+	if (mode.Contains("all") || mode.Contains("hnst")) {
+	  if (!fname.Contains("52-1-1") && !fname.Contains("0.061-1-4.3") && !fname.Contains("1-16-3.8") && !fname.Contains("1-1-1")) {
+	    if (fname.Contains("-1-0") && val != 0) {
+	      multi = true;
+	      g = SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	      g->SetLineColor(colors[colC]);
+	      g->Draw("AL");
+	      mEl->Add(g);
+	      mEl->Draw("AL");
+	      colC++;
+	    }
+	    else if (fname.Contains("0-1-") && suf != 0) {
+	      multi = true;
+	      g = SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	      g->SetLineColor(colors[colC]);
+	      g->Draw("AL");
+	      mTau->Add(g);
+	      mTau->Draw("AL");
+	      colC++;
+	    }
+	    else {
+	      SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	    }
+	  }
+	  else {
+	    SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	  }
+	}
+	else {
+	  SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	}
+      }
+    }
+  }
+  
+  if (multi) {
+    c = CreateTCanvas();
+    TMultiGraphCosmetics(mEl, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path, labelSize, titleSize);
+    c = CreateTCanvas();
+    TMultiGraphCosmetics(mTau, "N mass [GeV/c^{2}]", "Log(U^{2})", c, path, labelSize, titleSize);
+    c = CreateTCanvas();
+  }
+}
+
+void Plots(TString mode) {
+
+  MultiHisto("", mode);
   exit(0);
 }
