@@ -61,8 +61,8 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
   AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
@@ -748,15 +748,15 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
     // X axis
  
-    fHisto.GetTH1("SingleValue/hZMotherProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZDProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZTauProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZDDecay")->GetXaxis()->SetTitle("Position along Z [m]");
+    fHisto.GetTH1("SingleValue/hZMotherProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZDProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZTauProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZDDecay")->GetXaxis()->SetTitle("Z coordinate [m]");
     fHisto.GetTH1("SingleValue/hDTheta")->GetXaxis()->SetTitle("Polar angle [rad]");
     fHisto.GetTH1("SingleValue/hDLambda")->GetXaxis()->SetTitle("Decay length [mm]");
     fHisto.GetTH1("SingleValue/hDPath")->GetXaxis()->SetTitle("Z [mm]");
     fHisto.GetTH1("SingleValue/hDMom")->GetXaxis()->SetTitle("P [GeV/c]");
-    fHisto.GetTH1("SingleValue/hZHNLDecay")->GetXaxis()->SetTitle("Position along Z [m]");
+    fHisto.GetTH1("SingleValue/hZHNLDecay")->GetXaxis()->SetTitle("Z coordinate [m]");
     fHisto.GetTH1("SingleValue/hHNLGamma")->GetXaxis()->SetTitle("Lorentz factor");
     fHisto.GetTH1("SingleValue/hHNLTheta")->GetXaxis()->SetTitle("Polar angle [rad]");
     fHisto.GetTH1("SingleValue/hHNLMom")->GetXaxis()->SetTitle("P [GeV/c]");

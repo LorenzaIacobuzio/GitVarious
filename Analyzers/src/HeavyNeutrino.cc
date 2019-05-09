@@ -75,8 +75,8 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
   AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -1598,9 +1598,6 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
     fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
     fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
-    fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
-    fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
-    fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
 
     // Y axis
 
@@ -1667,9 +1664,6 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
     fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
-    fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
 
     // Colz axis
 

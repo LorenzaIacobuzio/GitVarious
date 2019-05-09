@@ -748,15 +748,15 @@ void HeavyNeutrinoScanNewTau::EndOfJobUser() {
 
     // X axis
  
-    fHisto.GetTH1("SingleValue/hZMotherProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZDProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZTauProd")->GetXaxis()->SetTitle("Position along Z [m]");
-    fHisto.GetTH1("SingleValue/hZDDecay")->GetXaxis()->SetTitle("Position along Z [m]");
+    fHisto.GetTH1("SingleValue/hZMotherProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZDProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZTauProd")->GetXaxis()->SetTitle("Z coordinate [m]");
+    fHisto.GetTH1("SingleValue/hZDDecay")->GetXaxis()->SetTitle("Z coordinate [m]");
     fHisto.GetTH1("SingleValue/hDTheta")->GetXaxis()->SetTitle("Polar angle [rad]");
     fHisto.GetTH1("SingleValue/hDLambda")->GetXaxis()->SetTitle("Decay length [mm]");
     fHisto.GetTH1("SingleValue/hDPath")->GetXaxis()->SetTitle("Z [mm]");
     fHisto.GetTH1("SingleValue/hDMom")->GetXaxis()->SetTitle("P [GeV/c]");
-    fHisto.GetTH1("SingleValue/hZHNLDecay")->GetXaxis()->SetTitle("Position along Z [m]");
+    fHisto.GetTH1("SingleValue/hZHNLDecay")->GetXaxis()->SetTitle("Z coordinate [m]");
     fHisto.GetTH1("SingleValue/hHNLGamma")->GetXaxis()->SetTitle("Lorentz factor");
     fHisto.GetTH1("SingleValue/hHNLTheta")->GetXaxis()->SetTitle("Polar angle [rad]");
     fHisto.GetTH1("SingleValue/hHNLMom")->GetXaxis()->SetTitle("P [GeV/c]");
@@ -978,6 +978,19 @@ void HeavyNeutrinoScanNewTau::EndOfJobUser() {
 
     Int_t N = fHisto.GetTGraph("TotalScan/Contours")->GetN();
     Double_t X[N], Y[N];
+
+    for (Int_t i = 0; i < N; i++)
+      fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
+
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N,   1.96, Y[N-1]-0.2);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+1, 1.96, Y[N-1]-0.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+2, 1.96, Y[N-1]-0.8);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+3, 1.96, Y[N-1]-1.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+4, 1.96, Y[N-1]-1.4);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+5, 1.96, Y[N-1]-1.9);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+6, 1.96, Y[N-1]-2.0);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
+    fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
 
     // Mean probability vs mass and coupling
 

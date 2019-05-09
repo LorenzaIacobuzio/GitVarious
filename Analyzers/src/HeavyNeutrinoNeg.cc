@@ -1598,9 +1598,6 @@ void HeavyNeutrinoNeg::EndOfJobUser() {
     fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
     fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
     fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
-    fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
-    fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
-    fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
 
     // Y axis
 
@@ -1667,9 +1664,6 @@ void HeavyNeutrinoNeg::EndOfJobUser() {
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
     fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
-    fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
 
     // Colz axis
 

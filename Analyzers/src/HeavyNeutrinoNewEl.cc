@@ -74,7 +74,7 @@ HeavyNeutrinoNewEl::HeavyNeutrinoNewEl(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 20.); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
   AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
   AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
@@ -113,22 +113,12 @@ HeavyNeutrinoNewEl::HeavyNeutrinoNewEl(Core::BaseAnalysis *ba) :
 
   // Parameters for L0 trigger conditions
 
-  //fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10", "RICH-Q2-M1-LKr20", "RICH-Q2-MO2-nLKr20", "RICH-Q2-MO2", "RICH-Q2-M2", "RICH-QX-LKr20", "RICH-LKr20", "RICH-Q2-nMUV-LKr20", "RICH-Q2-MO1-LKr20",  "RICH-Q2-MO2-nLKr30", "RICH-QX-MO2"};
-  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1"};
+  fStream = {"RICH-Q2-MO1", "RICH-Q2-M1", "RICH-Q2-MO1-LKr10"};
 
   for (UInt_t i = 0; i < fStream.size(); i++) {
     fID.push_back(TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]));
   }
 
-  // Needed for POT computation
-
-  fNPOTT10 = 0.;
-  fNPOTFit = 0.;
-  fNKTot = 0.;
-  fNK3Pi = 0.;
-  fNK = 0.;
-  fNPOT = 0.;
-  fBurstCounter = 0;
   KTAGcand = new TRecoCedarCandidate();
 }
 
@@ -161,19 +151,31 @@ void HeavyNeutrinoNewEl::InitOutput() {
     AddBranch("HeavyNeutrinoNewElPassed", "yGTK31", &yGTK31);
     AddBranch("HeavyNeutrinoNewElPassed", "xGTK32", &xGTK32);
     AddBranch("HeavyNeutrinoNewElPassed", "yGTK32", &yGTK32);
+    AddBranch("HeavyNeutrinoNewElPassed", "BeamCDA1", &BeamCDA1);
+    AddBranch("HeavyNeutrinoNewElPassed", "BeamCDA2", &BeamCDA2);
+    AddBranch("HeavyNeutrinoNewElPassed", "BeamVtx1", &BeamVtx1);
+    AddBranch("HeavyNeutrinoNewElPassed", "BeamVtx2", &BeamVtx2);
+    AddBranch("HeavyNeutrinoNewElPassed", "EtotLKr", &EtotLKr);
     AddBranch("HeavyNeutrinoNewElPassed", "Mom1", &Mom1);
     AddBranch("HeavyNeutrinoNewElPassed", "Mom2", &Mom2);
+    AddBranch("HeavyNeutrinoNewElPassed", "Pos1", &Pos1);
+    AddBranch("HeavyNeutrinoNewElPassed", "Pos2", &Pos2);
     AddBranch("HeavyNeutrinoNewElPassed", "TotMom", &TotMom);
     AddBranch("HeavyNeutrinoNewElPassed", "Vertex", &Vertex);
-    AddBranch("HeavyNeutrinoNewElPassed", "threeMomPi", &threeMomPi);
-    AddBranch("HeavyNeutrinoNewElPassed", "threeMomMu", &threeMomMu);
     AddBranch("HeavyNeutrinoNewElPassed", "Target", &Target);
     AddBranch("HeavyNeutrinoNewElPassed", "K3pi", &K3pi);
     AddBranch("HeavyNeutrinoNewElPassed", "autoPass", &autoPass);
     AddBranch("HeavyNeutrinoNewElPassed", "Assoc", &Assoc);
+    AddBranch("HeavyNeutrinoNewElPassed", "CHANTIAssoc1", &CHANTIAssoc1);
+    AddBranch("HeavyNeutrinoNewElPassed", "CHANTIAssoc2", &CHANTIAssoc2);
     AddBranch("HeavyNeutrinoNewElPassed", "Charge1", &Charge1);
     AddBranch("HeavyNeutrinoNewElPassed", "Charge2", &Charge2);
-    AddBranch("HeavyNeutrinoNewElPassed", "KTAGcand", KTAGcand);
+    AddBranch("HeavyNeutrinoNewElPassed", "nSec", &nSec);
+    AddBranch("HeavyNeutrinoNewElPassed", "nCHOD", &nCHOD);
+    AddBranch("HeavyNeutrinoNewElPassed", "nNewCHOD", &nNewCHOD);
+    AddBranch("HeavyNeutrinoNewElPassed", "nLKr", &nLKr);
+    AddBranch("HeavyNeutrinoNewElPassed", "RICHInfo1", &RICHInfo1);
+    AddBranch("HeavyNeutrinoNewElPassed", "RICHInfo2", &RICHInfo2);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrinoNewEl", false, "HeavyNeutrinoNewEl");
@@ -192,7 +194,7 @@ void HeavyNeutrinoNewEl::InitHist() {
     BookHisto("hNtracks",  new TH1D("Ntracks", "Number of tracks", 10, -0.5, 9.5));
     BookHisto("hMomPi",    new TH1D("MomPi", "Pion momentum", 100, -0.5, 200.));
     BookHisto("hMomMu",    new TH1D("MomMu", "Muon momentum", 100, -0.5, 200.));
-    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 32, 0., 32.));
+    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 33, 0., 33.));
 
     // X,Y distributions
 
@@ -284,23 +286,6 @@ void HeavyNeutrinoNewEl::InitHist() {
 
     BookHisto("hCHANTImult",   new TH1D("CHANTImult", "CHANTI multiplicity in time", 10, 0., 10.));
     BookHisto("hExtraLKrmult", new TH1D("ExtraLKrmult", "Residual LKr multiplicity in time", 10, 0., 10.));
-
-    // POT
-
-    BookHisto("hPOTT10", new TH1D("POTT10", "", 1, 0., 1.));
-    BookHisto("hPOTFit", new TH1D("POTFit", "", 1, 0., 1.));
-
-    BookHisto("hSpare1", new TH1D("Spare1", "", 50, 0., 30.));
-    BookHisto("hSpare2", new TH2D("Spare2", "", 100, 110., 130., 100, 110., 130.));
-
-    BookHisto("T10", new TGraph());
-    fHisto.GetTGraph("T10")->SetNameTitle("T10", "N POT vs N K decays");
-    BookHisto("POT1", new TGraph());
-    fHisto.GetTGraph("POT1")->SetNameTitle("POT1", "N POT vs burst ID - T10 method");
-    BookHisto("POT2", new TGraph());
-    fHisto.GetTGraph("POT2")->SetNameTitle("POT2", "N POT vs burst ID - K3Pi method");
-    BookHisto("NK", new TGraph());
-    fHisto.GetTGraph("NK")->SetNameTitle("NK", "N kaon decays vs burst ID");
   }
 
   return;
@@ -317,17 +302,13 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   FillHisto("hNEvents", 0.5);
 
   TRecoCedarEvent* CedarEvent = (TRecoCedarEvent*)GetEvent("Cedar");
-  TRecoCHODEvent* CHODEvent = (TRecoCHODEvent*)GetEvent("CHOD");
   TRecoLAVEvent* LAVEvent = (TRecoLAVEvent*)GetEvent("LAV");
   TRecoIRCEvent* IRCEvent = (TRecoIRCEvent*)GetEvent("IRC");
   TRecoSACEvent* SACEvent = (TRecoSACEvent*)GetEvent("SAC");
   TRecoCHANTIEvent* CHANTIEvent = (TRecoCHANTIEvent*)GetEvent("CHANTI");
-
-  if (GetWithMC()) {
-    for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
-      *KTAGcand = *(TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
-    }
-  }
+  TRecoNewCHODEvent* NewCHODEvent = (TRecoNewCHODEvent*)GetEvent("NewCHOD");
+  TRecoCHODEvent* CHODEvent = (TRecoCHODEvent*)GetEvent("CHOD");
+  TRecoLKrEvent* LKrEvent = (TRecoLKrEvent*)GetEvent("LKr");
 
   // Counter for cuts
 
@@ -482,11 +463,38 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   Double_t ChiSquare2 = Tracks[1].GetChi2();
   TRecoSpectrometerCandidate* SpectrometerCand1 = Tracks[0].GetSpectrometerCandidate();
   TRecoSpectrometerCandidate* SpectrometerCand2 = Tracks[1].GetSpectrometerCandidate();
+  BeamCDA1 = Tracks[0].GetBeamAxisCDA();
+  BeamCDA2 = Tracks[1].GetBeamAxisCDA();
+  BeamVtx1 = Tracks[0].GetBeamAxisVertex();
+  BeamVtx2 = Tracks[1].GetBeamAxisVertex();
   Mom1 = SpectrometerCand1->GetThreeMomentumBeforeMagnet();
   Mom2 = SpectrometerCand2->GetThreeMomentumBeforeMagnet();
   TotMom = Mom1 + Mom2;    
   Charge1 = Tracks[0].GetCharge();
   Charge2 = Tracks[1].GetCharge();
+  Pos1 = Tracks[0].GetPositionBeforeMagnet();
+  Pos2 = Tracks[1].GetPositionBeforeMagnet();
+  RICHInfo1.push_back(Tracks[0].GetRICHMostLikelyHypothesis());
+  RICHInfo1.push_back(Tracks[0].GetRICHLikelihoodKaon());
+  RICHInfo1.push_back(Tracks[0].GetRICHLikelihoodPion());
+  RICHInfo1.push_back(Tracks[0].GetRICHLikelihoodMuon());
+  RICHInfo1.push_back(Tracks[0].GetRICHLikelihoodElectron());
+  RICHInfo1.push_back(Tracks[0].GetRICHSingleRingTrkCentredRadius());
+  RICHInfo1.push_back(Tracks[0].GetRICHNumberOfInTimeHits());
+  RICHInfo1.push_back(Tracks[0].GetRICHSingleRingTrkCentredNHits());
+  RICHInfo2.push_back(Tracks[1].GetRICHMostLikelyHypothesis());
+  RICHInfo2.push_back(Tracks[1].GetRICHLikelihoodKaon());
+  RICHInfo2.push_back(Tracks[1].GetRICHLikelihoodPion());
+  RICHInfo2.push_back(Tracks[1].GetRICHLikelihoodMuon());
+  RICHInfo2.push_back(Tracks[1].GetRICHLikelihoodElectron());
+  RICHInfo2.push_back(Tracks[1].GetRICHSingleRingTrkCentredRadius());
+  RICHInfo2.push_back(Tracks[1].GetRICHNumberOfInTimeHits());
+  RICHInfo2.push_back(Tracks[1].GetRICHSingleRingTrkCentredNHits());
+  CHANTIAssoc1 = Tracks[0].CHANTIAssociationExists();
+  CHANTIAssoc2 = Tracks[1].CHANTIAssociationExists();
+
+  if (Tracks[0].GetIsFake() || Tracks[1].GetIsFake())
+    return;
 
   // Handle fast MC and data
 
@@ -649,19 +657,32 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // KTAG timing
+  // KTAG timing (data + kaon mode for bkg studies)
+
+  for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
+    *KTAGcand = *(TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+    Double_t dT = KTAGcand->GetTime() - L0TPTime;
+    if (KTAGcand->GetNSectors() >= 5 && TMath::Abs(dT) <= KTAGWindow)
+      return;
+  }
+  
+  FillHisto("hCuts", CutID);
+  CutID++;
+  
+  // KTAG activity for pion spike in combinatorial bkg
+  
+  nSec  = 0;
 
   if (!GetWithMC()) {
     for(int i = 0; i < CedarEvent->GetNCandidates(); i++) {
-      *KTAGcand = *(TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
+      TRecoCedarCandidate *Cedarcand = (TRecoCedarCandidate*)CedarEvent->GetCandidate(i);
       Double_t dT = KTAGcand->GetTime() - L0TPTime;
-      if (KTAGcand->GetNSectors() >= 5 && TMath::Abs(dT) <= KTAGWindow)
-	return;
+      if (TMath::Abs(dT) <= KTAGWindow) {
+	if (Cedarcand->GetNSectors() > nSec)
+	  nSec = Cedarcand->GetNSectors();
+      }
     }
   }
-
-  FillHisto("hCuts", CutID);
-  CutID++;
 
   // (X,Y) of reconstructed tracks for all Spectrometer chambers
     
@@ -959,23 +980,6 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
   
-  // Downstream track selection, CUT: Extrapolation and association to LKr
-  
-  //Bool_t LKrAssoc = (Tracks[0].LKrAssociationExists() && Tracks[1].LKrAssociationExists());
-  
-  if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr))
-    return;
-  
-  FillHisto("hCuts", CutID);
-  CutID++;
-  /*
-  if (!LKrAssoc)
-    return;
-
-  FillHisto("hCuts", CutID);
-  CutID++;
-  */
-
   // Downstream track selection, CUT: Extrapolation and association to MUV3
     
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3))
@@ -1011,33 +1015,42 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
 
   // CUT: MUV3 timing (also for MC)
   
-  if (!GetWithMC() || GetWithMC()) {
-    Int_t inTime = 0;
-    std::vector<SpectrometerMUV3AssociationOutput> SpecMUV3 = *(std::vector<SpectrometerMUV3AssociationOutput>*)GetOutput("SpectrometerMUV3Association.Output");
-    for (Int_t i = 0; i < SpecMUV3[Assoc-1].GetNAssociationRecords(); i++) {
-      Double_t dT = 0.;
-
-      if (!GetWithMC())
-	dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
-      else
-	dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime(); // to handle fast MC, CHODtime = 0 in MC
-
-      FillHisto("hMUV3", dT);
-      if (TMath::Abs(dT) <= MUV3Window)
-	inTime++;
-    }
+  Int_t inTime = 0;
+  std::vector<SpectrometerMUV3AssociationOutput> SpecMUV3 = *(std::vector<SpectrometerMUV3AssociationOutput>*)GetOutput("SpectrometerMUV3Association.Output");
+  for (Int_t i = 0; i < SpecMUV3[Assoc-1].GetNAssociationRecords(); i++) {
+    Double_t dT = 0.;
     
-    if (!inTime)
-      return;
+    if (!GetWithMC())
+      dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime() - L0TPTime;
+    else
+      dT = SpecMUV3[Assoc-1].GetAssociationRecord(i)->GetMuonTime(); // to handle fast MC, CHODtime = 0 in MC
+    
+    FillHisto("hMUV3", dT);
+    if (TMath::Abs(dT) <= MUV3Window)
+      inTime++;
   }
+  
+  if (!inTime)
+    return;
   
   FillHisto("hCuts", CutID);
   CutID++;
   
-  // CUT: LKr timing
+  // Downstream track selection, CUT: Extrapolation and association to LKr
+  
+  if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr))
+    return;
+  
+  FillHisto("hCuts", CutID);
+  CutID++;
+
+  // CUT: LKr association and timing
+
+  if (!Tracks[NoAssoc-1].LKrAssociationExists())
+    return;
   
   if (!GetWithMC()) {
-    Int_t inTime = 0;
+    inTime = 0;
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     for (UInt_t i = 0; i < SpecLKr[NoAssoc-1].GetNAssociationRecords(); i++) {
       Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
@@ -1051,7 +1064,72 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   
   FillHisto("hCuts", CutID);
   CutID++;
+
+  // CHOD extra activity for bkg studies
+
+  nCHOD = 0;
+
+  std::vector<SpectrometerCHODAssociationOutput> SpecCHOD = *(std::vector<SpectrometerCHODAssociationOutput>*)GetOutput("SpectrometerCHODAssociation.Output");
+  SpectrometerCHODAssociationOutput SpecCHOD1 = SpecCHOD[0];
+  SpectrometerCHODAssociationRecord* BestSpecCHOD1 = SpecCHOD1.GetBestAssociationRecord();
+  Int_t TrkCHODAssoIndex1 = BestSpecCHOD1->GetCHODCandidateID();
+  SpectrometerCHODAssociationOutput SpecCHOD2 = SpecCHOD[1];
+  SpectrometerCHODAssociationRecord* BestSpecCHOD2 = SpecCHOD2.GetBestAssociationRecord();
+  Int_t TrkCHODAssoIndex2 = BestSpecCHOD2->GetCHODCandidateID();
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < CHODEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* CHODcand = (TRecoVCandidate*)CHODEvent->GetCandidate(i);
+      Double_t dT = CHODcand->GetTime() - L0TPTime;
+      if (TMath::Abs(dT) <= 5. && i != TrkCHODAssoIndex1 && i != TrkCHODAssoIndex2)
+	nCHOD++;
+    }
+  }
   
+  // NewCHOD extra activity for bkg studies
+  
+  nNewCHOD = 0;
+
+  std::vector<SpectrometerNewCHODAssociationOutput> SpecNewCHOD = *(std::vector<SpectrometerNewCHODAssociationOutput>*)GetOutput("SpectrometerNewCHODAssociation.Output");
+  SpectrometerNewCHODAssociationOutput SpecNewCHOD1 = SpecNewCHOD[0];
+  SpectrometerNewCHODAssociationRecord* BestSpecNewCHOD1 = SpecNewCHOD1.GetBestAssociationRecord();
+  Int_t TrkNewCHODAssoIndex1 = BestSpecNewCHOD1->GetRecoHitID();
+  SpectrometerNewCHODAssociationOutput SpecNewCHOD2 = SpecNewCHOD[1];
+  SpectrometerNewCHODAssociationRecord* BestSpecNewCHOD2 = SpecNewCHOD2.GetBestAssociationRecord();
+  Int_t TrkNewCHODAssoIndex2 = BestSpecNewCHOD2->GetRecoHitID();
+
+  if (!GetWithMC()) {
+    for(int i = 0; i < NewCHODEvent->GetNCandidates(); i++) {
+      TRecoVCandidate* NewCHODcand = (TRecoVCandidate*)NewCHODEvent->GetCandidate(i);
+      Double_t dT = NewCHODcand->GetTime() - L0TPTime;
+      if (TMath::Abs(dT) <= NewCHODWindow && i != TrkNewCHODAssoIndex1 && i != TrkNewCHODAssoIndex2)
+	nNewCHOD++;
+    }
+  }
+
+  // LKr extra activity for bkg studies
+
+  nLKr = 0;
+  EtotLKr = 0.;
+
+  for (Int_t i = 0; i < LKrEvent->GetNCandidates(); i++) {
+    TRecoLKrCandidate *LKrCand = (TRecoLKrCandidate*) LKrEvent->GetCandidate(i);
+    Double_t X1 = LKrCand->GetClusterX() - Tracks[0].GetLKrClusterX();
+    Double_t Y1 = LKrCand->GetClusterY() - Tracks[0].GetLKrClusterY();
+    Double_t X2 = LKrCand->GetClusterX() - Tracks[1].GetLKrClusterX();
+    Double_t Y2 = LKrCand->GetClusterY() - Tracks[1].GetLKrClusterY();
+    Double_t LKrCandPos1 = sqrt(X1*X1 + Y1*Y1);
+    Double_t LKrCandPos2 = sqrt(X2*X2 + Y2*Y2);
+    Bool_t LKrPos = (TMath::Abs(LKrCandPos1) > 200. && TMath::Abs(LKrCandPos2) > 200.);
+    Double_t LKrCandE = LKrCand->GetClusterEnergy();
+    Double_t LKrCandDt = LKrCand->GetTime() - L0TPTime;
+    
+    if (LKrPos && TMath::Abs(LKrCandDt) <= LKrWindow) {
+      nLKr++;
+      EtotLKr += LKrCandE;
+    }
+  }
+
   // Downstream track selection, CUT: LAV12 acceptance
 
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLAV12) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLAV12))
@@ -1424,55 +1502,11 @@ void HeavyNeutrinoNewEl::Process(Int_t) {
   return;
 }
 
-void HeavyNeutrinoNewEl::ProcessEOBEvent() {
-
-  if (!fReadingData) return;
-
-  if (!GetWithMC()) {
-    
-    // POT computation (works for parasitic and dump mode)    
-    
-    fNPOT = GetBeamSpecialTrigger()->GetIntensityT10()*1.E11;
-    
-    if (fNPOT >= 0.)
-      fNPOTT10 += fNPOT;
-  }
-
-  return;
-}
-
 void HeavyNeutrinoNewEl::EndOfBurstUser() {
 
   if (!fReadingData) return;
   
   FillHisto("hNbursts", 0.5);
-
-  if (!GetWithMC()) {
-    
-    // POT computation (works for parasitic mode only)           
-    
-    Double_t BRK3Pi = 0.05583;
-    Double_t AccK3Pi = 0.1536;
-    L0TPData *L0TPData = GetL0Data();
-    
-    if (fNPOT >= 0.) {
-      for (UInt_t i = 0; i < fStream.size(); i++) {
-	if (TriggerConditions::GetInstance()->L0TriggerOn(GetEventHeader()->GetRunID(), L0TPData, fID[i])) {
-	  fNK = TriggerConditions::GetInstance()->GetL0TriggerDownscaling(GetEventHeader()->GetRunID(), TriggerConditions::GetInstance()->GetL0TriggerID("RICH-QX"))*fNK3Pi/(BRK3Pi*AccK3Pi*TriggerConditions::GetInstance()->GetL0TriggerDownscaling(GetEventHeader()->GetRunID(), TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i])));
-	}
-      }
-
-      fNKaons.push_back(fNK);
-      fNKTot += fNK;
-      fHisto.GetTGraph("T10")->SetPoint(fBurstCounter, fNK, fNPOT);
-      fHisto.GetTGraph("POT1")->SetPoint(fBurstCounter, fBurstCounter, fNPOT);
-      fHisto.GetTGraph("NK")->SetPoint(fBurstCounter, fBurstCounter, fNK);
-      fBurstCounter++; 
-      fNK3Pi = 0.; 
-    }
-  }
-  
-  return;
 }
 
 void HeavyNeutrinoNewEl::EndOfJobUser() {
@@ -1564,9 +1598,6 @@ void HeavyNeutrinoNewEl::EndOfJobUser() {
     fHisto.GetTH1("hCHANTI")->GetXaxis()->SetTitle("Time difference [ns]");
     fHisto.GetTH1("hCHANTImult")->GetXaxis()->SetTitle("CHANTI multiplicity");
     fHisto.GetTH1("hExtraLKrmult")->GetXaxis()->SetTitle("Residual LKr multiplicity");
-    fHisto.GetTGraph("T10")->GetXaxis()->SetTitle("N of K decays per burst");
-    fHisto.GetTGraph("POT1")->GetXaxis()->SetTitle("Burst ID");
-    fHisto.GetTGraph("POT2")->GetXaxis()->SetTitle("Burst ID");
 
     // Y axis
 
@@ -1633,9 +1664,6 @@ void HeavyNeutrinoNewEl::EndOfJobUser() {
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
     fHisto.GetTH1("hEoPMuVsPi")->GetYaxis()->SetTitle("Muon E/p");
-    fHisto.GetTGraph("T10")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT1")->GetYaxis()->SetTitle("N POT");
-    fHisto.GetTGraph("POT2")->GetYaxis()->SetTitle("N POT");
 
     // Colz axis
 
@@ -1701,31 +1729,12 @@ void HeavyNeutrinoNewEl::EndOfJobUser() {
       fHisto.GetTH1("hLAV")->Fit("gaus", "", "", -10., 10.);
       fHisto.GetTH1("hSAV")->Fit("gaus", "", "", -10., 10.);
       fHisto.GetTH1("hCHANTI")->Fit("gaus", "", "", -10., 10.);
-    
-      // POT computation (works for parasitic mode only)
-
-      TF1 *func = new TF1("func", "[0]*x");
-      fHisto.GetTGraph("T10")->Fit(func);
-      fHisto.GetTGraph("T10")->Draw("AP*");
-    
-      for (Int_t i = 0; i < fHisto.GetTGraph("POT1")->GetN(); i++) {
-	fHisto.GetTGraph("POT2")->SetPoint(i, i, fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKaons[i]);
-	Double_t x;
-	Double_t y;
-	fHisto.GetTGraph("POT1")->GetPoint(i,x,y);
-      }
-    
-      fNPOTFit = fHisto.GetTGraph("T10")->GetFunction("func")->GetParameter(0)*fNKTot;
-      FillHisto("hPOTT10", 0.5, fNPOTT10);
-      FillHisto("hPOTFit", 0.5, fNPOTFit);
-    
-      cout << endl << "Total number of K decays, POT (T10 method) and POT (fit method) in this job: " << fNKTot << " " << fNPOTT10 << " " << fNPOTFit << endl;
     }
-
+    
     // Plot residual number of events after each cut
 
-    const int NCuts = 32;
-    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "LKr acc", /*"LKr assoc",*/ "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
+    const int NCuts = 33;
+    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr acc", "LKr assoc", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
   
     for (Int_t i = 1; i <= NCuts; i++)
       fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
