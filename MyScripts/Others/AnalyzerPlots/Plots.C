@@ -59,8 +59,10 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   if (name.Contains("Res2D"))
     gPad->SetLogy(0);
 
-  if (name.Contains("Prob"))
+  if (name.Contains("Prob")) {
     gPad->SetLogz();
+    gPad->SetLogy(0);
+  }
 }
 
 void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
@@ -160,10 +162,10 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
     m->Draw("AL");
 
   if (name.Contains("Coupling") && name.Contains("Sel"))
-    m->GetYaxis()->SetRangeUser(1.E-4, 1.);
+    m->GetYaxis()->SetRangeUser(1.E-2, 1.);
 
   if (name.Contains("Coupling") && (name.Contains("Yield") || name.Contains("FV"))) {
-    m->GetYaxis()->SetRangeUser(1.E-50, 1.E-6);
+    m->GetYaxis()->SetRangeUser(1.E-28, 1.E-6);
   }
 
   if (name.Contains("Yield") && name.Contains("Mass")) {
@@ -204,8 +206,8 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
     c->SaveAs(path + m->GetName() + ".png");
   }
   else {
-    c->SaveAs("/Users/lorenza/Desktop/Histos/" + name + ".pdf");
-    c->SaveAs("/Users/lorenza/Desktop/Histos/" + name + ".png");
+    c->SaveAs("/home/li/Desktop/Histos/" + name + ".pdf");
+    c->SaveAs("/home/li/Desktop/Histos/" + name + ".png");
   }
 
   delete m;
@@ -330,7 +332,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
 	TString modName = histo1Name.Remove(0, histo1Name.First('/') + 35);
 	modName.Remove(modName.Last('.'), modName.Last('.') + 4);
 	histo1Name = histo1;
-	c->SaveAs("/Users/lorenza/Desktop/Histos/" + modName + ".png");
+	c->SaveAs("/home/li/Desktop/Histos/" + modName + ".png");
 	g->SetTitle(modName);
       }
       else
@@ -431,7 +433,7 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
   if (dir != "")
     path = dir;
   else
-    path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
+    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("52"))
     path += "ShapoOld/1/";
@@ -553,9 +555,9 @@ void MultiHisto(TString direc, TString mode) {
   if (direc != "")
     path = direc;
   else
-    path = "/Users/lorenza/Desktop/Histos/";
+    path = "/home/li/Desktop/Histos/";
 
-  TSystemDirectory dir("/Users/lorenza/Desktop/FinalHistos/", "/Users/lorenza/Desktop/FinalHistos/");
+  TSystemDirectory dir("/home/li/Desktop/FinalHistos/", "/home/li/Desktop/FinalHistos/");
   TList *files = dir.GetListOfFiles();
   TCanvas *c = CreateTCanvas();
 
@@ -585,7 +587,7 @@ void MultiHisto(TString direc, TString mode) {
 	  if (!fname.Contains("52-1-1") && !fname.Contains("0.061-1-4.3") && !fname.Contains("1-16-3.8") && !fname.Contains("1-1-1")) {
 	    if (fname.Contains("-1-0") && val != 0) {
 	      multi = true;
-	      g = SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	      g = SingleHisto("", "/home/li/Desktop/FinalHistos/" + fname, mode, val, suf, c);
 	      g->SetLineColor(colors[colC]);
 	      g->Draw("AL");
 	      mEl->Add(g);
@@ -594,7 +596,7 @@ void MultiHisto(TString direc, TString mode) {
 	    }
 	    else if (fname.Contains("0-1-") && suf != 0) {
 	      multi = true;
-	      g = SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	      g = SingleHisto("", "/home/li/Desktop/FinalHistos/" + fname, mode, val, suf, c);
 	      g->SetLineColor(colors[colC]);
 	      g->Draw("AL");
 	      mTau->Add(g);
@@ -602,15 +604,15 @@ void MultiHisto(TString direc, TString mode) {
 	      colC++;
 	    }
 	    else {
-	      SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	      SingleHisto("", "/home/li/Desktop/FinalHistos/" + fname, mode, val, suf, c);
 	    }
 	  }
 	  else {
-	    SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	    SingleHisto("", "/home/li/Desktop/FinalHistos/" + fname, mode, val, suf, c);
 	  }
 	}
 	else {
-	  SingleHisto("", "/Users/lorenza/Desktop/FinalHistos/" + fname, mode, val, suf, c);
+	  SingleHisto("", "/home/li/Desktop/FinalHistos/" + fname, mode, val, suf, c);
 	}
       }
     }

@@ -1539,50 +1539,50 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hZvsBeam_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
     fHisto.GetTH2("hZvsBeam_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
 
-    fHisto.GetTH2("hSR_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hSRTar_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hSRTAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetXaxis()->SetTitle("Z of CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
 
-    fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of mother wrt target line [m]");
-    fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of mother wrt TAX line [m]");
+    fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target line [m]");
+    fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of HNL wrt TAX line [m]");
 
     fHisto.GetTH1("hEoP")->GetXaxis()->SetTitle("E/p");
     fHisto.GetTH1("hEoPMuVsPi")->GetXaxis()->SetTitle("Pion E/p");
@@ -1618,47 +1618,47 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hZvsBeam_Geom")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
     fHisto.GetTH2("hZvsBeam_Fin")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
 
-    fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
-    fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt segment line [m]");
+    fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
+    fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATarget_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_In")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Track")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDATAX_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
 
-    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
-    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetYaxis()->SetTitle("CDA of mother wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_In")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Track")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
 
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
