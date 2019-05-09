@@ -33,6 +33,9 @@ echo "Executable options: ${myIgnore=}"
 ## CASTOR
 castorPrefix="root://castorpublic.cern.ch/"
 
+##EOS
+eosPrefix="root://eosna62.cern.ch/"
+
 ## Local directories and files
 mkdir inFiles
 mkdir outFiles
@@ -88,7 +91,7 @@ while read -r line || [[ -n "$line" ]]; do
 			fi
 
 			## Attempt to copy the file...
-			cp ${line} inFiles/${fileName} > ${outputFile} 2>&1
+			xrdcp ${eosPrefix}${line} inFiles/${fileName} > ${outputFile} 2>&1
 			cat ${outputFile}
 			((copyAttempts++))
 			if [ -f "inFiles/${fileName}" ]; then
