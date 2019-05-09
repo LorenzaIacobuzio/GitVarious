@@ -924,8 +924,10 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     TGenPhaseSpace Event;
     
     Event.SetDecay(Mother, 3, Daughters);
+
+    Double_t wMax = 0.;
     
-    for (Int_t n = 0; n < 100000; n++) {
+    for (Int_t n = 0; n < 1000000; n++) {
       Double_t W = Event.Generate();
       TLorentzVector *p1 = Event.GetDecay(0);
       TLorentzVector *p2 = Event.GetDecay(1);
@@ -933,8 +935,13 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       TLorentzVector p12 = *p1 + *p2;
       TLorentzVector p13 = *p1 + *p3;
 
+      if (W > wMax)
+	wMax = W;
+      
       h2->Fill(p12.M2(), p13.M2());
     }
+    
+    cout<<Title<<" "<<wMax<<endl;
 
     h2->Draw("colz");
     h2->SetTitle(Form("%s, m_{N} = %.1f GeV, model %i",Title.c_str(), Mass2, model));
