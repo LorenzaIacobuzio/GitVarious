@@ -417,10 +417,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  momN = Weights[i]["Momentum"];
 	  NReachProb = Weights[i]["ReachProb"];
 	  NDecayProb = Weights[i]["DecayProb"];
-
-	  //if (Weights[i]["Weight"] < 1.E-1)
-	    Weight = Weights[i]["Weight"];   
- 
+	  Weight = Weights[i]["Weight"];   
 	  isGood = Weights[i]["IsGood"];
 	  fMasses[round(MN)] = round(MN);
 
@@ -437,9 +434,30 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  // Histos for acceptance and yield: coupling
 
 	  if (round(MN)/1000. == fMassForSingleValue) {
+
+	    // Scan on the N momentum
+
+	    if (fCoupling == fCouplingForSingleValue) {
+	      if (momN/1000 >= fMomStart && momN/1000 <= fMomStop) {
+		Double_t momN1 = momN/1000.;
+		momBin = fMomStep*trunc(momN1/fMomStep);
+		
+		FillHisto("SingleValue/hA", momBin, Weight*scale);
+		FillHisto("SingleValue/hN", momBin, scale);
+
+		if (IsHNLGood == true && isGood == true) {
+		  FillHisto("SingleValue/hG", momBin, Weight*scale);
+		}
+		
+		if (isGood == true) {
+		  FillHisto("SingleValue/hR", momBin, Weight*scale);
+		}
+	      }
+	    }
+
 	    FillHisto("CouplingScan/hA", fCoupling, Weight*scale);
 	    FillHisto("CouplingScan/hN", fCoupling, scale);
-
+	    
 	    if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	      FillHisto("CouplingScan/hA1", fCoupling, Weight*scale);
 	      FillHisto("CouplingScan/hN1", fCoupling, scale);
@@ -448,7 +466,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	      FillHisto("CouplingScan/hA2", fCoupling, Weight*scale);
 	      FillHisto("CouplingScan/hN2", fCoupling, scale);
 	    }
-
+	    
 	    if (IsHNLGood == true && isGood == true) {
 	      FillHisto("CouplingScan/hG", fCoupling, Weight*scale);
 
@@ -459,15 +477,15 @@ void HeavyNeutrinoScan::Process(Int_t) {
 		FillHisto("CouplingScan/hG2", fCoupling, Weight*scale);
 	      }
 	    }
-
+	    
 	    if (isGood == true) {
 	      FillHisto("CouplingScan/hR", fCoupling, Weight*scale);
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) {
-                FillHisto("CouplingScan/hR1", fCoupling, Weight*scale);
-              }
-              else if (Weights[i]["ProdProb"] == fDCuProdProb) {
-                FillHisto("CouplingScan/hR2", fCoupling, Weight*scale);
-              }
+		FillHisto("CouplingScan/hR1", fCoupling, Weight*scale);
+	      }
+	      else if (Weights[i]["ProdProb"] == fDCuProdProb) {
+		FillHisto("CouplingScan/hR2", fCoupling, Weight*scale);
+	      }
 	    }
 
 	    // Histos for weight components: coupling
@@ -545,41 +563,6 @@ void HeavyNeutrinoScan::Process(Int_t) {
       }
     }
 
-    // Scan on the N momentum
-  
-    if (GetWithMC()) {
-      Event *evt = GetMCEvent();
-
-      fUSquared = TMath::Power(10., fCouplingForSingleValue);
-      std::vector<std::map<std::string, Double_t>> Weights = ComputeWeight(evt, fUSquared, fInitialUeSquaredRatio, fInitialUmuSquaredRatio, fInitialUtauSquaredRatio, fLInitialFV, fLFV, fMode);
-
-      for (UInt_t i = 0; i < Weights.size(); i++) {
-	MN =  round(Weights[i]["Mass"]);
-	isGood = Weights[i]["IsGood"];
-
-	if (round(MN)/1000. == fMassForSingleValue) {
-	  momN = Weights[i]["Momentum"]/1000.;
-
-	  if (Weights[i]["Weight"] < 1.E-1)
-	    Weight = Weights[i]["Weight"];
-
-	  if (momN >= fMomStart && momN <= fMomStop) {
-	    momBin = fMomStep*trunc(momN/fMomStep);
-	    FillHisto("SingleValue/hA", momBin, Weight*scale);
-	    FillHisto("SingleValue/hN", momBin, scale);
-
-	    if (IsHNLGood == true && isGood == true) {
-	      FillHisto("SingleValue/hG", momBin, Weight*scale);
-	    }
-
-	    if (isGood == true) {
-	      FillHisto("SingleValue/hR", momBin, Weight*scale);
-	    }
-	  }
-	}
-      }
-    }
-  
     // Some plots from MC
 
     Int_t kineCounter = 0;

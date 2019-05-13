@@ -329,7 +329,12 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
       if (Name1.Contains("Contours")) {
 	g->Draw("AL");
 	retG = g;
-	TString modName = histo1Name.Remove(0, histo1Name.First('/') + 35);
+	Int_t N = 0;
+	if (histo1.Contains("Users"))
+	  N = 35;
+	else if (histo1.Contains("li"))
+	  N = 29;
+	TString modName = histo1Name.Remove(0, histo1Name.First('/') + N);
 	modName.Remove(modName.Last('.'), modName.Last('.') + 4);
 	histo1Name = histo1;
 	c->SaveAs("/home/li/Desktop/Histos/" + modName + ".png");
