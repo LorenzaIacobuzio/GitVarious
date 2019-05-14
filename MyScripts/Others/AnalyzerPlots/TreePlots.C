@@ -80,8 +80,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/2017/" + analyzer + "/";
     else if (histo1.Contains("2018"))
       path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/2018/" + analyzer + "/";    
-    else
+    else if (histo1.Contains("Data"))
       path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+    else
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);

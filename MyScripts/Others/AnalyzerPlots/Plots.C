@@ -478,7 +478,8 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
   
   if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) {
     
-    ParseDir(histo1, hnDir + "/" + hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
+    ParseDir(histo1, hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
+    //ParseDir(histo1, hnDir/* + "/" + hnDir*/, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr); old format where hn dir is in hn dir (to be dismissed with next grid production
   }
 
   if (f->Get(hnsDir) != nullptr) {
