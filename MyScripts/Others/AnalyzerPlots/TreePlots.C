@@ -19,11 +19,11 @@ void Save(TString path, TCanvas *c, TH1D* h, TString x, Double_t labelSize, Doub
 void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labelSize, Double_t titleSize) {
 
   TString name = h->GetName();
-
-  if (name.Contains("Mass"))
-    h->Draw("colz");
-  else
+  
+  if (h->GetEntries() < 100)
     h->Draw("text");
+  else
+    h->Draw("colz");
 
   h->GetXaxis()->SetTitle(x);
   h->GetYaxis()->SetTitle(y);
@@ -234,6 +234,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hMomPiPar = new TH1D("hMomPiPar", "Parasitic background studies", 100, 0., 200.);
   TH1D *hMomMuPar = new TH1D("hMomMuPar", "Parasitic background studies", 100, 0., 200.);
   TH2D *hDistvsMassPar = new TH2D("hDistvsMassPar", "Parasitic background studies", 300, 0.2, 2., 50, 0., 1000.);
+  TH2D *hDistvsMassParSR = new TH2D("hDistvsMassParSR", "Parasitic background studies", 300, 0.2, 2., 50, 0., 1000.);
   TH2D *hSRPar = new TH2D("hSRPar", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPar = new TH2D("hSRFinalPar", "Signal region", 500, -50., 50., 50, 0., 0.1);
 
@@ -254,7 +255,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     
     if (i%1000 == 0)
       cout<<"Processing event n."<<i<<endl;
-    
+
     // 0-charge
 
     if ((ZCDALine < ZCDALineMin || ZCDALine > ZCDALineMax || (ZCDALine >= ZCDALineMin && ZCDALine <= ZCDALineMax && CDALine > CDALineMax)) && CDA < CDAMax && !an.Contains("Pos") && !an.Contains("Neg")) { // all events outside blinded region
@@ -342,6 +343,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPar++;
 	hInvMassParSR->Fill(invMass/1000., Weight);
+	hDistvsMassParSR->Fill(invMass/1000., BeamlineDist, Weight);
       }
       if (Zvertex >= ZVertexMin && Zvertex <= ZVertexMax && CDA < CDAMax && !an.Contains("Pos") && !an.Contains("Neg")) { // ...and vertex sidebands (0-charge)
 	hSRFinalPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
@@ -355,6 +357,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	counterPromptPosNegFV++;
       }
     }
+    /*
+    if (i>5000)
+      break;
+    */
   }
   
   Save(path, c, hDistSR, "Vertex-beamline distance [mm]", labelSize, titleSize);
@@ -406,6 +412,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path, c, hMomPiPar, "Pion momentum [GeV/c]", labelSize, titleSize);
   Save(path, c, hMomMuPar, "Muon momentum [GeV/c]", labelSize, titleSize);
   Save(path, c, hDistvsMassPar, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path, c, hDistvsMassParSR, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
   Save(path, c, hSRPar, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path, c, hSRFinalPar, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
@@ -433,11 +440,14 @@ void TreePlots(TString dir, TString histo1) {
   c->SetGrid();
   c->RedrawAxis();
 
-  Analyzer(dir, histo1, "HeavyNeutrino", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
-  Analyzer(dir, histo1, "HeavyNeutrinoPos", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
-  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
-
-  counterPromptFV = counterPrompt*counterPromptPosNegFV/counterPromptPosNeg;
+  if (histo1.Contains("2016") || histo1.Contains("2017") || histo1.Contains("2018") || histo1.Contains("Data")) {
+    Analyzer(dir, histo1, "HeavyNeutrino", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
+    Analyzer(dir, histo1, "HeavyNeutrinoPos", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
+    Analyzer(dir, histo1, "HeavyNeutrinoNeg", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
+    counterPromptFV = counterPrompt*counterPromptPosNegFV/counterPromptPosNeg;
+  }
+  else
+    Analyzer(dir, histo1, "HeavyNeutrino", c, counterComb, counterPar, counterPrompt, counterPromptPosNeg, counterPromptPosNegFV);
   
   cout<<"Number of events in SR and time sidebands: "<<counterComb<<", and beamdist sidebands: "<<counterPar<<", and Z sidebands (0-charge): "<<counterPrompt<<", and Z sidebands (2-charge): "<<counterPromptPosNeg<<", and FV (2-charge): "<<counterPromptPosNegFV<<", and FV (0-charge): "<<counterPromptFV<<endl;
 
