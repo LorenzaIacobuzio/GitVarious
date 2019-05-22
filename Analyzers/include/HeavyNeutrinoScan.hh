@@ -44,9 +44,11 @@ public:
   void DrawPlot() {}
   void CosmeticsGraph(TGraph*, const char*, const char*, Int_t);
   void CosmeticsGraph(TGraphAsymmErrors*, const char*, const char*, Int_t);
+  void CosmeticsHisto(TH1*, const char*, const char*, Int_t);
   void EvaluateUL(TH2*, TGraph*);
   std::vector<TGraph*> ExtractContours(TH2*);
   void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
+  void Normalize(TH1D*, TH1D*, TString, TString);
 
 protected:
   

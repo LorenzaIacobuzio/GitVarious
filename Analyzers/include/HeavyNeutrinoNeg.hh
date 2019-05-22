@@ -39,7 +39,7 @@ public:
   void StartOfRunUser() {}
   void EndOfRunUser() {}
   void EndOfJobUser();
-  void PostProcess() {}
+  void PostProcess();
   void DrawPlot() {}
   void ProcessEOBEvent() {}
 

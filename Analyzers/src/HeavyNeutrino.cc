@@ -178,7 +178,7 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("HeavyNeutrinoPassed", "RICHInfo2", &RICHInfo2);
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrino", false, "HeavyNeutrino");
+    ImportAllInputHistogram("HeavyNeutrino", false);
   }
 
   return;
@@ -1743,10 +1743,21 @@ void HeavyNeutrino::EndOfJobUser() {
   }
   else {
     TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoPassed"))->CloneTree();
+    TDirectory *d = gDirectory;
+    gFile->cd();
     tree->Write();
+    gDirectory = d;
   }
   
   SaveAllPlots();
 
+  return;
+}
+
+void HeavyNeutrino::PostProcess() {
+ 
+  RICHInfo1.clear();
+  RICHInfo2.clear();
+ 
   return;
 }

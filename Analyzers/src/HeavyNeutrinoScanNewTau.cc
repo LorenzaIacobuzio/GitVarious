@@ -72,7 +72,7 @@ HeavyNeutrinoScanNewTau::HeavyNeutrinoScanNewTau(Core::BaseAnalysis *ba) :
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
-  AddParam("MomStop", &fMomStop, 150.);
+  AddParam("MomStop", &fMomStop, 300.);
   AddParam("MomStart", &fMomStart, 0.);
   AddParam("MomStep", &fMomStep, 10.);
   AddParam("MassForSingleValue", &fMassForSingleValue, 1.);
@@ -132,18 +132,16 @@ void HeavyNeutrinoScanNewTau::InitHist() {
     BookHisto("SingleValue/hBeamvsTarTrue", new TH2D("BeamvsTarTrue", "N true trajectory (target)", 20, 0., 0.2, 100, 0., 1.)); 
     BookHisto("SingleValue/hBeamvsTAXTrue", new TH2D("BeamvsTAXTrue", "N true trajectory (TAX)", 20, 0., 0.2, 100, 0., 1.)); 
 
-    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
-    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
-    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
-    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom+1, fMomStart-fMomStep/2., fMomStop+fMomStep/2.));
+    BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom, fMomStart, fMomStop));
 
     // Coupling scan 
 
     BookHisto("CouplingScan/hReachCoupling",  new TH2D("ReachCoupling", "Probability of N reaching the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, -0.1, 1.1));
     BookHisto("CouplingScan/hDecayCoupling",  new TH2D("DecayCoupling", "Probability of N decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, -0.1, 1.1));
-    //BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling", "Probability of N reaching and decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 1.));
     BookHisto("CouplingScan/hProbCoupling",   new TH2D("ProbCoupling", "Probability of N reaching and decaying in the FV vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 20, -20., 0.));
-    //BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 10000, 1.E-17, 1.E-13));
     BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, -25., -7.));
     BookHisto("CouplingScan/hGoodWeightCoupling", new TH2D("GoodWeightCoupling", "Good N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, 1.E-12, 1.E-8));
     BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 100.));
@@ -165,9 +163,7 @@ void HeavyNeutrinoScanNewTau::InitHist() {
 
     BookHisto("MassScan/hReachMass",     new TH2D("ReachMass", "Probability of N reaching the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, -0.1, 1.1));
     BookHisto("MassScan/hDecayMass",     new TH2D("DecayMass", "Probability of N decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, -0.1, 1.1));
-    //BookHisto("MassScan/hProbMass",      new TH2D("ProbMass", "Probability of N reaching and decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, -0.1, 1.1));
     BookHisto("MassScan/hProbMass",      new TH2D("ProbMass", "Probability of N reaching and decaying in the FV vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 20, -8., 0.));
-    //BookHisto("MassScan/hWeightMass",    new TH2D("WeightMass", "N weight vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 10000, 1.E-18, 1.E-14));
     BookHisto("MassScan/hWeightMass",    new TH2D("WeightMass", "N weight vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 20, -25., -10.));
     BookHisto("MassScan/hGoodWeightMass",    new TH2D("GoodWeightMass", "Good N weight vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 10000, 1.E-13, 1.E-9));
     BookHisto("MassScan/hEnergyMass",    new TH2D("EnergyMass", "N energy vs N mass", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2., 100, 0., 100.));
@@ -283,7 +279,7 @@ void HeavyNeutrinoScanNewTau::InitHist() {
     ImportAllInputHistogram("HeavyNeutrinoScanNewTau/ToyMC/D0", false, "ToyMC/D0");
     
     // One value
-
+    /*
     BookHisto("SingleValue/ErrorAccMomSel", new TGraphAsymmErrors());
     fHisto.GetTGraph("SingleValue/ErrorAccMomSel")->SetNameTitle("ErrorAccMomSel", "Selection acceptance vs N momentum");
     BookHisto("SingleValue/ErrorAccMomReg", new TGraphAsymmErrors());
@@ -293,7 +289,7 @@ void HeavyNeutrinoScanNewTau::InitHist() {
 
     BookHisto("SingleValue/ErrorYieldMom", new TGraphAsymmErrors());
     fHisto.GetTGraph("SingleValue/ErrorYieldMom")->SetNameTitle("ErrorYieldMom", "Yield per POT vs N momentum");
-
+    */
     // Coupling
 
     BookHisto("CouplingScan/MeanCoupling", new TGraph());
@@ -873,12 +869,18 @@ void HeavyNeutrinoScanNewTau::EndOfJobUser() {
   else {
 
     // Acceptance and yield computation: momentum
-    
+    /*    
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true), (TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true), "cl=0.683 mode");
-  
+    */
+
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "Selection acceptance vs N momentum", "ErrorAccMomSel");    
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "Regeneration acceptance vs N momentum", "ErrorAccMomReg");
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "FV acceptance vs N momentum", "ErrorAccMomFV");  
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "Yield per POT vs N momentum", "ErrorYieldMom");
+
     // Acceptance and yield computation: coupling
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), "cl=0.683 mode");
@@ -1032,14 +1034,26 @@ void HeavyNeutrinoScanNewTau::EndOfJobUser() {
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX")), "Log(U^{2})", "Acceptance", 8);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX")), "Log(U^{2})", "Acceptance", 8);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")), "Log(U^{2})", "Yield per POT", 8);
-
+    /*
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomSel")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomReg")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomFV")), "Log(U^{2})", "Acceptance", 2);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "Log(U^{2})", "Yield per POT", 2);
+    */
+
+    CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorAccMomSel")), "N momentum [GeV/c]", "Acceptance", 2);                                               
+    CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorAccMomReg")), "N momentum [GeV/c]", "Acceptance", 2);                                                                   
+    CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorAccMomFV")), "N momentum [GeV/c]", "Acceptance", 2);   
+    CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorYieldMom")), "N momentum [GeV/c]", "Yield per POT", 2);
 
     fHisto.GetTH2("TotalScan/hExclusion")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("TotalScan/hExclusion")->GetYaxis()->SetTitle("Log(U^{2})");
+
+    TTree* scanTree = static_cast<TTree*>(GetCurrentFile()->Get("Scan"))->CloneTree();
+    TDirectory *d = gDirectory;
+    gFile->cd();
+    scanTree->Write();
+    gDirectory = d;
   }
 
   SaveAllPlots();
@@ -1068,6 +1082,19 @@ void HeavyNeutrinoScanNewTau::CosmeticsGraph(TGraphAsymmErrors* g, const char* x
   g->SetMarkerColor(col);
   g->Draw("AP");
   
+  return;
+}
+
+void HeavyNeutrinoScanNewTau::CosmeticsHisto(TH1* h, const char* x, const char* y, Int_t col) {
+
+  h->GetXaxis()->SetTitle(x);
+  h->GetYaxis()->SetTitle(y);
+  h->SetLineColor(1);
+  h->SetLineWidth(1);
+  h->SetMarkerStyle(8);
+  h->SetMarkerColor(col);
+  h->Draw("E");
+
   return;
 }
 
@@ -1167,6 +1194,19 @@ void HeavyNeutrinoScanNewTau::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmError
     res->SetPoint(i, x1, y1+y2);
     res->SetPointError(i, g1->GetErrorXlow(i), g1->GetErrorXhigh(i), TMath::Sqrt(g1->GetErrorYlow(i)*g1->GetErrorYlow(i)+g2->GetErrorYlow(i)*g2->GetErrorYlow(i)), TMath::Sqrt(g1->GetErrorYhigh(i)*g1->GetErrorYhigh(i)+g2->GetErrorYhigh(i)*g2->GetErrorYhigh(i)));
   }
+
+  return;
+}
+
+// Function to compute yield vs mom and renormalize it to the total yield for a certain coupling value 
+
+void HeavyNeutrinoScanNewTau::Normalize(TH1D* h1, TH1D* h2, TString title, TString name) {
+
+  Double_t I = h2->Integral();
+  TH1D* res = (TH1D*)h1->Clone(name);
+  res->Scale(1./I);
+  res->SetTitle(title);
+  BookHisto("SingleValue/" + name, res);
 
   return;
 }

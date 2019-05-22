@@ -1,26 +1,44 @@
 void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
 
   TString name = h1->GetName();
-
-  h1->SetFillColor(38);
-  h1->SetTitleSize(titleSize, "t");
-  h1->GetXaxis()->SetTitleSize(labelSize);
-  h1->GetXaxis()->SetLabelSize(labelSize);
-  h1->GetYaxis()->SetTitleSize(labelSize);
-  h1->GetYaxis()->SetLabelSize(labelSize);
-  h1->GetXaxis()->SetTitleOffset(1.4);
-  h1->GetYaxis()->SetTitleOffset(1.4);
-  gPad->Update();
-  gStyle->SetStatW(0.2);
-  gStyle->SetStatH(0.2);
-  gStyle->SetOptStat(0);
-
-  if (name.Contains("EoP"))
-    gPad->SetLogy(1);
-  else
-    gPad->SetLogy(0);
-
-  gPad->Update();
+  TString title = h1->GetTitle();
+  
+  if (title.Contains("momentum")) {
+    h1->GetXaxis()->SetTitle("N momentum [GeV/c]");
+    if (title.Contains("Acceptance") && title.Contains("momentum"))
+      gPad->SetLogy();
+    h->GetXaxis()->SetTitleOffset(1.4);
+    h->GetYaxis()->SetTitleOffset(1.4);
+    gPad->Update();
+    h->GetXaxis()->SetTitleSize(labelSize);
+    h->GetYaxis()->SetTitleSize(labelSize);
+    h->GetXaxis()->SetLabelSize(labelSize);
+    h->GetYaxis()->SetLabelSize(labelSize);
+    h->SetMarkerSize(0.8);
+    gStyle->SetOptStat(0);
+    gPad->Update();
+  }
+  else {
+    h1->SetFillColor(38);
+    h1->SetTitleSize(titleSize, "t");
+    h1->GetXaxis()->SetTitleSize(labelSize);
+    h1->GetXaxis()->SetLabelSize(labelSize);
+    h1->GetYaxis()->SetTitleSize(labelSize);
+    h1->GetYaxis()->SetLabelSize(labelSize);
+    h1->GetXaxis()->SetTitleOffset(1.4);
+    h1->GetYaxis()->SetTitleOffset(1.4);
+    gPad->Update();
+    gStyle->SetStatW(0.2);
+    gStyle->SetStatH(0.2);
+    gStyle->SetOptStat(0);
+    
+    if (name.Contains("EoP"))
+      gPad->SetLogy(1);
+    else
+      gPad->SetLogy(0);
+    
+    gPad->Update();
+  }
 }
 
 void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSize) {

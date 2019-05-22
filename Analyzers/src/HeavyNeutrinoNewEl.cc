@@ -178,7 +178,7 @@ void HeavyNeutrinoNewEl::InitOutput() {
     AddBranch("HeavyNeutrinoNewElPassed", "RICHInfo2", &RICHInfo2);
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrinoNewEl", false, "HeavyNeutrinoNewEl");
+    ImportAllInputHistogram("HeavyNeutrinoNewEl", false);
   }
 
   return;
@@ -1743,10 +1743,21 @@ void HeavyNeutrinoNewEl::EndOfJobUser() {
   }
   else {
     TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoNewElPassed"))->CloneTree();
+    TDirectory *d = gDirectory;
+    gFile->cd();
     tree->Write();
+    gDirectory = d;
   }
   
   SaveAllPlots();
+
+  return;
+}
+
+void HeavyNeutrinoNewEl::PostProcess() {
+
+  RICHInfo1.clear();
+  RICHInfo2.clear();
 
   return;
 }

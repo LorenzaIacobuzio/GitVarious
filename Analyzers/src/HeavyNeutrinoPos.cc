@@ -75,8 +75,8 @@ HeavyNeutrinoPos::HeavyNeutrinoPos(Core::BaseAnalysis *ba) :
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
   AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -178,7 +178,7 @@ void HeavyNeutrinoPos::InitOutput() {
     AddBranch("HeavyNeutrinoPosPassed", "RICHInfo2", &RICHInfo2);
   }
   else {
-    ImportAllInputHistogram("HeavyNeutrinoPos", false, "HeavyNeutrinoPos");
+    ImportAllInputHistogram("HeavyNeutrinoPos", false);
   }
 
   return;
@@ -1743,10 +1743,21 @@ void HeavyNeutrinoPos::EndOfJobUser() {
   }
   else {
     TTree* tree = static_cast<TTree*>(GetCurrentFile()->Get("HeavyNeutrinoPosPassed"))->CloneTree();
+    TDirectory *d = gDirectory;
+    gFile->cd();
     tree->Write();
+    gDirectory = d;
   }
   
   SaveAllPlots();
+
+  return;
+}
+
+void HeavyNeutrinoPos::PostProcess() {
+
+  RICHInfo1.clear();
+  RICHInfo2.clear();
 
   return;
 }
