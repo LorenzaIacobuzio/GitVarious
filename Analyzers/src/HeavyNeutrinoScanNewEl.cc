@@ -92,9 +92,9 @@ HeavyNeutrinoScanNewEl::HeavyNeutrinoScanNewEl(Core::BaseAnalysis *ba) :
 }
 
 void HeavyNeutrinoScanNewEl::InitOutput() {
-
+  
   OpenNewTree("Scan", "Scan");
-
+  
   AddBranch("Scan", "Mass", &fTMass);
   AddBranch("Scan", "Coupling", &fTCoupling);
   AddBranch("Scan", "NEvents", &fTNEvents);
@@ -278,18 +278,6 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     ImportAllInputHistogram("HeavyNeutrinoScanNewEl/ToyMC/DS", false, "ToyMC/DS");
     ImportAllInputHistogram("HeavyNeutrinoScanNewEl/ToyMC/D0", false, "ToyMC/D0");
     
-    // One value
-    /*
-    BookHisto("SingleValue/ErrorAccMomSel", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomSel")->SetNameTitle("ErrorAccMomSel", "Selection acceptance vs N momentum");
-    BookHisto("SingleValue/ErrorAccMomReg", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomReg")->SetNameTitle("ErrorAccMomReg", "Regeneration acceptance vs N momentum");
-    BookHisto("SingleValue/ErrorAccMomFV", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorAccMomFV")->SetNameTitle("ErrorAccMomFV", "FV acceptance vs N momentum");
-
-    BookHisto("SingleValue/ErrorYieldMom", new TGraphAsymmErrors());
-    fHisto.GetTGraph("SingleValue/ErrorYieldMom")->SetNameTitle("ErrorYieldMom", "Yield per POT vs N momentum");
-    */
     // Coupling
 
     BookHisto("CouplingScan/MeanCoupling", new TGraph());
@@ -869,17 +857,11 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
   else {
 
     // Acceptance and yield computation: momentum
-    /*    
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true), (TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true), "cl=0.683 mode");
-    */
 
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "Selection acceptance vs N momentum", "ErrorAccMomSel");    
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "Regeneration acceptance vs N momentum", "ErrorAccMomReg");
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "FV acceptance vs N momentum", "ErrorAccMomFV");  
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "Yield per POT vs N momentum", "ErrorYieldMom");
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "Selection acceptance vs N momentum", "ErrorAccMomSel", "SingleValue/");    
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "Regeneration acceptance vs N momentum", "ErrorAccMomReg", "SingleValue/");
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "FV acceptance vs N momentum", "ErrorAccMomFV", "SingleValue/");  
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "Yield per POT vs N momentum", "ErrorYieldMom", "SingleValue/");
 
     // Acceptance and yield computation: coupling
 
@@ -1034,12 +1016,6 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX")), "Log(U^{2})", "Acceptance", 8);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX")), "Log(U^{2})", "Acceptance", 8);
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")), "Log(U^{2})", "Yield per POT", 8);
-    /*
-    CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomSel")), "Log(U^{2})", "Acceptance", 2);
-    CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomReg")), "Log(U^{2})", "Acceptance", 2);
-    CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorAccMomFV")), "Log(U^{2})", "Acceptance", 2);
-    CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("SingleValue/ErrorYieldMom")), "Log(U^{2})", "Yield per POT", 2);
-    */
 
     CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorAccMomSel")), "N momentum [GeV/c]", "Acceptance", 2);                                               
     CosmeticsHisto(static_cast<TH1D*>(fHisto.GetTH1("SingleValue/ErrorAccMomReg")), "N momentum [GeV/c]", "Acceptance", 2);                                                                   
@@ -1200,13 +1176,13 @@ void HeavyNeutrinoScanNewEl::SumGraphs(TGraphAsymmErrors* res, TGraphAsymmErrors
 
 // Function to compute yield vs mom and renormalize it to the total yield for a certain coupling value 
 
-void HeavyNeutrinoScanNewEl::Normalize(TH1D* h1, TH1D* h2, TString title, TString name) {
+void HeavyNeutrinoScanNewEl::Normalize(TH1D* h1, TH1D* h2, TString title, TString name, TString path) {
 
   Double_t I = h2->Integral();
   TH1D* res = (TH1D*)h1->Clone(name);
   res->Scale(1./I);
   res->SetTitle(title);
-  BookHisto("SingleValue/" + name, res);
+  BookHisto(path + name, res);
 
   return;
 }
