@@ -3,18 +3,18 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   TString name = h1->GetName();
   TString title = h1->GetTitle();
   
-  if (title.Contains("momentum")) {
+  if (title.Contains("momentum") && (title.Contains("acceptance") || title.Contains("Yield"))) {
     h1->GetXaxis()->SetTitle("N momentum [GeV/c]");
-    if (title.Contains("Acceptance") && title.Contains("momentum"))
-      gPad->SetLogy();
-    h->GetXaxis()->SetTitleOffset(1.4);
-    h->GetYaxis()->SetTitleOffset(1.4);
+    //if (title.Contains("Acceptance") && title.Contains("momentum"))
+    gPad->SetLogy();
+    h1->GetXaxis()->SetTitleOffset(1.4);
+    h1->GetYaxis()->SetTitleOffset(1.4);
     gPad->Update();
-    h->GetXaxis()->SetTitleSize(labelSize);
-    h->GetYaxis()->SetTitleSize(labelSize);
-    h->GetXaxis()->SetLabelSize(labelSize);
-    h->GetYaxis()->SetLabelSize(labelSize);
-    h->SetMarkerSize(0.8);
+    h1->GetXaxis()->SetTitleSize(labelSize);
+    h1->GetYaxis()->SetTitleSize(labelSize);
+    h1->GetXaxis()->SetLabelSize(labelSize);
+    h1->GetYaxis()->SetLabelSize(labelSize);
+    h1->SetMarkerSize(0.8);
     gStyle->SetOptStat(0);
     gPad->Update();
   }
@@ -157,7 +157,12 @@ void TGraphCosmetics(TGraphAsymmErrors* g, Double_t labelSize, Double_t titleSiz
 	gPad->SetLogy();
     }
   }
-    
+
+  if (!title.Contains("Sensitivity") && !title.Contains("momentum")) {
+    if (!title.Contains("Target") && !title.Contains("TAX"))
+      g->SetMarkerStyle(24);
+  }
+      
   g->GetXaxis()->SetTitleOffset(1.4);
   g->GetYaxis()->SetTitleOffset(1.4);
   gPad->Update();
@@ -183,7 +188,7 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
     m->GetYaxis()->SetRangeUser(1.E-2, 1.);
 
   if (name.Contains("Coupling") && (name.Contains("Yield") || name.Contains("FV"))) {
-    m->GetYaxis()->SetRangeUser(1.E-28, 1.E-6);
+    m->GetYaxis()->SetRangeUser(1.E-34, 1.E-6);
   }
 
   if (name.Contains("Yield") && name.Contains("Mass")) {
@@ -497,7 +502,7 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
   if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) {
     
     ParseDir(histo1, hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
-    //ParseDir(histo1, hnDir/* + "/" + hnDir*/, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr); old format where hn dir is in hn dir (to be dismissed with next grid production
+    //ParseDir(histo1, hnDir + "/" + hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr); //old format where hn dir is in hn dir (to be dismissed with next grid production
   }
 
   if (f->Get(hnsDir) != nullptr) {

@@ -1,6 +1,6 @@
 // couplings according to model I, II, III, IV
 
-Double_t USquared = 1.;
+Double_t USquared = 0.1;
 Double_t UeSquared = 0.;
 Double_t UmuSquared = 0.;
 Double_t UtauSquared = 0.;
