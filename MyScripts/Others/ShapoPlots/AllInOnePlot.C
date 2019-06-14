@@ -1,6 +1,6 @@
 // couplings according to model I, II, III, IV
 
-Double_t USquared = 0.1;
+Double_t USquared = 1.;
 Double_t UeSquared = 0.;
 Double_t UmuSquared = 0.;
 Double_t UtauSquared = 0.;
@@ -1236,5 +1236,5 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
     exit(1);
   }
   
-  return 0;
+  exit(0);
 }

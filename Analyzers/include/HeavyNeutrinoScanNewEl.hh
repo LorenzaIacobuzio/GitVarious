@@ -50,7 +50,6 @@ public:
   void SumGraphs(TGraphAsymmErrors*, TGraphAsymmErrors*, TGraphAsymmErrors*);
   void Normalize(TH1D*, TH1D*, TString, TString, TString);
 
-
 protected:
   
   TRandom3* r;
@@ -74,6 +73,8 @@ protected:
   Double_t fTCoupling;
   Double_t fTNEvents;
   Double_t fTSumGood;
+  Double_t fTSumAllR;
+  Double_t fTSumAllFV;
   Int_t fMode;
   Int_t fN;
   Int_t fNMom;
@@ -82,6 +83,8 @@ protected:
 
   std::map<Double_t, std::map<Double_t, Double_t>> fNEvents;
   std::map<Double_t, std::map<Double_t, Double_t>> fSumGood;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllR;
+  std::map<Double_t, std::map<Double_t, Double_t>> fSumAllFV;
   std::map<Double_t, std::map<Double_t, Double_t>> fYield;
   std::map<Double_t, Double_t> fCouplings;
   std::map<Double_t, Double_t> fMasses;

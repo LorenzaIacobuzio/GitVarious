@@ -60,7 +60,7 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   else
     gPad->SetLogz(0);
   
-  if (logScale == true) {
+  if (logScale == true && !name.Contains("Prob") && !name.Contains("WeightMass") && !name.Contains("WeightCoupling")) {
     gPad->SetLogy();
     gStyle->SetLineStyleString(9, "80 20");
     gStyle->SetLineStyleString(9, "80 20");
@@ -118,9 +118,9 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
 
-  if (title.Contains("N POT vs N K decays") || title.Contains("Contour"))
+  if (title.Contains("Contour"))
     gPad->SetLogy(0);
-  else if (name.Contains("CL"))
+  else if (name.Contains("CL") || name.Contains("MeanMass") || name.Contains("MeanCoupling"))
     gPad->SetLogy(0);
   else
     gPad->SetLogy();

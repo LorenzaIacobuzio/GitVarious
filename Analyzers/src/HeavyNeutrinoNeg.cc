@@ -37,7 +37,6 @@
 #include "MCInfo.hh"
 #include "Persistency.hh"
 #include "BeamParameters.hh"
-#include "DetectorAcceptance.hh"
 #include "SpectrometerTrackVertex.hh"
 #include "DownstreamTrack.hh"
 #include "GeometricAcceptance.hh"
@@ -555,12 +554,12 @@ void HeavyNeutrinoNeg::Process(Int_t) {
   if (!GetWithMC()) {
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
       FillHisto("hLKr", dT);
     }
 
     for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
       FillHisto("hLKr", dT);
     }
 
@@ -568,7 +567,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
 
     if (SpecLKr[0].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
 	  inTime++;
       }
@@ -579,7 +578,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
 
     if (SpecLKr[1].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
           inTime++;
       }
@@ -1053,7 +1052,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
     inTime = 0;
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     for (UInt_t i = 0; i < SpecLKr[NoAssoc-1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+      Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
       if (TMath::Abs(dT) <= LKrWindow)
         inTime++;
     }
@@ -1320,7 +1319,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     if (SpecLKr[0].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
 	  return;
       }
@@ -1328,7 +1327,7 @@ void HeavyNeutrinoNeg::Process(Int_t) {
 
     if (SpecLKr[1].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterTime() - L0TPTime;
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
         if (TMath::Abs(dT) <= LKrWindow)
           return;
       }

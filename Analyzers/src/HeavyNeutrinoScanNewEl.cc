@@ -64,7 +64,7 @@ HeavyNeutrinoScanNewEl::HeavyNeutrinoScanNewEl(Core::BaseAnalysis *ba) :
   AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
-  AddParam("CouplingStop", &fCouplingStop, -1.); // -1 (do not put 0)
+  AddParam("CouplingStop", &fCouplingStop, -1); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // keep this min
   AddParam("MassStop", &fMassStop, 1.960); // keep this max
@@ -99,6 +99,8 @@ void HeavyNeutrinoScanNewEl::InitOutput() {
   AddBranch("Scan", "Coupling", &fTCoupling);
   AddBranch("Scan", "NEvents", &fTNEvents);
   AddBranch("Scan", "SumGood", &fTSumGood);
+  AddBranch("Scan", "SumAllR", &fTSumAllR);
+  AddBranch("Scan", "SumAllFV", &fTSumAllFV);
 }
 
 void HeavyNeutrinoScanNewEl::InitHist() {
@@ -135,7 +137,10 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     BookHisto("SingleValue/hG", new TH1D("sG", "", fNMom, fMomStart, fMomStop));
     BookHisto("SingleValue/hR", new TH1D("sR", "", fNMom, fMomStart, fMomStop));
     BookHisto("SingleValue/hA", new TH1D("sA", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hB", new TH1D("sB", "", fNMom, fMomStart, fMomStop));
     BookHisto("SingleValue/hN", new TH1D("sN", "", fNMom, fMomStart, fMomStop));
+    BookHisto("SingleValue/hZR", new TH2D("ZR", "N decay vertex vs N momentum (good HNLs)", fNMom, fMomStart, fMomStop, 25, 100., 200.));
+    BookHisto("SingleValue/hZA", new TH2D("ZA", "N decay vertex vs N momentum", fNMom, fMomStart, fMomStop, 25, 100., 200.));
 
     // Coupling scan 
 
@@ -145,18 +150,23 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     BookHisto("CouplingScan/hWeightCoupling", new TH2D("WeightCoupling", "N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, -25., -7.));
     BookHisto("CouplingScan/hGoodWeightCoupling", new TH2D("GoodWeightCoupling", "Good N weight vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 1000, 1.E-12, 1.E-8));
     BookHisto("CouplingScan/hEnergyCoupling", new TH2D("EnergyCoupling", "N energy vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 100, 0., 100.));
+    BookHisto("CouplingScan/hZCouplingR", new TH2D("ZCouplingR", "N decay vertex vs coupling (good HNLs)", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 25, 100., 200.));
+    BookHisto("CouplingScan/hZCouplingA", new TH2D("ZCouplingA", "N decay vertex vs coupling", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2., 25, 100., 200.));
 
     BookHisto("CouplingScan/hG",  new TH1D("cG", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hA",  new TH1D("cA", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
+    BookHisto("CouplingScan/hB",  new TH1D("cB", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hR",  new TH1D("cR", "",  fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
+    BookHisto("CouplingScan/hN",  new TH1D("cN",  "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hG1", new TH1D("cG1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hA1", new TH1D("cA1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
+    BookHisto("CouplingScan/hB1", new TH1D("cB1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hR1", new TH1D("cR1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
+    BookHisto("CouplingScan/hN1", new TH1D("cN1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hG2", new TH1D("cG2", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hA2", new TH1D("cA2", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
+    BookHisto("CouplingScan/hB2", new TH1D("cB2", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hR2", new TH1D("cR2", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
-    BookHisto("CouplingScan/hN",  new TH1D("cN",  "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
-    BookHisto("CouplingScan/hN1", new TH1D("cN1", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
     BookHisto("CouplingScan/hN2", new TH1D("cN2", "", fN+1, fCouplingStart-fCouplingStep/2., fCouplingStop+fCouplingStep/2.));
    
     // Mass scan
@@ -172,14 +182,17 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     BookHisto("MassScan/hG",  new TH1D("mG", "",  fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hR",  new TH1D("mR", "",  fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hA",  new TH1D("mA", "",  fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+    BookHisto("MassScan/hB",  new TH1D("mB", "",  fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+    BookHisto("MassScan/hN",  new TH1D("mN",  "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hG1", new TH1D("mG1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hA1", new TH1D("mA1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+    BookHisto("MassScan/hB1", new TH1D("mB1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hR1", new TH1D("mR1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+    BookHisto("MassScan/hN1", new TH1D("mN1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hG2", new TH1D("mG2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hA2", new TH1D("mA2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
+    BookHisto("MassScan/hB2", new TH1D("mB2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hR2", new TH1D("mR2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
-    BookHisto("MassScan/hN",  new TH1D("mN",  "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
-    BookHisto("MassScan/hN1", new TH1D("mN1", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
     BookHisto("MassScan/hN2", new TH1D("mN2", "", fNMass+1, fMassStart-fMassStep/2., fMassStop+fMassStep/2.));
 
     // Toy-MC comparison: DS
@@ -221,6 +234,7 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     fHisto.GetTH1("SingleValue/hG")->Sumw2();
     fHisto.GetTH1("SingleValue/hR")->Sumw2();
     fHisto.GetTH1("SingleValue/hA")->Sumw2();
+    fHisto.GetTH1("SingleValue/hB")->Sumw2();
     fHisto.GetTH1("SingleValue/hN")->Sumw2();
     fHisto.GetTH1("CouplingScan/hG")->Sumw2();
     fHisto.GetTH1("CouplingScan/hG1")->Sumw2();
@@ -231,6 +245,9 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     fHisto.GetTH1("CouplingScan/hA")->Sumw2();
     fHisto.GetTH1("CouplingScan/hA1")->Sumw2();
     fHisto.GetTH1("CouplingScan/hA2")->Sumw2();
+    fHisto.GetTH1("CouplingScan/hB")->Sumw2();
+    fHisto.GetTH1("CouplingScan/hB1")->Sumw2();
+    fHisto.GetTH1("CouplingScan/hB2")->Sumw2();
     fHisto.GetTH1("CouplingScan/hN")->Sumw2();
     fHisto.GetTH1("CouplingScan/hN1")->Sumw2();
     fHisto.GetTH1("CouplingScan/hN2")->Sumw2();
@@ -243,6 +260,9 @@ void HeavyNeutrinoScanNewEl::InitHist() {
     fHisto.GetTH1("MassScan/hA")->Sumw2();
     fHisto.GetTH1("MassScan/hA1")->Sumw2();
     fHisto.GetTH1("MassScan/hA2")->Sumw2();
+    fHisto.GetTH1("MassScan/hB")->Sumw2();
+    fHisto.GetTH1("MassScan/hB1")->Sumw2();
+    fHisto.GetTH1("MassScan/hB2")->Sumw2();
     fHisto.GetTH1("MassScan/hN")->Sumw2();
     fHisto.GetTH1("MassScan/hN1")->Sumw2();
     fHisto.GetTH1("MassScan/hN2")->Sumw2();
@@ -371,6 +391,8 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
     Double_t NDecayProb = 0.;
     Double_t NReachProb = 0.;
     Double_t Weight = 0.;
+    Double_t ZDecay = 0.;
+    Double_t Z = 0.;
     Double_t scale = 1.E10;
     Bool_t isGood = false;
 
@@ -403,8 +425,10 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
 	  NDecayProb = Weights[i]["DecayProb"];
 	  Weight = Weights[i]["Weight"];   
 	  isGood = Weights[i]["IsGood"];
+	  ZDecay = Weights[i]["ZDecay"];
+	  Z = Weights[i]["Z"];
 	  fMasses[round(MN)] = round(MN);
-
+	  
 	  // Maps for exclusion plot
 
 	  if (fNEvents[round(MN)].count(fCoupling) == 0)
@@ -412,7 +436,7 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
 	  fNEvents[round(MN)][fCoupling]++;
 
 	  if (IsHNLGood == true && isGood == true) {
-	    fSumGood[round(MN)][fCoupling] += Weight;
+	    fSumGood[round(MN)][fCoupling] += Weight*ZDecay;
 	  }
 
 	  // Histos for acceptance and yield: coupling
@@ -427,48 +451,57 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
 		momBin = fMomStep*trunc(momN1/fMomStep);
 		
 		FillHisto("SingleValue/hA", momBin, Weight*scale);
+		FillHisto("SingleValue/hB", momBin, Weight*ZDecay*scale);
 		FillHisto("SingleValue/hN", momBin, scale);
+		FillHisto("SingleValue/hZA", momBin, Z/1000., ZDecay);
 
 		if (IsHNLGood == true && isGood == true) {
-		  FillHisto("SingleValue/hG", momBin, Weight*scale);
+		  FillHisto("SingleValue/hG", momBin, Weight*ZDecay*scale);
 		}
 		
 		if (isGood == true) {
-		  FillHisto("SingleValue/hR", momBin, Weight*scale);
+		  FillHisto("SingleValue/hR", momBin, Weight*ZDecay*scale);
+		  FillHisto("SingleValue/hZR", momBin, Z/1000., ZDecay);
 		}
 	      }
 	    }
 
 	    FillHisto("CouplingScan/hA", fCoupling, Weight*scale);
+	    FillHisto("CouplingScan/hB", fCoupling, Weight*ZDecay*scale);
 	    FillHisto("CouplingScan/hN", fCoupling, scale);
-	    
+	    FillHisto("CouplingScan/hZCouplingA", fCoupling, Z/1000., ZDecay);
+
 	    if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	      FillHisto("CouplingScan/hA1", fCoupling, Weight*scale);
+	      FillHisto("CouplingScan/hB1", fCoupling, Weight*ZDecay*scale);
 	      FillHisto("CouplingScan/hN1", fCoupling, scale);
 	    }
 	    else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	      FillHisto("CouplingScan/hA2", fCoupling, Weight*scale);
+	      FillHisto("CouplingScan/hB2", fCoupling, Weight*ZDecay*scale);
 	      FillHisto("CouplingScan/hN2", fCoupling, scale);
 	    }
 	    
 	    if (IsHNLGood == true && isGood == true) {
-	      FillHisto("CouplingScan/hG", fCoupling, Weight*scale);
+	      FillHisto("CouplingScan/hG", fCoupling, Weight*ZDecay*scale);
 
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) { 
-		FillHisto("CouplingScan/hG1", fCoupling, Weight*scale);
+		FillHisto("CouplingScan/hG1", fCoupling, Weight*ZDecay*scale);
 	      }
 	      else if (Weights[i]["ProdProb"] == fDCuProdProb) {
-		FillHisto("CouplingScan/hG2", fCoupling, Weight*scale);
+		FillHisto("CouplingScan/hG2", fCoupling, Weight*ZDecay*scale);
 	      }
 	    }
 	    
 	    if (isGood == true) {
-	      FillHisto("CouplingScan/hR", fCoupling, Weight*scale);
+	      FillHisto("CouplingScan/hR", fCoupling, Weight*ZDecay*scale);
+	      FillHisto("CouplingScan/hZCouplingR", fCoupling, Z/1000., ZDecay);
+
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) {
-		FillHisto("CouplingScan/hR1", fCoupling, Weight*scale);
+		FillHisto("CouplingScan/hR1", fCoupling, Weight*ZDecay*scale);
 	      }
 	      else if (Weights[i]["ProdProb"] == fDCuProdProb) {
-		FillHisto("CouplingScan/hR2", fCoupling, Weight*scale);
+		FillHisto("CouplingScan/hR2", fCoupling, Weight*ZDecay*scale);
 	      }
 	    }
 
@@ -477,47 +510,50 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
 	    FillHisto("CouplingScan/hReachCoupling", fCoupling, NReachProb);
 	    FillHisto("CouplingScan/hDecayCoupling", fCoupling, NDecayProb);
 	    FillHisto("CouplingScan/hProbCoupling", fCoupling, TMath::Log10(NReachProb*NDecayProb));
-	    FillHisto("CouplingScan/hWeightCoupling", fCoupling, TMath::Log10(Weight));	
+	    FillHisto("CouplingScan/hWeightCoupling", fCoupling, TMath::Log10(Weight*ZDecay));	
 	    FillHisto("CouplingScan/hEnergyCoupling", fCoupling, TMath::Sqrt(momN/1000.*momN/1000. + MN/1000.*MN/1000.));
 
 	    if (isGood)
-	      FillHisto("CouplingScan/hGoodWeightCoupling", fCoupling, Weight);	
+	      FillHisto("CouplingScan/hGoodWeightCoupling", fCoupling, Weight*ZDecay);	
 	  }
 
 	  // Histos for acceptance and yield: mass
 
 	  if (fCoupling == fCouplingForSingleValue) {
 	    FillHisto("MassScan/hA", round(MN)/1000., Weight*scale);
+	    FillHisto("MassScan/hB", round(MN)/1000., Weight*ZDecay*scale);
 	    FillHisto("MassScan/hN", round(MN)/1000., scale);
 
 	    if (Weights[i]["ProdProb"] == fDBeProdProb) {
 	      FillHisto("MassScan/hA1", round(MN)/1000., Weight*scale);
+	      FillHisto("MassScan/hB1", round(MN)/1000., Weight*ZDecay*scale);
 	      FillHisto("MassScan/hN1", round(MN)/1000., scale);
 	    }
 	    else if (Weights[i]["ProdProb"] == fDCuProdProb) {
 	      FillHisto("MassScan/hA2", round(MN)/1000., Weight*scale);
+	      FillHisto("MassScan/hB2", round(MN)/1000., Weight*ZDecay*scale);
 	      FillHisto("MassScan/hN2", round(MN)/1000., scale);
 	    }
 
 	    if (IsHNLGood == true && isGood == true) {
-	      FillHisto("MassScan/hG", round(MN)/1000., Weight*scale);
+	      FillHisto("MassScan/hG", round(MN)/1000., Weight*ZDecay*scale);
 
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) {
-		FillHisto("MassScan/hG1", round(MN)/1000., Weight*scale);
+		FillHisto("MassScan/hG1", round(MN)/1000., Weight*ZDecay*scale);
 	      }
 	      else if (Weights[i]["ProdProb"] == fDCuProdProb) {
-		FillHisto("MassScan/hG2", round(MN)/1000., Weight*scale);
+		FillHisto("MassScan/hG2", round(MN)/1000., Weight*ZDecay*scale);
 	      }
 	    }
 
 	    if (isGood == true) {
-	      FillHisto("MassScan/hR", round(MN)/1000., Weight*scale);
+	      FillHisto("MassScan/hR", round(MN)/1000., Weight*ZDecay*scale);
 	      
 	      if (Weights[i]["ProdProb"] == fDBeProdProb) {
-                FillHisto("MassScan/hR1", round(MN)/1000., Weight*scale);
+                FillHisto("MassScan/hR1", round(MN)/1000., Weight*ZDecay*scale);
               }
               else if (Weights[i]["ProdProb"] == fDCuProdProb) {
-                FillHisto("MassScan/hR2", round(MN)/1000., Weight*scale);
+                FillHisto("MassScan/hR2", round(MN)/1000., Weight*ZDecay*scale);
               }
 	    }
 
@@ -526,11 +562,11 @@ void HeavyNeutrinoScanNewEl::Process(Int_t) {
 	    FillHisto("MassScan/hReachMass", round(MN)/1000., NReachProb);
 	    FillHisto("MassScan/hDecayMass", round(MN)/1000., NDecayProb);
 	    FillHisto("MassScan/hProbMass", round(MN)/1000., TMath::Log10(NReachProb*NDecayProb));
-	    FillHisto("MassScan/hWeightMass", round(MN)/1000., TMath::Log10(Weight));
+	    FillHisto("MassScan/hWeightMass", round(MN)/1000., TMath::Log10(Weight*ZDecay));
 	    FillHisto("MassScan/hEnergyMass", round(MN)/1000., TMath::Sqrt(momN/1000.*momN/1000. + round(MN)/1000.*round(MN)/1000.));
 
 	    if (isGood)
-	      FillHisto("MassScan/hGoodWeightMass", round(MN)/1000., Weight);
+	      FillHisto("MassScan/hGoodWeightMass", round(MN)/1000., Weight*ZDecay);
 
 	    for (Int_t j = 0; j < evt->GetNKineParts(); j++) {
 	      KinePart *p = evt->GetKinePart(j);
@@ -743,12 +779,16 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
     fHisto.GetTH2("SingleValue/hDProd")->GetXaxis()->SetTitle("X [mm]");
     fHisto.GetTH2("SingleValue/hBeamvsTarTrue")->GetXaxis()->SetTitle("Impact parameter [m]");
     fHisto.GetTH2("SingleValue/hBeamvsTAXTrue")->GetXaxis()->SetTitle("Impact parameter [m]");
+    fHisto.GetTH2("SingleValue/hZR")->GetXaxis()->SetTitle("N momentum [GeV/c]");
+    fHisto.GetTH2("SingleValue/hZA")->GetXaxis()->SetTitle("N momentum [GeV/c]");
     fHisto.GetTH2("CouplingScan/hReachCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hDecayCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hProbCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hWeightCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hGoodWeightCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("CouplingScan/hEnergyCoupling")->GetXaxis()->SetTitle("Log(U^{2})");
+    fHisto.GetTH2("CouplingScan/hZCouplingR")->GetXaxis()->SetTitle("Log(U^{2})");
+    fHisto.GetTH2("CouplingScan/hZCouplingA")->GetXaxis()->SetTitle("Log(U^{2})");
     fHisto.GetTH2("MassScan/hReachMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hDecayMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
     fHisto.GetTH2("MassScan/hProbMass")->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -794,12 +834,16 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
     fHisto.GetTH2("SingleValue/hXYProd")->GetYaxis()->SetTitle("Y [mm]");
     fHisto.GetTH2("SingleValue/hBeamvsTarTrue")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
     fHisto.GetTH2("SingleValue/hBeamvsTAXTrue")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
+    fHisto.GetTH2("SingleValue/hZR")->GetYaxis()->SetTitle("Z of N decay vertex [m]");
+    fHisto.GetTH2("SingleValue/hZA")->GetYaxis()->SetTitle("Z of N decay vertex [m]");
     fHisto.GetTH2("CouplingScan/hReachCoupling")->GetYaxis()->SetTitle("Reach probability");
     fHisto.GetTH2("CouplingScan/hDecayCoupling")->GetYaxis()->SetTitle("Decay probability");
     fHisto.GetTH2("CouplingScan/hProbCoupling")->GetYaxis()->SetTitle("Log(reach and decay probability)");
     fHisto.GetTH2("CouplingScan/hWeightCoupling")->GetYaxis()->SetTitle("Weight");
     fHisto.GetTH2("CouplingScan/hGoodWeightCoupling")->GetYaxis()->SetTitle("Weight");
     fHisto.GetTH2("CouplingScan/hEnergyCoupling")->GetYaxis()->SetTitle("N energy [GeV]");
+    fHisto.GetTH2("CouplingScan/hZCouplingR")->GetYaxis()->SetTitle("Z of N decay vertex [m]");
+    fHisto.GetTH2("CouplingScan/hZCouplingA")->GetYaxis()->SetTitle("Z of N decay vertex [m]");
     fHisto.GetTH2("MassScan/hReachMass")->GetYaxis()->SetTitle("Reach probability");
     fHisto.GetTH2("MassScan/hDecayMass")->GetYaxis()->SetTitle("Decay probability");
     fHisto.GetTH2("MassScan/hProbMass")->GetYaxis()->SetTitle("Log(each and decay probability)");
@@ -850,53 +894,95 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
 	fTCoupling = Coupling;
 	fTNEvents = fNEvents[MN][Coupling];
 	fTSumGood = fSumGood[MN][Coupling];
+	fTSumAllR = fSumAllR[MN][Coupling];
+	fTSumAllFV = fSumAllFV[MN][Coupling];
 	FillTree("Scan");
       }
     }
   }
   else {
 
+    // Buffer histos for yield
+
+    TH1D* h1;
+    TH1D* h2;
+
     // Acceptance and yield computation: momentum
 
     Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), "Selection acceptance vs N momentum", "ErrorAccMomSel", "SingleValue/");    
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), "Regeneration acceptance vs N momentum", "ErrorAccMomReg", "SingleValue/");
+    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sB", true)), "Regeneration acceptance vs N momentum", "ErrorAccMomReg", "SingleValue/");
     Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "FV acceptance vs N momentum", "ErrorAccMomFV", "SingleValue/");  
-    Normalize(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true)), "Yield per POT vs N momentum", "ErrorYieldMom", "SingleValue/");
+
+    h1 = (TH1D*)(RequestHistogram(fAnalyzerName, "SingleValue/sG", true)->Clone());
+    h2 = (TH1D*)(RequestHistogram(fAnalyzerName, "SingleValue/sB", true)->Clone());
+    h1->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sA", true));
+    h1->Divide(h2);
+    Normalize(h1, (TH1D*)RequestHistogram(fAnalyzerName, "SingleValue/sN", true), "Yield per POT vs N momentum", "ErrorYieldMom", "SingleValue/");
+    h1->Reset();
+    h2->Reset();
 
     // Acceptance and yield computation: coupling
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA1", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cB1", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN1", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG1", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN1", true), "cl=0.683 mode");
+
+    h1 = (TH1D*)(RequestHistogram(fAnalyzerName, "CouplingScan/cG1", true)->Clone());
+    h2 = (TH1D*)(RequestHistogram(fAnalyzerName, "CouplingScan/cB1", true)->Clone());
+    h1->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA1", true));
+    h2->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN1", true));
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget"))->Divide(h1, h2, "cl=0.683 mode");
+    h1->Reset();
+    h2->Reset();
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSelTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR2", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA2", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cB2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFVTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN2", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG2", true), (TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN2", true), "cl=0.683 mode");
+
+    h1 = (TH1D*)(RequestHistogram(fAnalyzerName, "CouplingScan/cG2", true)->Clone());
+    h2 = (TH1D*)(RequestHistogram(fAnalyzerName, "CouplingScan/cB2", true)->Clone());
+    h1->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA2", true));
+    h2->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN2", true));
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX"))->Divide(h1, h2, "cl=0.683 mode");
+    h1->Reset();
+    h2->Reset();
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cB", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "CouplingScan/cN", true)), "cl=0.683 mode");
     SumGraphs(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCoupling")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTarget")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorYieldCouplingTAX")));
 
     // Acceptance and yield computation: mass
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSelTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR1", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA1", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mB1", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFVTarget"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA1", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN1", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTarget"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG1", true), (TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN1", true), "cl=0.683 mode");
+
+    h1 = (TH1D*)(RequestHistogram(fAnalyzerName, "MassScan/mG1", true)->Clone());
+    h2 = (TH1D*)(RequestHistogram(fAnalyzerName, "MassScan/mB1", true)->Clone());
+    h1->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA1", true));
+    h2->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN1", true));
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTarget"))->Divide(h1, h2, "cl=0.683 mode");
+    h1->Reset();
+    h2->Reset();
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSelTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR2", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA2", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassRegTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mB2", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFVTAX"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA2", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN2", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX"))->Divide((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG2", true), (TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN2", true), "cl=0.683 mode");
+
+    h1 = (TH1D*)(RequestHistogram(fAnalyzerName, "MassScan/mG2", true)->Clone());
+    h2 = (TH1D*)(RequestHistogram(fAnalyzerName, "MassScan/mB2", true)->Clone());
+    h1->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA2", true));
+    h2->Multiply((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN2", true));
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX"))->Divide(h1, h2, "cl=0.683 mode");
+    h1->Reset();
+    h2->Reset();
 
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassSel"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mG", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), "cl=0.683 mode");
-    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), "cl=0.683 mode");
+    static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassReg"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mR", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mB", true)), "cl=0.683 mode");
     static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorAccMassFV"))->Divide(static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mA", true)), static_cast<TH1D*>((TH1D*)RequestHistogram(fAnalyzerName, "MassScan/mN", true)), "cl=0.683 mode");
     SumGraphs(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMass")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTarget")), static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("MassScan/ErrorYieldMassTAX")));
-    
+
     // Retrieve file info for exclusion plot
     
     Double_t Coupling = 0.;
@@ -912,11 +998,15 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
     tree->SetBranchAddress("Coupling", &fTCoupling);
     tree->SetBranchAddress("NEvents", &fTNEvents);
     tree->SetBranchAddress("SumGood", &fTSumGood);
+    tree->SetBranchAddress("SumAllR", &fTSumAllR);
+    tree->SetBranchAddress("SumAllFV", &fTSumAllFV);
 
     for (Int_t i = 0; i < tree->GetEntries(); ++i) {
       tree->GetEntry(i);
       fNEvents[fTMass][fTCoupling] += fTNEvents;
       fSumGood[fTMass][fTCoupling] += fTSumGood;
+      fSumAllR[fTMass][fTCoupling] += fTSumAllR;
+      fSumAllFV[fTMass][fTCoupling] += fTSumAllFV;
     }
 
     // Lifetime and exclusion plots
@@ -933,8 +1023,8 @@ void HeavyNeutrinoScanNewEl::EndOfJobUser() {
 	  couplingCounter++;
 	}
 
-	if (fSumGood[MN][Coupling]/fNEvents[MN][Coupling] != 0.0/0.0 && fSumGood[MN][Coupling]/fNEvents[MN][Coupling] != 1.0/0.0)
-	  fYield[MN][Coupling] = fSumGood[MN][Coupling]/fNEvents[MN][Coupling];
+	if (fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]) != 1.0/0.0)
+	  fYield[MN][Coupling] = fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]);
 	FillHisto("TotalScan/hExclusion", MN/1000., Coupling, fYield[MN][Coupling]*POT);
       }
     
