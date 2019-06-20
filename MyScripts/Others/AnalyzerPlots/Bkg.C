@@ -319,9 +319,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hMomMuPosComb = new TH1D("hMomMuPosComb", "Combinatorial background studies", 100, 0., 200.);
   TH1D *hMomPiNegComb = new TH1D("hMomPiNegComb", "Combinatorial background studies", 100, 0., 200.);
   TH1D *hMomMuNegComb = new TH1D("hMomMuNegComb", "Combinatorial background studies", 100, 0., 200.);
-  TH1D *hInvMassCombExtra1 = new TH1D("hInvMassCombExtra1", "Combinatorial background studies - K#rightarrow #pi + #mu halo", 1000, -1., 2.); // K->pi + mu halo
-  TH1D *hInvMassCombExtra2 = new TH1D("hInvMassCombExtra2", "Combinatorial background studies - K #rightarrow #mu + beam #pi", 1000, -1., 2.); // K->mu + beam pi
-  TH1D *hInvMassCombExtra3 = new TH1D("hInvMassCombExtra3", "Combinatorial background studies - K #rightarrow 3#pi (lost+decayed)", 1000, -1., 2.); // K->3pi (pi lost +  pi->mu)
+  TH1D *hInvMassCombExtra1 = new TH1D("hInvMassCombExtra1", "Combinatorial background studies - K#rightarrow #pi + #mu halo", 1000, -1., 2.); // K->pi + mu halo (peak at m_pi0^2)
+  TH1D *hInvMassCombExtra2 = new TH1D("hInvMassCombExtra2", "Combinatorial background studies - K #rightarrow #mu + beam #pi", 1000, -1., 2.); // K->mu + beam pi (peak at 0)
+  TH1D *hInvMassCombExtra3 = new TH1D("hInvMassCombExtra3", "Combinatorial background studies - K #rightarrow 3#pi (lost+decayed)", 1000, -1., 4.); // K->3pi (pi lost +  pi->mu) (peak at m_pi^2)
+  TH1D *hInvMassCombExtra4 = new TH1D("hInvMassCombExtra4", "Combinatorial background studies - #pi #rightarrow #mu + beam #pi", 1000, -1., 2.); // pi->mu + beam pi (peak at 0)
   TH2D *hGTK3IDPiPosComb = new TH2D("hGTK3IDPiPosComb", "Combinatorial background studies", 6, -0.5, 5.5, 100, 0., 250.);
   TH2D *hGTK3IDMuPosComb = new TH2D("hGTK3IDMuPosComb", "Combinatorial background studies", 6, -0.5, 5.5, 100, 0., 250.);
   TH2D *hGTK3IDPiNegComb = new TH2D("hGTK3IDPiNegComb", "Combinatorial background studies", 6, -0.5, 5.5, 100, 0., 250.);
@@ -371,7 +372,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hCDAPar = new TH1D("hCDAPar", "Parasitic background studies", 100, 0., 0.5);
   TH1D *hInvMassPar = new TH1D("hInvMassPar", "Parasitic background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TH1D *hInvMassParSR = new TH1D("hInvMassParSR", "Combinatorial background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassParSR = new TH1D("hInvMassParSR", "Parasitic background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassParKolm = new TH1D("hInvMassParKolm", "Parasitic background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TH1D *hMomPiPar = new TH1D("hMomPiPar", "Parasitic background studies", 100, 0., 200.);
   TH1D *hMomMuPar = new TH1D("hMomMuPar", "Parasitic background studies", 100, 0., 200.);
   TH2D *hDistvsMassPar = new TH2D("hDistvsMassPar", "Parasitic background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., 50, 0., 1000.);
@@ -403,6 +404,13 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   
   for(Int_t i = 0; i < tree->GetEntries(); ++i) {
     tree->GetEntry(i);
+
+    Bool_t insideSR = false;
+    Bool_t outsideSR = false;
+    Bool_t Comb = false;
+    Bool_t Prompt = false;
+    Bool_t Par = false;
+    Bool_t PosNeg = !an.Contains("Pos") && !an.Contains("Neg");
     
     if (i%1000 == 0)
       cout<<"Processing event n."<<i<<endl;
@@ -553,15 +561,18 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	Double_t kMom = 75000.;
 	TVector3 *threeMomK = new TVector3(0., 0., 75000.);
 	Double_t kE = TMath::Sqrt(kMom*kMom + kMass*kMass);
+	Double_t piE = TMath::Sqrt(kMom*kMom + piMass*piMass);
 	Double_t hypMuE1 = TMath::Sqrt(Mom1->Px()*Mom1->Px() + Mom1->Py()*Mom1->Py() + Mom1->Pz()*Mom1->Pz() + muMass*muMass);
 	Double_t hypMuE2 = TMath::Sqrt(Mom2->Px()*Mom2->Px() + Mom2->Py()*Mom2->Py() + Mom2->Pz()*Mom2->Pz() + muMass*muMass);
 	Double_t hypPiE1 = TMath::Sqrt(Mom1->Px()*Mom1->Px() + Mom1->Py()*Mom1->Py() + Mom1->Pz()*Mom1->Pz() + piMass*piMass);
 	Double_t hypPiE2 = TMath::Sqrt(Mom2->Px()*Mom2->Px() + Mom2->Py()*Mom2->Py() + Mom2->Pz()*Mom2->Pz() + piMass*piMass);
-	hInvMassCombExtra1->Fill(TMath::Sqrt((kE + hypMuE1)*(kE + hypMuE1) - (*threeMomK + *Mom1).Mag2())/1000.);
-	hInvMassCombExtra1->Fill(TMath::Sqrt((kE + hypMuE2)*(kE + hypMuE2) - (*threeMomK + *Mom2).Mag2())/1000.);
-	hInvMassCombExtra2->Fill(TMath::Sqrt((kE + hypPiE1)*(kE + hypPiE1) - (*threeMomK + *Mom1).Mag2())/1000.);
-	hInvMassCombExtra2->Fill(TMath::Sqrt((kE + hypPiE2)*(kE + hypPiE2) - (*threeMomK + *Mom2).Mag2())/1000.);
-	hInvMassCombExtra3->Fill(TMath::Sqrt((kE + hypPiE1 + hypPiE2)*(kE + hypPiE1 + hypPiE2) - (*threeMomK + *Mom1 + *Mom2).Mag2())/1000.);
+	hInvMassCombExtra1->Fill(((kE + hypMuE1)*(kE + hypMuE1) - (*threeMomK + *Mom1).Mag2())/1.E6);
+	hInvMassCombExtra1->Fill(((kE + hypMuE2)*(kE + hypMuE2) - (*threeMomK + *Mom2).Mag2())/1.E6);
+	hInvMassCombExtra2->Fill(((kE + hypPiE1)*(kE + hypPiE1) - (*threeMomK + *Mom1).Mag2())/1.E6);
+	hInvMassCombExtra2->Fill(((kE + hypPiE2)*(kE + hypPiE2) - (*threeMomK + *Mom2).Mag2())/1.E6);
+	hInvMassCombExtra3->Fill(((kE + hypPiE1 + hypPiE2)*(kE + hypPiE1 + hypPiE2) - (*threeMomK + *Mom1 + *Mom2).Mag2())/1.E6);
+	hInvMassCombExtra4->Fill(((piE + hypMuE1)*(piE + hypMuE1) - (*threeMomK + *Mom1).Mag2())/1.E6);
+	hInvMassCombExtra4->Fill(((piE + hypMuE2)*(piE + hypMuE2) - (*threeMomK + *Mom2).Mag2())/1.E6);
       }
     }
 
@@ -717,6 +728,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "Comb/", c, hInvMassCombExtra1, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "Comb/", c, hInvMassCombExtra2, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "Comb/", c, hInvMassCombExtra3, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+  Save(path + "Comb/", c, hInvMassCombExtra4, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "Comb/", c, hInvMassCombKolm, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "Comb/", c, hInvMassCombSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "Comb/", c, hInvMassCombSREnriched, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
