@@ -496,15 +496,9 @@ void HeavyNeutrinoNeg::Process(Int_t) {
     return;
 
   // Handle fast MC and data
-
-  if (!GetWithMC()) {
-    CHODTime1 = Tracks[0].GetCHODTime();
-    CHODTime2 = Tracks[1].GetCHODTime();
-  }
-  else {
-    CHODTime1 = 0.;
-    CHODTime2 = 0.;
-  }
+  
+  CHODTime1 = Tracks[0].GetCHODTime();
+  CHODTime2 = Tracks[1].GetCHODTime();
 
   // TIMING PLOTS
 
