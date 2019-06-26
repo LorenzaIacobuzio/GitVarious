@@ -5,7 +5,6 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
   
   if (title.Contains("momentum") && (title.Contains("acceptance") || title.Contains("Yield"))) {
     h1->GetXaxis()->SetTitle("N momentum [GeV/c]");
-    //if (title.Contains("Acceptance") && title.Contains("momentum"))
     gPad->SetLogy();
     h1->GetXaxis()->SetTitleOffset(1.4);
     h1->GetYaxis()->SetTitleOffset(1.4);
@@ -263,6 +262,8 @@ TCanvas* CreateTCanvas() {
   return c;
 }
 
+// Parse all histograms
+
 TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* c, TMultiGraph* m, TMultiGraph* m1, TMultiGraph* m2, TMultiGraph* m3) {
 
   TFile *f = TFile::Open(fName);
@@ -283,8 +284,8 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
     TClass *cl = gROOT->GetClass(key->GetClassName());
     TString Name = key->GetName();
     TString Name1 = Name.Remove(0, Name.First('/') + 1);
-
-    if (cl->InheritsFrom("TGraphAsymmErrors")) {
+    
+    if (cl->InheritsFrom("TGraphAsymmErrors")) { // 1 - TGraphAsymmErrors
       TGraphAsymmErrors *g = (TGraphAsymmErrors*)(key->ReadObj());
       
       TGraphCosmetics(g, labelSize, titleSize);
@@ -331,24 +332,11 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
 	c->SaveAs(path + Name1 + ".png");
       }
     }
-    else if (cl->InheritsFrom("TGraph")) {
+    else if (cl->InheritsFrom("TGraph")) { // 2 - TGraph
       TGraph *g = (TGraph*)(key->ReadObj());
       
       TGraphCosmetics(g, labelSize, titleSize);
-      /*
-      if (Name1.Contains("T10") && !Name1.Contains("POT")) {
-	gStyle->SetOptFit(0);
-      }
-      
-      if (Name1.Contains("T10") && !Name1.Contains("POT")) 
-	g->Draw("AP*");
-      else if (Name1.Contains("POT1") || Name1.Contains("POT2") || Name1.Contains("NK"))
-	g->Draw("AP*");
-      else if (Name1.Contains("CL")) {
-	g->Draw("AC");
-	m->Add(g);
-      }
-      */
+
       if (Name1.Contains("Contours")) {
 	g->Draw("AL");
 	retG = g;
@@ -369,7 +357,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
       c->SaveAs(path + Name1 + ".pdf");
       c->SaveAs(path + Name1 + ".png");
     }
-    else if (cl->InheritsFrom("TH2")) {
+    else if (cl->InheritsFrom("TH2")) { // 3 - TH2
       TH2 *h2 = (TH2*)key->ReadObj();
 
       if (Name1.Contains("DThetaMom"))
@@ -388,7 +376,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
       c->SaveAs(path + key->GetName() + ".pdf");
       c->SaveAs(path + key->GetName() + ".png");
     }
-    else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) {
+    else if (!cl->InheritsFrom("TH2") && cl->InheritsFrom("TH1")) { // 4 - TH1
       TH1 *h1 = (TH1*)key->ReadObj();
       TH1Cosmetics(h1, labelSize, titleSize);
       
@@ -449,6 +437,8 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
   return retG;
 }
 
+// Multigraph and plots creation
+
 TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t suf, TCanvas *c) {
 
   // dir = output dir, histo1 = histo to do cosmetics on, mode: all = all dirs, hn = HeavyNeutrino dir, hnss = HeavyNeutrinoScan/SingleValue, hnsc = HeavyNeutrinoScan/Coupling, hnsm = HeavyNeutrinoScan/Mass, hnst = HeavyNeutrinoScan/Total
@@ -458,6 +448,8 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
   TString path = "";
   TGraph* retG = new TGraph();
 
+  // Setting paths
+  
   if (dir != "")
     path = dir;
   else
@@ -499,7 +491,9 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
     hnsDir += "NewTau";
   }
   
-  if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) {
+  if ((TDirectory*)f->Get(hnDir) != nullptr && (mode == "all" || mode == "hn")) { // A - HN
+
+    // A - Heavy neutrino plots
     
     ParseDir(histo1, hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr);
     //ParseDir(histo1, hnDir + "/" + hnDir, path + hnDir + "/", c, nullptr, nullptr, nullptr, nullptr); //old format where hn dir is in hn dir (to be dismissed with next grid production
@@ -514,14 +508,14 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
     
     if (mode == "all" || mode == "hnss") {
       
-      // One value plots for weight quantities
+      // B - One value plots for weight quantities
       
       ParseDir(histo1, hnsDir + "/SingleValue", path + hnsDir + "/SingleValue/", c, nullptr, nullptr, nullptr, nullptr);
     }
 
-    if (mode == "all" || mode == "hnsc") {
+    if (mode == "all" || mode == "hnsc") { // C - CouplingScan
       
-      // Coupling plots
+      // C - Coupling plots
       
       ParseDir(histo1, hnsDir + "/CouplingScan", path + hnsDir + "/CouplingScan/", c, m, m1, m2, m3);
 
@@ -538,7 +532,7 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
 
     if (mode == "all" || mode == "hnsm") {
       
-      // Mass plots
+      // D - Mass plots
 
       c = CreateTCanvas();      
       m = CreateTMultiGraph("YieldMass", "Yield per POT vs N mass");
@@ -560,7 +554,7 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
 
     if (mode == "all" || mode == "hnst") {
       
-      // Total scan plots
+      // E - Total scan plots
 
       retG = nullptr;
       retG = ParseDir(histo1, hnsDir + "/TotalScan", path + hnsDir + "/TotalScan/", c, nullptr,nullptr, nullptr, nullptr);
@@ -569,6 +563,8 @@ TGraph* SingleHisto(TString dir, TString histo1, TString mode, Int_t val, Int_t 
 
   return retG;
 }
+
+// Process multiple root files
 
 void MultiHisto(TString direc, TString mode) {
 
@@ -657,6 +653,8 @@ void MultiHisto(TString direc, TString mode) {
 }
 
 void Plots(TString mode) {
+
+  // mode = hn, hnss, hnsc, hnsm, hnst, all
 
   MultiHisto("", mode);
   exit(0);

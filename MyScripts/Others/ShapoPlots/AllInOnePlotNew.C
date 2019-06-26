@@ -958,6 +958,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   }
 }
 
+// Making multigraph
 
 TGraph* SumAllGraphs(TMultiGraph* M) {
 
@@ -1175,6 +1176,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
 
 Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
+  // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1 (1-1-1), 2 (0-1-0), 3 (0-1-10), 4 (10-1-0)
+  
   TCanvas *c = new TCanvas();
 
   c->SetLeftMargin(0.2);
