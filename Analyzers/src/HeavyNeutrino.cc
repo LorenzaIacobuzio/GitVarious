@@ -1415,14 +1415,8 @@ void HeavyNeutrino::Process(Int_t) {
     
   // Geometrical cuts, CUT: Cut on Z of two-track vertex
 
-  if (GetWithMC()) {
-    if (Zvertex <= 120000. || Zvertex >= (fInitialFV + fLFV))
-      return;
-  }
-  else {
-    if (Zvertex <= 100000. || Zvertex >= (fInitialFV + fLFV))
-      return;
-  }
+  if (Zvertex <= 100000. || Zvertex >= (fInitialFV + fLFV))
+    return;
 
   FillHisto("hCuts", CutID);
   CutID++;

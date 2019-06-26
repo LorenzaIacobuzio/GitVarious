@@ -743,54 +743,22 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
       gBkg1SigmaComb->GetPoint(i, X, Y);
       Ytot += Y;
-      
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       gBkg1SigmaPrompt->GetPoint(i, X, Y);
       Ytot += Y;
-      
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       gBkg1SigmaPar->GetPoint(i, X, Y);
       Ytot += Y;
-      
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       gBkg1SigmaTot->SetPoint(i, X, Ytot);
-
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       X = 0.;
       Y = 0.;
       Ytot = 0.;
 
       gBkg2SigmaComb->GetPoint(i, X, Y);
       Ytot += Y;
-      
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       gBkg2SigmaPrompt->GetPoint(i, X, Y);
       Ytot += Y;
-
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-      
       gBkg2SigmaPar->GetPoint(i, X, Y);
       Ytot += Y;
-      
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-
       gBkg2SigmaTot->SetPoint(i, X, Ytot);
-
-      if(X > 0.99933 && X < 1.00151)
-	cout<<i<<" "<<X<<" "<<Y<<" "<<Ytot<<endl;
-      
       X = 0.;
       Y = 0.;
       Ytot = 0.;      
