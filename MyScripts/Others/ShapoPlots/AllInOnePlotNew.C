@@ -1,4 +1,4 @@
-// couplings according to model I, II, III, IV
+// couplings according to model I, II, III
 
 Double_t USquared = 1.;
 Double_t UeSquared = 0.;
@@ -64,10 +64,10 @@ Double_t K0Star = 895.55;
 
 // lifetimes
 
-Double_t Dlife = 1.04E-3;
-Double_t D0life = 4.101E-4;
-Double_t DSlife = 5.E-4;
-Double_t taulife = 2.91E-4;
+Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                                                          
+Double_t D0life = 6.227*1.E8;
+Double_t DSlife = 7.595*1.E8;
+Double_t taulife = 4.42*1.E8;
 
 // CKM
 
@@ -659,6 +659,7 @@ Double_t GammaTot(Double_t MN) {
 Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
 
   Double_t brt = 0.;
+  Double_t gammat = GammaTot(Mass1);
   
   if (Prod == kTRUE) {
     if (TwoBody == kTRUE) {
@@ -684,49 +685,49 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
     if (TwoBody == kTRUE) {
       if (Mass2 == pi) {
 	if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/gammat;
 	else {
 	  brt = 0.;
 	}
       }
       else if (Mass2 == rho) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/gammat;
 	else {
 	  brt = 0.;
 	}
       }
       else if (Mass2 == pi0) {
         if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fPi)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == K) {
         if (Gamma2(Mass1, Mass2, Mass3, fK) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fK)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fK)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == eta) {
         if (Gamma2(Mass1, Mass2, Mass3, fEta) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fEta)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fEta)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == etaprime) {
         if (Gamma2(Mass1, Mass2, Mass3, fEtaprime) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fEtaprime)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fEtaprime)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == rho0) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/gammat;
 	else {
 	  brt = 0.;
 	}
@@ -737,8 +738,8 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
       }
     }
     else if (TwoBody == kFALSE) {
-      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
-	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
+      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && gammat > 0.)
+	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/gammat;
       else {
 	brt = 0.;
       }
@@ -929,8 +930,10 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     TGenPhaseSpace Event;
     
     Event.SetDecay(Mother, 3, Daughters);
+
+    Double_t wMax = 0.;
     
-    for (Int_t n = 0; n < 100000; n++) {
+    for (Int_t n = 0; n < 1000000; n++) {
       Double_t W = Event.Generate();
       TLorentzVector *p1 = Event.GetDecay(0);
       TLorentzVector *p2 = Event.GetDecay(1);
@@ -938,8 +941,13 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       TLorentzVector p12 = *p1 + *p2;
       TLorentzVector p13 = *p1 + *p3;
 
+      if (W > wMax)
+	wMax = W;
+      
       h2->Fill(p12.M2(), p13.M2());
     }
+    
+    cout<<Title<<" "<<wMax<<endl;
 
     h2->Draw("colz");
     h2->SetTitle(Form("%s, m_{N} = %.1f GeV, model %i",Title.c_str(), Mass2, model));
@@ -1038,22 +1046,22 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
-  M->SetMinimum(1.E-24);
-  M->SetMaximum(1.E-11);
+  M->SetMinimum(1.E-8);
+  M->SetMaximum(1.1);
   M->GetXaxis()->SetLimits(0., 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
   sum->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
-  sum->GetYaxis()->SetTitle("Sum of BRs");
-  sum->SetTitle("Sum of N production modes vs N mass");
+  sum->GetYaxis()->SetTitle("Sum of BRs");    
+  sum->SetTitle("Sum of N production modes vs N mass, model II (1:16:3.8)");
   sum->GetXaxis()->SetTitleOffset(0.9);
   sum->GetYaxis()->SetTitleOffset(1.);
   sum->GetXaxis()->SetTitleSize(labelSize);
@@ -1070,7 +1078,6 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Write();
   gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
   gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
-
 }
 
 // Function to call all N decay modes
@@ -1118,8 +1125,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1168,25 +1175,25 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
 
-Int_t AllInOnePlot(Int_t mode, Int_t model) {
-
-  // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1 (1-1-1), 2 (0-1-0), 3 (0-1-10), 4 (10-1-0)
+Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
+  
+  // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1, 2, 3 (Shaposhnikov)
   
   TCanvas *c = new TCanvas();
-
+  
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   //c->SetWindowSize(20000., 12000.);
-
+  
   TGaxis::SetMaxDigits(2);
-
-  if (model == 1 || model == 2 || model == 3) || model == 4)
+  
+  if (model == 1 || model == 2 || model == 3 || model == 4)
     SetModel(model);
   else {
     cout<<"[GeneralPlots] Unknown model:"<<endl;
@@ -1196,7 +1203,7 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
     cout<<"4: 10:1:0"<<endl;
     exit(1);
   }
-    
+  
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
@@ -1204,8 +1211,8 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   TMultiGraph* Mgamma = new TMultiGraph("Mgamma", "");
   Mdecay->SetName("Mgamma");
   std::string HistoTitle = "";
-  
-  if (model == 1) 
+
+  if (model == 1)
     HistoTitle = "I (1:1:1)";
   else if (model == 2)
     HistoTitle = "II (0:1:0)";
@@ -1241,5 +1248,5 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
     exit(1);
   }
   
-  return 0;
+  exit(0);
 }

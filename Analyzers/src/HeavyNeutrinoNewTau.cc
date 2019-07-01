@@ -73,9 +73,9 @@ HeavyNeutrinoNewTau::HeavyNeutrinoNewTau(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -193,7 +193,7 @@ void HeavyNeutrinoNewTau::InitHist() {
     BookHisto("hNtracks",  new TH1D("Ntracks", "Number of tracks", 10, -0.5, 9.5));
     BookHisto("hMomPi",    new TH1D("MomPi", "Pion momentum", 100, -0.5, 200.));
     BookHisto("hMomMu",    new TH1D("MomMu", "Muon momentum", 100, -0.5, 200.));
-    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 33, 0., 33.));
+    BookHisto("hCuts",     new TH1D("Cuts", "Physics events after cuts", 35, 0., 35.));
 
     // X,Y distributions
 
@@ -548,12 +548,12 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (!GetWithMC()) {
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+      Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
       FillHisto("hLKr", dT);
     }
 
     for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+      Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
       FillHisto("hLKr", dT);
     }
 
@@ -561,7 +561,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
     if (SpecLKr[0].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
 	  inTime++;
       }
@@ -572,7 +572,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
     if (SpecLKr[1].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
           inTime++;
       }
@@ -934,7 +934,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kNewCHOD) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kNewCHOD))
     return;
-
+  
   FillHisto("hCuts", CutID);
   CutID++;
 
@@ -1041,12 +1041,15 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   if (!Tracks[NoAssoc-1].LKrAssociationExists())
     return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
   
   if (!GetWithMC()) {
     inTime = 0;
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     for (UInt_t i = 0; i < SpecLKr[NoAssoc-1].GetNAssociationRecords(); i++) {
-      Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+      Double_t dT = SpecLKr[NoAssoc-1].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
       if (TMath::Abs(dT) <= LKrWindow)
         inTime++;
     }
@@ -1058,7 +1061,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // CHOD extra activity for bkg studies
+  // CUT: CHOD extra activity for bkg studies
 
   nCHOD = 0;
 
@@ -1089,7 +1092,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
     }
   }
   
-  // NewCHOD extra activity for bkg studies
+  // CUT: NewCHOD extra activity for bkg studies
   
   nNewCHOD = 0;
 
@@ -1103,7 +1106,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   if (TrkNewCHODAssoIndex1 == TrkNewCHODAssoIndex2)
     return;
-  
+
   if (!GetWithMC()) {
     for(int i = 0; i < NewCHODEvent->GetNCandidates(); i++) {
       TRecoVCandidate* NewCHODcand = (TRecoVCandidate*)NewCHODEvent->GetCandidate(i);
@@ -1326,7 +1329,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
     std::vector<SpectrometerLKrAssociationOutput> SpecLKr = *(std::vector<SpectrometerLKrAssociationOutput>*)GetOutput("SpectrometerLKrAssociation.Output");
     if (SpecLKr[0].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[0].GetNAssociationRecords(); i++) {
-	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+	Double_t dT = SpecLKr[0].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
 	if (TMath::Abs(dT) <= LKrWindow)
 	  return;
       }
@@ -1334,7 +1337,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
     if (SpecLKr[1].GetNAssociationRecords() > 1) {
       for (UInt_t i = 0; i < SpecLKr[1].GetNAssociationRecords(); i++) {
-        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetClusterUTime() - L0TPTime;
+        Double_t dT = SpecLKr[1].GetAssociationRecord(i)->GetLKrCandidate()->GetTime() - L0TPTime;
         if (TMath::Abs(dT) <= LKrWindow)
           return;
       }
@@ -1391,7 +1394,7 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
-  // Geometrical cuts, CUT: Extrapoolation to GTK
+  // Extrapolation to GTK
 
   xGTK31 = SpectrometerCand1->xAt(fZGTK3);
   xGTK32 = SpectrometerCand2->xAt(fZGTK3);
@@ -1733,8 +1736,8 @@ void HeavyNeutrinoNewTau::EndOfJobUser() {
     
     // Plot residual number of events after each cut
 
-    const int NCuts = 33;
-    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Track time", "KTAG time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr acc", "LKr assoc", "LKr time", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "GTK extrap", "Z vertex", "Beam dist"};
+    const int NCuts = 35;
+    const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Fake track", "Track time", "KTAG in time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr acc", "LKr assoc", "LKr time", "Extra CHOD", "Extra newCHOD", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
   
     for (Int_t i = 1; i <= NCuts; i++)
       fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);

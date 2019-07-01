@@ -59,10 +59,10 @@ Double_t K0Star = 895.55;
 
 // lifetimes
 
-Double_t Dlife = 1.04E-3;
-Double_t D0life = 4.101E-4;
-Double_t DSlife = 5.E-4;
-Double_t taulife = 2.91E-4;
+Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                                                          
+Double_t D0life = 6.227*1.E8;
+Double_t DSlife = 7.595*1.E8;
+Double_t taulife = 4.42*1.E8;
 
 // CKM
 
@@ -654,6 +654,7 @@ Double_t GammaTot(Double_t MN) {
 Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass4, Double_t Factor, Bool_t Prod, Bool_t TwoBody) {
 
   Double_t brt = 0.;
+  Double_t gammat = GammaTot(Mass1);
   
   if (Prod == kTRUE) {
     if (TwoBody == kTRUE) {
@@ -679,49 +680,49 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
     if (TwoBody == kTRUE) {
       if (Mass2 == pi) {
 	if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fPi)/gammat;
 	else {
 	  brt = 0.;
 	}
       }
       else if (Mass2 == rho) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/gammat;
 	else {
 	  brt = 0.;
 	}
       }
       else if (Mass2 == pi0) {
         if (Gamma2(Mass1, Mass2, Mass3, fPi) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fPi)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fPi)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == K) {
         if (Gamma2(Mass1, Mass2, Mass3, fK) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fK)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fK)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == eta) {
         if (Gamma2(Mass1, Mass2, Mass3, fEta) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fEta)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fEta)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == etaprime) {
         if (Gamma2(Mass1, Mass2, Mass3, fEtaprime) > 0.)
-          brt = Gamma2(Mass1, Mass2, Mass3, fEtaprime)/GammaTot(Mass1);
+          brt = Gamma2(Mass1, Mass2, Mass3, fEtaprime)/gammat;
         else {
           brt = 0.;
         }
       }
       else if (Mass2 == rho0) {
 	if (Gamma2(Mass1, Mass2, Mass3, fRho) > 0.)
-	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/GammaTot(Mass1);
+	  brt = Gamma2(Mass1, Mass2, Mass3, fRho)/gammat;
 	else {
 	  brt = 0.;
 	}
@@ -732,8 +733,8 @@ Double_t ComputeBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Mass
       }
     }
     else if (TwoBody == kFALSE) {
-      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && GammaTot(Mass1) > 0.)
-	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/GammaTot(Mass1);
+      if (GammaLeptonNu3(Mass1, Mass2, Mass3) > 0. && gammat > 0.)
+	brt = GammaLeptonNu3(Mass1, Mass2, Mass3)/gammat;
       else {
 	brt = 0.;
       }
@@ -1040,8 +1041,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetLogy();
   gPad->SetGridx();
   gPad->SetGridy();
-  M->SetMinimum(1.E-24);
-  M->SetMaximum(1.E-11);
+  M->SetMinimum(1.E-8);
+  M->SetMaximum(1.1);
   M->GetXaxis()->SetLimits(0., 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
