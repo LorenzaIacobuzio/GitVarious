@@ -677,8 +677,8 @@ void HeavyNeutrino::Process(Int_t) {
   // CDA of track1 wrt track2                                                                           
 
   fCDAcomp = new TwoLinesCDA();
-  fCDAcomp->SetLine1PointDir(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0, Mom1);
-  fCDAcomp->SetLine2PointDir(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0, Mom2);
+  fCDAcomp->SetLine1PointDir(TVector3(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0), Mom1);
+  fCDAcomp->SetLine2PointDir(TVector3(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0), Mom2);
   fCDAcomp->ComputeVertexCDA();
   
   CDA = fCDAcomp->GetCDA();
@@ -690,7 +690,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1PointDir(Vertex, TotMom);
-  fCDAcomp->SetLine2Point1Point2(0., 0., avgTarZ, avgTAXX, avgTAXY, avgTAXZ);
+  fCDAcomp->SetLine2Point1Point2(TVector3(0., 0., avgTarZ), TVector3(avgTAXX, avgTAXY, avgTAXZ));
   fCDAcomp->ComputeVertexCDA();
 
   CDALine = fCDAcomp->GetCDA();
@@ -700,7 +700,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   fDistcomp = new PointLineDistance();
   
-  fDistcomp->SetLinePointDir(0., 0., 102000., 0., 0., 1.2E-3);
+  fDistcomp->SetLinePoint1(0., 0., 102000.);
+  fDistcomp->SetLineDir(0., 0., 1.2E-3);
   fDistcomp->SetPoint(Vertex);
   
   fDistcomp->ComputeDistance();
@@ -713,7 +714,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1PointDir(Vertex, TotMom);
-  fCDAcomp->SetLine2PointDir(0., 0., avgTarZ, 0., 0., 1.);
+  fCDAcomp->SetLine2PointDir(TVector3(0., 0., avgTarZ), TVector3(0., 0., 1.));
   fCDAcomp->ComputeVertexCDA();
 
   Double_t ZVertexMomTarget = fCDAcomp->GetVertex().z();
@@ -723,7 +724,7 @@ void HeavyNeutrino::Process(Int_t) {
   fCDAcomp = new TwoLinesCDA();
 
   fCDAcomp->SetLine1PointDir(Vertex, TotMom);
-  fCDAcomp->SetLine2PointDir(avgTAXX, avgTAXY, avgTAXZ, 0., 0., 1.);
+  fCDAcomp->SetLine2PointDir(TVector3(avgTAXX, avgTAXY, avgTAXZ), TVector3(0., 0., 1.));
   fCDAcomp->ComputeVertexCDA();
 
   Double_t ZVertexMomTAX = fCDAcomp->GetVertex().z();

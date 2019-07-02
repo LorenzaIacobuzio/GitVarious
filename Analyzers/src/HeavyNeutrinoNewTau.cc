@@ -216,29 +216,6 @@ void HeavyNeutrinoNewTau::InitHist() {
     BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom", "Two-track vertex, after geometrical cuts",    50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after all cuts",             50, 100., 200., 50, 0., 1.));
 
-    // Unique signal region (3-segment line)
-
-    BookHisto("hSR_In",     new TH2D("SR_In",     "Signal region, before any cut",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Track",  new TH2D("SR_Track",  "Signal region, after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Energy", new TH2D("SR_Energy", "Signal region, after energy cuts",        500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Vetoes", new TH2D("SR_Vetoes", "Signal region, after veto cuts",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Geom",   new TH2D("SR_Geom",   "Signal region, after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSR_Fin",    new TH2D("SR_Fin",    "Signal region, after all cuts",           500, -50., 50., 50, 0., 0.1));
-
-    BookHisto("hSRTar_In",     new TH2D("SRTar_In",     "Signal region (target), before any cut",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Track",  new TH2D("SRTar_Track",  "Signal region (target), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Energy", new TH2D("SRTar_Energy", "Signal region (target), after energy cuts",        500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Vetoes", new TH2D("SRTar_Vetoes", "Signal region (target), after veto cuts",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Geom",   new TH2D("SRTar_Geom",   "Signal region (target), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTar_Fin",    new TH2D("SRTar_Fin",    "Signal region (target), after all cuts",           500, -50., 50., 50, 0., 0.1));
-
-    BookHisto("hSRTAX_In",     new TH2D("SRTAX_In",     "Signal region (TAX), before any cut",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Track",  new TH2D("SRTAX_Track",  "Signal region (TAX), after track-quality cuts", 500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Energy", new TH2D("SRTAX_Energy", "Signal region (TAX), after energy cuts",        500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Vetoes", new TH2D("SRTAX_Vetoes", "Signal region (TAX), after veto cuts",          500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Geom",   new TH2D("SRTAX_Geom",   "Signal region (TAX), after geometrical cuts",   500, -50., 50., 50, 0., 0.1));
-    BookHisto("hSRTAX_Fin",    new TH2D("SRTAX_Fin",    "Signal region (TAX), after all cuts",           500, -50., 50., 50, 0., 0.1));
-
     // Unique signal region (one line)
 
     BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
@@ -700,10 +677,8 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   // CDA of track1 wrt track2                                                                           
 
   fCDAcomp = new TwoLinesCDA();
-  fCDAcomp->SetLine1Point1(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0);
-  fCDAcomp->SetDir1(Mom1);
-  fCDAcomp->SetLine2Point1(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0);
-  fCDAcomp->SetDir2(Mom2);
+  fCDAcomp->SetLine1PointDir(TVector3(SpectrometerCand1->xAtBeforeMagnet(10.0), SpectrometerCand1->yAtBeforeMagnet(10.0), 10.0), Mom1);
+  fCDAcomp->SetLine2PointDir(TVector3(SpectrometerCand2->xAtBeforeMagnet(10.0), SpectrometerCand2->yAtBeforeMagnet(10.0), 10.0), Mom2);
   fCDAcomp->ComputeVertexCDA();
   
   CDA = fCDAcomp->GetCDA();
@@ -714,10 +689,8 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   fCDAcomp = new TwoLinesCDA();
 
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., avgTarZ);
-  fCDAcomp->SetLine2Point2(avgTAXX, avgTAXY, avgTAXZ);
+  fCDAcomp->SetLine1PointDir(Vertex, TotMom);
+  fCDAcomp->SetLine2Point1Point2(TVector3(0., 0., avgTarZ), TVector3(avgTAXX, avgTAXY, avgTAXZ));
   fCDAcomp->ComputeVertexCDA();
 
   CDALine = fCDAcomp->GetCDA();
@@ -740,10 +713,8 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   fCDAcomp = new TwoLinesCDA();
 
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., avgTarZ);
-  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->SetLine1PointDir(Vertex, TotMom);
+  fCDAcomp->SetLine2PointDir(TVector3(0., 0., avgTarZ), TVector3(0., 0., 1.));
   fCDAcomp->ComputeVertexCDA();
 
   Double_t ZVertexMomTarget = fCDAcomp->GetVertex().z();
@@ -752,73 +723,11 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
 
   fCDAcomp = new TwoLinesCDA();
 
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(avgTAXX, avgTAXY, avgTAXZ);
-  fCDAcomp->SetDir2(0., 0., 1.);
+  fCDAcomp->SetLine1PointDir(Vertex, TotMom);
+  fCDAcomp->SetLine2PointDir(TVector3(avgTAXX, avgTAXY, avgTAXZ), TVector3(0., 0., 1.));
   fCDAcomp->ComputeVertexCDA();
 
   Double_t ZVertexMomTAX = fCDAcomp->GetVertex().z();
-
-  // SR studies 2: 3-segment line -> 1 SR
-  // CDA of hnl wrt target segment
-
-  fCDAcomp = new TwoLinesCDA();
-
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., 14960.); // Acromat bending
-  fCDAcomp->SetDir2(0., 0., 1.);
-  fCDAcomp->ComputeVertexCDA();
-  
-  Double_t ZBrokenTarget = fCDAcomp->GetVertex().z();
-  Double_t CDABrokenTarget = fCDAcomp->GetCDA();
-
-  // CDA of hnl wrt proton line segment
-
-  fCDAcomp = new TwoLinesCDA();
-
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., 0., 14960.);
-  fCDAcomp->SetLine2Point2(0., -22., 22760.); // Two big magnets
-  fCDAcomp->ComputeVertexCDA();
-
-  Double_t ZBrokenProtonLine = fCDAcomp->GetVertex().z();
-  Double_t CDABrokenProtonLine = fCDAcomp->GetCDA();
-
-  // CDA of hnl wrt TAX segment
-
-  fCDAcomp = new TwoLinesCDA();
-
-  fCDAcomp->SetLine1Point1(Vertex);
-  fCDAcomp->SetDir1(TotMom);
-  fCDAcomp->SetLine2Point1(0., -22., 22760.);
-  fCDAcomp->SetDir2(0., 0., 1.);
-  fCDAcomp->ComputeVertexCDA();
-
-  Double_t ZBrokenTAX = fCDAcomp->GetVertex().z();
-  Double_t CDABrokenTAX = fCDAcomp->GetCDA();
-
-  xSR = -999.;
-  ySR = -999.;
-  Double_t minCDA = 999999.;
-  Double_t xRes = 3.*12000.;
-
-  if (ZBrokenTarget <= (14960. + xRes) && CDABrokenTarget < minCDA) {
-    minCDA = CDABrokenTarget;
-    xSR = ZBrokenTarget;
-  }
-  if (ZBrokenProtonLine > (14960. - xRes) && ZBrokenProtonLine <= (22760. + xRes) && CDABrokenProtonLine < minCDA) {
-    minCDA = CDABrokenProtonLine;
-    xSR = ZBrokenProtonLine;
-  }
-  if (ZBrokenTAX > (22760. - xRes) && CDABrokenTAX < minCDA) {
-    minCDA = CDABrokenTAX;
-    xSR = ZBrokenTAX;
-  }
-
-  ySR = minCDA;
 
   // MC studies on extrapolation to target/TAX
 
@@ -852,20 +761,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_In", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_In", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_In", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_In", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_In", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_In", ZCDALine/1000., CDALine/1000., Weight);
@@ -1154,20 +1053,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_Track", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_Track", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_Track", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_Track", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-  
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_Track", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_Track", ZCDALine/1000., CDALine/1000., Weight);
@@ -1252,20 +1141,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_Energy", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_Energy", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_Energy", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_Energy", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_Energy", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_Energy", ZCDALine/1000., CDALine/1000., Weight);
@@ -1354,20 +1233,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_Vetoes", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_Vetoes", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-  
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_Vetoes", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_Vetoes", ZCDALine/1000., CDALine/1000., Weight);
@@ -1411,20 +1280,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_Geom", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_Geom", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_Geom", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_Geom", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-  
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_Geom", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_Geom", ZCDALine/1000., CDALine/1000., Weight);
@@ -1459,20 +1318,10 @@ void HeavyNeutrinoNewTau::Process(Int_t) {
   if (GetWithMC()) {
     if (Target == true) {
       FillHisto("hCDAvsZCDATarget_Fin", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTar_Fin", xSR/1000., ySR/1000., Weight);
-      }
     }
     else if (Target == false) {
       FillHisto("hCDAvsZCDATAX_Fin", ZCDALine/1000., CDALine/1000., Weight);
-      if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-	FillHisto("hSRTAX_Fin", xSR/1000., ySR/1000., Weight);
-      }
     }
-  }
-  
-  if ((fBlindRegion && (xSR <= xMin || xSR >= xMax) && (ySR <= yMin || ySR >= yMax)) || !fBlindRegion) {
-    FillHisto("hSR_Fin", xSR/1000., ySR/1000., Weight);
   }
 
   FillHisto("hCDAvsZCDAAll_Fin", ZCDALine/1000., CDALine/1000., Weight);
@@ -1542,27 +1391,6 @@ void HeavyNeutrinoNewTau::EndOfJobUser() {
     fHisto.GetTH2("hZvsBeam_Geom")->GetXaxis()->SetTitle("Vertex position along Z [m]");
     fHisto.GetTH2("hZvsBeam_Fin")->GetXaxis()->SetTitle("Vertex position along Z [m]");
 
-    fHisto.GetTH2("hSR_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-
-    fHisto.GetTH2("hSRTar_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-
-    fHisto.GetTH2("hSRTAX_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Vetoes")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt proton line [m]");
-
     fHisto.GetTH2("hCDAvsZCDATarget_In")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
@@ -1621,27 +1449,6 @@ void HeavyNeutrinoNewTau::EndOfJobUser() {
     fHisto.GetTH2("hZvsBeam_Geom")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
     fHisto.GetTH2("hZvsBeam_Fin")->GetYaxis()->SetTitle("Vertex-beam axis distance [m]");
 
-    fHisto.GetTH2("hSR_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSR_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-
-    fHisto.GetTH2("hSRTar_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTar_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-
-    fHisto.GetTH2("hSRTAX_In")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Track")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Vetoes")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-    fHisto.GetTH2("hSRTAX_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt proton line [m]");
-
     fHisto.GetTH2("hCDAvsZCDATarget_In")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDATarget_Energy")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
@@ -1676,27 +1483,6 @@ void HeavyNeutrinoNewTau::EndOfJobUser() {
     fHisto.GetTH2("hZvsBeam_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
     fHisto.GetTH2("hZvsBeam_Geom")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
     fHisto.GetTH2("hZvsBeam_Fin")->GetZaxis()->SetTitle("Normalized to POT and 400 cm^{2}");
-
-    fHisto.GetTH2("hSR_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSR_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSR_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSR_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSR_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSR_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-
-    fHisto.GetTH2("hSRTar_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTar_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTar_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTar_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTar_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTar_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-
-    fHisto.GetTH2("hSRTAX_In")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTAX_Track")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTAX_Energy")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTAX_Vetoes")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTAX_Geom")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
-    fHisto.GetTH2("hSRTAX_Fin")->GetZaxis()->SetTitle("Normalized to POT and 4 cm^{2}");
 
     fHisto.GetTH2("hCDAvsZCDATarget_In")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
     fHisto.GetTH2("hCDAvsZCDATarget_Track")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
