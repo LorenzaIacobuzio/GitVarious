@@ -198,9 +198,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TString analyzer = "";
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-  Double_t ZCDALineMax = 35000.;
-  Double_t ZCDALineMin = -10000.;
-  Double_t CDALineMax = 40.;
+  Double_t ZCDALineMax = 40000.;//35000.;
+  Double_t ZCDALineMin = -15000.;//-10000.;
+  Double_t CDALineMax = 60.;//40.;
   Double_t Time1Max = -2.;
   Double_t Time1Min = -4.;
   Double_t Time2Max = 4.;
@@ -234,9 +234,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -809,7 +809,7 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBNPiMinusMuPlus = 0;
   Double_t counterPromptFVNPiMinusMuPlus = 0;
   Double_t NPiMinusMuPlus = 0.;
-  TString pathPiMinusMuPlus = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
+  TString pathPiMinusMuPlus = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
 
   // Total expected bkg
   

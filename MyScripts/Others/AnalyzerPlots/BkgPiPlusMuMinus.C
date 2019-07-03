@@ -44,7 +44,7 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
     gPad->SetLogy();
   else
     gPad->SetLogy(0);
-      
+
   h->GetXaxis()->SetTitle(x);
   h->GetYaxis()->SetTitle(y);
   h->SetTitleSize(titleSize, "t");
@@ -198,9 +198,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TString analyzer = "";
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-  Double_t ZCDALineMax = 35000.;
-  Double_t ZCDALineMin = -10000.;
-  Double_t CDALineMax = 40.;
+  Double_t ZCDALineMax = 40000.;//35000.;
+  Double_t ZCDALineMin = -15000.;//-10000.;
+  Double_t CDALineMax = 60.;//40.;
   Double_t Time1Max = -2.;
   Double_t Time1Min = -4.;
   Double_t Time2Max = 4.;
@@ -234,9 +234,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -510,15 +510,15 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       
       if (Assoc == 1 && Charge1 == -1) { // mu-pi+
 	if (Mom1->Mag()/1000. >= 70. && Mom1->Mag()/1000. <= 80.)
-	  hGTK3XYMuNegCombPiPlusMuMinus->Fill(xGTK31, yGTK31);
+	  hGTK3XYMuNegCombPiPlusMuMinus->Fill(xGTK31, yGTK31, Weight);
 	if (Mom2->Mag()/1000. >= 70. && Mom2->Mag()/1000. <= 80.)
-	  hGTK3XYPiPosCombPiPlusMuMinus->Fill(xGTK32, yGTK32);
+	  hGTK3XYPiPosCombPiPlusMuMinus->Fill(xGTK32, yGTK32, Weight);
       }
       else if (Assoc == 2 && Charge1 == 1) { // pi+mu-
 	if (Mom1->Mag()/1000. >= 70. && Mom1->Mag()/1000. <= 80.)
-	  hGTK3XYPiPosCombPiPlusMuMinus->Fill(xGTK31, yGTK31);
+	  hGTK3XYPiPosCombPiPlusMuMinus->Fill(xGTK31, yGTK31, Weight);
 	if (Mom2->Mag()/1000. >= 70. && Mom2->Mag()/1000. <= 80.)
-	  hGTK3XYMuNegCombPiPlusMuMinus->Fill(xGTK32, yGTK32);
+	  hGTK3XYMuNegCombPiPlusMuMinus->Fill(xGTK32, yGTK32, Weight);
       }
 
       // Select momentum in [70-80] GeV and xy @ GTK3 to study spike
@@ -650,13 +650,13 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hDistvsMassParSRPiPlusMuMinus->Fill(invMass/1000., BeamlineDist, Weight);
       }
       if (Prompt && Zero && !MC && CDAIn) { // ...and vertex sidebands (0-charge)
-	hSRFinalPromptPiPlusMuMinus->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPromptSBZPiPlusMuMinus++;
       }
       if (SB && an.Contains("Pos") && CDAIn) { // ...and vertex sidebands (pos-charge)
 	counterPromptSBPPiPlusMuMinus++;
       }
       if (FV && an.Contains("Pos") && CDAIn) { // ...and in FV (pos-charge)
+	hSRFinalPromptPiPlusMuMinus->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPromptFVPPiPlusMuMinus++;
       } 
       if (FV && an.Contains("Pos") && CDAIn) { // ...and pos-charge evt in FV for inv mass distr
@@ -832,7 +832,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBPPiPlusMuMinus = 0;
   Double_t counterPromptFVPPiPlusMuMinus = 0;
   Double_t PPiPlusMuMinus = 0.;
-  TString pathPiPlusMuMinus = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString pathPiPlusMuMinus = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   

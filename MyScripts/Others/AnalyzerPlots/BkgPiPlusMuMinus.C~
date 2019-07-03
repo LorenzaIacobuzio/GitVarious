@@ -198,9 +198,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TString analyzer = "";
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-  Double_t ZCDALineMax = 35000.;
-  Double_t ZCDALineMin = -10000.;
-  Double_t CDALineMax = 40.;
+  Double_t ZCDALineMax = 40000.;//35000.;
+  Double_t ZCDALineMin = -15000.;//-10000.;
+  Double_t CDALineMax = 60.;//40.;
   Double_t Time1Max = -2.;
   Double_t Time1Min = -4.;
   Double_t Time2Max = 4.;
@@ -227,8 +227,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   
   if (an.Contains("Pos"))
     analyzer = "Pos";
-  else if (an.Contains("Neg"))
-    analyzer = "Neg";
   else if (!an.Contains("Pos") && !an.Contains("Neg"))
     analyzer = "Zero";
   
@@ -236,9 +234,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -385,10 +383,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   TH1D *hZPromptPiPlusMuMinus = new TH1D("hZPrompt", "Prompt background studies", 500, 100., 190.);
   TH1D *hZPromptPPiPlusMuMinus = new TH1D("hZPromptP", "Prompt background studies", 500, 100., 190.);
-  TH1D *hZPromptNPiPlusMuMinus = new TH1D("hZPromptN", "Prompt background studies", 500, 100., 190.);
   TH2D *hZTimePromptPiPlusMuMinus = new TH2D("hZTimePrompt", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
   TH2D *hZTimePromptPPiPlusMuMinus = new TH2D("hZTimePromptP", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
-  TH2D *hZTimePromptNPiPlusMuMinus = new TH2D("hZTimePromptN", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
 
   TH1D *hInvMassPromptPiPlusMuMinus = new TH1D("hInvMassPrompt", "Prompt background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TH1D *hInvMassPromptSRPiPlusMuMinus = new TH1D("hInvMassPromptSR", "Prompt background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
@@ -623,11 +619,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hZTimePromptPPiPlusMuMinus->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
     }
     
-    if (Prompt && an.Contains("Neg") && noSpike && CDAIn && PiPlusMuMinus) {
-      hZPromptNPiPlusMuMinus->Fill(Zvertex/1000., Weight);
-      hZTimePromptNPiPlusMuMinus->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
-    }
-    
     // 4 - Parasitic
     
     if (Par && Zero && noSpike && CDAIn && PiPlusMuMinus) { // all events inside beam distance sidebands
@@ -788,7 +779,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   
   Save(path + "PiPlusMuMinus/Prompt/", c, hZPromptPiPlusMuMinus, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZPromptPPiPlusMuMinus, "Z coordinate of vertex [m]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Prompt/", c, hZPromptNPiPlusMuMinus, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptSRPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptKolmPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
@@ -796,7 +786,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Prompt/", c, hMomMuPromptPiPlusMuMinus, "Muon momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePromptPiPlusMuMinus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePromptPPiPlusMuMinus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePromptNPiPlusMuMinus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRFinalPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg1SigmaPromptPiPlusMuMinus, "gBkg1SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
@@ -815,7 +804,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Par/", c, gBkg1SigmaParPiPlusMuMinus, "gBkg1SigmaPar", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Par/", c, gBkg2SigmaParPiPlusMuMinus, "gBkg2SigmaPar", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
 
-  if (!an.Contains("Pos") && !an.Contains("Neg") && !histo1.Contains("2016") && !histo1.Contains("2017") && !histo1.Contains("2018") && !histo1.Contains("Data")) {
+  if (!an.Contains("Pos")  && !histo1.Contains("2016") && !histo1.Contains("2017") && !histo1.Contains("2018") && !histo1.Contains("Data")) {
     Save(path + "PiPlusMuMinus/MC/", c, hInvMassMCPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiPlusMuMinus/MC/", c, gMassMCPiPlusMuMinus, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Sigma [GeV/c^{2}]", labelSize, titleSize);
   }
@@ -831,7 +820,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
 
   gErrorIgnoreLevel = kFatal;
 
-  // Counters for pos/neg/zero charge studies
+  // Counters for pos/zero charge studies
   
   TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
@@ -843,7 +832,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBPPiPlusMuMinus = 0;
   Double_t counterPromptFVPPiPlusMuMinus = 0;
   Double_t PPiPlusMuMinus = 0.;
-  TString pathPiPlusMuMinus = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString pathPiPlusMuMinus = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   

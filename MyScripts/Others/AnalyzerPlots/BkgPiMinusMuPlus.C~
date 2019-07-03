@@ -225,9 +225,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   // Finding paths
   
-  if (an.Contains("Pos"))
-    analyzer = "Pos";
-  else if (an.Contains("Neg"))
+  if (an.Contains("Neg"))
     analyzer = "Neg";
   else if (!an.Contains("Pos") && !an.Contains("Neg"))
     analyzer = "Zero";
@@ -236,9 +234,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -381,10 +379,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   // Prompt - pi-mu+
 
   TH1D *hZPromptPiMinusMuPlus = new TH1D("hZPrompt", "Prompt background studies", 500, 100., 190.);
-  TH1D *hZPromptPPiMinusMuPlus = new TH1D("hZPromptP", "Prompt background studies", 500, 100., 190.);
   TH1D *hZPromptNPiMinusMuPlus = new TH1D("hZPromptN", "Prompt background studies", 500, 100., 190.);
   TH2D *hZTimePromptPiMinusMuPlus = new TH2D("hZTimePrompt", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
-  TH2D *hZTimePromptPPiMinusMuPlus = new TH2D("hZTimePromptP", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
   TH2D *hZTimePromptNPiMinusMuPlus = new TH2D("hZTimePromptN", "Prompt background studies", 500, 100., 190., 100, -15., 15.);
 
   TH1D *hInvMassPromptPiMinusMuPlus = new TH1D("hInvMassPrompt", "Prompt background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
@@ -595,14 +591,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hSRPromptPiMinusMuPlus->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (FV && an.Contains("Pos") && noSpike && CDAIn && PiMinusMuPlus)
+    if (FV && an.Contains("Neg") && noSpike && CDAIn && PiMinusMuPlus)
       hInvMassPromptPiMinusMuPlus->Fill(invMass/1000., Weight);
 	
-    if (Prompt && an.Contains("Pos") && noSpike && CDAIn && PiMinusMuPlus) {
-      hZPromptPPiMinusMuPlus->Fill(Zvertex/1000., Weight);
-      hZTimePromptPPiMinusMuPlus->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
-    }
-    
     if (Prompt && an.Contains("Neg") && noSpike && CDAIn && PiMinusMuPlus) {
       hZPromptNPiMinusMuPlus->Fill(Zvertex/1000., Weight);
       hZTimePromptNPiMinusMuPlus->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
@@ -642,19 +633,13 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hSRFinalPromptPiMinusMuPlus->Fill(ZCDALine/1000., CDALine/1000., Weight);
 	counterPromptSBZPiMinusMuPlus++;
       }
-      if (SB && an.Contains("Pos") && CDAIn) { // ...and vertex sidebands (pos-charge)
-	counterPromptSBPPiMinusMuPlus++;
-      }
       if (SB && an.Contains("Neg") && CDAIn) { // ...and vertex sidebands (neg-charge)
 	counterPromptSBNPiMinusMuPlus++;
       }
-      if (FV && an.Contains("Pos") && CDAIn) { // ...and in FV (pos-charge)
-	counterPromptFVPPiMinusMuPlus++;
-      } 
       if (FV && an.Contains("Neg") && CDAIn) { // ...and in FV (neg-charge)
 	counterPromptFVNPiMinusMuPlus++;
       }
-      if (FV && an.Contains("Pos") && CDAIn) { // ...and pos-charge evt in FV for inv mass distr
+      if (FV && an.Contains("Neg") && CDAIn) { // ...and pos-charge evt in FV for inv mass distr
 	hInvMassPromptSRPiMinusMuPlus->Fill(invMass/1000., Weight);		
       }
     }
@@ -719,7 +704,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       SumGraphs(gBkg2SigmaCombPiMinusMuPlus, gBkg2SigmaParPiMinusMuPlus, *gBkg2SigmaBufferPiMinusMuPlus);
     }
       
-    if (an.Contains("Pos")) {
+    if (an.Contains("Neg")) {
 
       // C - Prompt
 	
@@ -770,7 +755,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiMinusMuPlus/Comb/", c, gBkg2SigmaCombPiMinusMuPlus, "gBkg2SigmaComb", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   
   Save(path + "PiMinusMuPlus/Prompt/", c, hZPromptPiMinusMuPlus, "Z coordinate of vertex [m]", labelSize, titleSize);
-  Save(path + "PiMinusMuPlus/Prompt/", c, hZPromptPPiMinusMuPlus, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hZPromptNPiMinusMuPlus, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hInvMassPromptPiMinusMuPlus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hInvMassPromptSRPiMinusMuPlus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
@@ -778,7 +762,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiMinusMuPlus/Prompt/", c, hMomPiPromptPiMinusMuPlus, "Pion momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hMomMuPromptPiMinusMuPlus, "Muon momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hZTimePromptPiMinusMuPlus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
-  Save(path + "PiMinusMuPlus/Prompt/", c, hZTimePromptPPiMinusMuPlus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hZTimePromptNPiMinusMuPlus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hSRPromptPiMinusMuPlus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Prompt/", c, hSRFinalPromptPiMinusMuPlus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
@@ -823,13 +806,10 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
   Double_t counterParPiMinusMuPlus = 0;
   Double_t counterPromptSBZPiMinusMuPlus = 0;
   Double_t counterPromptFVZPiMinusMuPlus = 0;
-  Double_t counterPromptSBPPiMinusMuPlus = 0;
-  Double_t counterPromptFVPPiMinusMuPlus = 0;
   Double_t counterPromptSBNPiMinusMuPlus = 0;
   Double_t counterPromptFVNPiMinusMuPlus = 0;
-  Double_t PPiMinusMuPlus = 0.;
   Double_t NPiMinusMuPlus = 0.;
-  TString pathPiMinusMuPlus = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
+  TString pathPiMinusMuPlus = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
 
   // Total expected bkg
   
@@ -849,22 +829,19 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
   c->SetGrid();
   c->RedrawAxis();
 
-  Analyzer(dir, histo2, "HeavyNeutrino", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBPPiMinusMuPlus, counterPromptFVPPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
-  Analyzer(dir, histo1, "HeavyNeutrino", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBPPiMinusMuPlus, counterPromptFVPPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
-  Analyzer(dir, histo1, "HeavyNeutrinoPos", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBPPiMinusMuPlus, counterPromptFVPPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
-  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBPPiMinusMuPlus, counterPromptFVPPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
+  Analyzer(dir, histo2, "HeavyNeutrino", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
+  Analyzer(dir, histo1, "HeavyNeutrino", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
+  Analyzer(dir, histo1, "HeavyNeutrinoNeg", c, counterCombPiMinusMuPlus, counterParPiMinusMuPlus, counterPromptSBZPiMinusMuPlus, counterPromptFVZPiMinusMuPlus, counterPromptSBNPiMinusMuPlus, counterPromptFVNPiMinusMuPlus, gBkg1SigmaBufferPiMinusMuPlus, gBkg2SigmaBufferPiMinusMuPlus, gBkg1SigmaTotPiMinusMuPlus, gBkg2SigmaTotPiMinusMuPlus);
   
   Save(pathPiMinusMuPlus + "Total/", c, gBkg1SigmaTotPiMinusMuPlus, "gBkg1SigmaTot", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   Save(pathPiMinusMuPlus + "Total/", c, gBkg2SigmaTotPiMinusMuPlus, "gBkg2SigmaTot", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
     
-  if (counterPromptSBPPiMinusMuPlus != 0.)
-    PPiMinusMuPlus = counterPromptFVPPiMinusMuPlus*counterPromptSBZPiMinusMuPlus/counterPromptSBPPiMinusMuPlus;
   if (counterPromptSBNPiMinusMuPlus != 0.)
     NPiMinusMuPlus = counterPromptFVNPiMinusMuPlus*counterPromptSBZPiMinusMuPlus/counterPromptSBNPiMinusMuPlus;
   
-  counterPromptFVZPiMinusMuPlus = PPiMinusMuPlus+NPiMinusMuPlus;
+  counterPromptFVZPiMinusMuPlus = NPiMinusMuPlus;
   
-  cout<<"PI-MU+: Number of events in SR and time sidebands: "<<counterCombPiMinusMuPlus<<", and beamdist sidebands: "<<counterParPiMinusMuPlus<<", and Z sidebands (0-charge): "<<counterPromptSBZPiMinusMuPlus<<", and Z sidebands (pos-charge): "<<counterPromptSBPPiMinusMuPlus<<", and Z sidebands (neg-charge): "<<counterPromptSBNPiMinusMuPlus<<", and FV (pos-charge): "<<counterPromptFVPPiMinusMuPlus<<", and FV (neg-charge): "<<counterPromptFVNPiMinusMuPlus<<", and FV (0-charge): "<<counterPromptFVZPiMinusMuPlus<<endl;
+  cout<<"PI-MU+: Number of events in SR and time sidebands: "<<counterCombPiMinusMuPlus<<", and beamdist sidebands: "<<counterParPiMinusMuPlus<<", and Z sidebands (0-charge): "<<counterPromptSBZPiMinusMuPlus<<", and Z sidebands (neg-charge): "<<counterPromptSBNPiMinusMuPlus<<", and FV (neg-charge): "<<counterPromptFVNPiMinusMuPlus<<", and FV (0-charge): "<<counterPromptFVZPiMinusMuPlus<<endl;
 
   _exit(0);
 }

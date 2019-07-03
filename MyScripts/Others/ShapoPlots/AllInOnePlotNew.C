@@ -1,5 +1,6 @@
 // couplings according to model I, II, III
 
+TRandom3 *R = new TRandom3();
 Double_t USquared = 1.;
 Double_t UeSquared = 0.;
 Double_t UmuSquared = 0.;
@@ -241,12 +242,37 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 
   if (Mass3 == K || Mass3 == K0 || Mass3 == pi || Mass3 == pi0) {
     if (Mass1 == D || Mass1 == D0) { 
-      Double_t ENmin = Mass2; // N at rest, K and e back to back
-      Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
-      Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
-      Double_t q2max = TMath::Power(Mass1-Mass3, 2.); // sum of 4momenta of lepton pair, when K at rest and N and e back to back
+      Double_t m23 = -1.;
+      Double_t m12 = -1.;
+      Double_t min23 = 0.;
+      Double_t max23 = 0.;
+      Double_t min12 = TMath::Power(Mass2+Mass4, 2.);
+      Double_t max12 = TMath::Power(Mass1-Mass3, 2.);
+      Double_t E2 = 0.;
+      Double_t E3 = 0.;
+      Double_t P2 = 0.;
+      Double_t P3 = 0.;
+
+      while(m23 < min23 || m23 > max23){
+  
+	m23 = R->Rndm();
+	m23 = TMath::Power(Mass2+Mass3, 2.) + m23*(TMath::Power(Mass1-Mass4, 2.) - TMath::Power(Mass2+Mass3, 2.));
+	m12 = R->Rndm();
+	m12 = TMath::Power(Mass2+Mass4, 2.) + m12*(TMath::Power(Mass1-Mass3, 2.) - TMath::Power(Mass2+Mass4, 2.));
+	E2 = (m12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(m12));
+	E3 = (Mass1*Mass1 - m12 + Mass3*Mass3)/(2.*Mass1);
+	P2 = TMath::Sqrt(E2*E2 - Mass2*Mass2); 
+	P3 = TMath::Sqrt(E3*E3 - Mass3*Mass3);
+	max23 = (E2+E3)*(E2+E3) - (P2-P3)*(P2-P3); 
+	min23 = (E2+E3)*(E2+E3) - (P2+P3)*(P2+P3); 
+      }
+
+      Double_t q2min = min12;
+      Double_t q2max = max12;
+      Double_t ENmin = (min12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(min12));
+      Double_t ENmax = (max12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(max12));
       Double_t tau, V, f, g, a, b;
-    
+
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
 	if (Mass1 == D) {
 	  tau = Dlife;
@@ -312,10 +338,35 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
   }
   else if (Mass3 == KStar || Mass3 == K0Star) {
     if (Mass1 == D || Mass1 == D0) { 
-      Double_t ENmin = Mass2; // N at rest, K and e back to back
-      Double_t ENmax = (Mass1*Mass1+Mass2*Mass2-TMath::Power(Mass4+Mass3, 2.))/(2.*Mass1); // N one way, K and e other way, their momenta summed equal to the N one
-      Double_t q2min = TMath::Power(Mass2+Mass4, 2.); // sum of masses of lepton pair
-      Double_t q2max = TMath::Power(Mass1-Mass3, 2.); // sum of 4momenta of lepton pair, when K at rest and N and e back to back
+      Double_t m23 = -1.;
+      Double_t m12 = -1.;
+      Double_t min23 = 0.;
+      Double_t max23 = 0.;
+      Double_t min12 = TMath::Power(Mass2+Mass4, 2.);
+      Double_t max12 = TMath::Power(Mass1-Mass3, 2.);
+      Double_t E2 = 0.;
+      Double_t E3 = 0.;
+      Double_t P2 = 0.;
+      Double_t P3 = 0.;
+
+      while(m23 < min23 || m23 > max23){
+  
+	m23 = R->Rndm();
+	m23 = TMath::Power(Mass2+Mass3, 2.) + m23*(TMath::Power(Mass1-Mass4, 2.) - TMath::Power(Mass2+Mass3, 2.));
+	m12 = R->Rndm();
+	m12 = TMath::Power(Mass2+Mass4, 2.) + m12*(TMath::Power(Mass1-Mass3, 2.) - TMath::Power(Mass2+Mass4, 2.));
+	E2 = (m12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(m12));
+	E3 = (Mass1*Mass1 - m12 + Mass3*Mass3)/(2.*Mass1);
+	P2 = TMath::Sqrt(E2*E2 - Mass2*Mass2); 
+	P3 = TMath::Sqrt(E3*E3 - Mass3*Mass3);
+	max23 = (E2+E3)*(E2+E3) - (P2-P3)*(P2-P3); 
+	min23 = (E2+E3)*(E2+E3) - (P2+P3)*(P2+P3); 
+      }
+
+      Double_t q2min = min12;
+      Double_t q2max = max12;
+      Double_t ENmin = (min12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(min12));
+      Double_t ENmax = (max12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(max12));
       Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, a, b;
       
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
@@ -958,11 +1009,11 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     gPad->SetLogz();
     
     if (model == 1)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 2)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 3)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
   }
 }
 
@@ -1054,8 +1105,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
@@ -1076,8 +1127,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   sum->Draw();
   gPad->Update();
   gPad->Write();
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1125,8 +1176,8 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1175,24 +1226,24 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
 }
 
 // Main
 
-Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
-  
+Int_t AllInOnePlot(Int_t mode, Int_t model) {
+
   // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1, 2, 3 (Shaposhnikov)
   
   TCanvas *c = new TCanvas();
-  
+
   c->SetLeftMargin(0.2);
   c->SetBottomMargin(0.2);
   //c->SetWindowSize(20000., 12000.);
-  
+
   TGaxis::SetMaxDigits(2);
-  
+
   if (model == 1 || model == 2 || model == 3 || model == 4)
     SetModel(model);
   else {
@@ -1203,7 +1254,7 @@ Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
     cout<<"4: 10:1:0"<<endl;
     exit(1);
   }
-  
+    
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
@@ -1211,7 +1262,7 @@ Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
   TMultiGraph* Mgamma = new TMultiGraph("Mgamma", "");
   Mdecay->SetName("Mgamma");
   std::string HistoTitle = "";
-
+  
   if (model == 1)
     HistoTitle = "I (1:1:1)";
   else if (model == 2)
