@@ -422,7 +422,7 @@ void HeavyNeutrino::Process(Int_t) {
   CutID++;
 
   // CUT: Select two-track events
-  
+
   std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
 
   FillHisto("hNtracks", Tracks.size());
