@@ -722,8 +722,11 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
       SumGraphs(gBkg1SigmaCombPiPlusMuMinus, gBkg1SigmaParPiPlusMuMinus, *gBkg1SigmaBufferPiPlusMuMinus);
       SumGraphs(gBkg2SigmaCombPiPlusMuMinus, gBkg2SigmaParPiPlusMuMinus, *gBkg2SigmaBufferPiPlusMuMinus);
+      //REMOVE
+      *gBkg1SigmaTotPiPlusMuMinus = *gBkg1SigmaBufferPiPlusMuMinus;
+      *gBkg2SigmaTotPiPlusMuMinus = *gBkg2SigmaBufferPiPlusMuMinus;
     }
-      
+    /*    
     if (an.Contains("Pos")) {
 
       // C - Prompt
@@ -743,6 +746,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       
       minSigma = 0.;
     }
+    */
   }
 
   // Saving histograms

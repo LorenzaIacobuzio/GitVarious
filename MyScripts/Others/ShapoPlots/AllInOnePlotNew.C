@@ -65,10 +65,10 @@ Double_t K0Star = 895.55;
 
 // lifetimes
 
-Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                                                          
+Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                    
 Double_t D0life = 6.227*1.E8;
 Double_t DSlife = 7.595*1.E8;
-Double_t taulife = 4.42*1.E8;
+Double_t taulife = 2.*1.E7; // lascia cosi', senno' i prod mode di modello 3 vanno sopra 1
 
 // CKM
 
@@ -1009,11 +1009,11 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     gPad->SetLogz();
     
     if (model == 1)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 2)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 3)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
   }
 }
 
@@ -1099,14 +1099,14 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-8);
   M->SetMaximum(1.1);
-  M->GetXaxis()->SetLimits(0., 2.2);
+  M->GetXaxis()->SetLimits(0.1, 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
@@ -1127,8 +1127,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   sum->Draw();
   gPad->Update();
   gPad->Write();
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1152,9 +1152,9 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   MassScan(e,         tau, 0., 0, 0, 0, "N #rightarrow e#tau#nu",    M, 1.);
   MassScan(mu,        tau, 0., 0, 0, 0, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 0, "N #rightarrow #pi#tau",     M, 1.);
-  MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
-  MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
-  MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
+  //MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
+  //MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
+  //MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
   
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1170,14 +1170,14 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-7);
   M->SetMaximum(1.5);
-  M->GetXaxis()->SetLimits(0., 5.);
+  M->GetXaxis()->SetLimits(0., 4.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1202,9 +1202,9 @@ void AllGamma(Int_t model, TMultiGraph* M) {
 
   MassScan(mu,        tau, 0., 0, 0, 1, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 1, "N #rightarrow #pi#tau",     M, 1.);
-  MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
-  MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
-  MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
+  //MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
+  //MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
+  //MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
 
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1219,20 +1219,20 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->SetGridx();
   gPad->SetGridy();
   M->SetMinimum(1.E-18);
-  M->SetMaximum(1.E-4);
-  M->GetXaxis()->SetLimits(0., 10.);
+  M->SetMaximum(1.E-6);
+  M->GetXaxis()->SetLimits(0., 4.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
 }
 
 // Main
 
-Int_t AllInOnePlot(Int_t mode, Int_t model) {
+Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
 
   // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1, 2, 3 (Shaposhnikov)
   

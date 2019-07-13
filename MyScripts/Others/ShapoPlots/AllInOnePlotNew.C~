@@ -8,19 +8,24 @@ Double_t UtauSquared = 0.;
 
 void SetModel(Int_t model) {
   if (model == 1) {
-    UmuSquared = USquared/54.;
+    UmuSquared = USquared/3;
     UtauSquared = UmuSquared;
-    UeSquared = 52.*UmuSquared;
+    UeSquared = UmuSquared;
   }
   else if (model == 2) {
-    UeSquared = USquared/20.8;
-    UmuSquared = 16.*UeSquared;
-    UtauSquared = 3.8*UeSquared;
+    UeSquared = 0.;
+    UmuSquared = 1.;
+    UtauSquared = 0.;
   }
   else if (model == 3) {
-    UmuSquared = USquared/5.361;
-    UeSquared = 0.061*UmuSquared;
-    UtauSquared = 4.3*UmuSquared;
+    UmuSquared = 1.;
+    UeSquared = 0.;
+    UtauSquared = 10.;
+  }
+  else if (model == 4) {
+    UmuSquared = 1.;
+    UeSquared = 10.;
+    UtauSquared = 0.;
   }
 }
 
@@ -60,10 +65,10 @@ Double_t K0Star = 895.55;
 
 // lifetimes
 
-Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                                                          
+Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                    
 Double_t D0life = 6.227*1.E8;
 Double_t DSlife = 7.595*1.E8;
-Double_t taulife = 4.42*1.E8;
+Double_t taulife = 2.*1.E7; // lascia cosi', senno' i prod mode di modello 3 vanno sopra 1
 
 // CKM
 
@@ -237,35 +242,35 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 
   if (Mass3 == K || Mass3 == K0 || Mass3 == pi || Mass3 == pi0) {
     if (Mass1 == D || Mass1 == D0) { 
-      Double_t m23 = -1.;
-      Double_t m12 = -1.;
-      Double_t min23 = 0.;
-      Double_t max23 = 0.;
-      Double_t min12 = TMath::Power(Mass2+Mass4, 2.);
-      Double_t max12 = TMath::Power(Mass1-Mass3, 2.);
-      Double_t E2 = 0.;
-      Double_t E3 = 0.;
-      Double_t P2 = 0.;
-      Double_t P3 = 0.;
+      Double_t mKl = -1.;
+      Double_t mNl = -1.;
+      Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
+      Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
+      Double_t minNl = TMath::Power(Mass2+Mass4, 2.);
+      Double_t maxNl = TMath::Power(Mass1-Mass3, 2.);
+      Double_t EN = 0.;
+      Double_t El = 0.;
+      Double_t PN = 0.;
+      Double_t Pl = 0.;
 
-      while(m23 < min23 || m23 > max23){
+      while(mNl < minNl || mNl > maxNl){
   
-	m23 = R->Rndm();
-	m23 = TMath::Power(Mass2+Mass3, 2.) + m23*(TMath::Power(Mass1-Mass4, 2.) - TMath::Power(Mass2+Mass3, 2.));
-	m12 = R->Rndm();
-	m12 = TMath::Power(Mass2+Mass4, 2.) + m12*(TMath::Power(Mass1-Mass3, 2.) - TMath::Power(Mass2+Mass4, 2.));
-	E2 = (m12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(m12));
-	E3 = (Mass1*Mass1 - m12 + Mass3*Mass3)/(2.*Mass1);
-	P2 = TMath::Sqrt(E2*E2 - Mass2*Mass2); 
-	P3 = TMath::Sqrt(E3*E3 - Mass3*Mass3);
-	max23 = (E2+E3)*(E2+E3) - (P2-P3)*(P2-P3); 
-	min23 = (E2+E3)*(E2+E3) - (P2+P3)*(P2+P3); 
+	mNl = R->Rndm();
+	mNl = minNl + mNl*(maxNl-minNl);
+	mKl = R->Rndm();
+	mKl = minKl + mKl*(maxKl-minKl);
+	EN = (Mass1*Mass1 - mKl + Mass2*Mass2)/(2.*Mass1);
+	El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
+	PN = TMath::Sqrt(EN*EN - Mass2*Mass2); 
+	Pl = TMath::Sqrt(El*El - Mass4*Mass4);
+	maxNl = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl); 
+	minNl = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl); 
       }
 
-      Double_t q2min = min12;
-      Double_t q2max = max12;
-      Double_t ENmin = (min12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(min12));
-      Double_t ENmax = (max12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(max12));
+      Double_t q2min = TMath::Power(Mass2+Mass4, 2.);
+      Double_t q2max = TMath::Power(Mass1-Mass3, 2.);
+      Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
+      Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
       Double_t tau, V, f, g, a, b;
 
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
@@ -333,35 +338,35 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
   }
   else if (Mass3 == KStar || Mass3 == K0Star) {
     if (Mass1 == D || Mass1 == D0) { 
-      Double_t m23 = -1.;
-      Double_t m12 = -1.;
-      Double_t min23 = 0.;
-      Double_t max23 = 0.;
-      Double_t min12 = TMath::Power(Mass2+Mass4, 2.);
-      Double_t max12 = TMath::Power(Mass1-Mass3, 2.);
-      Double_t E2 = 0.;
-      Double_t E3 = 0.;
-      Double_t P2 = 0.;
-      Double_t P3 = 0.;
+      Double_t mKl = -1.;
+      Double_t mNl = -1.;
+      Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
+      Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
+      Double_t minNl = TMath::Power(Mass2+Mass4, 2.);
+      Double_t maxNl = TMath::Power(Mass1-Mass3, 2.);
+      Double_t EN = 0.;
+      Double_t El = 0.;
+      Double_t PN = 0.;
+      Double_t Pl = 0.;
 
-      while(m23 < min23 || m23 > max23){
+      while(mNl < minNl || mNl > maxNl){
   
-	m23 = R->Rndm();
-	m23 = TMath::Power(Mass2+Mass3, 2.) + m23*(TMath::Power(Mass1-Mass4, 2.) - TMath::Power(Mass2+Mass3, 2.));
-	m12 = R->Rndm();
-	m12 = TMath::Power(Mass2+Mass4, 2.) + m12*(TMath::Power(Mass1-Mass3, 2.) - TMath::Power(Mass2+Mass4, 2.));
-	E2 = (m12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(m12));
-	E3 = (Mass1*Mass1 - m12 + Mass3*Mass3)/(2.*Mass1);
-	P2 = TMath::Sqrt(E2*E2 - Mass2*Mass2); 
-	P3 = TMath::Sqrt(E3*E3 - Mass3*Mass3);
-	max23 = (E2+E3)*(E2+E3) - (P2-P3)*(P2-P3); 
-	min23 = (E2+E3)*(E2+E3) - (P2+P3)*(P2+P3); 
+	mNl = R->Rndm();
+	mNl = minNl + mNl*(maxNl-minNl);
+	mKl = R->Rndm();
+	mKl = minKl + mKl*(maxKl-minKl);
+	EN = (Mass1*Mass1 - mKl + Mass2*Mass2)/(2.*Mass1);
+	El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
+	PN = TMath::Sqrt(EN*EN - Mass2*Mass2); 
+	Pl = TMath::Sqrt(El*El - Mass4*Mass4);
+	maxNl = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl); 
+	minNl = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl); 
       }
 
-      Double_t q2min = min12;
-      Double_t q2max = max12;
-      Double_t ENmin = (min12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(min12));
-      Double_t ENmax = (max12 + Mass2*Mass2 - Mass4*Mass4)/(2.*TMath::Sqrt(max12));
+      Double_t q2min = TMath::Power(Mass2+Mass4, 2.);
+      Double_t q2max = TMath::Power(Mass1-Mass3, 2.);
+      Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
+      Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
       Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, a, b;
       
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
@@ -1094,14 +1099,14 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-8);
   M->SetMaximum(1.1);
-  M->GetXaxis()->SetLimits(0., 2.2);
+  M->GetXaxis()->SetLimits(0.1, 2.2);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
@@ -1122,8 +1127,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   sum->Draw();
   gPad->Update();
   gPad->Write();
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NSumProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1147,9 +1152,9 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   MassScan(e,         tau, 0., 0, 0, 0, "N #rightarrow e#tau#nu",    M, 1.);
   MassScan(mu,        tau, 0., 0, 0, 0, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 0, "N #rightarrow #pi#tau",     M, 1.);
-  MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
-  MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
-  MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
+  //MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
+  //MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
+  //MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
   
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1165,14 +1170,14 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-7);
   M->SetMaximum(1.5);
-  M->GetXaxis()->SetLimits(0., 5.);
+  M->GetXaxis()->SetLimits(0., 4.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1197,9 +1202,9 @@ void AllGamma(Int_t model, TMultiGraph* M) {
 
   MassScan(mu,        tau, 0., 0, 0, 1, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 1, "N #rightarrow #pi#tau",     M, 1.);
-  MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
-  MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
-  MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
+  //MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
+  //MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
+  //MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
 
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1215,19 +1220,19 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-18);
   M->SetMaximum(1.E-4);
-  M->GetXaxis()->SetLimits(0., 10.);
+  M->GetXaxis()->SetLimits(0., 4.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
 }
 
 // Main
 
-Int_t AllInOnePlot(Int_t mode, Int_t model) {
+Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
 
   // mode = 0 (Dalitz), 1 (prod), 2 (decay), 3 (width); model = 1, 2, 3 (Shaposhnikov)
   
@@ -1239,16 +1244,17 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
 
   TGaxis::SetMaxDigits(2);
 
-  if (model == 1 || model == 2 || model == 3)
+if (model == 1 || model == 2 || model == 3 || model == 4)
     SetModel(model);
   else {
     cout<<"[GeneralPlots] Unknown model:"<<endl;
-    cout<<"1: 52:1:1"<<endl;
-    cout<<"2: 1:16:3.8"<<endl;
-    cout<<"3: 0.061:1:4.3"<<endl;
+    cout<<"1: 1:1:1"<<endl;
+    cout<<"2: 0:1:0"<<endl;
+    cout<<"3: 0:1:10"<<endl;
+    cout<<"4: 10:1:0"<<endl;
     exit(1);
   }
-    
+  
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
@@ -1257,12 +1263,14 @@ Int_t AllInOnePlot(Int_t mode, Int_t model) {
   Mdecay->SetName("Mgamma");
   std::string HistoTitle = "";
   
-  if (model == 1) 
-    HistoTitle = "I (52:1:1)";
+  if (model == 1)
+    HistoTitle = "I (1:1:1)";
   else if (model == 2)
-    HistoTitle = "II (1:16:3.8)";
+    HistoTitle = "II (0:1:0)";
   else if (model == 3)
-    HistoTitle = "III (0.061:1:4.3)";
+    HistoTitle = "III (0:1:10)";
+  else if (model == 4)
+    HistoTitle = "IV (10:1:0)";
 
   Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
