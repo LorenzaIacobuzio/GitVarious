@@ -472,6 +472,9 @@ void HeavyNeutrino::Process(Int_t) {
   if (Tracks[0].GetIsFake() || Tracks[1].GetIsFake())
     return;
 
+  FillHisto("hCuts", CutID);
+  CutID++;
+
   // Handle fast MC and data
 
   CHODTime1 = Tracks[0].GetCHODTime();                                        
@@ -990,6 +993,9 @@ void HeavyNeutrino::Process(Int_t) {
 	nCHOD++;
     }
   }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
   
   // CUT: NewCHOD extra activity for bkg studies
   
@@ -1014,6 +1020,9 @@ void HeavyNeutrino::Process(Int_t) {
 	nNewCHOD++;
     }
   }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // LKr extra activity for bkg studies
 
@@ -1269,9 +1278,6 @@ void HeavyNeutrino::Process(Int_t) {
   xGTK32 = SpectrometerCand2->xAt(fZGTK3);
   yGTK31 = SpectrometerCand1->yAt(fZGTK3);
   yGTK32 = SpectrometerCand2->yAt(fZGTK3);
-
-  FillHisto("hCuts", CutID);
-  CutID++;
 
   // Reference plot - 5 
 

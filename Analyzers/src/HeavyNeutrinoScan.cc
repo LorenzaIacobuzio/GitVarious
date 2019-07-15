@@ -66,9 +66,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 1.); // 0.1
-  AddParam("MassStart", &fMassStart, 0.250); // keep this min
-  AddParam("MassStop", &fMassStop, 1.960); // keep this max
-  AddParam("MassStep", &fMassStep, 0.01); // keep this step
+  AddParam("MassStart", &fMassStart, 0.3); // 0.250
+  AddParam("MassStop", &fMassStop, 1.7); // 1.960
+  AddParam("MassStep", &fMassStep, 0.1); // 0.01
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -438,6 +438,9 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	  if (IsHNLGood == true && isGood == true) {
 	    fSumGood[round(MN)][fCoupling] += Weight*ZDecay;
 	  }
+
+	  fSumAllR[round(MN)][fCoupling] += Weight*ZDecay;
+	  fSumAllFV[round(MN)][fCoupling] += Weight;
 
 	  // Histos for acceptance and yield: coupling
 
@@ -1023,8 +1026,9 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	  couplingCounter++;
 	}
 
-	if (fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]) != 1.0/0.0)
-	  fYield[MN][Coupling] = fSumGood[MN][Coupling]*fSumAllFV[fTMass][fTCoupling]/(fSumAllR[fTMass][fTCoupling]*fNEvents[MN][Coupling]);
+	if (fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 1.0/0.0)
+	  fYield[MN][Coupling] = fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]);
+
 	FillHisto("TotalScan/hExclusion", MN/1000., Coupling, fYield[MN][Coupling]*POT);
       }
     
