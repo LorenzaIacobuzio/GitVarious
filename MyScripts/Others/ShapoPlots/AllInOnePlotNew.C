@@ -14,23 +14,25 @@ void SetModel(Int_t model) {
   }
   else if (model == 2) {
     UeSquared = 0.;
-    UmuSquared = 1.;
+    UmuSquared = USquared;
     UtauSquared = 0.;
   }
   else if (model == 3) {
-    UmuSquared = 1.;
+    UmuSquared = USquared/11.;
     UeSquared = 0.;
-    UtauSquared = 10.;
+    UtauSquared = 10.*UmuSquared;
   }
   else if (model == 4) {
-    UmuSquared = 1.;
-    UeSquared = 10.;
+    UmuSquared = USquared/11.;
+    UeSquared = 10.*UmuSquared;
     UtauSquared = 0.;
   }
 }
 
 // physical constants
 
+Double_t hc = 197.327E-12; // MeV mm                                     
+Double_t cLight = 299.792; //mm/ns
 Double_t GF = 1.17E-11; // MeV^-2                             
 Double_t fPi = 130.41; // MeV                                   
 Double_t fRho = 1.04E5; // MeV^2
@@ -65,10 +67,10 @@ Double_t K0Star = 895.55;
 
 // lifetimes
 
-Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                    
+Double_t Dlife = 1.579*1.E9; // MeV^-1, right?                                                          
 Double_t D0life = 6.227*1.E8;
 Double_t DSlife = 7.595*1.E8;
-Double_t taulife = 2.*1.E7; // lascia cosi', senno' i prod mode di modello 3 vanno sopra 1
+Double_t taulife = 4.42*1.E8;
 
 // CKM
 
@@ -116,10 +118,10 @@ Double_t ffDS = 0.08;
 
 // variables for macro
 
-const int InitialMass = 1;
-const int Mass = 10000;
-const int step = 1;
-const int Masses = Mass/step;
+const int InitialMass = 10;
+const int Mass = 5000;
+const int step = 10;
+const int Masses = (Mass-InitialMass)/step;
 TString name = "";
 Double_t labelSize = 0.05;
 Double_t titleSize = 0.07;
@@ -241,95 +243,97 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
     U = UtauSquared;
 
   if (Mass3 == K || Mass3 == K0 || Mass3 == pi || Mass3 == pi0) {
-    if (Mass1 == D || Mass1 == D0) { 
-      Double_t mKl = -1.;
-      Double_t mNl = -1.;
-      Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
-      Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
-      Double_t minNl = TMath::Power(Mass2+Mass4, 2.);
-      Double_t maxNl = TMath::Power(Mass1-Mass3, 2.);
-      Double_t EN = 0.;
-      Double_t El = 0.;
-      Double_t PN = 0.;
-      Double_t Pl = 0.;
-
-      while(mNl < minNl || mNl > maxNl){
-  
-	mNl = R->Rndm();
-	mNl = minNl + mNl*(maxNl-minNl);
-	mKl = R->Rndm();
-	mKl = minKl + mKl*(maxKl-minKl);
-	EN = (Mass1*Mass1 - mKl + Mass2*Mass2)/(2.*Mass1);
-	El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
-	PN = TMath::Sqrt(EN*EN - Mass2*Mass2); 
-	Pl = TMath::Sqrt(El*El - Mass4*Mass4);
-	maxNl = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl); 
-	minNl = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl); 
-      }
-
-      Double_t q2min = TMath::Power(Mass2+Mass4, 2.);
-      Double_t q2max = TMath::Power(Mass1-Mass3, 2.);
-      Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
-      Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
-      Double_t tau, V, f, g, a, b;
-
+    if (Mass1 == D || Mass1 == D0) {
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
-	if (Mass1 == D) {
-	  tau = Dlife;
-	  if (Mass3 == K0) {
-	    V = Vcs;
-	    f = fDK0;
-	    g = gDK0;
+	Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
+	Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
+	Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
+	Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
+	Double_t ENstep = (ENmax-ENmin)/10.;
+	Double_t q2min = 0.;
+	Double_t q2max = 0.;
+	Double_t a = 0.;
+
+	for (Double_t EN = ENmin; EN < ENmax; EN += ENstep) {
+	  Double_t mKl = Mass1*Mass1 - 2.*Mass1*EN + Mass2*Mass2;
+	  Double_t El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
+	  Double_t EK = (mKl - Mass4*Mass4 + Mass3*Mass3)/(2.*TMath::Sqrt(mKl));
+	  Double_t PN = TMath::Sqrt(TMath::Abs(EN*EN - Mass2*Mass2));
+	  Double_t Pl = TMath::Sqrt(TMath::Abs(El*El - Mass4*Mass4));
+	  Double_t PK = TMath::Sqrt(TMath::Abs(EK*EK - Mass3*Mass3));
+	  //Double_t PKl = TMath::Sqrt(PK*PK + Pl*Pl - 2.*PK*Pl);
+	  //Double_t EKl = TMath::Sqrt(PKl*PKl - mKl);
+	  //Double_t gammaKl = EKl/(TMath::Sqrt(mKl)*cLight*cLight);
+	  //Double_t betaKl = PKl*cLight/EKl;
+	  //Double_t Pl1 = gammaKl*(Pl + betaKl*El/cLight);
+	  //Double_t Pl2 = gammaKl*(-Pl + betaKl*El/cLight);
+	  //Double_t El1 = gammaKl*(El + betaKl*Pl*cLight);
+	  //Double_t El2 = gammaKl*(El - betaKl*Pl*cLight);
+	  //q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
+	  //q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
+	  q2min = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl);
+	  q2max = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl);
+
+	  Double_t tau, V, f, g, b;
+	  
+	  if (Mass1 == D) {
+	    tau = Dlife;
+	    if (Mass3 == K0) {
+	      V = Vcs;
+	      f = fDK0;
+	      g = gDK0;
+	    }
+	    else if (Mass3 == pi0) {
+	      V = Vcd;
+	      f = fDpi0;
+	      g = gDpi0;
+	    }
+	    else {
+	      cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+	      exit(1);
+	    }
 	  }
-	  else if (Mass3 == pi0) {
-	    V = Vcd;
-	    f = fDpi0;
-	    g =	gDpi0;
+	  else if (Mass1 == D0) {
+	    tau = D0life;
+	    if (Mass3 == K) {
+	      V = Vcs;
+	      f = fD0K;
+	      g = gD0K;
+	    }
+	    else if (Mass3 == pi) {
+	      V = Vcd;
+	      f = fD0pi;
+	      g = gD0pi;
+	    }
+	    else {
+	      cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
+	      exit(1);
+	    }
 	  }
-	  else {
-	    cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
-	    exit(1);
-	  }
+	  
+	  a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	  
+	  //(g*g*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*g*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
+	  
+	  TF2 func("func", "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*y*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*y*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*y*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*y*[1] - [4]*[4] + [2]*[2] + x) + (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))");
+	  
+	  func.SetParameter(0, f);
+	  func.SetParameter(1, Mass1);
+	  func.SetParameter(2, Mass2);
+	  func.SetParameter(3, Mass3);
+	  func.SetParameter(4, Mass4);
+	  func.SetParameter(5, g);
+	  
+	  ROOT::Math::WrappedMultiTF1 wf1(func, 2);
+	  ROOT::Math::AdaptiveIntegratorMultiDim ig;
+	  ig.SetFunction(wf1);
+	  ig.SetRelTolerance(0.001);
+	  double xmin[] = {q2min, EN};
+	  double xmax[] = {q2max, EN+ENstep};
+	  b = ig.Integral(xmin, xmax);
+	  br += b;
 	}
-	else if (Mass1 == D0) {
-	  tau = D0life;
-	  if (Mass3 == K) {
-	    V = Vcs;
-	    f = fD0K;
-	    g = gD0K;
-	  }
-	  else if (Mass3 == pi) {
-	    V = Vcd;
-	    f = fD0pi;
-	    g = gD0pi;
-	  }
-	  else {
-	    cout<<"[ThreeBodyBR] Unknown daughter hadron"<<endl;
-	    exit(1);
-	  }
-	}
-      
-	a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
-      
-	//(g*g*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*g*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
-      
-	TF2 func("func", "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*y*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*y*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*y*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*y*[1] - [4]*[4] + [2]*[2] + x) + (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))");
-      
-	func.SetParameter(0, f);
-	func.SetParameter(1, Mass1);
-	func.SetParameter(2, Mass2);
-	func.SetParameter(3, Mass3);
-	func.SetParameter(4, Mass4);
-	func.SetParameter(5, g);
-	
-	ROOT::Math::WrappedMultiTF1 wf1(func, 2);
-	ROOT::Math::AdaptiveIntegratorMultiDim ig;
-	ig.SetFunction(wf1);
-	ig.SetRelTolerance(0.001);
-	double xmin[] = {q2min, ENmin};
-	double xmax[] = {q2max, ENmax};
-	b = ig.Integral(xmin, xmax);
-	br = a*b;
+	br *= a;
       }
       else {
 	br = 0.;
@@ -338,92 +342,94 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
   }
   else if (Mass3 == KStar || Mass3 == K0Star) {
     if (Mass1 == D || Mass1 == D0) { 
-      Double_t mKl = -1.;
-      Double_t mNl = -1.;
-      Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
-      Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
-      Double_t minNl = TMath::Power(Mass2+Mass4, 2.);
-      Double_t maxNl = TMath::Power(Mass1-Mass3, 2.);
-      Double_t EN = 0.;
-      Double_t El = 0.;
-      Double_t PN = 0.;
-      Double_t Pl = 0.;
-
-      while(mNl < minNl || mNl > maxNl){
-  
-	mNl = R->Rndm();
-	mNl = minNl + mNl*(maxNl-minNl);
-	mKl = R->Rndm();
-	mKl = minKl + mKl*(maxKl-minKl);
-	EN = (Mass1*Mass1 - mKl + Mass2*Mass2)/(2.*Mass1);
-	El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
-	PN = TMath::Sqrt(EN*EN - Mass2*Mass2); 
-	Pl = TMath::Sqrt(El*El - Mass4*Mass4);
-	maxNl = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl); 
-	minNl = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl); 
-      }
-
-      Double_t q2min = TMath::Power(Mass2+Mass4, 2.);
-      Double_t q2max = TMath::Power(Mass1-Mass3, 2.);
-      Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
-      Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
-      Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, a, b;
-      
       if (Mass1 >= (Mass2+Mass3+Mass4)) {
-	if (Mass1 == D) {
-	  tau = Dlife;
-	  V = Vcs;
-	  f1 = fVD/(Mass1+Mass3);
-	  f2 = (Mass1+Mass3)*fA1D;
-	  f3 = -fA2D/(Mass1+Mass3);
-	  f4 = Mass3*(2.*fA0D-fA1D-fA2D) + Mass1*(fA2D-fA1D); // to be multiplied by 1/x
-	}
-	else if (Mass1 == D0) {
-	  tau = D0life;
-	  V = Vcs;
-	  f1 = fVD0/(Mass1+Mass3);
-	  f2 = (Mass1+Mass3)*fA1D0;
-	  f3 = -fA2D0/(Mass1+Mass3);
-	  f4 = Mass3*(2.*fA0D0-fA1D0-fA2D0) + Mass1*(fA2D0-fA1D0); // to be multiplied by 1/x
-	}
-	
-	omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;
-	Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
-	a = U*tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	Double_t minKl = TMath::Power(Mass3+Mass4, 2.);
+	Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
+	Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
+	Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
+	Double_t ENstep = (ENmax-ENmin)/10.;
+	Double_t q2min = 0.;
+	Double_t q2max = 0.;
+	Double_t a = 0.;
+
+	for (Double_t EN = ENmin; EN < ENmax; EN += ENstep) {
+	  Double_t mKl = Mass1*Mass1 - 2.*Mass1*EN + Mass2*Mass2;
+	  Double_t El = (mKl - Mass3*Mass3 + Mass4*Mass4)/(2.*TMath::Sqrt(mKl));
+	  Double_t EK = (mKl - Mass4*Mass4 + Mass3*Mass3)/(2.*TMath::Sqrt(mKl));
+	  Double_t PN = TMath::Sqrt(TMath::Abs(EN*EN - Mass2*Mass2));
+	  Double_t Pl = TMath::Sqrt(TMath::Abs(El*El - Mass4*Mass4));
+	  Double_t PK = TMath::Sqrt(TMath::Abs(EK*EK - Mass3*Mass3));
+	  //Double_t PKl = TMath::Sqrt(PK*PK + Pl*Pl - 2.*PK*Pl);
+	  //Double_t EKl = TMath::Sqrt(PKl*PKl - mKl);
+	  //Double_t gammaKl = EKl/(TMath::Sqrt(mKl)*cLight*cLight);
+	  //Double_t betaKl = PKl*cLight/EKl;
+	  //Double_t Pl1 = gammaKl*(Pl + betaKl*El/cLight);
+	  //Double_t Pl2 = gammaKl*(-Pl + betaKl*El/cLight);
+	  //Double_t El1 = gammaKl*(El + betaKl*Pl*cLight);
+	  //Double_t El2 = gammaKl*(El - betaKl*Pl*cLight);
+	  //q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
+	  //q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
+	  q2min = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl);
+	  q2max = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl);
+
+	  Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, b;
+
+	  if (Mass1 == D) {
+	    tau = Dlife;
+	    V = Vcs;
+	    f1 = fVD/(Mass1+Mass3);
+	    f2 = (Mass1+Mass3)*fA1D;
+	    f3 = -fA2D/(Mass1+Mass3);
+	    f4 = Mass3*(2.*fA0D-fA1D-fA2D) + Mass1*(fA2D-fA1D); // to be multiplied by 1/x
+	  }
+	  else if (Mass1 == D0) {
+	    tau = D0life;
+	    V = Vcs;
+	    f1 = fVD0/(Mass1+Mass3);
+	    f2 = (Mass1+Mass3)*fA1D0;
+	    f3 = -fA2D0/(Mass1+Mass3);
+	    f4 = Mass3*(2.*fA0D0-fA1D0-fA2D0) + Mass1*(fA2D0-fA1D0); // to be multiplied by 1/x
+	  }
+	  
+	  omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;
+	  Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
+	  a = U*tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	  
+	  // (f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
+	  // + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
+	  // + 2.*f3*f3*Mass3*Mass3*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)*(Mass2*Mass2 + Mass4*Mass4 - x + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
+	  // + 2.*f3*(f3+f4*1./x)*(Mass2*Mass2*(omega2 - 2.*Mass1*y) + (Omega2 - x - (omega2 - 2.*Mass1*y))*Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
+	  // + 2.*f1*f2*(x*(2.*(omega2 - 2.*Mass1*y) - Omega2 - x) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4))
+	  // + (f2*(f3+f4*1./x)/2.)*((omega2 - 2.*Mass1*y)*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4))
+	  // + f2*f3*((Omega2 - x)*(omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3) + 2.*(omega2 - 2.*Mass1*y)*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
+	  // + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*(omega2 - 2.*Mass1*y)*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*(omega2 - 2.*Mass1*y)*(omega2 - 2.*Mass1*y)*x)
+	  
+	  TF2 func("func", "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*y) + ([1] - x - ([0] - 2.*[9]*y))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*y) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*y)*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3]) + 2.*([0] - 2.*[9]*y)*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*y)*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*y)*([0] - 2.*[9]*y)*x))");
       
-	// (f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
-	// + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
-	// + 2.*f3*f3*Mass3*Mass3*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)*(Mass2*Mass2 + Mass4*Mass4 - x + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
-	// + 2.*f3*(f3+f4*1./x)*(Mass2*Mass2*(omega2 - 2.*Mass1*y) + (Omega2 - x - (omega2 - 2.*Mass1*y))*Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
-	// + 2.*f1*f2*(x*(2.*(omega2 - 2.*Mass1*y) - Omega2 - x) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4))
-	// + (f2*(f3+f4*1./x)/2.)*((omega2 - 2.*Mass1*y)*(Omega2 - x)/(Mass3*Mass3)*(Mass2*Mass2 - Mass4*Mass4) + (Omega2 - x)*(Omega2 - x)*Mass4*Mass4/(Mass3*Mass3) + 2.*TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.) - 2.*x*(Mass2*Mass2 + Mass4*Mass4))
-	// + f2*f3*((Omega2 - x)*(omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3) + 2.*(omega2 - 2.*Mass1*y)*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
-	// + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*(omega2 - 2.*Mass1*y)*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*(omega2 - 2.*Mass1*y)*(omega2 - 2.*Mass1*y)*x)
-	
-	TF2 func("func", "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*y) + ([1] - x - ([0] - 2.*[9]*y))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*y) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*y)*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3]) + 2.*([0] - 2.*[9]*y)*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*y)*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*y)*([0] - 2.*[9]*y)*x))");
-      
-	func.SetParameter(0, omega2);
-	func.SetParameter(1, Omega2);
-	func.SetParameter(2, Mass2);
-	func.SetParameter(4, Mass4);
-	func.SetParameter(3, Mass3);
-	func.SetParameter(5, f1);
-	func.SetParameter(6, f2);
-	func.SetParameter(7, f3);
-	func.SetParameter(8, f4);
-	func.SetParameter(9, Mass1);
-	
-	ROOT::Math::WrappedMultiTF1 wf1(func, 2);
-	ROOT::Math::AdaptiveIntegratorMultiDim ig;
-	ig.SetFunction(wf1);
-	ig.SetRelTolerance(0.001);
-        double xmin[] = {q2min, ENmin};
-        double xmax[] = {q2max, ENmax};
-        b = ig.Integral(xmin, xmax);
-        br = a*b;
+	  func.SetParameter(0, omega2);
+	  func.SetParameter(1, Omega2);
+	  func.SetParameter(2, Mass2);
+	  func.SetParameter(4, Mass4);
+	  func.SetParameter(3, Mass3);
+	  func.SetParameter(5, f1);
+	  func.SetParameter(6, f2);
+	  func.SetParameter(7, f3);
+	  func.SetParameter(8, f4);
+	  func.SetParameter(9, Mass1);
+	  
+	  ROOT::Math::WrappedMultiTF1 wf1(func, 2);
+	  ROOT::Math::AdaptiveIntegratorMultiDim ig;
+	  ig.SetFunction(wf1);
+	  ig.SetRelTolerance(0.001);
+          double xmin[] = {q2min, EN};
+          double xmax[] = {q2max, EN+ENstep};
+          b = ig.Integral(xmin, xmax);
+          br += b;
+        }
+        br *= a;
       }
       else {
-	br = 0.;
+        br = 0.;
       }
     }
   }
@@ -879,8 +885,8 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
   Double_t PS = 0.;
   Double_t PSF = 0.;
   Double_t BR = 0.;
-  Double_t xMN[Masses];
-  Double_t yBR[Masses];
+  TVectorD xMN(Masses);
+  TVectorD yBR(Masses);
   
   if (Prod == kTRUE) {
     if (TwoBody == kTRUE) {
@@ -888,15 +894,15 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
 	PS = PhaseSpace(Mass1, MN, Mass2);
 	PSF = PhaseSpaceFactor(Mass1, MN, Mass2, PS);
 	BR = factor*ComputeBR(Mass1, MN, Mass2, 0., PSF, Prod, TwoBody);
-	xMN[MN] = MN/1000.;
-	yBR[MN] = BR;
+	xMN[(MN-InitialMass)/step] = MN/1000.;
+	yBR[(MN-InitialMass)/step] = BR;
       }
     }
     else if (TwoBody == kFALSE) {
       for (Int_t MN = InitialMass; MN < Mass; MN += step) {
         BR = factor*ComputeBR(Mass1, MN, Mass2, Mass3, 0., Prod, TwoBody);
-        xMN[MN] = MN/1000.;
-        yBR[MN] = BR;
+        xMN[(MN-InitialMass)/step] = MN/1000.;
+        yBR[(MN-InitialMass)/step] = BR;
       }
     }
   }
@@ -904,32 +910,32 @@ void MassScan(Double_t Mass1, Double_t Mass2, Double_t Mass3, Bool_t Prod, Bool_
     if (Gamma == kTRUE) {
       for (Int_t MN = InitialMass; MN < Mass; MN += step) {
 	BR = DecayWidth(MN, Mass1, Mass2, TwoBody);
-	xMN[MN] = MN/1000.;
-	yBR[MN] = BR;
+	xMN[(MN-InitialMass)/step] = MN/1000.;
+	yBR[(MN-InitialMass)/step] = BR;
       }
     }
     else {
       if (TwoBody == kTRUE) {
 	for (Int_t MN = InitialMass; MN < Mass; MN += step) {
 	  BR = factor*ComputeBR(MN, Mass1, Mass2, 0., 0., Prod, TwoBody);
-	  xMN[MN] = MN/1000.;
-	  yBR[MN] = BR;
+	  xMN[(MN-InitialMass)/step] = MN/1000.;
+	  yBR[(MN-InitialMass)/step] = BR;
 	}
       }
       else if (TwoBody == kFALSE) {
 	for (Int_t MN = InitialMass; MN < Mass; MN += step) {
 	  BR = factor*ComputeBR(MN, Mass1, Mass2, 0., 0., Prod, TwoBody);  // factor to be removed/changed when taking into account coupling
-	  xMN[MN] = MN/1000.;
-	  yBR[MN] = BR;
+	  xMN[(MN-InitialMass)/step] = MN/1000.;
+	  yBR[(MN-InitialMass)/step] = BR;
 	}
       }
     }
   }
   
-  TGraph* gr = new TGraph(Mass, xMN, yBR);
+  TGraph* gr = new TGraph(xMN, yBR);
   
   gr->SetNameTitle(Title.c_str(), Title.c_str());
-  gr->SetLineWidth(5);
+  gr->SetLineWidth(4);
   gr->SetFillColor(0);
   
   if (Prod == kTRUE) {
@@ -1009,11 +1015,11 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     gPad->SetLogz();
     
     if (model == 1)
-      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 2)
-      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
     else if (model == 3)
-      gPad->SaveAs(Form("/Users/lorenza/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
   }
 }
 
@@ -1099,14 +1105,14 @@ void AllProd (Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-8);
   M->SetMaximum(1.1);
-  M->GetXaxis()->SetLimits(0.1, 2.2);
+  M->GetXaxis()->SetLimits(0., 2.5);
   gPad->BuildLegend(0.818, 0.223, 0.984, 0.881);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NProdGraph_%i.png", model));
 
   new TCanvas;
   TGraph* sum = SumAllGraphs(M);
@@ -1127,8 +1133,8 @@ void AllProd (Int_t model, TMultiGraph* M) {
   sum->Draw();
   gPad->Update();
   gPad->Write();
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NSumProdGraph_%i.png", model));
 }
 
 // Function to call all N decay modes
@@ -1152,9 +1158,9 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   MassScan(e,         tau, 0., 0, 0, 0, "N #rightarrow e#tau#nu",    M, 1.);
   MassScan(mu,        tau, 0., 0, 0, 0, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 0, "N #rightarrow #pi#tau",     M, 1.);
-  //MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
-  //MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
-  //MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
+  MassScan(K,         tau, 0., 0, 1, 0, "N #rightarrow K#tau",       M, 1.);
+  MassScan(rho,       tau, 0., 0, 1, 0, "N #rightarrow #rho#tau",    M, 1.);
+  MassScan(tau,       tau, 0., 0, 0, 0, "N #rightarrow #tau#tau#nu", M, 1.);
   
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1170,14 +1176,14 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-7);
   M->SetMaximum(1.5);
-  M->GetXaxis()->SetLimits(0., 4.);
+  M->GetXaxis()->SetLimits(0., 5.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
  
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NDecayGraph_%i.png", model));
 }
 
 // Function to call all N partial decay widths
@@ -1202,9 +1208,9 @@ void AllGamma(Int_t model, TMultiGraph* M) {
 
   MassScan(mu,        tau, 0., 0, 0, 1, "N #rightarrow #mu#tau#nu",  M, 1.);
   MassScan(pi,        tau, 0., 0, 1, 1, "N #rightarrow #pi#tau",     M, 1.);
-  //MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
-  //MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
-  //MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
+  MassScan(K,         tau, 0., 0, 1, 1, "N #rightarrow K#tau",       M, 1.);
+  MassScan(rho,       tau, 0., 0, 1, 1, "N #rightarrow #rho#tau",    M, 1.);
+  MassScan(tau,       tau, 0., 0, 0, 1, "N #rightarrow #tau#tau#nu", M, 1.);
 
   M->Draw("AC");
   M->GetXaxis()->SetTitle("N mass [GeV/c^{2}]");
@@ -1220,14 +1226,14 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-18);
   M->SetMaximum(1.E-6);
-  M->GetXaxis()->SetLimits(0., 4.);
+  M->GetXaxis()->SetLimits(0., 5.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
   gPad->Write();
   
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
-  gPad->SaveAs(Form("/Users/lorenza/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.pdf", model));
+  gPad->SaveAs(Form("/home/li/cernbox/PhD/Thesis/Thesis/Thesis/images/NWidthGraph_%i.png", model));
 }
 
 // Main
@@ -1244,7 +1250,7 @@ Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
 
   TGaxis::SetMaxDigits(2);
 
-if (model == 1 || model == 2 || model == 3 || model == 4)
+  if (model == 1 || model == 2 || model == 3 || model == 4)
     SetModel(model);
   else {
     cout<<"[GeneralPlots] Unknown model:"<<endl;
@@ -1254,7 +1260,7 @@ if (model == 1 || model == 2 || model == 3 || model == 4)
     cout<<"4: 10:1:0"<<endl;
     exit(1);
   }
-  
+    
   TMultiGraph* Mprod = new TMultiGraph("Mprod", "");
   Mprod->SetName("Mprod");
   TMultiGraph* Mdecay = new TMultiGraph("Mdecay", "");
@@ -1271,7 +1277,7 @@ if (model == 1 || model == 2 || model == 3 || model == 4)
     HistoTitle = "III (0:1:10)";
   else if (model == 4)
     HistoTitle = "IV (10:1:0)";
-
+  
   Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
   Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
   Mgamma->SetTitle(("N partial decay widths vs N mass, model " + HistoTitle).c_str());

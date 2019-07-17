@@ -2,6 +2,11 @@
 
 Double_t Par[6] = {0., 0., 0., 0., 0., 0.};
 Double_t minSigma = 0.;
+Double_t massMin = 0.25;
+Double_t massMax = 1.96;
+Double_t massStep = 0.01;
+Int_t nMassBins = (massMax - massMin)/massStep;
+Double_t binWidth = (massMax - massMin)/(nMassBins);
 
 void Save(TString path, TCanvas *c, TH1D* h, TString x, Double_t labelSize, Double_t titleSize) {
 
@@ -39,12 +44,12 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
     h->Draw("text");
   else
     h->Draw("colz");
-
+  /*
   if (name.Contains("ZPrompt"))
     gPad->SetLogy();
   else
     gPad->SetLogy(0);
-
+  */
   h->GetXaxis()->SetTitle(x);
   h->GetYaxis()->SetTitle(y);
   h->SetTitleSize(titleSize, "t");
@@ -117,8 +122,6 @@ TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
   Int_t lastBin = h->FindLastBinAbove(0.,1);
   Double_t lastBinValue = h->GetBinCenter(lastBin)-h->GetBinWidth(lastBin)/2.;
   Int_t counter = 0;
-  Double_t massMin = 0.2;
-  Double_t massMax = 2.;
   TGraph *res = new TGraph();
 
   for (Double_t massHyp = massMin-minSigma; massHyp <= massMax+minSigma; massHyp += minSigma) {
@@ -217,11 +220,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Double_t yGTKMax = 30.;
   Double_t massSigma = 0.0045; //GeV (fixed from 1 GeV mass);
   Double_t sigmaStep = 0.25; // step for mass window center
-  Double_t massMin = 0.2;
-  Double_t massMax = 2.;
-  Double_t massStep = 0.01;
-  Int_t nMassBins = (massMax - massMin)/massStep; //(massMax - massMin)/massSigma; why was it like this?
-  Double_t binWidth = (massMax - massMin)/nMassBins;
 
   // Finding paths
   
@@ -234,9 +232,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -266,6 +264,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Double_t energyPi;
   Double_t energyMu;
   Double_t invMass;
+  //Double_t trueMass;
   Double_t L0TPTime;
   Double_t xGTK31;
   Double_t yGTK31;
@@ -315,6 +314,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   tree->SetBranchAddress("energyPi", &energyPi);
   tree->SetBranchAddress("energyMu", &energyMu);
   tree->SetBranchAddress("invMass", &invMass);
+  //tree->SetBranchAddress("trueMass", &trueMass);
   tree->SetBranchAddress("L0TPTime", &L0TPTime);
   tree->SetBranchAddress("xGTK31", &xGTK31);
   tree->SetBranchAddress("yGTK31", &yGTK31);
@@ -393,6 +393,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hMomPiPromptPiPlusMuMinus = new TH1D("hMomPiPrompt", "Prompt background studies", 100, 0., 200.);
   TH1D *hMomMuPromptPiPlusMuMinus = new TH1D("hMomMuPrompt", "Prompt background studies", 100, 0., 200.);
 
+  TH2D *hInvMassVsZPromptPiPlusMuMinus = new TH2D("hInvMassVsZPrompt", "Prompt background studies", 1000, 90., 120., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH2D *hInvMassVsZq2PromptPiPlusMuMinus = new TH2D("hInvMassVsZq2Prompt", "Prompt background studies", 1000, 90., 190., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TH2D *hSRPromptPiPlusMuMinus = new TH2D("hSRPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPromptPiPlusMuMinus = new TH2D("hSRFinalPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   
@@ -425,6 +427,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   // SR - pi+mu-
 
   TH1D *hDistSRPiPlusMuMinus = new TH1D("hDistSR", "Signal region background studies", 100, 0., 1000.);
+  TH1D *hCDASRPiPlusMuMinus = new TH1D("hCDASR", "Signal region background studies", 100, 0., 1000.);
   TH1D *hTimeSRPiPlusMuMinus = new TH1D("hTimeSR", "Signal region background studies", 100, -15., 15.);
   TH1D *hZSRPiPlusMuMinus = new TH1D("hZSR", "Signal region background studies", 500, 100., 190.);
   TH2D *hDistvsMassSRPiPlusMuMinus = new TH2D("hDistvsMassSR", "Signal region background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., 50, 0., 1000.);
@@ -438,7 +441,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   // MC only - pi+mu-
 
-  TH1D *hInvMassMCPiPlusMuMinus = new TH1D("hInvMassMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassMCPiPlusMuMinus = new TH1D("hInvMassMC", "MC studies", 1.E3, massMin-binWidth/2., massMax+binWidth/2.);
+  TH2D *hInvMassRecoVsMCPiPlusMuMinus = new TH2D("hInvMassRecoVsMCPiPlusMuMinus", "MC studies", 1000, massMin-binWidth/2., massMax+binWidth/2., 1000, massMin-binWidth/2., massMax+binWidth/2.);
   TGraph *gMassMCPiPlusMuMinus = new TGraph();
   gMassMCPiPlusMuMinus->SetNameTitle("PiPlusMuMinus/gMassMC", "MC studies");
 
@@ -467,6 +471,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     Bool_t SB = (Zvertex >= ZVertexMin && Zvertex <= ZVertexMax);
     Bool_t FV = (Zvertex >= ZVertexMax && Zvertex <= ZEndFV);
     Bool_t Par = (BeamlineDist >= BeamdistMin && BeamlineDist <= BeamdistMax);
+    //Bool_t Par = (BeamCDA1, BeamCDA2);
     Bool_t PiPlusMuMinus = ((Assoc == 2 && Charge1 == 1) || (Assoc == 1 && Charge1 == -1));
     Bool_t Spike1 = ((Assoc == 1 && Charge1 == -1) && (Mom2->Mag()/1000. >= 70. && Mom2->Mag()/1000. <= 80.) && (xGTK32 >= xGTKMin && xGTK32 <= xGTKMax && yGTK32 >= yGTKMin && yGTK32 <= yGTKMax));
     Bool_t Spike2 = ((Assoc == 2 && Charge1 == 1) && (Mom1->Mag()/1000. >= 70. && Mom1->Mag()/1000. <= 80.) && (xGTK31 >= xGTKMin && xGTK31 <= xGTKMax && yGTK31 >= yGTKMin && yGTK31 <= yGTKMax));
@@ -476,12 +481,15 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     
     if (MC && Zero && noSpike && PiPlusMuMinus) {
       hInvMassMCPiPlusMuMinus->Fill(invMass/1000.);
+      //hInvMassRecoVsMCPiPlusMuMinus->Fill(trueMass, invMass/1000.);
     }
     
     // 1 - Events outside blinded region
     
     if (outsideSR && Zero && noSpike && CDAIn && PiPlusMuMinus) { // all events outside blinded region
       hDistSRPiPlusMuMinus->Fill(BeamlineDist, Weight);
+      hCDASRPiPlusMuMinus->Fill(BeamCDA1, Weight);
+      hCDASRPiPlusMuMinus->Fill(BeamCDA2, Weight);
       hTimeSRPiPlusMuMinus->Fill(CHODTime1-CHODTime2, Weight);
       hZSRPiPlusMuMinus->Fill(Zvertex/1000., Weight);
       hInvMassSRPiPlusMuMinus->Fill(invMass/1000., Weight);
@@ -650,6 +658,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hDistvsMassParSRPiPlusMuMinus->Fill(invMass/1000., BeamlineDist, Weight);
       }
       if (Prompt && Zero && !MC && CDAIn) { // ...and vertex sidebands (0-charge)
+	hInvMassVsZPromptPiPlusMuMinus->Fill(Zvertex/1000., invMass/1000.);
 	counterPromptSBZPiPlusMuMinus++;
       }
       if (SB && an.Contains("Pos") && CDAIn) { // ...and vertex sidebands (pos-charge)
@@ -662,6 +671,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       if (FV && an.Contains("Pos") && CDAIn) { // ...and pos-charge evt in FV for inv mass distr
 	hInvMassPromptSRPiPlusMuMinus->Fill(invMass/1000., Weight);		
       }
+      if ((SB || FV) && an.Contains("Pos") && CDAIn) { // ...and all Z range (pos-charge)
+	hInvMassVsZq2PromptPiPlusMuMinus->Fill(Zvertex/1000., invMass/1000.);
+      }
     }
   }
 
@@ -673,16 +685,14 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     Int_t counter = 0;
     Double_t sigma = 0.;
     Double_t sigmaMin = 999.;
-    hInvMassMCPiPlusMuMinus->Draw();
-    Int_t firstBin = hInvMassMCPiPlusMuMinus->FindFirstBinAbove(0.,1);
-    Double_t firstBinValue = hInvMassMCPiPlusMuMinus->GetBinCenter(firstBin)-hInvMassMCPiPlusMuMinus->GetBinWidth(firstBin)/2.;
-    Int_t lastBin = hInvMassMCPiPlusMuMinus->FindLastBinAbove(0.,1);
-    Double_t lastBinValue = hInvMassMCPiPlusMuMinus->GetBinCenter(lastBin)-hInvMassMCPiPlusMuMinus->GetBinWidth(lastBin)/2.;
 
-    for (Double_t mass = firstBinValue+massStep; mass <= lastBinValue-massStep; mass += massStep) {
-      TF1 *f1 = new TF1("f1", "gaus", mass-massStep, mass+massStep);
+    hInvMassMCPiPlusMuMinus->Draw();
+
+    for (Double_t mass = massMin; mass < massMax; mass += massStep) {
+      TF1 *f1 = new TF1("f1", "gaus", mass-massStep/2., mass+massStep/2.);
       hInvMassMCPiPlusMuMinus->Fit("f1", "Rq");
       sigma = f1->GetParameter(2);
+      //cout<<mass<<" "<<sigma<<endl;
       gMassMCPiPlusMuMinus->SetPoint(counter, mass, sigma);
       if (sigma < sigmaMin && sigma != 0.)
 	sigmaMin = sigma;
@@ -703,16 +713,16 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     if (Zero) {
 	
       // A - Combinatorial
-	
+
       cout<<"Combinatorial bkg - Kolmogorov test for SR sample: "<<hInvMassCombSRPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<" and enriched SR sample: "<<hInvMassCombSREnrichedPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<endl;
       hInvMassCombKolmPiPlusMuMinus = (TH1D*)hInvMassCombPiPlusMuMinus->Clone();
       hInvMassCombKolmPiPlusMuMinus->SetName("hInvMassCombKolmPiPlusMuMinus");
       hInvMassCombKolmPiPlusMuMinus->Scale(hInvMassCombSRPiPlusMuMinus->Integral()/hInvMassCombKolmPiPlusMuMinus->Integral());
       gBkg1SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 1.);
       gBkg2SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 2.);
-	
+
       // B - Parasitic
-	
+
       cout<<"Parasitic bkg - Kolmogorov test for SR sample: "<<hInvMassParSRPiPlusMuMinus->KolmogorovTest(hInvMassParPiPlusMuMinus)<<endl;
       hInvMassParKolmPiPlusMuMinus = (TH1D*)hInvMassParPiPlusMuMinus->Clone();
       hInvMassParKolmPiPlusMuMinus->SetName("hInvMassParKolmPiPlusMuMinus");
@@ -790,6 +800,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Prompt/", c, hMomMuPromptPiPlusMuMinus, "Muon momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePromptPiPlusMuMinus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePromptPPiPlusMuMinus, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsZPromptPiPlusMuMinus, "Z coordinate of vertex [m]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsZq2PromptPiPlusMuMinus, "Z coordinate of vertex [m]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRFinalPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg1SigmaPromptPiPlusMuMinus, "gBkg1SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
@@ -810,6 +822,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   if (!an.Contains("Pos")  && !histo1.Contains("2016") && !histo1.Contains("2017") && !histo1.Contains("2018") && !histo1.Contains("Data")) {
     Save(path + "PiPlusMuMinus/MC/", c, hInvMassMCPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+    Save(path + "PiPlusMuMinus/MC/", c, hInvMassRecoVsMCPiPlusMuMinus, "MC true invariant mass [GeV/c^{2}]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiPlusMuMinus/MC/", c, gMassMCPiPlusMuMinus, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Sigma [GeV/c^{2}]", labelSize, titleSize);
   }
 
@@ -836,7 +849,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBPPiPlusMuMinus = 0;
   Double_t counterPromptFVPPiPlusMuMinus = 0;
   Double_t PPiPlusMuMinus = 0.;
-  TString pathPiPlusMuMinus = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString pathPiPlusMuMinus = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   
