@@ -1000,15 +1000,24 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       mod = "III";
     
     h2->Draw("colz");
-    h2->SetTitle(Form("%s, m_{N} = %.1f GeV, model %s",Title.c_str(), Mass2, mod.c_str()));
-    h2->GetXaxis()->SetTitle("H'l invariant mass [GeV^{2}/c^{4}]");
-    h2->GetYaxis()->SetTitle("Nl invariant mass [GeV^{2}/c^{4}]");
+    h2->SetTitle(Form("%s, model %s",Title.c_str(), mod.c_str()));
+    h2->GetXaxis()->SetTitle("m_{Hl}^{2} [GeV^{2}/c^{4}]");
+    h2->GetYaxis()->SetTitle("m_{Nl}^{2} [GeV^{2}/c^{4}]");
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
     gPad->SetLogz();
     gStyle->SetOptStat(0);
-    
-    gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+
+    TString title = (TString)Title;
+
+    if (title.Contains("D #rightarrow K^{0}eN")) {
+      gPad->SaveAs("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/dalitz.png");
+      gPad->SaveAs("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/dalitz.pdf");
+    }
+    else if (title.Contains("D^{0} #rightarrow K^{*}#muN")) {
+      gPad->SaveAs("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/dalitz1.png");
+      gPad->SaveAs("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/dalitz1.pdf");
+    }      
   }
 }
 
