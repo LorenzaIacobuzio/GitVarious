@@ -94,6 +94,7 @@ protected:
   Double_t energyPi;
   Double_t energyMu;
   Double_t invMass;
+  Double_t trueMass;
   Double_t L0TPTime;
   Double_t xGTK31;
   Double_t yGTK31;
@@ -117,6 +118,7 @@ protected:
   Bool_t autoPass;
   Bool_t CHANTIAssoc1;
   Bool_t CHANTIAssoc2;
+  Bool_t isControlTrigger;
   Int_t Assoc;
   Int_t Charge1;
   Int_t Charge2;

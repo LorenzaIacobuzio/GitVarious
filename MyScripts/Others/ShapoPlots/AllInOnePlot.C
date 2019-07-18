@@ -114,7 +114,7 @@ Double_t ffDS = 0.08;
 // variables for macro
 
 const int InitialMass = 10;
-const int Mass = 5000;
+const int Mass = 3000;
 const int step = 10;
 const int Masses = (Mass-InitialMass)/step;
 TString name = "";
@@ -256,18 +256,16 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  Double_t PN = TMath::Sqrt(TMath::Abs(EN*EN - Mass2*Mass2));
 	  Double_t Pl = TMath::Sqrt(TMath::Abs(El*El - Mass4*Mass4));
 	  Double_t PK = TMath::Sqrt(TMath::Abs(EK*EK - Mass3*Mass3));
-	  //Double_t PKl = TMath::Sqrt(PK*PK + Pl*Pl - 2.*PK*Pl);
-	  //Double_t EKl = TMath::Sqrt(PKl*PKl - mKl);
-	  //Double_t gammaKl = EKl/(TMath::Sqrt(mKl)*cLight*cLight);
-	  //Double_t betaKl = PKl*cLight/EKl;
-	  //Double_t Pl1 = gammaKl*(Pl + betaKl*El/cLight);
-	  //Double_t Pl2 = gammaKl*(-Pl + betaKl*El/cLight);
-	  //Double_t El1 = gammaKl*(El + betaKl*Pl*cLight);
-	  //Double_t El2 = gammaKl*(El - betaKl*Pl*cLight);
-	  //q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
-	  //q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
-	  q2min = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl);
-	  q2max = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl);
+	  Double_t PKl = PN;
+	  Double_t EKl = TMath::Sqrt(PKl*PKl + mKl);
+	  Double_t betaKl = PN/EKl;
+	  Double_t gammaKl = 1./(TMath::Sqrt(1. - betaKl*betaKl));
+	  Double_t Pl1 = gammaKl*(-Pl - betaKl*El);
+	  Double_t Pl2 = gammaKl*(Pl - betaKl*El);
+	  Double_t El1 = gammaKl*(El + betaKl*Pl);
+	  Double_t El2 = gammaKl*(El - betaKl*Pl);
+	  q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
+	  q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
 
 	  Double_t tau, V, f, g, b;
 	  
@@ -308,24 +306,20 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  
 	  a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
 	  
-	  //(g*g*(x*(Mass2*Mass2 + Mass4*Mass4) - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*f*g*(Mass2*Mass2*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 -4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) + Mass4*Mass4*(4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)) + f*f*((4.*EN*Mass1 + Mass4*Mass4 - Mass2*Mass2 - x)*(2.*Mass1*Mass1 - 2.*Mass3*Mass3 - 4.*EN*Mass1 - Mass4*Mass4 + Mass2*Mass2 + x) - (2.*Mass1*Mass1 + 2.*Mass3*Mass3 - x)*(x - Mass2*Mass2 - Mass4*Mass4)));
+	  TF1 *func = new TF1("func", "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*[6]*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*[6]*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*[6]*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*[6]*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))");
 	  
-	  TF2 func("func", "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*y*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*y*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*y*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*y*[1] - [4]*[4] + [2]*[2] + x) + (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))");
+	  func->SetParameter(0, f);
+	  func->SetParameter(1, Mass1);
+	  func->SetParameter(2, Mass2);
+	  func->SetParameter(3, Mass3);
+	  func->SetParameter(4, Mass4);
+	  func->SetParameter(5, g);
+	  func->SetParameter(6, EN);
 	  
-	  func.SetParameter(0, f);
-	  func.SetParameter(1, Mass1);
-	  func.SetParameter(2, Mass2);
-	  func.SetParameter(3, Mass3);
-	  func.SetParameter(4, Mass4);
-	  func.SetParameter(5, g);
-	  
-	  ROOT::Math::WrappedMultiTF1 wf1(func, 2);
-	  ROOT::Math::AdaptiveIntegratorMultiDim ig;
+	  ROOT::Math::WrappedTF1 wf1(*func);
+	  ROOT::Math::GaussLegendreIntegrator ig;
 	  ig.SetFunction(wf1);
-	  ig.SetRelTolerance(0.001);
-	  double xmin[] = {q2min, EN};
-	  double xmax[] = {q2max, EN+ENstep};
-	  b = ig.Integral(xmin, xmax);
+	  b = ig.Integral(q2min, q2max);
 	  br += b;
 	}
 	br *= a;
@@ -354,18 +348,16 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  Double_t PN = TMath::Sqrt(TMath::Abs(EN*EN - Mass2*Mass2));
 	  Double_t Pl = TMath::Sqrt(TMath::Abs(El*El - Mass4*Mass4));
 	  Double_t PK = TMath::Sqrt(TMath::Abs(EK*EK - Mass3*Mass3));
-	  //Double_t PKl = TMath::Sqrt(PK*PK + Pl*Pl - 2.*PK*Pl);
-	  //Double_t EKl = TMath::Sqrt(PKl*PKl - mKl);
-	  //Double_t gammaKl = EKl/(TMath::Sqrt(mKl)*cLight*cLight);
-	  //Double_t betaKl = PKl*cLight/EKl;
-	  //Double_t Pl1 = gammaKl*(Pl + betaKl*El/cLight);
-	  //Double_t Pl2 = gammaKl*(-Pl + betaKl*El/cLight);
-	  //Double_t El1 = gammaKl*(El + betaKl*Pl*cLight);
-	  //Double_t El2 = gammaKl*(El - betaKl*Pl*cLight);
-	  //q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
-	  //q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
-	  q2min = (EN+El)*(EN+El) - (PN+Pl)*(PN+Pl);
-	  q2max = (EN+El)*(EN+El) - (PN-Pl)*(PN-Pl);
+	  Double_t PKl = PN;
+	  Double_t EKl = TMath::Sqrt(PKl*PKl + mKl);
+	  Double_t betaKl = PN/EKl;
+	  Double_t gammaKl = 1./(TMath::Sqrt(1. - betaKl*betaKl));
+	  Double_t Pl1 = gammaKl*(-Pl - betaKl*El);
+	  Double_t Pl2 = gammaKl*(Pl - betaKl*El);
+	  Double_t El1 = gammaKl*(El + betaKl*Pl);
+	  Double_t El2 = gammaKl*(El - betaKl*Pl);
+	  q2max = (EN+El1)*(EN+El1) - (PN+Pl1)*(PN+Pl1); // Nl parallel
+	  q2min = (EN+El2)*(EN+El2) - (PN+Pl2)*(PN+Pl2); // Nl back to back
 
 	  Double_t tau, V, f, f1, f2, f3, f4, omega2, Omega2, b;
 
@@ -399,26 +391,24 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  // + f2*f3*((Omega2 - x)*(omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3) + 2.*(omega2 - 2.*Mass1*y)*(Mass4*Mass4 - Mass2*Mass2) + (Omega2 - x)*(Mass2*Mass2 - Mass4*Mass4 - x))
 	  // + f1*f1*((Omega2 - x)*(Omega2 - x)*(x - Mass2*Mass2 + Mass4*Mass4) - 2.*Mass3*Mass3*(x*x - TMath::Power(Mass2*Mass2 - Mass4*Mass4, 2.)) + 2.*(omega2 - 2.*Mass1*y)*(Omega2 - x)*(Mass2*Mass2 - x - Mass4*Mass4) + 2.*(omega2 - 2.*Mass1*y)*(omega2 - 2.*Mass1*y)*x)
 	  
-	  TF2 func("func", "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*y) + ([1] - x - ([0] - 2.*[9]*y))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*y) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*y)*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*y)*([1] - x - ([0] - 2.*[9]*y))/([3]*[3]) + 2.*([0] - 2.*[9]*y)*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*y)*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*y)*([0] - 2.*[9]*y)*x))");
+	  TF2 *func = new TF2("func", "(([6]*[6]/2.)*(x - [2]*[2] - [4]*[4] + ([0] - 2.*[9]*[10])*([1] - x - ([0] - 2.*[9]*[10]))/([3]*[3])) + (([7]+[8]*1./x)*([7]+[8]*1./x)/2.)*([2]*[2] + [4]*[4])*(x - [2]*[2] + [4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[7]*[7]*[3]*[3]*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x)*([2]*[2] + [4]*[4] - x + ([0] - 2.*[9]*[10])*([1] - x - ([0] - 2.*[9]*[10]))/([3]*[3])) + 2.*[7]*([7]+[8]*1./x)*([2]*[2]*([0] - 2.*[9]*[10]) + ([1] - x - ([0] - 2.*[9]*[10]))*[4]*[4])*(([1] - x)*([1] - x)/(4.*[3]*[3]) - x) + 2.*[5]*[6]*(x*(2.*([0] - 2.*[9]*[10]) - [1] + x) + ([1] - x)*([2]*[2] - [4]*[4])) + ([6]*([7]+[8]*1./x)/2.)*(([0] - 2.*[9]*[10])*([1] - x)/([3]*[3])*([2]*[2] - [4]*[4]) + ([1] - x)*([1] - x)*[4]*[4]/([3]*[3]) + 2.*TMath::Power([2]*[2] - [4]*[4], 2.) - 2.*x*([2]*[2] + [4]*[4])) + [6]*[7]*(([1] - x)*([0] - 2.*[9]*[10])*([1] - x - ([0] - 2.*[9]*[10]))/([3]*[3]) + 2.*([0] - 2.*[9]*[10])*([4]*[4] - [2]*[2]) + ([1] - x)*([2]*[2] - [4]*[4] - x)) + [5]*[5]*(([1] - x)*([1] - x)*(x - [2]*[2] + [4]*[4]) - 2.*[3]*[3]*(x*x - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*([0] - 2.*[9]*[10])*([1] - x)*([2]*[2] - x - [4]*[4]) + 2.*([0] - 2.*[9]*[10])*([0] - 2.*[9]*[10])*x))");
       
-	  func.SetParameter(0, omega2);
-	  func.SetParameter(1, Omega2);
-	  func.SetParameter(2, Mass2);
-	  func.SetParameter(4, Mass4);
-	  func.SetParameter(3, Mass3);
-	  func.SetParameter(5, f1);
-	  func.SetParameter(6, f2);
-	  func.SetParameter(7, f3);
-	  func.SetParameter(8, f4);
-	  func.SetParameter(9, Mass1);
+	  func->SetParameter(0, omega2);
+	  func->SetParameter(1, Omega2);
+	  func->SetParameter(2, Mass2);
+	  func->SetParameter(4, Mass4);
+	  func->SetParameter(3, Mass3);
+	  func->SetParameter(5, f1);
+	  func->SetParameter(6, f2);
+	  func->SetParameter(7, f3);
+	  func->SetParameter(8, f4);
+	  func->SetParameter(9, Mass1);
+	  func->SetParameter(10, EN);
 	  
-	  ROOT::Math::WrappedMultiTF1 wf1(func, 2);
-	  ROOT::Math::AdaptiveIntegratorMultiDim ig;
-	  ig.SetFunction(wf1);
-	  ig.SetRelTolerance(0.001);
-          double xmin[] = {q2min, EN};
-          double xmax[] = {q2max, EN+ENstep};
-          b = ig.Integral(xmin, xmax);
+	  ROOT::Math::WrappedTF1 wf1(*func);
+          ROOT::Math::GaussLegendreIntegrator ig;
+          ig.SetFunction(wf1);
+          b = ig.Integral(q2min, q2max);
           br += b;
         }
         br *= a;
@@ -968,11 +958,12 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
   Mass3 = Mass3/1000.;
   Mass4 = Mass4/1000.;
 
-  for (Double_t Mass2 = 0.1; Mass2 < (Mass1-Mass3-Mass4); Mass2 += 0.1) {
+  //for (Double_t Mass2 = 0.1; Mass2 < (Mass1-Mass3-Mass4); Mass2 += 0.1) {
+  for (Double_t Mass2 = 0.5; Mass2 < 0.6; Mass2 += 0.1) {
 
     Int_t N = 100;
-    Double_t xmin = (Mass2+Mass3)*(Mass2+Mass3);
-    Double_t xmax = (Mass1-Mass4)*(Mass1-Mass4);
+    Double_t xmin = (Mass4+Mass3)*(Mass4+Mass3);
+    Double_t xmax = (Mass1-Mass2)*(Mass1-Mass2);
     Double_t ymin = (Mass2+Mass4)*(Mass2+Mass4);
     Double_t ymax = (Mass1-Mass3)*(Mass1-Mass3);
     
@@ -990,31 +981,34 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
       TLorentzVector *p1 = Event.GetDecay(0);
       TLorentzVector *p2 = Event.GetDecay(1);
       TLorentzVector *p3 = Event.GetDecay(2);
-      TLorentzVector p12 = *p1 + *p2;
       TLorentzVector p13 = *p1 + *p3;
+      TLorentzVector p23 = *p2 + *p3;
 
       if (W > wMax)
 	wMax = W;
       
-      h2->Fill(p12.M2(), p13.M2());
+      h2->Fill(p23.M2(), p13.M2());
     }
-    
-    cout<<Title<<" "<<wMax<<endl;
 
+    std::string mod = "";
+
+    if (model == 1)
+      mod = "I";
+    else if (model == 2)
+      mod = "II";
+    else if (model == 3)
+      mod = "III";
+    
     h2->Draw("colz");
-    h2->SetTitle(Form("%s, m_{N} = %.1f GeV, model %i",Title.c_str(), Mass2, model));
-    h2->GetXaxis()->SetTitle("Neutrino-meson invariant mass [GeV^{2}/c^{4}]");
-    h2->GetYaxis()->SetTitle("Neutrino-lepton invariant mass [GeV^{2}/c^{4}]");
+    h2->SetTitle(Form("%s, m_{N} = %.1f GeV, model %s",Title.c_str(), Mass2, mod.c_str()));
+    h2->GetXaxis()->SetTitle("H'l invariant mass [GeV^{2}/c^{4}]");
+    h2->GetYaxis()->SetTitle("Nl invariant mass [GeV^{2}/c^{4}]");
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
     gPad->SetLogz();
+    gStyle->SetOptStat(0);
     
-    if (model == 1)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model I/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
-    else if (model == 2)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model II/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
-    else if (model == 3)
-      gPad->SaveAs(Form("/home/li/Desktop/HeavyNeutrino/DalitzPlots/Model III/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
+    gPad->SaveAs(Form("/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/%s_%.1f_model%i.png", Title.c_str(), Mass2, model));
   }
 }
 
@@ -1044,16 +1038,16 @@ TGraph* SumAllGraphs(TMultiGraph* M) {
 void AllDalitz(Int_t model) {
 
   PhaseSpace(D,  K0,     e,  "D #rightarrow K^{0}eN"  ,     model);  // 3-body HNL production: Dalitz plots
-  PhaseSpace(D,  pi0,    e,  "D #rightarrow #pi^{0}eN" ,    model);
-  PhaseSpace(D0, K,      e,  "D^{0} #rightarrow KeN"  ,     model);
-  PhaseSpace(D0, pi,     e,  "D^{0} #rightarrow #pieN" ,    model);
-  PhaseSpace(D,  K0,     mu, "D #rightarrow K^{0}#muN" ,    model);
-  PhaseSpace(D,  pi0,    mu, "D #rightarrow #pi^{0}#muN",   model);
-  PhaseSpace(D0, K,      mu, "D^{0} #rightarrow K#muN" ,    model);
-  PhaseSpace(D0, pi,     mu, "D^{0} #rightarrow #pi#muN",   model);
-  PhaseSpace(D,  K0Star, e,  "D #rightarrow K^{0*}eN" ,     model);
-  PhaseSpace(D0, KStar,  e,  "D^{0} #rightarrow K^{*}eN" ,  model);
-  PhaseSpace(D,  K0Star, mu, "D #rightarrow K^{0*}#muN",    model);
+  //PhaseSpace(D,  pi0,    e,  "D #rightarrow #pi^{0}eN" ,    model);
+  //PhaseSpace(D0, K,      e,  "D^{0} #rightarrow KeN"  ,     model);
+  //PhaseSpace(D0, pi,     e,  "D^{0} #rightarrow #pieN" ,    model);
+  //PhaseSpace(D,  K0,     mu, "D #rightarrow K^{0}#muN" ,    model);
+  //PhaseSpace(D,  pi0,    mu, "D #rightarrow #pi^{0}#muN",   model);
+  //PhaseSpace(D0, K,      mu, "D^{0} #rightarrow K#muN" ,    model);
+  //PhaseSpace(D0, pi,     mu, "D^{0} #rightarrow #pi#muN",   model);
+  //PhaseSpace(D,  K0Star, e,  "D #rightarrow K^{0*}eN" ,     model);
+  //PhaseSpace(D0, KStar,  e,  "D^{0} #rightarrow K^{*}eN" ,  model);
+  //PhaseSpace(D,  K0Star, mu, "D #rightarrow K^{0*}#muN",    model);
   PhaseSpace(D0, KStar,  mu, "D^{0} #rightarrow K^{*}#muN", model);
 }
 
@@ -1171,7 +1165,7 @@ void AllDecay(Int_t model, TMultiGraph* M) {
   gPad->SetGridy();
   M->SetMinimum(1.E-7);
   M->SetMaximum(1.5);
-  M->GetXaxis()->SetLimits(0., 5.);
+  M->GetXaxis()->SetLimits(0., Mass/1000.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();
@@ -1220,8 +1214,8 @@ void AllGamma(Int_t model, TMultiGraph* M) {
   gPad->SetGridx();
   gPad->SetGridy();
   M->SetMinimum(1.E-18);
-  M->SetMaximum(1.E-4);
-  M->GetXaxis()->SetLimits(0., 5.);
+  M->SetMaximum(1.E-7);
+  M->GetXaxis()->SetLimits(0., Mass/1000.);
   gPad->BuildLegend(0.841, 0.218, 0.985, 0.862);
   gPad->Update();
   gPad->Modified();

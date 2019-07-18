@@ -145,6 +145,7 @@ void HeavyNeutrinoPos::InitOutput() {
     AddBranch("HeavyNeutrinoPosPassed", "energyPi", &energyPi);
     AddBranch("HeavyNeutrinoPosPassed", "energyMu", &energyMu);
     AddBranch("HeavyNeutrinoPosPassed", "invMass", &invMass);
+    AddBranch("HeavyNeutrinoPosPassed", "trueMass", &trueMass);
     AddBranch("HeavyNeutrinoPosPassed", "L0TPTime", &L0TPTime);
     AddBranch("HeavyNeutrinoPosPassed", "xGTK31", &xGTK31);
     AddBranch("HeavyNeutrinoPosPassed", "yGTK31", &yGTK31);
@@ -167,6 +168,7 @@ void HeavyNeutrinoPos::InitOutput() {
     AddBranch("HeavyNeutrinoPosPassed", "Assoc", &Assoc);
     AddBranch("HeavyNeutrinoPosPassed", "CHANTIAssoc1", &CHANTIAssoc1);
     AddBranch("HeavyNeutrinoPosPassed", "CHANTIAssoc2", &CHANTIAssoc2);
+    AddBranch("HeavyNeutrinoPosPassed", "isControlTrigger", &isControlTrigger);
     AddBranch("HeavyNeutrinoPosPassed", "Charge1", &Charge1);
     AddBranch("HeavyNeutrinoPosPassed", "Charge2", &Charge2);
     AddBranch("HeavyNeutrinoPosPassed", "nSec", &nSec);
@@ -339,6 +341,8 @@ void HeavyNeutrinoPos::Process(Int_t) {
 
   Double_t MN = 0.;
   
+  trueMass = 0.;
+
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
 
@@ -348,6 +352,7 @@ void HeavyNeutrinoPos::Process(Int_t) {
       if ((Bool_t)(Weights[i]["IsGood"]) == true) {
 	Weight = Weights[i]["Weight"];
 	MN = round(Weights[i]["Mass"])/1000.;
+	trueMass = MN;
       }  
     }
   }
@@ -358,8 +363,8 @@ void HeavyNeutrinoPos::Process(Int_t) {
     return;
 
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
-  Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
-  L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
+  isControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
+  L0TPTime = isControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
   L0TPTime *= TdcCalib;
   Double_t L0Window = 1.22*5.;
   Double_t KTAGWindow = 0.96*5.;
@@ -422,7 +427,7 @@ void HeavyNeutrinoPos::Process(Int_t) {
   CutID++;
 
   // CUT: Select two-track events
-  
+
   std::vector<DownstreamTrack> Tracks = *(std::vector<DownstreamTrack>*) GetOutput("DownstreamTrackBuilder.Output");
 
   FillHisto("hNtracks", Tracks.size());
@@ -471,6 +476,9 @@ void HeavyNeutrinoPos::Process(Int_t) {
 
   if (Tracks[0].GetIsFake() || Tracks[1].GetIsFake())
     return;
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // Handle fast MC and data
 
@@ -990,6 +998,9 @@ void HeavyNeutrinoPos::Process(Int_t) {
 	nCHOD++;
     }
   }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
   
   // CUT: NewCHOD extra activity for bkg studies
   
@@ -1014,6 +1025,9 @@ void HeavyNeutrinoPos::Process(Int_t) {
 	nNewCHOD++;
     }
   }
+
+  FillHisto("hCuts", CutID);
+  CutID++;
 
   // LKr extra activity for bkg studies
 
@@ -1269,9 +1283,6 @@ void HeavyNeutrinoPos::Process(Int_t) {
   xGTK32 = SpectrometerCand2->xAt(fZGTK3);
   yGTK31 = SpectrometerCand1->yAt(fZGTK3);
   yGTK32 = SpectrometerCand2->yAt(fZGTK3);
-
-  FillHisto("hCuts", CutID);
-  CutID++;
 
   // Reference plot - 5 
 

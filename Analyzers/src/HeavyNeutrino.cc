@@ -145,6 +145,7 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("HeavyNeutrinoPassed", "energyPi", &energyPi);
     AddBranch("HeavyNeutrinoPassed", "energyMu", &energyMu);
     AddBranch("HeavyNeutrinoPassed", "invMass", &invMass);
+    AddBranch("HeavyNeutrinoPassed", "trueMass", &trueMass);
     AddBranch("HeavyNeutrinoPassed", "L0TPTime", &L0TPTime);
     AddBranch("HeavyNeutrinoPassed", "xGTK31", &xGTK31);
     AddBranch("HeavyNeutrinoPassed", "yGTK31", &yGTK31);
@@ -167,6 +168,7 @@ void HeavyNeutrino::InitOutput() {
     AddBranch("HeavyNeutrinoPassed", "Assoc", &Assoc);
     AddBranch("HeavyNeutrinoPassed", "CHANTIAssoc1", &CHANTIAssoc1);
     AddBranch("HeavyNeutrinoPassed", "CHANTIAssoc2", &CHANTIAssoc2);
+    AddBranch("HeavyNeutrinoPassed", "isControlTrigger", &isControlTrigger);
     AddBranch("HeavyNeutrinoPassed", "Charge1", &Charge1);
     AddBranch("HeavyNeutrinoPassed", "Charge2", &Charge2);
     AddBranch("HeavyNeutrinoPassed", "nSec", &nSec);
@@ -339,6 +341,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   Double_t MN = 0.;
   
+  trueMass = 0.;
+
   if (GetWithMC()) {
     Event *evt = GetMCEvent();
 
@@ -348,6 +352,7 @@ void HeavyNeutrino::Process(Int_t) {
       if ((Bool_t)(Weights[i]["IsGood"]) == true) {
 	Weight = Weights[i]["Weight"];
 	MN = round(Weights[i]["Mass"])/1000.;
+	trueMass = MN;
       }  
     }
   }
@@ -358,8 +363,8 @@ void HeavyNeutrino::Process(Int_t) {
     return;
 
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
-  Bool_t ControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
-  L0TPTime = ControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
+  isControlTrigger = TriggerConditions::GetInstance()->IsControlTrigger(GetL0Data());
+  L0TPTime = isControlTrigger ? GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0CHOD).GetFineTime() : GetL0Data()->GetPrimitive(kL0TriggerSlot, kL0RICH).GetFineTime();
   L0TPTime *= TdcCalib;
   Double_t L0Window = 1.22*5.;
   Double_t KTAGWindow = 0.96*5.;
