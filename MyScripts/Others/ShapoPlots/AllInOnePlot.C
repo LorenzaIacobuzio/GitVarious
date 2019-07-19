@@ -229,6 +229,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 
   Double_t br = 0.;
   Double_t U = 0.;
+  Double_t Nsteps = 5.;
   
   if (Mass4 == e)
     U = UeSquared;
@@ -244,7 +245,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
 	Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
 	Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
-	Double_t ENstep = (ENmax-ENmin)/10.;
+	Double_t ENstep = (ENmax-ENmin)/Nsteps;
 	Double_t q2min = 0.;
 	Double_t q2max = 0.;
 	Double_t a = 0.;
@@ -304,7 +305,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	    }
 	  }
 	  
-	  a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	  a = U*tau*V*V*GF*GF/(64.*TMath::Power(TMath::Pi(), 3.)*Mass1);
 	  
 	  TF1 *func = new TF1("func", "([5]*[5]*(x*([2]*[2] + [4]*[4]) - TMath::Power([2]*[2] - [4]*[4], 2.)) + 2.*[5]*[0]*([2]*[2]*(2.*[1]*[1] - 2.*[3]*[3] -4.*[6]*[1] - [4]*[4] + [2]*[2] + x) + [4]*[4]*(4.*[6]*[1] + [4]*[4] - [2]*[2] - x)) + [0]*[0]*((4.*[6]*[1] + [4]*[4] - [2]*[2] - x)*(2.*[1]*[1] - 2.*[3]*[3] - 4.*[6]*[1] - [4]*[4] + [2]*[2] + x) - (2.*[1]*[1] + 2.*[3]*[3] - x)*(x - [2]*[2] - [4]*[4])))");
 	  
@@ -322,7 +323,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  b = ig.Integral(q2min, q2max);
 	  br += b;
 	}
-	br *= a;
+	br *= a/Nsteps;
       }
       else {
 	br = 0.;
@@ -336,7 +337,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	Double_t maxKl = TMath::Power(Mass1-Mass2, 2.);
 	Double_t ENmin = (Mass1*Mass1 - maxKl + Mass2*Mass2)/(2.*Mass1);
 	Double_t ENmax = (Mass1*Mass1 - minKl + Mass2*Mass2)/(2.*Mass1);
-	Double_t ENstep = (ENmax-ENmin)/10.;
+	Double_t ENstep = (ENmax-ENmin)/Nsteps;
 	Double_t q2min = 0.;
 	Double_t q2max = 0.;
 	Double_t a = 0.;
@@ -380,7 +381,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
 	  
 	  omega2 = Mass1*Mass1 - Mass3*Mass3 + Mass2*Mass2 - Mass4*Mass4; // add - 2.*Mass1*y;
 	  Omega2 = Mass1*Mass1 - Mass3*Mass3; // add -x
-	  a = U*tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1*Mass1);
+	  a = U*tau*V*V*GF*GF/(32.*TMath::Power(TMath::Pi(), 3.)*Mass1);
 	  
 	  // (f2*f2/2.)*(x - Mass2*Mass2 - Mass4*Mass4 + (omega2 - 2.*Mass1*y)*(Omega2 - x - (omega2 - 2.*Mass1*y))/(Mass3*Mass3))
 	  // + ((f3+f4*1./x)*(f3+f4*1./x)/2.)*(Mass2*Mass2 + Mass4*Mass4)*(x - Mass2*Mass2 + Mass4*Mass4)*((Omega2 - x)*(Omega2 - x)/(4.*Mass3*Mass3) - x)
@@ -411,7 +412,7 @@ Double_t ThreeBodyBR(Double_t Mass1, Double_t Mass2, Double_t Mass3, Double_t Ma
           b = ig.Integral(q2min, q2max);
           br += b;
         }
-        br *= a;
+        br *= a/Nsteps;
       }
       else {
         br = 0.;
