@@ -1276,17 +1276,17 @@ Int_t AllInOnePlotNew(Int_t mode, Int_t model) {
   std::string HistoTitle = "";
   
   if (model == 1)
-    HistoTitle = "I (1:1:1)";
+    HistoTitle = "(1:1:1)";
   else if (model == 2)
-    HistoTitle = "II (0:1:0)";
+    HistoTitle = "(0:1:0)";
   else if (model == 3)
-    HistoTitle = "III (0:1:10)";
+    HistoTitle = "(0:1:10)";
   else if (model == 4)
-    HistoTitle = "IV (10:1:0)";
+    HistoTitle = "(10:1:0)";
 
-  Mprod->SetTitle(("N production modes vs N mass, model " + HistoTitle).c_str());
-  Mdecay->SetTitle(("N decay modes vs N mass, model " + HistoTitle).c_str());
-  Mgamma->SetTitle(("N partial decay widths vs N mass, model " + HistoTitle).c_str());
+  Mprod->SetTitle(("N production modes vs N mass " + HistoTitle).c_str());
+  Mdecay->SetTitle(("N decay modes vs N mass " + HistoTitle).c_str());
+  Mgamma->SetTitle(("N partial decay widths vs N mass " + HistoTitle).c_str());
     
   TGaxis::SetMaxDigits(2);
 
