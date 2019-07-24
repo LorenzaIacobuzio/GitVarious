@@ -128,6 +128,7 @@ protected:
   Int_t nLKr;
   std::vector<Double_t> RICHInfo1;
   std::vector<Double_t> RICHInfo2;
+  TString primitive;
 };
 
 #endif

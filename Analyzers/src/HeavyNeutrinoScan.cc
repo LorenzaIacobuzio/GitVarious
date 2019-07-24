@@ -67,7 +67,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("CouplingStop", &fCouplingStop, -1); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 1.); // 0.1
   AddParam("MassStart", &fMassStart, 0.3); // 0.250
-  AddParam("MassStop", &fMassStop, 1.7); // 1.960
+  AddParam("MassStop", &fMassStop, 1.9); // 1.960
   AddParam("MassStep", &fMassStep, 0.1); // 0.01
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
@@ -1043,7 +1043,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 
     Int_t N = fHisto.GetTGraph("TotalScan/Contours")->GetN();
     Double_t X[N], Y[N];
-
+    /*
     if (fInitialUeSquaredRatio != 0. && fInitialUmuSquaredRatio != 0. && fInitialUtauSquaredRatio != 0.) {
       for (Int_t i = 0; i < N; i++)
 	fHisto.GetTGraph("TotalScan/Contours")->GetPoint(i, X[i], Y[i]);
@@ -1058,7 +1058,7 @@ void HeavyNeutrinoScan::EndOfJobUser() {
       fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+7, 1.96, Y[0]+0.1);
       fHisto.GetTGraph("TotalScan/Contours")->SetPoint(N+8, 1.96, Y[0]);
     }
-
+    */
     // Mean probability vs mass and coupling
 
     for (Int_t i = 1; i < static_cast<TH2D*>((TH2D*)RequestHistogram(fAnalyzerName, "CouplingScan/ProbCoupling", true))->GetNbinsX()+1; i++) {

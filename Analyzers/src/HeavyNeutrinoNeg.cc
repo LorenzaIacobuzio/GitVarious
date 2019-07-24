@@ -177,6 +177,7 @@ void HeavyNeutrinoNeg::InitOutput() {
     AddBranch("HeavyNeutrinoNegPassed", "nLKr", &nLKr);
     AddBranch("HeavyNeutrinoNegPassed", "RICHInfo1", &RICHInfo1);
     AddBranch("HeavyNeutrinoNegPassed", "RICHInfo2", &RICHInfo2);
+    AddBranch("HeavyNeutrinoPassed", "primitive", &primitive);
   }
   else {
     ImportAllInputHistogram("HeavyNeutrinoNeg", false);
@@ -400,9 +401,13 @@ void HeavyNeutrinoNeg::Process(Int_t) {
     
     Bool_t L0OK = kFALSE;
     Bool_t L1OK = kFALSE;
-    
+
+    primitive = "";
+
     for (UInt_t i = 0; i < fID.size(); i++) {
       L0OK |= TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID[i]);
+      if (TriggerConditions::GetInstance()->L0TriggerOn(RunNumber, L0TPData, fID[i]))
+	primitive = fStream[i];
     }
     
     if (!L0OK) return;

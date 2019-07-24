@@ -54,7 +54,7 @@ function findListFile() {
         fi
 
 	if [[ ${sample} == *"2016"* ]]; then
-	    version="v1.0.0"
+	    version="v1.0.5"
 	elif [[ ${sample} == *"2017A"* ]]; then
 	    version="v1.0.2"
 	elif [[ ${sample} == *"2017B"* ]]; then

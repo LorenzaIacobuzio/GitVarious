@@ -1,0 +1,18 @@
+## "Constants"
+dataListsLocation= /afs/cern.ch/na62/offline/lists/Data/Reco/2018
+analysisScript= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/analysis_condor.sh
+executableFile= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/bin-cc7/MyAnalyzerData
+executableName= MyAnalyzerData
+
+## Parameters
+runs= 8548 8553 8562 8563 8564 8565 8584 8585 8586 8594 8595 8596 8597 800 8602 8603 8607 8608 8610 8611 8633 8634 8635 8636 8637 8638 8639 8640 8641 8643 8644 8645 8647 8648 8652 8658 8659 8660 8661 8662 8664 8666 8667 8668 8669 8688 8689 8692 8693 8694 8695 8698 8699 8700 8701 8726 8730 8734 8735 8738 8740
+
+filter= HNLV
+filesPerJob= 70
+jobFlavour= tomorrow
+numberOfCPUs= 2
+operatingSystem= CentOS7
+outputDir= /afs/cern.ch/work/l/liacobuz/private/condorOutputData2018B/
+analysisDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/
+myListDir= /afs/cern.ch/user/l/liacobuz/NA62AnalysisTool/CondorJobs/
+

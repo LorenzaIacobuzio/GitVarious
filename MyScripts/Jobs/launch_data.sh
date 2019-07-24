@@ -5,6 +5,8 @@
 ./submit_job_analysis_condor.sh condorConfigData2017B
 ./submit_job_analysis_condor.sh condorConfigData2017C
 ./submit_job_analysis_condor.sh condorConfigData2017D
+./submit_job_analysis_condor.sh condorConfigData2018A
+./submit_job_analysis_condor.sh condorConfigData2018B
 ./submit_job_analysis_condor.sh condorConfigData2018E
 ./submit_job_analysis_condor.sh condorConfigData2018H
 
