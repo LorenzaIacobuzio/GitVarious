@@ -686,7 +686,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	
       cout<<"Combinatorial bkg - Kolmogorov test for SR sample: "<<hInvMassCombSRPiMinusMuPlus->KolmogorovTest(hInvMassCombPiMinusMuPlus)<<" and enriched SR sample: "<<hInvMassCombSREnrichedPiMinusMuPlus->KolmogorovTest(hInvMassCombPiMinusMuPlus)<<endl;
       hInvMassCombKolmPiMinusMuPlus = (TH1D*)hInvMassCombPiMinusMuPlus->Clone();
-      hInvMassCombKolmPiMinusMuPlus->SetName("hInvMassCombKolmPiMinusMuPlus");
+      hInvMassCombKolmPiMinusMuPlus->SetName("hInvMassCombKolm");
       hInvMassCombKolmPiMinusMuPlus->Scale(hInvMassCombSRPiMinusMuPlus->Integral()/hInvMassCombKolmPiMinusMuPlus->Integral());
       gBkg1SigmaCombPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassCombKolmPiMinusMuPlus, 1.);
       gBkg2SigmaCombPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassCombKolmPiMinusMuPlus, 2.);
@@ -695,7 +695,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	
       cout<<"Parasitic bkg - Kolmogorov test for SR sample: "<<hInvMassParSRPiMinusMuPlus->KolmogorovTest(hInvMassParPiMinusMuPlus)<<endl;
       hInvMassParKolmPiMinusMuPlus = (TH1D*)hInvMassParPiMinusMuPlus->Clone();
-      hInvMassParKolmPiMinusMuPlus->SetName("hInvMassParKolmPiMinusMuPlus");
+      hInvMassParKolmPiMinusMuPlus->SetName("hInvMassParKolm");
       hInvMassParKolmPiMinusMuPlus->Scale(hInvMassParSRPiMinusMuPlus->Integral()/hInvMassParKolmPiMinusMuPlus->Integral());
       gBkg1SigmaParPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassParKolmPiMinusMuPlus, 1.);
       gBkg2SigmaParPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassParKolmPiMinusMuPlus, 2.);
@@ -710,7 +710,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	
       cout<<"Prompt bkg - Kolmogorov test for SR sample: "<<hInvMassPromptSRPiMinusMuPlus->KolmogorovTest(hInvMassPromptPiMinusMuPlus)<<endl;
       hInvMassPromptKolmPiMinusMuPlus = (TH1D*)hInvMassPromptPiMinusMuPlus->Clone();
-      hInvMassPromptKolmPiMinusMuPlus->SetName("hInvMassPromptKolmPiMinusMuPlus");
+      hInvMassPromptKolmPiMinusMuPlus->SetName("hInvMassPromptKolm");
       hInvMassPromptKolmPiMinusMuPlus->Scale(hInvMassPromptSRPiMinusMuPlus->Integral()/hInvMassPromptKolmPiMinusMuPlus->Integral());
       gBkg1SigmaPromptPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassPromptKolmPiMinusMuPlus, 1.);
       gBkg2SigmaPromptPiMinusMuPlus = WindowScanNoFixedSigma(hInvMassPromptKolmPiMinusMuPlus, 2.);

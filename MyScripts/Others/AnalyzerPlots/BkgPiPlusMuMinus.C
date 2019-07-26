@@ -619,8 +619,12 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hSRPromptPiPlusMuMinus->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (FV && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus)
+    if (FV && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) {
+
+      // Remove peak at kaon mass from K2pi
+
       hInvMassPromptPiPlusMuMinus->Fill(invMass/1000., Weight);
+    }
 	
     if (Prompt && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) {
       hZPromptPPiPlusMuMinus->Fill(Zvertex/1000., Weight);
@@ -716,7 +720,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
       cout<<"Combinatorial bkg - Kolmogorov test for SR sample: "<<hInvMassCombSRPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<" and enriched SR sample: "<<hInvMassCombSREnrichedPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<endl;
       hInvMassCombKolmPiPlusMuMinus = (TH1D*)hInvMassCombPiPlusMuMinus->Clone();
-      hInvMassCombKolmPiPlusMuMinus->SetName("hInvMassCombKolmPiPlusMuMinus");
+      hInvMassCombKolmPiPlusMuMinus->SetName("hInvMassCombKolm");
       hInvMassCombKolmPiPlusMuMinus->Scale(hInvMassCombSRPiPlusMuMinus->Integral()/hInvMassCombKolmPiPlusMuMinus->Integral());
       gBkg1SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 1.);
       gBkg2SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 2.);
@@ -725,25 +729,26 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
       cout<<"Parasitic bkg - Kolmogorov test for SR sample: "<<hInvMassParSRPiPlusMuMinus->KolmogorovTest(hInvMassParPiPlusMuMinus)<<endl;
       hInvMassParKolmPiPlusMuMinus = (TH1D*)hInvMassParPiPlusMuMinus->Clone();
-      hInvMassParKolmPiPlusMuMinus->SetName("hInvMassParKolmPiPlusMuMinus");
+      hInvMassParKolmPiPlusMuMinus->SetName("hInvMassParKolm");
       hInvMassParKolmPiPlusMuMinus->Scale(hInvMassParSRPiPlusMuMinus->Integral()/hInvMassParKolmPiPlusMuMinus->Integral());
       gBkg1SigmaParPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassParKolmPiPlusMuMinus, 1.);
       gBkg2SigmaParPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassParKolmPiPlusMuMinus, 2.);
 
       SumGraphs(gBkg1SigmaCombPiPlusMuMinus, gBkg1SigmaParPiPlusMuMinus, *gBkg1SigmaBufferPiPlusMuMinus);
       SumGraphs(gBkg2SigmaCombPiPlusMuMinus, gBkg2SigmaParPiPlusMuMinus, *gBkg2SigmaBufferPiPlusMuMinus);
+
       //REMOVE
-      *gBkg1SigmaTotPiPlusMuMinus = *gBkg1SigmaBufferPiPlusMuMinus;
-      *gBkg2SigmaTotPiPlusMuMinus = *gBkg2SigmaBufferPiPlusMuMinus;
+      //*gBkg1SigmaTotPiPlusMuMinus = *gBkg1SigmaBufferPiPlusMuMinus;
+      //*gBkg2SigmaTotPiPlusMuMinus = *gBkg2SigmaBufferPiPlusMuMinus;
     }
-    /*    
+
     if (an.Contains("Pos")) {
 
       // C - Prompt
 	
       cout<<"Prompt bkg - Kolmogorov test for SR sample: "<<hInvMassPromptSRPiPlusMuMinus->KolmogorovTest(hInvMassPromptPiPlusMuMinus)<<endl;
       hInvMassPromptKolmPiPlusMuMinus = (TH1D*)hInvMassPromptPiPlusMuMinus->Clone();
-      hInvMassPromptKolmPiPlusMuMinus->SetName("hInvMassPromptKolmPiPlusMuMinus");
+      hInvMassPromptKolmPiPlusMuMinus->SetName("hInvMassPromptKolm");
       hInvMassPromptKolmPiPlusMuMinus->Scale(hInvMassPromptSRPiPlusMuMinus->Integral()/hInvMassPromptKolmPiPlusMuMinus->Integral());
       gBkg1SigmaPromptPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassPromptKolmPiPlusMuMinus, 1.);
       gBkg2SigmaPromptPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassPromptKolmPiPlusMuMinus, 2.);
@@ -756,7 +761,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       
       minSigma = 0.;
     }
-    */
   }
 
   // Saving histograms
