@@ -1014,6 +1014,7 @@ void PhaseSpace(Double_t Mass1, Double_t Mass3, Double_t Mass4, std::string Titl
     h2->GetXaxis()->SetRange(h2->FindFirstBinAbove(0., 1)-2, h2->FindLastBinAbove(0., 1)+2);
     h2->GetYaxis()->SetRange(h2->FindFirstBinAbove(0., 2)-2, h2->FindLastBinAbove(0., 2)+2);
     gPad->SetLogz();
+    TGaxis::SetMaxDigits(5);
     gStyle->SetOptStat(0);
 
     TString title = (TString)Title;
