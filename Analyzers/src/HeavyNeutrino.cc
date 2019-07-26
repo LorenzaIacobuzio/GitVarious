@@ -219,6 +219,23 @@ void HeavyNeutrino::InitHist() {
     BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom", "Two-track vertex, after geometrical cuts",    50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after all cuts",             50, 100., 200., 50, 0., 1.));
 
+    // Track time for bkg studies
+
+    BookHisto("hTime_1",  new TH1D("Time_1",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_2",  new TH1D("Time_2",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_3",  new TH1D("Time_3",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_4",  new TH1D("Time_4",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_5",  new TH1D("Time_5",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_6",  new TH1D("Time_6",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_7",  new TH1D("Time_7",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_8",  new TH1D("Time_8",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_9",  new TH1D("Time_9",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_10", new TH1D("Time_10", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_11", new TH1D("Time_11", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_12", new TH1D("Time_12", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_13", new TH1D("Time_13", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_14", new TH1D("Time_14", "Two-track time difference", 100, -15., 15.));
+
     // Unique signal region (one line)
 
     BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
@@ -630,6 +647,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   // END OF TIMING PLOTS
 
+  FillHisto("hTime_1", CHODTime1-CHODTime2);
+
   // Track timing                                                             
 
   if (!GetWithMC()) {
@@ -639,6 +658,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_2", CHODTime1-CHODTime2);
 
   // KTAG timing (data + kaon mode for bkg studies)
 
@@ -840,6 +861,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  FillHisto("hTime_3", CHODTime1-CHODTime2);
+
   // Downstream track selection, CUT: Extrapolation and association to NewCHOD
 
   Bool_t NewCHODAssoc = (Tracks[0].NewCHODAssociationExists() && Tracks[1].NewCHODAssociationExists());
@@ -885,6 +908,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
   
+  FillHisto("hTime_4", CHODTime1-CHODTime2);
+
   // Downstream track selection, CUT: Extrapolation and association to MUV3
     
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kMUV3) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kMUV3))
@@ -941,6 +966,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
   
+  FillHisto("hTime_5", CHODTime1-CHODTime2);
+
   // Downstream track selection, CUT: Extrapolation and association to LKr
   
   if (!GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand1, kLKr) || !GeometricAcceptance::GetInstance()->InAcceptance(SpectrometerCand2, kLKr))
@@ -972,6 +999,8 @@ void HeavyNeutrino::Process(Int_t) {
   
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_6", CHODTime1-CHODTime2);
 
   // CUT: CHOD extra activity for bkg studies
 
@@ -1007,6 +1036,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
   
+  FillHisto("hTime_7", CHODTime1-CHODTime2);
+
   // CUT: NewCHOD extra activity for bkg studies
   
   nNewCHOD = 0;
@@ -1034,6 +1065,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  FillHisto("hTime_8", CHODTime1-CHODTime2);
+
   // LKr extra activity for bkg studies
 
   nLKr = 0;
@@ -1056,6 +1089,8 @@ void HeavyNeutrino::Process(Int_t) {
       EtotLKr += LKrCandE;
     }
   }
+
+  FillHisto("hTime_9", CHODTime1-CHODTime2);
 
   // Downstream track selection, CUT: LAV12 acceptance
 
@@ -1186,6 +1221,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_10", CHODTime1-CHODTime2);
   
   // Veto cuts, CUT: SAV veto
   
@@ -1207,6 +1244,8 @@ void HeavyNeutrino::Process(Int_t) {
   FillHisto("hCuts", CutID);
   CutID++;
 
+  FillHisto("hTime_11", CHODTime1-CHODTime2);
+
   // Veto cuts, CUT: CHANTI veto
 
   if (!GetWithMC()) {
@@ -1220,6 +1259,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_12", CHODTime1-CHODTime2);
 
   // Veto cuts, CUT: Residual LKr
 
@@ -1244,6 +1285,8 @@ void HeavyNeutrino::Process(Int_t) {
 
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_13", CHODTime1-CHODTime2);
 
   // Reference plot - 4 
 
@@ -1341,6 +1384,7 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   FillHisto("hCDAvsZCDAAll_Fin", ZCDALine/1000., CDALine/1000., Weight);
+  FillHisto("hTime_14", CHODTime1-CHODTime2);
 
   // Computation of invariant mass
   
@@ -1399,6 +1443,21 @@ void HeavyNeutrino::EndOfJobUser() {
     fHisto.GetTH2("hXYSpec0Mu")->GetXaxis()->SetTitle("X [m]");
     fHisto.GetTH2("hXYSpec0Pi")->GetXaxis()->SetTitle("X [m]");
     fHisto.GetTH1("hCuts")->GetXaxis()->SetTitle("Cut ID");
+
+    fHisto.GetTH1("hTime_1")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_2")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_3")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_4")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_5")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_6")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_7")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_8")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_9")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_10")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_11")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_12")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_13")->GetXaxis()->SetTitle("Time difference [ns]");
+    fHisto.GetTH1("hTime_14")->GetXaxis()->SetTitle("Time difference [ns]");
 
     fHisto.GetTH2("hZvsBeam_In")->GetXaxis()->SetTitle("Vertex position along Z [m]");
     fHisto.GetTH2("hZvsBeam_Track")->GetXaxis()->SetTitle("Vertex position along Z [m]");
