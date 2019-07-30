@@ -134,6 +134,7 @@ TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
     nBkg -= h->GetBinContent(bmax)*(axis->GetBinUpEdge(bmax)-(massHyp+howManySigmas*sigma))/axis->GetBinWidth(bmax);
     res->SetPoint(counter, massHyp, nBkg);
     counter++;
+    //cout<<massHyp<<" "<<massMin-minSigma<<" "<<massMax+minSigma<<" "<<minSigma<<" "<<sigma<<endl;
   }
 
   return res;
@@ -264,7 +265,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Double_t energyPi;
   Double_t energyMu;
   Double_t invMass;
-  //Double_t trueMass;
+  Double_t trueMass;
   Double_t L0TPTime;
   Double_t xGTK31;
   Double_t yGTK31;
@@ -314,7 +315,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   tree->SetBranchAddress("energyPi", &energyPi);
   tree->SetBranchAddress("energyMu", &energyMu);
   tree->SetBranchAddress("invMass", &invMass);
-  //tree->SetBranchAddress("trueMass", &trueMass);
+  tree->SetBranchAddress("trueMass", &trueMass);
   tree->SetBranchAddress("L0TPTime", &L0TPTime);
   tree->SetBranchAddress("xGTK31", &xGTK31);
   tree->SetBranchAddress("yGTK31", &yGTK31);
@@ -393,8 +394,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hMomPiPromptPiPlusMuMinus = new TH1D("hMomPiPrompt", "Prompt background studies", 100, 0., 200.);
   TH1D *hMomMuPromptPiPlusMuMinus = new TH1D("hMomMuPrompt", "Prompt background studies", 100, 0., 200.);
 
-  TH2D *hInvMassVsZPromptPiPlusMuMinus = new TH2D("hInvMassVsZPrompt", "Prompt background studies", 1000, 90., 120., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH2D *hInvMassVsZq2PromptPiPlusMuMinus = new TH2D("hInvMassVsZq2Prompt", "Prompt background studies", 1000, 90., 190., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH2D *hInvMassVsZPromptPiPlusMuMinus = new TH2D("hInvMassVsZPrompt", "Prompt background studies", 300, 90., 120., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH2D *hInvMassVsZq2PromptPiPlusMuMinus = new TH2D("hInvMassVsZq2Prompt", "Prompt background studies", 100, 90., 190., 50, 0.25, 1.);
   TH2D *hSRPromptPiPlusMuMinus = new TH2D("hSRPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPromptPiPlusMuMinus = new TH2D("hSRFinalPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   
@@ -441,8 +442,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   // MC only - pi+mu-
 
-  TH1D *hInvMassMCPiPlusMuMinus = new TH1D("hInvMassMC", "MC studies", 1.E3, massMin-binWidth/2., massMax+binWidth/2.);
-  TH2D *hInvMassRecoVsMCPiPlusMuMinus = new TH2D("hInvMassRecoVsMCPiPlusMuMinus", "MC studies", 1000, massMin-binWidth/2., massMax+binWidth/2., 1000, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassMCPiPlusMuMinus = new TH1D("hInvMassMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH2D *hInvMassRecoVsMCPiPlusMuMinus = new TH2D("hInvMassRecoVsMCPiPlusMuMinus", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TGraph *gMassMCPiPlusMuMinus = new TGraph();
   gMassMCPiPlusMuMinus->SetNameTitle("PiPlusMuMinus/gMassMC", "MC studies");
 
@@ -481,7 +482,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     
     if (MC && Zero && noSpike && PiPlusMuMinus) {
       hInvMassMCPiPlusMuMinus->Fill(invMass/1000.);
-      //hInvMassRecoVsMCPiPlusMuMinus->Fill(trueMass, invMass/1000.);
+      hInvMassRecoVsMCPiPlusMuMinus->Fill(trueMass, invMass/1000.);
     }
     
     // 1 - Events outside blinded region
@@ -620,12 +621,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     }
 
     if (FV && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) {
-
-      // Remove peak at kaon mass from K2pi
-
       hInvMassPromptPiPlusMuMinus->Fill(invMass/1000., Weight);
+      hInvMassVsZq2PromptPiPlusMuMinus->Fill(Zvertex/1000., invMass/1000.);
     }
-	
+
     if (Prompt && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) {
       hZPromptPPiPlusMuMinus->Fill(Zvertex/1000., Weight);
       hZTimePromptPPiPlusMuMinus->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
@@ -662,7 +661,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hDistvsMassParSRPiPlusMuMinus->Fill(invMass/1000., BeamlineDist, Weight);
       }
       if (Prompt && Zero && !MC && CDAIn) { // ...and vertex sidebands (0-charge)
-	hInvMassVsZPromptPiPlusMuMinus->Fill(Zvertex/1000., invMass/1000.);
 	counterPromptSBZPiPlusMuMinus++;
       }
       if (SB && an.Contains("Pos") && CDAIn) { // ...and vertex sidebands (pos-charge)
@@ -696,14 +694,16 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       TF1 *f1 = new TF1("f1", "gaus", mass-massStep/2., mass+massStep/2.);
       hInvMassMCPiPlusMuMinus->Fit("f1", "Rq");
       sigma = f1->GetParameter(2);
-      //cout<<mass<<" "<<sigma<<endl;
+      cout<<mass<<" "<<sigma<<endl;
       gMassMCPiPlusMuMinus->SetPoint(counter, mass, sigma);
       if (sigma < sigmaMin && sigma != 0.)
 	sigmaMin = sigma;
       counter++;
     }
 
-    minSigma = sigmaMin;
+    //REMOVE
+    minSigma = 0.005;
+    //minSigma = sigmaMin;
     gMassMCPiPlusMuMinus->Fit("pol5");
     TF1 *f = gMassMCPiPlusMuMinus->GetFunction("pol5");
 
@@ -721,10 +721,11 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       cout<<"Combinatorial bkg - Kolmogorov test for SR sample: "<<hInvMassCombSRPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<" and enriched SR sample: "<<hInvMassCombSREnrichedPiPlusMuMinus->KolmogorovTest(hInvMassCombPiPlusMuMinus)<<endl;
       hInvMassCombKolmPiPlusMuMinus = (TH1D*)hInvMassCombPiPlusMuMinus->Clone();
       hInvMassCombKolmPiPlusMuMinus->SetName("hInvMassCombKolm");
+      
       hInvMassCombKolmPiPlusMuMinus->Scale(hInvMassCombSRPiPlusMuMinus->Integral()/hInvMassCombKolmPiPlusMuMinus->Integral());
       gBkg1SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 1.);
       gBkg2SigmaCombPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassCombKolmPiPlusMuMinus, 2.);
-
+      
       // B - Parasitic
 
       cout<<"Parasitic bkg - Kolmogorov test for SR sample: "<<hInvMassParSRPiPlusMuMinus->KolmogorovTest(hInvMassParPiPlusMuMinus)<<endl;
@@ -738,8 +739,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       SumGraphs(gBkg2SigmaCombPiPlusMuMinus, gBkg2SigmaParPiPlusMuMinus, *gBkg2SigmaBufferPiPlusMuMinus);
 
       //REMOVE
-      //*gBkg1SigmaTotPiPlusMuMinus = *gBkg1SigmaBufferPiPlusMuMinus;
-      //*gBkg2SigmaTotPiPlusMuMinus = *gBkg2SigmaBufferPiPlusMuMinus;
+      *gBkg1SigmaTotPiPlusMuMinus = *gBkg1SigmaBufferPiPlusMuMinus;
+      *gBkg2SigmaTotPiPlusMuMinus = *gBkg2SigmaBufferPiPlusMuMinus;
     }
 
     if (an.Contains("Pos")) {
