@@ -288,6 +288,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Int_t Assoc;
   Bool_t CHANTIAssoc1;
   Bool_t CHANTIAssoc2;
+  Bool_t isControlTrigger;
   Int_t Charge1;
   Int_t Charge2;
   Int_t nSec;
@@ -296,7 +297,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Int_t nLKr;
   std::vector<Double_t> *RICHInfo1 = new std::vector<Double_t>;
   std::vector<Double_t> *RICHInfo2 = new std::vector<Double_t>;
-
+  std::string primitive;
+  
   // Setting branches
   
   tree->SetBranchAddress("Weight", &Weight);
@@ -338,6 +340,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   tree->SetBranchAddress("Assoc", &Assoc);
   tree->SetBranchAddress("CHANTIAssoc1", &CHANTIAssoc1);
   tree->SetBranchAddress("CHANTIAssoc2", &CHANTIAssoc2);
+  tree->SetBranchAddress("isControlTrigger", &isControlTrigger);
   tree->SetBranchAddress("Charge1", &Charge1);
   tree->SetBranchAddress("Charge2", &Charge2);
   tree->SetBranchAddress("nSec", &nSec);
@@ -346,6 +349,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   tree->SetBranchAddress("nLKr", &nLKr);
   tree->SetBranchAddress("RICHInfo1", &RICHInfo1);
   tree->SetBranchAddress("RICHInfo2", &RICHInfo2);
+  tree->SetBranchAddress("primitive", &primitive);
 
   // Setting histograms - splitting analysis for pi+mu- and pi-mu+ cases
   
@@ -398,6 +402,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH2D *hInvMassVsZq2PromptPiPlusMuMinus = new TH2D("hInvMassVsZq2Prompt", "Prompt background studies", 100, 90., 190., 50, 0.25, 1.);
   TH2D *hInvMassVsPq2PromptPiPlusMuMinus = new TH2D("hInvMassVsPq2Prompt", "Prompt background studies", 100, 0., 300., 50, 0.25, 1.);
   TH2D *hInvMassVsDistq2PromptPiPlusMuMinus = new TH2D("hInvMassVsDistq2Prompt", "Prompt background studies", 100, 0., 300., 50, 0.25, 1.);
+  TH2D *hInvMassVsRICHq2PromptPiPlusMuMinus = new TH2D("hInvMassVsRICHq2Prompt", "Prompt background studies", 6, -0.5, 5.5, 50, 0.25, 1.);
   TH2D *hSRPromptPiPlusMuMinus = new TH2D("hSRPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPromptPiPlusMuMinus = new TH2D("hSRFinalPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   
@@ -433,6 +438,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH1D *hCDASRPiPlusMuMinus = new TH1D("hCDASR", "Signal region background studies", 100, 0., 1000.);
   TH1D *hTimeSRPiPlusMuMinus = new TH1D("hTimeSR", "Signal region background studies", 100, -15., 15.);
   TH1D *hZSRPiPlusMuMinus = new TH1D("hZSR", "Signal region background studies", 500, 100., 190.);
+  TH1D *hZSRq2PiPlusMuMinus = new TH1D("hZSRq2", "Signal region background studies", 500, 100., 190.);
+  TH2D *hDistvsZSRPiPlusMuMinus = new TH2D("hDistvsZSR", "Signal region background studies", 500, 100., 190., 50, 0., 1000.);
+  TH2D *hDistvsZSRq2PiPlusMuMinus = new TH2D("hDistvsZSRq2", "Signal region background studies", 500, 100., 190., 50, 0., 1000.);
   TH2D *hDistvsMassSRPiPlusMuMinus = new TH2D("hDistvsMassSR", "Signal region background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., 50, 0., 1000.);
 
   TH1D *hInvMassSRPiPlusMuMinus = new TH1D("hInvMassSR", "Signal region background studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
@@ -493,13 +501,19 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hDistSRPiPlusMuMinus->Fill(BeamlineDist, Weight);
       hCDASRPiPlusMuMinus->Fill(BeamCDA1);//, Weight);
       hCDASRPiPlusMuMinus->Fill(BeamCDA2);//, Weight);
-      hTimeSRPiPlusMuMinus->Fill(CHODTime1-CHODTime2, Weight);
       hZSRPiPlusMuMinus->Fill(Zvertex/1000., Weight);
+      hDistvsZSRPiPlusMuMinus->Fill(Zvertex/1000., BeamlineDist, Weight);
+      hTimeSRPiPlusMuMinus->Fill(CHODTime1-CHODTime2, Weight);
       hInvMassSRPiPlusMuMinus->Fill(invMass/1000., Weight);
       hMomPiSRPiPlusMuMinus->Fill(Mom1->Mag()/1000., Weight);
       hMomMuSRPiPlusMuMinus->Fill(Mom2->Mag()/1000., Weight);
       hDistvsMassSRPiPlusMuMinus->Fill(invMass/1000., BeamlineDist, Weight);
       hSRSRPiPlusMuMinus->Fill(ZCDALine/1000., CDALine/1000., Weight);
+    }
+
+    if (outsideSR && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) { // all events outside blinded region (q2)
+      hZSRq2PiPlusMuMinus->Fill(Zvertex/1000., Weight);
+      hDistvsZSRq2PiPlusMuMinus->Fill(Zvertex/1000., BeamlineDist, Weight);
     }
     
     // 2 - Combinatorial SB
@@ -627,6 +641,14 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hInvMassVsZq2PromptPiPlusMuMinus->Fill(Zvertex/1000., invMass/1000.);
       hInvMassVsPq2PromptPiPlusMuMinus->Fill(TotMom->Mag()/1000., invMass/1000.);
       hInvMassVsDistq2PromptPiPlusMuMinus->Fill(BeamlineDist, invMass/1000.);
+      
+      if (RICHInfo1->at(0) == 99)
+        RICHInfo1->at(0) = 5;
+      if (RICHInfo2->at(0) == 99)
+        RICHInfo2->at(0) = 5;
+      
+      hInvMassVsRICHq2PromptPiPlusMuMinus->Fill(RICHInfo1->at(0), invMass/1000.);
+      hInvMassVsRICHq2PromptPiPlusMuMinus->Fill(RICHInfo2->at(0), invMass/1000.);
     }
 
     if (Prompt && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 2 in SB
@@ -747,10 +769,14 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       // C - Prompt
 
       hInvMassPromptSRPiPlusMuMinus->Scale(counterPromptSBZPiPlusMuMinus/counterPromptSBPPiPlusMuMinus);
+      hInvMassPromptPiPlusMuMinus->Scale(counterPromptSBZPiPlusMuMinus/counterPromptSBPPiPlusMuMinus);
       cout<<"Prompt bkg - Kolmogorov test for SR sample: "<<hInvMassPromptSRPiPlusMuMinus->KolmogorovTest(hInvMassPromptPiPlusMuMinus)<<endl;
       hInvMassPromptKolmPiPlusMuMinus = (TH1D*)hInvMassPromptPiPlusMuMinus->Clone();
       hInvMassPromptKolmPiPlusMuMinus->SetName("hInvMassPromptKolm");
       hInvMassPromptKolmPiPlusMuMinus->Scale(hInvMassPromptSRPiPlusMuMinus->Integral()/hInvMassPromptKolmPiPlusMuMinus->Integral());
+      TF1 *f = new TF1("f", "gaus", 0.4, 0.6);
+      hInvMassPromptKolmPiPlusMuMinus->Fit("f", "Rq");
+      cout<<"Fit double peak in prompt: "<<f->GetParameter(1)<<" +- "<<f->GetParameter(2)<<", oh look, it's some kaon mass!"<<endl;
       gBkg1SigmaPromptPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassPromptKolmPiPlusMuMinus, 1.);
       gBkg2SigmaPromptPiPlusMuMinus = WindowScanNoFixedSigma(hInvMassPromptKolmPiPlusMuMinus, 2.);
 	
@@ -770,10 +796,13 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/SR/", c, hCDASRPiPlusMuMinus, "Track-beamline CDA [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hTimeSRPiPlusMuMinus, "Track time difference [ns]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hZSRPiPlusMuMinus, "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/SR/", c, hZSRq2PiPlusMuMinus, "Z coordinate of vertex [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hInvMassSRPiPlusMuMinus, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hMomPiSRPiPlusMuMinus, "Pion momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hMomMuSRPiPlusMuMinus, "Muon momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hDistvsMassSRPiPlusMuMinus, "Reconstructed HNL mass", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/SR/", c, hDistvsZSRPiPlusMuMinus, "Z coordinate of vertex [m]", "Vertex-beamline distance [mm]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/SR/", c, hDistvsZSRq2PiPlusMuMinus, "Z coordinate of vertex [m]", "Vertex-beamline distance [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hSRSRPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
   Save(path + "PiPlusMuMinus/Comb/", c, hTimeCombPiPlusMuMinus, "Track time difference [ns]", labelSize, titleSize);
@@ -810,6 +839,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsZq2PromptPiPlusMuMinus, "Z coordinate of vertex [m]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsPq2PromptPiPlusMuMinus, "Modulus of mother momentum [GeV/c]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsDistq2PromptPiPlusMuMinus, "Vertex-beam distance [mm]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsRICHq2PromptPiPlusMuMinus, "Vertex-beam distance [mm]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hSRFinalPromptPiPlusMuMinus, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg1SigmaPromptPiPlusMuMinus, "gBkg1SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);

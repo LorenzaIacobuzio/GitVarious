@@ -65,7 +65,7 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1); // -1 (do not put 0)
-  AddParam("CouplingStep", &fCouplingStep, 1.); // 0.1
+  AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
   AddParam("MassStart", &fMassStart, 0.250); // 0.250
   AddParam("MassStop", &fMassStop, 1.96); // 1.960
   AddParam("MassStep", &fMassStep, 0.01); // 0.01
@@ -694,7 +694,7 @@ void HeavyNeutrinoScan::Process(Int_t) {
 	      else {
 		FillHisto("SingleValue/hXYDecay2Body", p->GetEndPos().X()/1000., p->GetEndPos().Y()/1000., WeightTom);
 	      }
-	      if (p->GetParticleName() == "D+->e+N" || p->GetParticleName() == "D-->e-N" || p->GetParticleName() == "D+->mu+N" || p->GetParticleName() == "D-->mu-N" || p->GetParticleName() == "DS+->e+N" || p->GetParticleName() == "DS-->e-N"|| p->GetParticleName() == "DS+->mu+N" || p->GetParticleName() == "DS-->mu-N") {
+	      if (p->GetParticleName().Contains("D+->e+N") || p->GetParticleName().Contains("D-->e-N") || p->GetParticleName().Contains("D+->mu+N") || p->GetParticleName().Contains("D-->mu-N") || p->GetParticleName().Contains("DS+->e+N") || p->GetParticleName().Contains("DS-->e-N") || p->GetParticleName().Contains("DS+->mu+N") || p->GetParticleName().Contains("DS-->mu-N")) {
 		FillHisto("SingleValue/hDThetaMom", p->GetMomAtCheckPoint(1).Y()/1000., p->GetPosAtCheckPoint(1).x(), WeightTom);
 		FillHisto("SingleValue/hXYDecayTom", p->GetEndPos().X()/1000., p->GetEndPos().Y()/1000., WeightTom);
 		FillHisto("SingleValue/hTransverse", TMath::Sqrt(p->GetEndPos().X()/1000.*p->GetEndPos().X()/1000. + p->GetEndPos().Y()/1000.*p->GetEndPos().Y()/1000.));

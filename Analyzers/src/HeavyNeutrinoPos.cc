@@ -119,6 +119,10 @@ HeavyNeutrinoPos::HeavyNeutrinoPos(Core::BaseAnalysis *ba) :
   }
 
   KTAGcand = new TRecoCedarCandidate();
+
+  // Needed for POT computation
+
+  fNPOT = 0.;
 }
 
 void HeavyNeutrinoPos::InitOutput() {
@@ -219,23 +223,6 @@ void HeavyNeutrinoPos::InitHist() {
     BookHisto("hZvsBeam_Geom",   new TH2D("ZvsBeam_Geom", "Two-track vertex, after geometrical cuts",    50, 100., 200., 50, 0., 1.));
     BookHisto("hZvsBeam_Fin",    new TH2D("ZvsBeam_Fin", "Two-track vertex, after all cuts",             50, 100., 200., 50, 0., 1.));
 
-    // Track time for bkg studies
-
-    BookHisto("hTime_1",  new TH1D("Time_1",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_2",  new TH1D("Time_2",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_3",  new TH1D("Time_3",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_4",  new TH1D("Time_4",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_5",  new TH1D("Time_5",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_6",  new TH1D("Time_6",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_7",  new TH1D("Time_7",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_8",  new TH1D("Time_8",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_9",  new TH1D("Time_9",  "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_10", new TH1D("Time_10", "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_11", new TH1D("Time_11", "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_12", new TH1D("Time_12", "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_13", new TH1D("Time_13", "Two-track time difference", 100, -15., 15.));
-    BookHisto("hTime_14", new TH1D("Time_14", "Two-track time difference", 100, -15., 15.));
-
     // Unique signal region (one line)
 
     BookHisto("hCDAvsZCDATarget_In",     new TH2D("CDAvsZCDATarget_In", "N trajectory wrt target-TAX line, before any cut",             500, -50., 50., 50, 0., 0.1));
@@ -258,6 +245,11 @@ void HeavyNeutrinoPos::InitHist() {
     BookHisto("hCDAvsZCDAAll_Vetoes", new TH2D("CDAvsZCDAAll_Vetoes", "N trajectory wrt target-TAX line, after veto cuts",         500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Geom",   new TH2D("CDAvsZCDAAll_Geom", "N trajectory wrt target-TAX line, after geometrical cuts",    500, -50., 50., 50, 0., 0.1));
     BookHisto("hCDAvsZCDAAll_Fin",    new TH2D("CDAvsZCDAAll_Fin", "N trajectory wrt target-TAX line, after all cuts",             500, -50., 50., 50, 0., 0.1));
+
+    // Unique SR for pi+mu- and pi-mu+ separately
+
+    BookHisto("hCDAvsZCDAAllPiPlusMuMinus_Fin", new TH2D("hCDAvsZCDAAllPiPlusMuMinus_Fin", "N trajectory wrt target-TAX line, after all cuts, for ~pi^{+}#mu{-} events", 500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAllPiMinusMuPlus_Fin", new TH2D("hCDAvsZCDAAllPiMinusMuPlus_Fin", "N trajectory wrt target-TAX line, after all cuts, for ~pi^{-}#mu{+} events", 500, -50., 50., 50, 0., 0.1));
 
     // Theta vs Z CDA (studies on SR resolution)
 
@@ -282,6 +274,40 @@ void HeavyNeutrinoPos::InitHist() {
 
     BookHisto("hCHANTImult",   new TH1D("CHANTImult", "CHANTI multiplicity in time", 10, 0., 10.));
     BookHisto("hExtraLKrmult", new TH1D("ExtraLKrmult", "Residual LKr multiplicity in time", 10, 0., 10.));
+
+    // Track time for bkg studies
+
+    BookHisto("hTime_1",  new TH1D("Time_1",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_2",  new TH1D("Time_2",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_3",  new TH1D("Time_3",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_4",  new TH1D("Time_4",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_5",  new TH1D("Time_5",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_6",  new TH1D("Time_6",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_7",  new TH1D("Time_7",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_8",  new TH1D("Time_8",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_9",  new TH1D("Time_9",  "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_10", new TH1D("Time_10", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_11", new TH1D("Time_11", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_12", new TH1D("Time_12", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_13", new TH1D("Time_13", "Two-track time difference", 100, -15., 15.));
+    BookHisto("hTime_14", new TH1D("Time_14", "Two-track time difference", 100, -15., 15.));
+
+    BookHisto("hPOT", new TH1D("POT", "", 1, 0., 1.)); 
+
+    fHisto.GetTH1("hTime_1")->Sumw2();
+    fHisto.GetTH1("hTime_2")->Sumw2();
+    fHisto.GetTH1("hTime_3")->Sumw2();
+    fHisto.GetTH1("hTime_4")->Sumw2();
+    fHisto.GetTH1("hTime_5")->Sumw2();
+    fHisto.GetTH1("hTime_6")->Sumw2();
+    fHisto.GetTH1("hTime_7")->Sumw2();
+    fHisto.GetTH1("hTime_8")->Sumw2();
+    fHisto.GetTH1("hTime_9")->Sumw2();
+    fHisto.GetTH1("hTime_10")->Sumw2();
+    fHisto.GetTH1("hTime_11")->Sumw2();
+    fHisto.GetTH1("hTime_12")->Sumw2();
+    fHisto.GetTH1("hTime_13")->Sumw2();
+    fHisto.GetTH1("hTime_14")->Sumw2();
   }
 
   return;
@@ -411,7 +437,7 @@ void HeavyNeutrinoPos::Process(Int_t) {
     Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
     Bool_t TriggerFlagsOK = L0TriggerFlags & MCTriggerMask;
     Bool_t TriggerOK = PhysicsTriggerOK && TriggerFlagsOK;
-    
+
     // CUT: L0 + L1
     
     if (!TriggerOK) return;
@@ -1386,6 +1412,11 @@ void HeavyNeutrinoPos::Process(Int_t) {
   FillHisto("hCDAvsZCDAAll_Fin", ZCDALine/1000., CDALine/1000., Weight);
   FillHisto("hTime_14", CHODTime1-CHODTime2);
 
+  if ((Assoc == 2 && Charge1 == 1) || (Assoc == 1 && Charge1 == -1))
+    FillHisto("hCDAvsZCDAAllPiPlusMuMinus_Fin", ZCDALine/1000., CDALine/1000., Weight);
+  else if ((Assoc == 2 && Charge1 == -1) || (Assoc == 1 && Charge1 == 1))
+    FillHisto("hCDAvsZCDAAllPiMinusMuPlus_Fin", ZCDALine/1000., CDALine/1000., Weight);
+
   // Computation of invariant mass
   
   invMass = 0.;
@@ -1419,6 +1450,35 @@ void HeavyNeutrinoPos::EndOfBurstUser() {
   if (!fReadingData) return;
   
   FillHisto("hNbursts", 0.5);
+
+  if (!GetWithMC()) {
+    
+    // POT computation (works for parasitic mode only)           
+    
+    Double_t BRK3Pi = 0.05583;
+    Double_t AccK3Pi = 0.1536;
+    Double_t F = 1.1E12/(45E6);
+    Double_t p = 0.125;
+    L0TPData *L0TPData = GetL0Data();
+
+    for (UInt_t i = 0; i < fStream.size(); i++) {                                                                  
+      if (TriggerConditions::GetInstance()->L0TriggerOn(GetEventHeader()->GetRunID(), L0TPData, fID[i])) {         
+	fNPOT += (F*fNK3Pi)/(BRK3Pi*AccK3Pi*p*TriggerConditions::GetInstance()->GetL0TriggerDownscaling(GetEventHeader()->GetRunID(), TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i])));
+	cout<<fNK3Pi<<" "<<TriggerConditions::GetInstance()->GetL0TriggerDownscaling(GetEventHeader()->GetRunID(), TriggerConditions::GetInstance()->GetL0TriggerID(fStream[i]))<<" "<<fNPOT<<endl;
+      }   
+    }
+
+    FillHisto("hPOT", 0.5, fNPOT);
+  }
+
+  return;
+}
+
+void HeavyNeutrinoPos::ProcessEOBEvent() {
+
+  if (!fReadingData) return;
+
+  return;
 }
 
 void HeavyNeutrinoPos::EndOfJobUser() {
@@ -1487,6 +1547,9 @@ void HeavyNeutrinoPos::EndOfJobUser() {
     fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
 
+    fHisto.GetTH2("hCDAvsZCDAAllPiPlusMuMinus_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAllPiMinusMuPlus_Fin")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target-TAX line [m]");
+
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetXaxis()->SetTitle("Z of CDA of HNL wrt target line [m]");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetXaxis()->SetTitle("Z of CDA of HNL wrt TAX line [m]");
 
@@ -1545,6 +1608,9 @@ void HeavyNeutrinoPos::EndOfJobUser() {
     fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
     fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
 
+    fHisto.GetTH2("hCDAvsZCDAAllPiPlusMuMinus_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+    fHisto.GetTH2("hCDAvsZCDAAllPiMinusMuPlus_Fin")->GetYaxis()->SetTitle("CDA of HNL wrt target-TAX line [m]");
+
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetYaxis()->SetTitle("N theta [mrad]");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetYaxis()->SetTitle("N theta [mrad]");
 
@@ -1580,9 +1646,12 @@ void HeavyNeutrinoPos::EndOfJobUser() {
     fHisto.GetTH2("hCDAvsZCDAAll_Geom")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
     fHisto.GetTH2("hCDAvsZCDAAll_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
 
+    fHisto.GetTH2("hCDAvsZCDAAllPiPlusMuMinus_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+    fHisto.GetTH2("hCDAvsZCDAAllPiMinusMuPlus_Fin")->GetZaxis()->SetTitle("Normalized to POT and 50 cm^{2}");
+
     fHisto.GetTH2("hThetavsZCDA_Tar")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
     fHisto.GetTH2("hThetavsZCDA_TAX")->GetZaxis()->SetTitle("Normalized to POT and 0.2 cm^{2}");
-
+    /*
     if (!GetWithMC()) {
       fHisto.GetTH1("hKTAG")->Fit("gaus", "", "", -2., 2.);
       fHisto.GetTH1("hCHOD")->Fit("gaus", "", "", -4., 4.);
@@ -1594,15 +1663,16 @@ void HeavyNeutrinoPos::EndOfJobUser() {
       fHisto.GetTH1("hSAV")->Fit("gaus", "", "", -10., 10.);
       fHisto.GetTH1("hCHANTI")->Fit("gaus", "", "", -10., 10.);
     }
-    
+    */
+
     // Plot residual number of events after each cut
 
     const int NCuts = 35;
     const char *CutNames[NCuts] = {"Total", "TriggerOK", "2 tracks", "Fake track", "Track time", "KTAG in time", "Straw acc", "Chi2", "Straw chambers", "Charge", "CHOD acc", "CHOD assoc", "CHOD time", "NewCHOD acc", "NewCHOD assoc", "NewCHOD time", "MUV3 acc", "MUV3 assoc", "MUV3 time", "LKr acc", "LKr assoc", "LKr time", "Extra CHOD", "Extra newCHOD", "LAV12 acc", "Mu E/p", "Pi E/p", "LAV veto", "SAV veto", "CHANTI veto", "LKr veto", "Track dist CH1", "CDA tracks", "Z vertex", "Beam dist"};
-  
+    
     for (Int_t i = 1; i <= NCuts; i++)
       fHisto.GetTH1("hCuts")->GetXaxis()->SetBinLabel(i, CutNames[i-1]);
-  
+    
     fHisto.GetTH1("hCuts")->GetXaxis()->LabelsOption("v");
   }
   else {

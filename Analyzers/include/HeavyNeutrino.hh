@@ -41,7 +41,7 @@ public:
   void EndOfJobUser();
   void PostProcess();
   void DrawPlot() {}
-  void ProcessEOBEvent() {}
+  void ProcessEOBEvent();
 
 protected:
 
@@ -58,7 +58,6 @@ protected:
   Bool_t fEnableChecks;
   Int_t fMode;
   Int_t fBurstCounter;
-  Int_t fNK3Pi;
   Double_t fInitialFV;
   Double_t fLFV;
   Double_t fMassForReco;
@@ -74,6 +73,13 @@ protected:
   Double_t frMinCHOD;
   Double_t frMaxCHOD;
   Double_t fZGTK3;
+  Double_t fNPOTT10;
+  Double_t fNPOTFit;
+  Double_t fNKTot;
+  Double_t fNK3Pi;
+  Double_t fNK;
+  Double_t fNPOT;
+  std::vector<Double_t> fNKaons;
   TRecoCedarCandidate *KTAGcand;
 
   // Variables for TTrees
