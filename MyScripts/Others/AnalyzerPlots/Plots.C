@@ -120,8 +120,12 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
 
-  if (title.Contains("Contour"))
+  if (title.Contains("Contour")) {
     gPad->SetLogy(0);
+    Double_t x, y;
+    g->GetPoint(0, x, y);
+    g->SetPoint(g->GetN(), x, y);
+  }
   else if (name.Contains("CL") || name.Contains("MeanMass") || name.Contains("MeanCoupling"))
     gPad->SetLogy(0);
   else
@@ -187,24 +191,26 @@ void TMultiGraphCosmetics(TMultiGraph *m, const char* x, const char* y, TCanvas*
     m->Draw("AL");
 
   if (name.Contains("Coupling") && name.Contains("Sel"))
-    m->GetYaxis()->SetRangeUser(1.E-3, 3.E-1);
-
-  if (name.Contains("Coupling") && (name.Contains("Yield") || name.Contains("FV"))) {
-    m->GetYaxis()->SetRangeUser(1.E-34, 1.E-6);
-  }
-
-  if (name.Contains("Yield") && name.Contains("Mass")) {
+    m->GetYaxis()->SetRangeUser(1.E-3, 1.);
+  
+  if (name.Contains("Coupling") && name.Contains("Yield"))
+    m->GetYaxis()->SetRangeUser(1.E-35, 1.E-8);
+  
+  if (name.Contains("Coupling") && name.Contains("FV"))
+      m->GetYaxis()->SetRangeUser(1.E-36, 1.e-6);
+    
+  if (name.Contains("Yield") && name.Contains("Mass"))
     m->GetYaxis()->SetRangeUser(1.E-20, 1.E-15);
-  }
 
-  if (name.Contains("Mass") && name.Contains("FV")) {
-    m->GetYaxis()->SetRangeUser(1.E-16, 1.E-11);
-  }
+  if (name.Contains("Mass") && name.Contains("FV"))
+    m->GetYaxis()->SetRangeUser(1.E-16, 1.E-10);
 
-  if (name.Contains("Mass") && name.Contains("Reg")) {
+  if (name.Contains("Mass") && name.Contains("Reg"))
     m->GetYaxis()->SetRangeUser(1.E-4, 1.E-3);
-  }
 
+  if (name.Contains("Mass") && name.Contains("Sel"))
+    m->GetYaxis()->SetRangeUser(1.E-2, 1.E-1);
+  
   gPad->Update();
   m->GetXaxis()->SetTitle(x);
   m->GetYaxis()->SetTitle(y);
