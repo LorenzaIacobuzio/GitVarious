@@ -404,8 +404,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   // MC only - pi+mu-
 
-  TH1D *hInvMassMC = new TH1D("hInvMassMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassMCSingle = new TH1D("hInvMassMCSingle", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hMass[172];
+  for (Int_t i = 0; i < 172; i++) {
+    hMass[i] = new TH1D(Form("hMass%d", i), Form("hMass%d", i), 100, (i*10.+245.)/1000., (i*10.+255.)/1000.);
+  }
   TH2D *hInvMassRecoVsMC = new TH2D("hInvMassRecoVsMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TGraph *gMassMC = new TGraph();
   gMassMC->SetNameTitle("PiMinusMuPlus/gMassMC", "MC studies");
@@ -444,9 +446,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     // MC studies on reco mass vs true mass
     
     if (MC && Zero && noSpike && PiMinusMuPlus) {
-      hInvMassMC->Fill(invMass/1000.);
       hInvMassRecoVsMC->Fill(trueMass, invMass/1000.);
-      hInvMassMCSingle->Fill(invMass/1000.);
+      Int_t massIndex = std::round((trueMass*1000-250)/10);
+      hMass[massIndex]->Fill(invMass/1000.);
     }
     
     // 1 - Events outside blinded region, to show SB for all bkgs
@@ -637,28 +639,19 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   // Sigma vs mass (MC studies)
     
   if (MC && Zero) { 
-    Int_t counter = 0;
     Double_t sigma = 0.;
     Double_t sigmaMin = 999.;
 
-    hInvMassMC->Draw();
-    hInvMassMCSingle->Draw();
-    
-    TF1 *f2 = new TF1("f2", "gaus", 0.245, 0.255);
-    hInvMassMCSingle->Fit("f2", "Rq");
-    hInvMassMCSingle->GetXaxis()->SetRangeUser(0.240, 0.280);
-    
-    for (Double_t mass = massMin; mass < massMax; mass += massStep) {
-      TF1 *f1 = new TF1("f1", "gaus", mass-massStep, mass+massStep);
-      hInvMassMC->Fit("f1", "Rq");
+    for (Int_t i = 0; i < 172; i++) {
+      hMass[i]->Draw();
+    }
+    for (Int_t i = 0; i < 172; i++) {
+      TF1 *f1 = new TF1("f1", "gaus", (i*10.+245.)/1000., (i*10.+255.)/1000.);
+      hMass[i]->Fit("f1", "Rq");
       sigma = f1->GetParameter(2);
-      if (sigma < 0.001 || sigma > 0.01)
-	gMassMC->SetPoint(counter, mass, 0.0055);
-      else
-	gMassMC->SetPoint(counter, mass, sigma);
+      gMassMC->SetPoint(i, (i*10.+250.)/1000., sigma);
       if (sigma < sigmaMin && sigma != 0.)
-	sigmaMin = sigma;
-      counter++;
+        sigmaMin = sigma;
     }
 
     minSigma = sigmaMin;
@@ -794,8 +787,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiMinusMuPlus/Par/", c, gBkg2SigmaPar, "gBkg2SigmaPar", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
 
   if (!an.Contains("Pos")  && !histo1.Contains("2016") && !histo1.Contains("2017") && !histo1.Contains("2018") && !histo1.Contains("Data")) {
-    Save(path + "PiMinusMuPlus/MC/", c, hInvMassMC, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-    Save(path + "PiMinusMuPlus/MC/", c, hInvMassMCSingle, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiMinusMuPlus/MC/", c, hInvMassRecoVsMC, "MC true invariant mass [GeV/c^{2}]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiMinusMuPlus/MC/", c, gMassMC, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Mass resolution [GeV/c^{2}]", labelSize, titleSize);
   }
