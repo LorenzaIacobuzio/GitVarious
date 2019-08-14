@@ -200,9 +200,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -568,7 +568,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hSRPrompt->Fill(ZCDALine/1000., CDALine/1000.);
     }
 
-    if (FV && an.Contains("Neg") && noSpike && CDAIn && PiMinusMuPlus) { // prompt with q = 2 in FV
+    if (FV && an.Contains("Neg") && noSpike && CDAIn) { // prompt with q = 2 in FV
       hInvMassPrompt->Fill(invMass/1000.);
       hInvMassVsZq2Prompt->Fill(Zvertex/1000., invMass/1000.);
       hInvMassVsPq2Prompt->Fill(TotMom->Mag()/1000., invMass/1000.);
@@ -598,19 +598,19 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     
     // 5 - Events inside blinded region
     
-    if (!outsideSR && noSpike && PiMinusMuPlus) { // all events inside blinded region...
+    if (!outsideSR && noSpike) { // all events inside blinded region...
       /*      
       if (Comb && CDAInEnriched && Zero && !MC) { // ...and time sidebands (enriched sample)
 	hSRFinalCombEnriched->Fill(ZCDALine/1000., CDALine/1000.);
 	hInvMassCombSREnriched->Fill(invMass/1000.);
       }
       */
-      if (Comb && Zero && !MC && CDAIn) { // ...and time sidebands (not enriched sample to study spike at 75 GeV)
+      if (Comb && Zero && !MC && CDAIn && PiMinusMuPlus) { // ...and time sidebands (not enriched sample to study spike at 75 GeV)
 	counterComb++;
 	hSRFinalComb->Fill(ZCDALine/1000., CDALine/1000.);
 	hInvMassCombSR->Fill(invMass/1000.);
       }
-      if (Par && Zero && !MC && CDAIn) { // ...and beam distance sidebands
+      if (Par && Zero && !MC && CDAIn && PiMinusMuPlus) { // ...and beam distance sidebands
 	counterPar++;
 	hSRFinalPar->Fill(ZCDALine/1000., CDALine/1000.);
 	hInvMassParSR->Fill(invMass/1000.);
@@ -618,7 +618,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 	hInvMassVsCDAFinalPar->Fill(BeamCDA2, invMass/1000.);
 	hInvMassVsRFinalPar->Fill(R, invMass/1000.);
       }
-      if (Prompt && Zero && !MC && CDAIn) { // ...and vertex sidebands (0-charge)
+      if (Prompt && Zero && !MC && CDAIn && PiMinusMuPlus) { // ...and vertex sidebands (0-charge)
 	counterPromptSBZ++;
       }
       if (SB && an.Contains("Neg") && CDAIn) { // ...and vertex sidebands (pos-charge)
@@ -823,7 +823,7 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBN = 0;
   Double_t counterPromptFVN = 0;
   Double_t N = 0.;
-  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
+  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
 
   // Total expected bkg
   
