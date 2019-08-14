@@ -359,7 +359,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   
   TH2D *hMom1VsMom2PeakPrompt = new TH2D("hMom1VsMom2PeakPrompt", "Muon-induced background studies", 100, 0., 200., 100, 0., 200.);
   TH2D *hMom1VsMom2NoPeakPrompt = new TH2D("hMom1VsMom2NoPeakPrompt", "Muon-induced background studies", 100, 0., 200., 100, 0., 200.);
-   
+
+  TH2D *hDistVsZPrompt = new TH2D("hDistVsZPrompt", "Muon-induced background studies", 100, 100., 120., 100, 100., 500.);
+  TH2D *hDistVsZq2Prompt = new TH2D("hDistVsZq2Prompt", "Muon-induced background studies", 100, 100., 120., 100, 100., 500.);
   TH2D *hInvMassVsZPrompt = new TH2D("hInvMassVsZPrompt", "Muon-induced background studies", 300, 90., 120., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TH2D *hInvMassVsZq2Prompt = new TH2D("hInvMassVsZq2Prompt", "Muon-induced background studies", 100, 90., 190., 50, 0.25, 1.);
   TH2D *hInvMassVsPq2Prompt = new TH2D("hInvMassVsPq2Prompt", "Muon-induced background studies", 100, 0., 300., 50, 0.25, 1.);
@@ -400,8 +402,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   // MC only - pi+mu-
 
-  TH1D *hInvMassMC = new TH1D("hInvMassMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassMCSingle = new TH1D("hInvMassMCSingle", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  //TH1D *hInvMassMC = new TH1D("hInvMassMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassMC = new TH1D("hInvMassMC", "MC studies", 3440, massMin-binWidth/2., massMax+binWidth/2.);
+  //TH1D *hInvMassMCSingle = new TH1D("hInvMassMCSingle", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassMCSingle = new TH1D("hInvMassMCSingle", "MC studies", 3440, massMin-binWidth/2., massMax+binWidth/2.);
   TH2D *hInvMassRecoVsMC = new TH2D("hInvMassRecoVsMC", "MC studies", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2., nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
   TGraph *gMassMC = new TGraph();
   gMassMC->SetNameTitle("PiPlusMuMinus/gMassMC", "MC studies");
@@ -566,6 +570,14 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hSRPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
+    if (SB && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 2 in SB
+      hDistVsZq2Prompt->Fill(Zvertex/1000., BeamlineDist);
+    }
+
+    if (SB && Zero && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 0 in SB
+      hDistVsZPrompt->Fill(Zvertex/1000., BeamlineDist);
+    }    
+
     if (FV && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 2 in FV
       hInvMassPrompt->Fill(invMass/1000., Weight);
       hInvMassVsZq2Prompt->Fill(Zvertex/1000., invMass/1000.);
@@ -640,16 +652,19 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     
     TF1 *f2 = new TF1("f2", "gaus", 0.245, 0.255);
     hInvMassMCSingle->Fit("f2", "Rq");
-    hInvMassMCSingle->GetXaxis()->SetRangeUser(0.240, 0.280);
+    hInvMassMCSingle->GetXaxis()->SetRangeUser(0.24, 0.28);
     
     for (Double_t mass = massMin; mass < massMax; mass += massStep) {
-      TF1 *f1 = new TF1("f1", "gaus", mass-massStep, mass+massStep);
+      TF1 *f1 = new TF1("f1", "gaus", mass-massStep/2., mass+massStep/2.);
       hInvMassMC->Fit("f1", "Rq");
       sigma = f1->GetParameter(2);
+      /*
       if (sigma < 0.001 || sigma > 0.01)
 	gMassMC->SetPoint(counter, mass, 0.0055);
       else
 	gMassMC->SetPoint(counter, mass, sigma);
+      */
+      gMassMC->SetPoint(counter, mass, sigma);
       if (sigma < sigmaMin && sigma != 0.)
 	sigmaMin = sigma;
       counter++;
@@ -765,6 +780,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Prompt/", c, hMom1VsMom2PeakPrompt, "Momentum of track1 [GeV/c]", "Momentum of track2 [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hMom1VsMom2NoPeakPrompt, "Momentum of track1 [GeV/c]", "Momentum of track2 [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePrompt, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hDistVsZPrompt, "Z coordinate of vertex [m]", "Vertex-beam distance [mm]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hDistVsZq2Prompt, "Z coordinate of vertex [m]", "Vertex-beam distance [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsZPrompt, "Z coordinate of vertex [m]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsZq2Prompt, "Z coordinate of vertex [m]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassVsPq2Prompt, "Modulus of mother momentum [GeV/c]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
@@ -787,7 +804,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     Save(path + "PiPlusMuMinus/MC/", c, hInvMassMC, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiPlusMuMinus/MC/", c, hInvMassMCSingle, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiPlusMuMinus/MC/", c, hInvMassRecoVsMC, "MC true invariant mass [GeV/c^{2}]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-    Save(path + "PiPlusMuMinus/MC/", c, gMassMC, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Sigma [GeV/c^{2}]", labelSize, titleSize);
+    Save(path + "PiPlusMuMinus/MC/", c, gMassMC, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Mass resolution [GeV/c^{2}]", labelSize, titleSize);
   }
 
   tree->ResetBranchAddresses();

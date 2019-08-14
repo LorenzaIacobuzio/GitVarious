@@ -54,7 +54,8 @@ using namespace std;
 using namespace NA62Analysis;
 using namespace NA62Constants;
 
-#define TRIGGER_L0_PHYSICS_TYPE 1
+//#define TRIGGER_L0_PHYSICS_TYPE 1
+#define TRIGGER_L0_PHYSICS_TYPE 0x10
 #define MCTriggerMask 0xFF
 
 /// \class HeavyNeutrino
@@ -427,10 +428,18 @@ void HeavyNeutrino::Process(Int_t) {
     FillHisto("hNk3pi", 0.5);
   }
 
-  // If real data
-  
   if (!GetWithMC()) {  
-    
+    L0TPData *L0TPData = GetL0Data();
+    UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
+    Bool_t PhysicsTriggerOK = (L0DataType & TRIGGER_L0_PHYSICS_TYPE);
+
+    if (!PhysicsTriggerOK) return;
+  }
+
+  // If real data
+  /*
+  if (!GetWithMC()) {  
+        
     L0TPData *L0TPData = GetL0Data();
     UChar_t L0DataType = GetWithMC() ? 0x11 : L0TPData->GetDataType();
     UInt_t L0TriggerFlags = GetWithMC() ? 0xFF : L0TPData->GetTriggerFlags();
@@ -470,7 +479,7 @@ void HeavyNeutrino::Process(Int_t) {
     
     if (!L1OK) return;
   }
-  
+  */
   FillHisto("hCuts", CutID);
   CutID++;
 

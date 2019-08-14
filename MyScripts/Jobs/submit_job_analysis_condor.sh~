@@ -63,6 +63,10 @@ function findListFile() {
 	    version="v1.0.3"
 	elif [[ ${sample} == *"2017D"* ]]; then
 	    version="v1.0.3"
+	elif [[ ${sample} == *"2018A"* ]]; then
+	    version="v1.1.2"
+	elif [[ ${sample} == *"2018B"* ]]; then
+	    version="v1.1.3"
 	elif [[ ${sample} == *"2018E"* ]]; then
 	    version="v1.0.4"
 	elif [[ ${sample} == *"2018H"* ]]; then
