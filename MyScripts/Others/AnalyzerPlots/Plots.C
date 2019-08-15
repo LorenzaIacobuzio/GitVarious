@@ -468,8 +468,12 @@ void Plots(TString dir, TString histo1, TString mode) {
     path += "ShapoOld/3/";
   else if (histo1.Contains("1-1-1"))
     path += "ShapoNew/All/";
-  else if (histo1.Contains("0-1-"))
+  else if (histo1.Contains("0-1-10"))
     path += "ShapoNew/Tau/";
+  else if (histo1.Contains("0-1-0"))
+    path += "ShapoNew/Muon/";
+  else if (histo1.Contains("10-1-0"))
+    path += "ShapoNew/Electron/";
   else {
     cout<<"Don't know which directory to put " << histo1 << " into!"<<endl;
     _exit(1);

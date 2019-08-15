@@ -200,9 +200,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -456,14 +456,17 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     if (outsideSR && Zero && noSpike && CDAIn && PiPlusMuMinus) { // all events outside blinded region
       hCDASR->Fill(BeamCDA1);//, Weight);
       hCDASR->Fill(BeamCDA2);//, Weight);
-      hZSR->Fill(Zvertex/1000., Weight);
+      //hZSR->Fill(Zvertex/1000., Weight);
       hTimeSR->Fill(CHODTime1-CHODTime2, Weight);
       hInvMassSR->Fill(invMass/1000., Weight);
       hSRSR->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (outsideSR && an.Contains("Pos") && noSpike && CDAIn && PiPlusMuMinus) { // all events outside blinded region (q2)
+    if (outsideSR && Zvertex >= 106000. && Zvertex <= 120000. && an.Contains("Pos") && noSpike && CDAIn) { // all events outside blinded region (q2)
       hZSRq2->Fill(Zvertex/1000., Weight);
+    }
+    if (outsideSR && Zvertex >= 106000. && Zvertex <= 120000. && Zero && noSpike && CDAIn && PiPlusMuMinus) {
+      hZSR->Fill(Zvertex/1000., Weight);
     }
     
     // 2 - Combinatorial SB
@@ -572,11 +575,11 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       hSRPrompt->Fill(ZCDALine/1000., CDALine/1000., Weight);
     }
 
-    if (SB && an.Contains("Pos") && noSpike && CDAIn) { // prompt with q = 2 in SB
+    if (Zvertex >= 106000. && Zvertex <= 120000. && an.Contains("Pos") && noSpike && CDAIn) { // prompt with q = 2 in SB
       hDistVsZq2Prompt->Fill(Zvertex/1000., BeamlineDist);
     }
 
-    if (SB && Zero && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 0 in SB
+    if (Zvertex >= 106000. && Zvertex <= 120000. && Zero && noSpike && CDAIn && PiPlusMuMinus) { // prompt with q = 0 in SB
       hDistVsZPrompt->Fill(Zvertex/1000., BeamlineDist);
     }    
 
@@ -816,7 +819,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBP = 0;
   Double_t counterPromptFVP = 0;
   Double_t P = 0.;
-  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   
