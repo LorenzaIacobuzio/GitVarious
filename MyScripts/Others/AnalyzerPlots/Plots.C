@@ -139,6 +139,12 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize, TString 
     gPad->SetLogy(0);
   else
     gPad->SetLogy();
+
+  if (histoName.Contains("10-1-0"))
+    gStyle->SetTitleX(0.4);
+
+  if (histoName.Contains("0-1-10"))
+    gStyle->SetTitleX(0.45);
   
   gPad->Update();
 }
