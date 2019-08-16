@@ -60,9 +60,9 @@ HeavyNeutrinoScan::HeavyNeutrinoScan(Core::BaseAnalysis *ba) :
   RequestAllMCTrees();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("InitialUeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
+  AddParam("InitialUmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("InitialUtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("CouplingStart", &fCouplingStart, -10.); // -10
   AddParam("CouplingStop", &fCouplingStop, -1); // -1 (do not put 0)
   AddParam("CouplingStep", &fCouplingStep, 0.1); // 0.1
@@ -1026,9 +1026,10 @@ void HeavyNeutrinoScan::EndOfJobUser() {
 	  couplingCounter++;
 	}
 
-	if (fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 1.0/0.0)
+	//if (fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 1.0/0.0 && -fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 0.0/0.0 && -fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]) != 1.0/0.0) {
+	if (!((fSumGood[MN][Coupling] == 0. || fSumAllFV[MN][Coupling] == 0.) && (fSumAllR[MN][Coupling] == 0. || fNEvents[MN][Coupling] == 0.))) {
 	  fYield[MN][Coupling] = fSumGood[MN][Coupling]*fSumAllFV[MN][Coupling]/(fSumAllR[MN][Coupling]*fNEvents[MN][Coupling]);
-
+	}
 	FillHisto("TotalScan/hExclusion", MN/1000., Coupling, fYield[MN][Coupling]*POT);
       }
     
@@ -1075,10 +1076,10 @@ void HeavyNeutrinoScan::EndOfJobUser() {
   
     CosmeticsGraph(fHisto.GetTGraph("CouplingScan/GammaTotCoupling"), "Log(U^{2})", "Total decay width [MeV]", 2);
     CosmeticsGraph(fHisto.GetTGraph("CouplingScan/TauCoupling"), "Log(U^{2})", "Lifetime [ns]", 2);
-    CosmeticsGraph(fHisto.GetTGraph("CouplingScan/MeanCoupling"), "Log(U^{2})", "Mean probability", 2);
+    CosmeticsGraph(fHisto.GetTGraph("CouplingScan/MeanCoupling"), "Log(U^{2})", "Log(mean probability)", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/GammaTotMass"), "N mass [GeV/c^{2}]", "Total decay width [MeV]", 2);
     CosmeticsGraph(fHisto.GetTGraph("MassScan/TauMass"), "N mass [GeV/c^{2}]", "Lifetime [ns]", 2);
-    CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"), "N mass [GeV/c^{2}]", "Mean probability", 2);
+    CosmeticsGraph(fHisto.GetTGraph("MassScan/MeanMass"), "N mass [GeV/c^{2}]", "Log(mean probability)", 2);
     CosmeticsGraph(fHisto.GetTGraph("TotalScan/Contours"), "N mass [GeV/c^{2}]", "Log(U^{2})", 2);  
 
     CosmeticsGraph(static_cast<TGraphAsymmErrors*>(fHisto.GetTGraph("CouplingScan/ErrorAccCouplingSel")), "Log(U^{2})", "Acceptance", 2);

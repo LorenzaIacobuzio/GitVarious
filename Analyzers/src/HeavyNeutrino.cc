@@ -74,9 +74,9 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 16.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 3.8); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
+  AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
@@ -339,6 +339,8 @@ void HeavyNeutrino::Process(Int_t) {
   
   FillHisto("hCuts", CutID);
   CutID++;
+
+  FillHisto("hTime_1", CHODTime1-CHODTime2);
 
   Int_t counter = 0;
   TLorentzVector mom1;
@@ -681,8 +683,6 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   // END OF TIMING PLOTS
-
-  FillHisto("hTime_1", CHODTime1-CHODTime2);
 
   // Track timing                                                             
 

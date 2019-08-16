@@ -363,6 +363,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
 	modName.Remove(modName.Last('.'), modName.Last('.') + 4);
 	histo1Name = histo1;
 	c->SaveAs("/home/li/Desktop/Histos/" + modName + ".png");
+
 	if (histo1Name.Contains("52-1-1"))
 	  g->SetTitle("Model I (52:1:1)");
 	else if (histo1Name.Contains("1-16-3.8"))
@@ -375,7 +376,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
 	  g->SetTitle("Tau-dominant model (0:1:10)");
 	else if (histo1Name.Contains("10-1-0"))
 	  g->SetTitle("Electron-dominant model (10:1:0)");
-	else if (histo1Name.Contains("0-1-0"))
+	else if (histo1Name.Contains("0-1-0") && !histo1Name.Contains("10-1-0"))
 	  g->SetTitle("Muon-only model (0:1:0)");
       }
       else
@@ -492,7 +493,7 @@ void Plots(TString dir, TString histo1, TString mode) {
     path += "ShapoNew/All/";
   else if (histo1.Contains("0-1-10"))
     path += "ShapoNew/Tau/";
-  else if (histo1.Contains("0-1-0"))
+  else if (histo1.Contains("0-1-0") && !histo1.Contains("10-1-0"))
     path += "ShapoNew/Muon/";
   else if (histo1.Contains("10-1-0"))
     path += "ShapoNew/Electron/";
