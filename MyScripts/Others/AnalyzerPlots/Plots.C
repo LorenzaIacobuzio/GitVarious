@@ -85,7 +85,7 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
     h2->GetYaxis()->SetRangeUser(100., 180.);
 }
 
-void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
+void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize, TString histoName) {
 
   TString title = g->GetTitle();
   TString name = g->GetName();
@@ -120,9 +120,18 @@ void TGraphCosmetics(TGraph* g, Double_t labelSize, Double_t titleSize) {
   g->GetYaxis()->SetLabelSize(labelSize);
   gStyle->SetOptStat(0);
 
-  if (title.Contains("Contour")) {
+  if (title.Contains("Contour") && !histoName.Contains("10-1-0")) {
     gPad->SetLogy(0);
     Double_t x, y;
+    g->GetPoint(0, x, y);
+    g->SetPoint(g->GetN(), x, y);
+  }
+  else if (title.Contains("Contour") && histoName.Contains("10-1-0")) {
+    gPad->SetLogy(0);
+    Double_t x, y;
+    g->RemovePoint(351);
+    g->RemovePoint(351);
+    g->RemovePoint(351);
     g->GetPoint(0, x, y);
     g->SetPoint(g->GetN(), x, y);
   }
@@ -344,7 +353,7 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
     else if (cl->InheritsFrom("TGraph")) { // 2 - TGraph
       TGraph *g = (TGraph*)(key->ReadObj());
       
-      TGraphCosmetics(g, labelSize, titleSize);
+      TGraphCosmetics(g, labelSize, titleSize, histo1Name);
 
       if (Name1.Contains("Contours")) {
 	g->Draw("AL");
@@ -354,7 +363,20 @@ TGraph* ParseDir(const char* fName, const char* dirName, TString path, TCanvas* 
 	modName.Remove(modName.Last('.'), modName.Last('.') + 4);
 	histo1Name = histo1;
 	c->SaveAs("/home/li/Desktop/Histos/" + modName + ".png");
-	g->SetTitle(modName);
+	if (histo1Name.Contains("52-1-1"))
+	  g->SetTitle("Model I (52:1:1)");
+	else if (histo1Name.Contains("1-16-3.8"))
+	  g->SetTitle("Model II (1:16:3.8)");
+	else if (histo1Name.Contains("0.061-1-4.3"))
+	  g->SetTitle("Model III (0.061:1:4.3)");
+	else if (histo1Name.Contains("1-1-1"))
+	  g->SetTitle("General model (1:1:1)");
+	else if (histo1Name.Contains("0-1-10"))
+	  g->SetTitle("Tau-dominant model (0:1:10)");
+	else if (histo1Name.Contains("10-1-0"))
+	  g->SetTitle("Electron-dominant model (10:1:0)");
+	else if (histo1Name.Contains("0-1-0"))
+	  g->SetTitle("Muon-only model (0:1:0)");
       }
       else
 	g->Draw("AC");
