@@ -67,7 +67,7 @@ void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString 
   if (name.Contains("gMassMC"))
     g->Draw("AP*");
   else
-    g->Draw("APL");
+    g->Draw("AL");
   
   g->GetXaxis()->SetTitleOffset(1.4);
   g->GetYaxis()->SetTitleOffset(1.5);
@@ -77,6 +77,8 @@ void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString 
   g->GetYaxis()->SetTitleSize(labelSize);
   g->GetXaxis()->SetLabelSize(labelSize);
   g->GetYaxis()->SetLabelSize(labelSize);
+  g->SetLineWidth(2);
+  g->SetLineColor(kRed);
   gStyle->SetOptStat(0);
   gPad->Update();
   c->SaveAs(path + name + ".pdf");

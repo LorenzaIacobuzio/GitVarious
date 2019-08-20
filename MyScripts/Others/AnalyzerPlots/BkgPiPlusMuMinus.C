@@ -65,7 +65,7 @@ void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString 
   if (name.Contains("gMassMC"))
     g->Draw("AP*");
   else
-    g->Draw("APL");
+    g->Draw("AL");
   
   g->GetXaxis()->SetTitleOffset(1.4);
   g->GetYaxis()->SetTitleOffset(1.5);
@@ -75,6 +75,8 @@ void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString 
   g->GetYaxis()->SetTitleSize(labelSize);
   g->GetXaxis()->SetLabelSize(labelSize);
   g->GetYaxis()->SetLabelSize(labelSize);
+  g->SetLineWidth(2);
+  g->SetLineColor(kRed);
   gStyle->SetOptStat(0);
   gPad->Update();
   c->SaveAs(path + name + ".pdf");
@@ -456,7 +458,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     if (outsideSR && SB && an.Contains("Pos") && noSpike && CDAIn) { // all events outside blinded region (q2)
       hZSRq2->Fill(Zvertex/1000., Weight);
     }
-    if (outsideSR && SB && Zero && noSpike && CDAIn && PiPlusMuMinus) {
+    if (outsideSR && Zero && noSpike && CDAIn && PiPlusMuMinus) {
       hZSR->Fill(Zvertex/1000., Weight);
     }
     
