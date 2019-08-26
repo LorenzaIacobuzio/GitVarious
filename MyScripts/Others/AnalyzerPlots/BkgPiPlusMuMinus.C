@@ -10,6 +10,29 @@ Double_t binWidth = (massMax - massMin)/(nMassBins);
 TH1D *hZK;
 TH1D *hZKq2;
 
+void Save(TString path, TCanvas *c, TH1D* h, TString x, TString y, Double_t labelSize, Double_t titleSize) {
+
+  TString name = h->GetName();
+  
+  h->Draw("hist");
+  h->GetXaxis()->SetTitle(x);
+  h->GetYaxis()->SetTitle(y);
+  h->SetFillColor(38);
+  h->SetTitleSize(titleSize, "t");
+  h->GetXaxis()->SetTitleSize(labelSize);
+  h->GetXaxis()->SetLabelSize(labelSize);
+  h->GetYaxis()->SetTitleSize(labelSize);
+  h->GetYaxis()->SetLabelSize(labelSize);
+  h->GetXaxis()->SetTitleOffset(1.4);
+  h->GetYaxis()->SetTitleOffset(1.4);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + h->GetName() + ".pdf");
+  c->SaveAs(path + h->GetName() + ".png");
+
+  return;
+}
+
 void Save(TString path, TCanvas *c, TH1D* h, TString x, Double_t labelSize, Double_t titleSize) {
 
   TString name = h->GetName();
@@ -200,9 +223,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -701,11 +724,11 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/SR/", c, hInvMassSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/SR/", c, hSRSR, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
 
-  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassComb, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassCombKolm, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassCombSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Comb/", c, hMomPiPosComb, "Pion momentum [GeV/c]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Comb/", c, hMomMuNegComb, "Muon momentum [GeV/c]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassComb, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassCombKolm, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Comb/", c, hInvMassCombSR, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Comb/", c, hMomPiPosComb, "Track momentum [GeV/c]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Comb/", c, hMomMuNegComb, "Track momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Comb/", c, hGTK3IDPiPosComb, "RICH hypothesis", "RICH radius [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Comb/", c, hGTK3IDMuNegComb, "RICH hypothesis", "RICH radius [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Comb/", c, hGTK3XYPiPosComb, "X at GTK3 [mm]", "Y at GTK3 [mm]", labelSize, titleSize);
@@ -715,9 +738,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Comb/", c, gBkg1SigmaComb, "gBkg1SigmaComb", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Comb/", c, gBkg2SigmaComb, "gBkg2SigmaComb", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   
-  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPrompt, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptKolm, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPrompt, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptSR, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptKolm, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hMom1VsMom2PeakPrompt, "Momentum of track1 [GeV/c]", "Momentum of track2 [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hMom1VsMom2NoPeakPrompt, "Momentum of track1 [GeV/c]", "Momentum of track2 [GeV/c]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hZTimePrompt, "Z coordinate of vertex [m]", "Track time difference [ns]", labelSize, titleSize);
@@ -733,9 +756,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg1SigmaPrompt, "gBkg1SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg2SigmaPrompt, "gBkg2SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
 
-  Save(path + "PiPlusMuMinus/Par/", c, hInvMassPar, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Par/", c, hInvMassParSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiPlusMuMinus/Par/", c, hInvMassParKolm, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Par/", c, hInvMassPar, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Par/", c, hInvMassParSR, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Par/", c, hInvMassParKolm, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Par/", c, hSRPar, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Par/", c, hSRFinalPar, "Z of CDA of mother wrt target-TAX line [m]", "CDA of mother wrt target-TAX line [m]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Par/", c, gBkg1SigmaPar, "gBkg1SigmaPar", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
@@ -771,7 +794,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBP = 0;
   Double_t counterPromptFVP = 0;
   Double_t P = 0.;
-  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   

@@ -202,9 +202,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -693,8 +693,8 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   Save(path + "PiMinusMuPlus/Comb/", c, hInvMassComb, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Comb/", c, hInvMassCombKolm, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Comb/", c, hInvMassCombSR, "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
-  Save(path + "PiMinusMuPlus/Comb/", c, hMomPiNegComb, "Pion momentum [GeV/c]", labelSize, titleSize);
-  Save(path + "PiMinusMuPlus/Comb/", c, hMomMuPosComb, "Muon momentum [GeV/c]", labelSize, titleSize);
+  Save(path + "PiMinusMuPlus/Comb/", c, hMomPiNegComb, "Track momentum [GeV/c]", labelSize, titleSize);
+  Save(path + "PiMinusMuPlus/Comb/", c, hMomMuPosComb, "Track momentum [GeV/c]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Comb/", c, hGTK3IDPiNegComb, "RICH hypothesis", "RICH radius [mm]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Comb/", c, hGTK3IDMuPosComb, "RICH hypothesis", "RICH radius [mm]", labelSize, titleSize);
   Save(path + "PiMinusMuPlus/Comb/", c, hGTK3XYPiNegComb, "X at GTK3 [mm]", "Y at GTK3 [mm]", labelSize, titleSize);
@@ -759,7 +759,7 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBN = 0;
   Double_t counterPromptFVN = 0;
   Double_t N = 0.;
-  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
+  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiMinusMuPlus/";
 
   // Total expected bkg
   
