@@ -3,9 +3,11 @@
 Double_t Par[6] = {0., 0., 0., 0., 0., 0.};
 Double_t minSigma = 0.;
 Double_t massMin = 0.25;
+Double_t massMinForBkg = 0.5;
 Double_t massMax = 1.96;
 Double_t massStep = 0.01;
 Int_t nMassBins = (massMax - massMin)/massStep;
+Int_t nMassBinsForBkg = (massMax - massMinForBkg)/massStep;
 Double_t binWidth = (massMax - massMin)/(nMassBins);
 TH1D *hZK;
 TH1D *hZKq2;
@@ -142,7 +144,7 @@ TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
   Int_t counter = 0;
   TGraph *res = new TGraph();
 
-  for (Double_t massHyp = massMin-minSigma; massHyp <= massMax+minSigma; massHyp += minSigma) {
+  for (Double_t massHyp = massMinForBkg-minSigma; massHyp <= massMax+minSigma; massHyp += minSigma) {
     Double_t sigma = Par[5]*TMath::Power(massHyp, 5.) + Par[4]*TMath::Power(massHyp, 4.) + Par[3]*TMath::Power(massHyp, 3.) + Par[2]*TMath::Power(massHyp, 2.) + Par[1]*TMath::Power(massHyp, 1.) + Par[0];
     TAxis *axis = h->GetXaxis();
     Int_t bmin = axis->FindBin(massHyp-howManySigmas*sigma);
@@ -223,9 +225,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -345,9 +347,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   
   // Combinatorial - pi+mu-
     
-  TH1D *hInvMassComb = new TH1D("hInvMassComb", "Events in sidebands", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassCombKolm = new TH1D("hInvMassCombKolm", "Events in sidebands", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassCombSR = new TH1D("hInvMassCombSR", "Events in sidebands and blinded region", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassComb = new TH1D("hInvMassComb", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassCombKolm = new TH1D("hInvMassCombKolm", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassCombSR = new TH1D("hInvMassCombSR", "Events in sidebands and blinded region", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
   
   TH1D *hMomPiPosComb = new TH1D("hMomPiPosComb", "Events in sidebands", 100, 0., 200.);
   TH1D *hMomMuNegComb = new TH1D("hMomMuNegComb", "Events in sidebands", 100, 0., 200.);
@@ -368,9 +370,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
   TH2D *hZTimePrompt = new TH2D("hZTimePrompt", "Events in sidebands", 500, 100., 190., 100, -15., 15.);
 
-  TH1D *hInvMassPrompt = new TH1D("hInvMassPrompt", "Events in sidebands", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassPromptSR = new TH1D("hInvMassPromptSR", "Events in sidebands and blinded region", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
-  TH1D *hInvMassPromptKolm = new TH1D("hInvMassPromptKolm", "Events in sidebands", nMassBins+1, massMin-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassPrompt = new TH1D("hInvMassPrompt", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassPromptSR = new TH1D("hInvMassPromptSR", "Events in sidebands and blinded region", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
+  TH1D *hInvMassPromptKolm = new TH1D("hInvMassPromptKolm", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
   
   TH2D *hMom1VsMom2PeakPrompt = new TH2D("hMom1VsMom2PeakPrompt", "Events in sidebands", 100, 0., 200., 100, 0., 200.);
   TH2D *hMom1VsMom2NoPeakPrompt = new TH2D("hMom1VsMom2NoPeakPrompt", "Events in sidebands", 100, 0., 200., 100, 0., 200.);
@@ -630,25 +632,42 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   if (MC && Zero) { 
     Double_t sigma = 0.;
     Double_t sigmaMin = 999.;
-
+    
     for (Int_t i = 0; i < 172; i++) {
       hMass[i]->Draw();
     }
     for (Int_t i = 0; i < 172; i++) {
       TF1 *f1 = new TF1("f1", "gaus", (i*10.+245.)/1000., (i*10.+255.)/1000.);
-      hMass[i]->Fit("f1", "Rq");                    
-      sigma = f1->GetParameter(2);
+      TF1 *f2 = new TF1("f2", "gaus", (i*10.+249.)/1000., (i*10.+251.)/1000.);
+      if ((i*10.+245.)/1000. < 1.5) {
+	hMass[i]->Fit("f1", "Rq");
+	sigma = f1->GetParameter(2);
+      }
+      else {
+	hMass[i]->Fit("f2", "Rq");
+	sigma = f2->GetParameter(2);
+      }
       gMassMC->SetPoint(i, (i*10.+250.)/1000., sigma);  
       if (sigma < sigmaMin && sigma != 0.)                 
         sigmaMin = sigma;                                  
     }
-
     minSigma = sigmaMin;
-    gMassMC->Fit("pol5");
-    TF1 *f = gMassMC->GetFunction("pol5");
+    
+    for (Int_t i = 0; i < gMassMC->GetN(); i++) {
+      Double_t x, y;
+      gMassMC->GetPoint(i, x, y);
+      if (x > 1.4 && y < 0.004)
+	gMassMC->SetPoint(i, x, y+0.004);
+      if (y > 0.007)
+	gMassMC->SetPoint(i, x, 0.0055);
+    }
+    
+    gMassMC->Fit("pol1");
+    TF1 *f = gMassMC->GetFunction("pol1");
 
-    for (Int_t j = 0; j < 6; j++)
+    for (Int_t j = 0; j < 2; j++) {
       Par[j] = f->GetParameter(j);
+    }
   }
 
   // Kolmogorov test and mass scan for data
@@ -669,7 +688,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       gBkg2SigmaComb->SetNameTitle("PiPlusMuMinus/gBkg1SigmaComb", "Expected combinatorial background events");
       
       // B - Parasitic
-
+      /*
       cout<<"Parasitic bkg - Kolmogorov test for SR sample: "<<hInvMassParSR->KolmogorovTest(hInvMassPar)<<endl;
       hInvMassParKolm = (TH1D*)hInvMassPar->Clone();
       hInvMassParKolm->SetName("hInvMassParKolm");
@@ -681,7 +700,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
 
       SumGraphs(gBkg1SigmaComb, gBkg1SigmaPar, *gBkg1SigmaBuffer);
       SumGraphs(gBkg2SigmaComb, gBkg2SigmaPar, *gBkg2SigmaBuffer);
-
+      */
       hZK = hZSR;
     }
 
@@ -704,10 +723,10 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
       gBkg1SigmaPrompt->SetNameTitle("PiPlusMuMinus/gBkg1SigmaPrompt", "Expected muon-induced background events");
       gBkg2SigmaPrompt->SetNameTitle("PiPlusMuMinus/gBkg1SigmaPrompt", "Expected muon-induced background events");
 	
-      SumGraphs(gBkg1SigmaPrompt, gBkg1SigmaBuffer, *gBkg1SigmaTot);
-      SumGraphs(gBkg2SigmaPrompt, gBkg2SigmaBuffer, *gBkg2SigmaTot);
+      SumGraphs(gBkg1SigmaComb, gBkg1SigmaPrompt, *gBkg1SigmaTot);
+      SumGraphs(gBkg2SigmaComb, gBkg2SigmaPrompt, *gBkg2SigmaTot);
       
-      for (Int_t j = 0; j < 6; j++) 
+      for (Int_t j = 0; j < 2; j++) 
 	Par[j] = 0.;
       
       minSigma = 0.;
@@ -794,7 +813,7 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   Double_t counterPromptSBP = 0;
   Double_t counterPromptFVP = 0;
   Double_t P = 0.;
-  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
   // Total expected bkg
   
