@@ -89,6 +89,34 @@ void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString 
   return;
 }
 
+void Save(TString path, TCanvas *c, TGraphAsymmErrors* g, TString name, TString x, TString y, Double_t labelSize, Double_t titleSize) {
+
+  if (name.Contains("gMassMC"))
+    g->Draw("AP*");
+  else {
+    g->SetFillStyle(3001);
+    g->SetFillColor(kRed);
+    g->Draw("AL3");
+  }
+  
+  g->GetXaxis()->SetTitleOffset(1.4);
+  g->GetYaxis()->SetTitleOffset(1.5);
+  g->GetXaxis()->SetTitle(x);
+  g->GetYaxis()->SetTitle(y);
+  g->GetXaxis()->SetTitleSize(labelSize);
+  g->GetYaxis()->SetTitleSize(labelSize);
+  g->GetXaxis()->SetLabelSize(labelSize);
+  g->GetYaxis()->SetLabelSize(labelSize);
+  g->SetLineWidth(2);
+  g->SetLineColor(kRed);
+  gStyle->SetOptStat(0);
+  gPad->Update();
+  c->SaveAs(path + name + ".pdf");
+  c->SaveAs(path + name + ".png");
+
+  return;
+}
+
 // Scan on HNL mass for expected number of background events, with window around mass hypothesis at 1 or 2 sigma (fixed sigma)
 
 TGraph* WindowScanFixedSigma(TH1D* h, Double_t massSigma, Double_t sigmaStep) {
@@ -114,15 +142,16 @@ TGraph* WindowScanFixedSigma(TH1D* h, Double_t massSigma, Double_t sigmaStep) {
 
 // Scan on HNL mass for expected number of background events, with window around mass hypothesis at 1 or 2 sigma (non-fixed sigma: each MC mass hypothesis is fitted, sigma is plotted vs mass and fitted. Fit parameters are used to compute sigma for each mass hypothesis in this scan)
 
-TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
+TGraphAsymmErrors* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
 
   Int_t firstBin = h->FindFirstBinAbove(0.,1);
   Double_t firstBinValue = h->GetBinCenter(firstBin)-h->GetBinWidth(firstBin)/2.;
   Int_t lastBin = h->FindLastBinAbove(0.,1);
   Double_t lastBinValue = h->GetBinCenter(lastBin)-h->GetBinWidth(lastBin)/2.;
   Int_t counter = 0;
-  TGraph *res = new TGraph();
-
+  TGraphAsymmErrors *res = new TGraphAsymmErrors();
+  TString name = h->GetName();
+  
   for (Double_t massHyp = massMinForBkg-minSigma; massHyp <= massMax+minSigma; massHyp += minSigma) {
     Double_t sigma = Par[5]*TMath::Power(massHyp, 5.) + Par[4]*TMath::Power(massHyp, 4.) + Par[3]*TMath::Power(massHyp, 3.) + Par[2]*TMath::Power(massHyp, 2.) + Par[1]*TMath::Power(massHyp, 1.) + Par[0];
     TAxis *axis = h->GetXaxis();
@@ -132,6 +161,12 @@ TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
     nBkg -= h->GetBinContent(bmin)*(massHyp-howManySigmas*sigma-axis->GetBinLowEdge(bmin))/axis->GetBinWidth(bmin);
     nBkg -= h->GetBinContent(bmax)*(axis->GetBinUpEdge(bmax)-(massHyp+howManySigmas*sigma))/axis->GetBinWidth(bmax);
     res->SetPoint(counter, massHyp, nBkg);
+
+    if (name.Contains("omb") || name.Contains("otal"))
+      res->SetPointError(counter, 0., 0., nBkg*0.5, nBkg*0.5);
+    else
+      res->SetPointError(counter, 0., 0., 0., 0.);
+    
     counter++;
   }
 
@@ -140,7 +175,7 @@ TGraph* WindowScanNoFixedSigma(TH1D* h, Int_t howManySigmas) {
 
 // Sum graphs for total expected bkg
 
-void SumGraphs(TGraph* g1, TGraph* g2, TGraph &g) {
+void SumGraphs(TGraphAsymmErrors* g1, TGraphAsymmErrors* g2, TGraphAsymmErrors &g) {
 
   if (g1->GetN() != g2->GetN()) {
     cout<<g1->GetName()<<" and "<<g2->GetName()<<" do not have the same number of points!"<<endl;
@@ -157,6 +192,7 @@ void SumGraphs(TGraph* g1, TGraph* g2, TGraph &g) {
     g2->GetPoint(i, X, Y);
     Ytot += Y;
     g.SetPoint(i, X, Ytot);
+    g.SetPointError(i, 0., 0., g1->GetErrorYlow(i)+g2->GetErrorYlow(i), g1->GetErrorYhigh(i)+g2->GetErrorYhigh(i));
     X = 0.;
     Y = 0.;
     Ytot = 0.;
@@ -165,7 +201,7 @@ void SumGraphs(TGraph* g1, TGraph* g2, TGraph &g) {
   return;
 }
 
-void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &counterComb, Double_t &counterPar, Double_t &counterPromptSBZ, Double_t &counterPromptFVZ, Double_t &counterPromptSBN, Double_t &counterPromptFVN, TGraph* gBkg1SigmaBuffer, TGraph* gBkg2SigmaBuffer, TGraph* gBkg1SigmaTot, TGraph* gBkg2SigmaTot) {
+void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &counterComb, Double_t &counterPar, Double_t &counterPromptSBZ, Double_t &counterPromptFVZ, Double_t &counterPromptSBN, Double_t &counterPromptFVN, TGraphAsymmErrors* gBkg1SigmaBuffer, TGraphAsymmErrors* gBkg2SigmaBuffer, TGraphAsymmErrors* gBkg1SigmaTot, TGraphAsymmErrors* gBkg2SigmaTot) {
 
   // Generic variables
   
@@ -340,9 +376,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH2D *hSRComb = new TH2D("hSRComb", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalComb = new TH2D("hSRFinalComb", "Signal region", 500, -50., 50., 50, 0., 0.1);
 
-  TGraph *gBkg1SigmaComb = new TGraph();
+  TGraphAsymmErrors *gBkg1SigmaComb = new TGraphAsymmErrors();
   gBkg1SigmaComb->SetNameTitle("PiMinusMuPlus/gBkg1SigmaComb", "Combinatorial background studies");
-  TGraph *gBkg2SigmaComb = new TGraph();
+  TGraphAsymmErrors *gBkg2SigmaComb = new TGraphAsymmErrors();
   gBkg2SigmaComb->SetNameTitle("PiMinusMuPlus/gBkg2SigmaComb", "Combinatorial background studies");
 
   // Prompt - pi+mu-
@@ -364,9 +400,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH2D *hSRPrompt = new TH2D("hSRPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPrompt = new TH2D("hSRFinalPrompt", "Signal region", 500, -50., 50., 50, 0., 0.1);
   
-  TGraph *gBkg1SigmaPrompt = new TGraph();
+  TGraphAsymmErrors *gBkg1SigmaPrompt = new TGraphAsymmErrors();
   gBkg1SigmaPrompt->SetNameTitle("PiMinusMuPlus/gBkg1SigmaPrompt", "Muon-induced background studies");
-  TGraph *gBkg2SigmaPrompt = new TGraph();
+  TGraphAsymmErrors *gBkg2SigmaPrompt = new TGraphAsymmErrors();
   gBkg2SigmaPrompt->SetNameTitle("PiMinusMuPlus/gBkg2SigmaPrompt", "Muon-induced background studies");
 
   // Parasitic - pi+mu-
@@ -381,9 +417,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, Double_t &cou
   TH2D *hSRPar = new TH2D("hSRPar", "Signal region", 500, -50., 50., 50, 0., 0.1);
   TH2D *hSRFinalPar = new TH2D("hSRFinalPar", "Signal region", 500, -50., 50., 50, 0., 0.1);
 
-  TGraph *gBkg1SigmaPar = new TGraph();
+  TGraphAsymmErrors *gBkg1SigmaPar = new TGraphAsymmErrors();
   gBkg1SigmaPar->SetNameTitle("PiMinusMuPlus/gBkg1SigmaPar", "Kaon-induced background studies");
-  TGraph *gBkg2SigmaPar = new TGraph();
+  TGraphAsymmErrors *gBkg2SigmaPar = new TGraphAsymmErrors();
   gBkg2SigmaPar->SetNameTitle("PiMinusMuPlus/gBkg2SigmaPar", "Kaon-induced background studies");
 
   // SR - pi+mu-
@@ -785,13 +821,13 @@ void BkgPiMinusMuPlus(TString dir, TString histo1, TString histo2) {
 
   // Total expected bkg
   
-  TGraph *gBkg1SigmaBuffer = new TGraph();
+  TGraphAsymmErrors *gBkg1SigmaBuffer = new TGraphAsymmErrors();
   gBkg1SigmaBuffer->SetNameTitle("gBkg1SigmaBuffer", "Total expected background");
-  TGraph *gBkg2SigmaBuffer = new TGraph();
+  TGraphAsymmErrors *gBkg2SigmaBuffer = new TGraphAsymmErrors();
   gBkg2SigmaBuffer->SetNameTitle("gBkg2SigmaBuffer", "Total expected background");
-  TGraph *gBkg1SigmaTot = new TGraph();
+  TGraphAsymmErrors *gBkg1SigmaTot = new TGraphAsymmErrors();
   gBkg1SigmaTot->SetNameTitle("gBkg1SigmaTot", "Total expected background");
-  TGraph *gBkg2SigmaTot = new TGraph();
+  TGraphAsymmErrors *gBkg2SigmaTot = new TGraphAsymmErrors();
   gBkg2SigmaTot->SetNameTitle("gBkg2SigmaTot", "Total expected background");
 
   c->SetRightMargin(0.2);
