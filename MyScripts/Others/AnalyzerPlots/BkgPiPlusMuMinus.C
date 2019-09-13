@@ -380,7 +380,13 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
   TH1D *hInvMassPrompt = new TH1D("hInvMassPrompt", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
   TH1D *hInvMassPromptSR = new TH1D("hInvMassPromptSR", "Events in sidebands and blinded region", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
   TH1D *hInvMassPromptKolm = new TH1D("hInvMassPromptKolm", "Events in sidebands", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2.);
-  
+
+  TH2D *hZdT = new TH2D("hZdT", "Events in sideband and BR", 100, -20., 20., 200, 90., 190.);
+  TH2D *hZR = new TH2D("hZR", "Events in sideband and BR", 200, 100., 800., 200, 90., 190.);
+  TH2D *hZM = new TH2D("hZM", "Events in sideband and BR", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2., 200, 90., 190.);
+  TH2D *hdTM = new TH2D("hdTM", "Events in sideband and BR", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2., 100, -20., 20.);
+  TH2D *hRM = new TH2D("hRM", "Events in sideband and BR", nMassBinsForBkg+1, massMinForBkg-binWidth/2., massMax+binWidth/2., 200, 100., 800.);
+  TH2D *hdTR = new TH2D("hdTR", "Events in sideband and BR", 200, 100., 800., 100, -20., 20.);
   TGraphAsymmErrors *gBkg1SigmaPrompt = new TGraphAsymmErrors();
   gBkg1SigmaPrompt->SetNameTitle("PiPlusMuMinus/gBkg1SigmaPrompt", "Expected muon-induced background events");
   TGraphAsymmErrors *gBkg2SigmaPrompt = new TGraphAsymmErrors();			   
@@ -572,6 +578,12 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
       if (SB && Zero && CDAIn && PiPlusMuMinus) {
 	hInvMassPromptSR->Fill(invMass/1000., Weight);		
 	hZTimeSRBR->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
+	hZdT->Fill(CHODTime1-CHODTime2, Zvertex/1000., Weight);
+	hZR->Fill(BeamlineDist, Zvertex/1000., Weight);
+	hZM->Fill(invMass/1000., Zvertex/1000., Weight);
+	hdTM->Fill(invMass/1000., CHODTime1-CHODTime2, Weight);
+	hdTR->Fill(BeamlineDist, CHODTime1-CHODTime2, Weight);
+	hRM->Fill(invMass/1000., BeamlineDist, Weight);
 	if ((CHODTime1-CHODTime2) > -1.5 && (CHODTime1-CHODTime2) < 1.5) {
 	  hZTimeSRBR1->Fill(Zvertex/1000., Weight);
 	  hZRadSRBR->Fill(Zvertex/1000., BeamlineDist, Weight);
@@ -744,6 +756,12 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPrompt, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptSR, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, hInvMassPromptKolm, "Reconstructed invariant mass [GeV/c^{2}]", "Events/10 MeV", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hZdT, "Track time difference [ns]", "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hZR, "Vertex radial position [mm]", "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hZM, "Reconstructed invariant mass [GeV/c^{2}]", "Z coordinate of vertex [m]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hdTM, "Reconstructed invariant mass [GeV/c^{2}]", "Track time difference [ns]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hdTR, "Vertex radial position [mm]", "Track time difference [ns]", labelSize, titleSize);
+  Save(path + "PiPlusMuMinus/Prompt/", c, hRM, "Reconstructed invariant mass [GeV/c^{2}]", "Vertex radial position [mm]", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg1SigmaPrompt, "gBkg1SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   Save(path + "PiPlusMuMinus/Prompt/", c, gBkg2SigmaPrompt, "gBkg2SigmaPrompt", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   /*
