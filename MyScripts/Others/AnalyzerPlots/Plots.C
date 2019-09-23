@@ -53,7 +53,12 @@ void TH2Cosmetics(TH2* h2, Bool_t logScale, Double_t labelSize, Double_t titleSi
   gPad->Update();
 
   TString name = h2->GetName();
-  
+
+  if (name.Contains("PiPlus"))
+    h2->SetTitle("N trajectory wrt target-TAX line, after all cuts, for  #pi^{+}#mu^{-} events");
+  else if (name.Contains("PiMinus"))
+    h2->SetTitle("N trajectory wrt target-TAX line, after all cuts, for  #pi^{-}#mu^{+} events");
+    
   if (name.Contains("EoP") || name.Contains("CDAvsZCDA") || name.Contains("SR"))
     gPad->SetLogz();
   else

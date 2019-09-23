@@ -439,7 +439,7 @@ void HeavyNeutrino::Process(Int_t) {
   }
 
   // If real data
-  /*
+
   if (!GetWithMC()) {  
         
     L0TPData *L0TPData = GetL0Data();
@@ -481,7 +481,7 @@ void HeavyNeutrino::Process(Int_t) {
     
     if (!L1OK) return;
   }
-  */
+
   FillHisto("hCuts", CutID);
   CutID++;
 
@@ -1384,7 +1384,7 @@ void HeavyNeutrino::Process(Int_t) {
     
   // Geometrical cuts, CUT: Cut on Z of two-track vertex
 
-  if (Zvertex <= 100000. || Zvertex >= (fInitialFV + fLFV))
+  if (Zvertex <= 120000. || Zvertex >= (fInitialFV + fLFV))
     return;
 
   FillHisto("hCuts", CutID);

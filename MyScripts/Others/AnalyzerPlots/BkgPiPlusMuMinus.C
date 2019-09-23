@@ -66,6 +66,11 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
     gStyle->SetPalette(1);
   else
     gStyle->SetPalette(kBird);
+
+  if(name.Contains("InvMassReco")) {
+    h->GetXaxis()->SetRangeUser(0.5, 2.2);
+    h->GetYaxis()->SetRangeUser(0.5, 2.2);
+  }
   
   h->GetXaxis()->SetTitle(x);
   h->GetYaxis()->SetTitle(y);
@@ -86,8 +91,11 @@ void Save(TString path, TCanvas *c, TH2D* h, TString x, TString y, Double_t labe
 
 void Save(TString path, TCanvas *c, TGraph* g, TString name, TString x, TString y, Double_t labelSize, Double_t titleSize) {
 
-  if (name.Contains("gMassMC"))
+  if (name.Contains("gMassMC")) {
     g->Draw("AP*");
+    g->GetXaxis()->SetRangeUser(0.5, 2.2);
+    g->GetYaxis()->SetRangeUser(0.001, 0.0075);
+  }
   else
     g->Draw("AL");
   
@@ -480,7 +488,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
       hZTimeSR->Fill(Zvertex/1000., CHODTime1-CHODTime2, Weight);
       if (Zvertex > 107000. && Zvertex < 130000. && BeamlineDist > 200. && BeamlineDist < 300.)
 	hZTimeSR2->Fill(CHODTime1-CHODTime2, Weight);
-      if ((CHODTime1-CHODTime2) > -1.5 && (CHODTime1-CHODTime2) < 1.5) {
+      if ((CHODTime1-CHODTime2) > -2 && (CHODTime1-CHODTime2) < 2) {
 	hZTimeSR1->Fill(Zvertex/1000., Weight);
 	hZRadSR->Fill(Zvertex/1000., BeamlineDist, Weight);
       }
@@ -584,7 +592,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
 	hdTM->Fill(invMass/1000., CHODTime1-CHODTime2, Weight);
 	hdTR->Fill(BeamlineDist, CHODTime1-CHODTime2, Weight);
 	hRM->Fill(invMass/1000., BeamlineDist, Weight);
-	if ((CHODTime1-CHODTime2) > -1.5 && (CHODTime1-CHODTime2) < 1.5) {
+	if ((CHODTime1-CHODTime2) > -2 && (CHODTime1-CHODTime2) < 2) {
 	  hZTimeSRBR1->Fill(Zvertex/1000., Weight);
 	  hZRadSRBR->Fill(Zvertex/1000., BeamlineDist, Weight);
 	}
@@ -772,7 +780,7 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
   Save(path + "PiPlusMuMinus/Par/", c, gBkg2SigmaPar, "gBkg2SigmaPar", "N mass [GeV/c^{2}]", "N_{exp}", labelSize, titleSize);
   */
   if (!an.Contains("Pos")  && !histo1.Contains("2016") && !histo1.Contains("2017") && !histo1.Contains("2018") && !histo1.Contains("Data")) {
-    Save(path + "PiPlusMuMinus/MC/", c, hInvMassRecoVsMC, "MC true invariant mass [GeV/c^{2}]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
+    Save(path + "PiPlusMuMinus/MC/", c, hInvMassRecoVsMC, "N true invariant mass [GeV/c^{2}]", "Reconstructed invariant mass [GeV/c^{2}]", labelSize, titleSize);
     Save(path + "PiPlusMuMinus/MC/", c, gMassMC, "gMassMC", "Reconstructed invariant mass [GeV/c^{2}]", "Mass resolution [GeV/c^{2}]", labelSize, titleSize);
   }
   /*  

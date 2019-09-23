@@ -249,8 +249,8 @@ void HeavyNeutrino::InitHist() {
 
     // Unique SR for pi+mu- and pi-mu+ separately
 
-    BookHisto("hCDAvsZCDAAllPiPlusMuMinus_Fin", new TH2D("hCDAvsZCDAAllPiPlusMuMinus_Fin", "N trajectory wrt target-TAX line, after all cuts, for ~pi^{+}#mu{-} events", 500, -50., 50., 50, 0., 0.1));
-    BookHisto("hCDAvsZCDAAllPiMinusMuPlus_Fin", new TH2D("hCDAvsZCDAAllPiMinusMuPlus_Fin", "N trajectory wrt target-TAX line, after all cuts, for ~pi^{-}#mu{+} events", 500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAllPiPlusMuMinus_Fin", new TH2D("hCDAvsZCDAAllPiPlusMuMinus_Fin", "N trajectory wrt target-TAX line, after all cuts, for #pi^{+}#mu{-} events", 500, -50., 50., 50, 0., 0.1));
+    BookHisto("hCDAvsZCDAAllPiMinusMuPlus_Fin", new TH2D("hCDAvsZCDAAllPiMinusMuPlus_Fin", "N trajectory wrt target-TAX line, after all cuts, for #pi^{-}#mu{+} events", 500, -50., 50., 50, 0., 0.1));
 
     // Theta vs Z CDA (studies on SR resolution)
 
