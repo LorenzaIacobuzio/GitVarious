@@ -245,9 +245,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -672,7 +672,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
     Double_t n = 2.3;
 
     N = n*nFV/nSB;
-    cout<<n<<" "<<nFV<<" "<<nSB<<" "<<N<<endl;
   }
   
   // Kolmogorov test and mass scan for data
@@ -812,9 +811,9 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-  TString path = "/Users/lorenza/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
-  TFile *of = new TFile("/Users/lorenza/GitVarious/MyScripts/Others/AnalyzerPlots/bkg.root", "RECREATE");
+  TFile *of = new TFile("/home/li/GitVarious/MyScripts/Others/AnalyzerPlots/bkg.root", "RECREATE");
   /*
   of->cd();
   gDirectory->mkdir("Zero");
