@@ -123,7 +123,7 @@ void Save(TString path, TCanvas *c, TGraphAsymmErrors* g, TString name, TString 
     g->Draw("AP*");
   else {
     g->SetFillStyle(3001);
-    g->SetFillColor(kRed);
+    g->SetFillColor(kBlue);
     g->Draw("AL3");
   }
   
@@ -245,9 +245,9 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
     path = dir;
   else {
     if (histo1.Contains("Data"))
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
+      path = "/mnt/c/Users/loren/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/" + analyzer + "/";
     else
-      path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
+      path = "/mnt/c/Users/loren/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/MC/" + analyzer + "/";
   }
   
   TFile *f = TFile::Open(histo1);
@@ -811,9 +811,9 @@ void BkgPiPlusMuMinus(TString dir, TString histo1, TString histo2) {
   TCanvas *c = new TCanvas();  
   Double_t labelSize = 0.05;
   Double_t titleSize = 0.07;  
-  TString path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
+  TString path = "/mnt/c/Users/loren/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/Data/All/Zero/PiPlusMuMinus/";
 
-  TFile *of = new TFile("/home/li/GitVarious/MyScripts/Others/AnalyzerPlots/bkg.root", "RECREATE");
+  TFile *of = new TFile("/home/lorenza/GitVarious/MyScripts/Others/AnalyzerPlots/bkg.root", "RECREATE");
   /*
   of->cd();
   gDirectory->mkdir("Zero");

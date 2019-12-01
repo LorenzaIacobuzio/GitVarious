@@ -2,7 +2,12 @@ void TH1Cosmetics(TH1* h1, Double_t labelSize, Double_t titleSize) {
 
   TString name = h1->GetName();
   TString title = h1->GetTitle();
-  
+
+  if (title.Contains("reference time")) {
+    TF1 *f = new TF1("f", "gaus", -10., 10.);
+    h1->Fit("f", "Rq");
+    gStyle->SetOptFit(0);
+  }
   if (title.Contains("momentum") && (title.Contains("acceptance") || title.Contains("Yield"))) {
     h1->GetXaxis()->SetTitle("N momentum [GeV/c]");
     gPad->SetLogy();
@@ -492,7 +497,7 @@ void Plots(TString dir, TString histo1, TString mode) {
   if (dir != "")
     path = dir;
   else
-    path = "/home/li/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
+    path = "/mnt/c/Users/loren/cernbox/PhD/TalksAndPapers/Notes/MCnote/images/Plots/";
   
   if (histo1.Contains("52"))
     path += "ShapoOld/1/";
@@ -508,6 +513,8 @@ void Plots(TString dir, TString histo1, TString mode) {
     path += "ShapoNew/Muon/";
   else if (histo1.Contains("10-1-0"))
     path += "ShapoNew/Electron/";
+  else if (histo1.Contains("Data"))
+    path += "DataTime/";
   else {
     cout<<"Don't know which directory to put " << histo1 << " into!"<<endl;
     _exit(1);

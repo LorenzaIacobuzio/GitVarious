@@ -74,17 +74,17 @@ HeavyNeutrino::HeavyNeutrino(Core::BaseAnalysis *ba) :
   RequestBeamSpecialTrigger();
 
   AddParam("USquared", &fUSquared, 1.E-6); // change accordingly
-  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 0.); // change accordingly
+  AddParam("UInitialeSquaredRatio", &fInitialUeSquaredRatio, 1.); // change accordingly
   AddParam("UInitialmuSquaredRatio", &fInitialUmuSquaredRatio, 1.); // change accordingly
-  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 0.); // change accordingly
+  AddParam("UInitialtauSquaredRatio", &fInitialUtauSquaredRatio, 1.); // change accordingly
   AddParam("InitialFV", &fInitialFV, 102425.); // keep
   AddParam("LFV", &fLFV, 77575.); // keep
   AddParam("Mode", &fMode, 0);
   AddParam("MassForReco", &fMassForReco, 1.);
   AddParam("BlindRegion", &fBlindRegion, false);
   AddParam("MCsample", &fMCsample, false);
-  AddParam("EnableChecks", &fEnableChecks, false);
-  AddParam("MassForChecks", &fMassForChecks, 1.);
+  AddParam("EnableChecks", &fEnableChecks, true);
+  AddParam("MassForChecks", &fMassForChecks, 1.5);
   AddParam("CouplingForChecks", &fCouplingForChecks, 1.E-6);
 
   fUeSquared = fUSquared/(fInitialUeSquaredRatio + fInitialUmuSquaredRatio + fInitialUtauSquaredRatio)*fInitialUeSquaredRatio;
@@ -406,7 +406,7 @@ void HeavyNeutrino::Process(Int_t) {
 
   // Plots with only one mass and coupling (for checks)
 
-  if (fEnableChecks && MN != fMassForChecks)
+  if (fEnableChecks && MN < fMassForChecks)
     return;
 
   Int_t RunNumber = GetWithMC() ? 0 : GetEventHeader()->GetRunID();
