@@ -629,16 +629,6 @@ void Analyzer(TString dir, TString histo1, TString an, TCanvas* c, TGraphAsymmEr
         sigmaMin = sigma;                                  
     }
     minSigma = sigmaMin;
-    
-    for (Int_t i = 0; i < gMassMC->GetN(); i++) {
-      Double_t x, y;
-      gMassMC->GetPoint(i, x, y);
-      if (x > 1.4 && y < 0.004)
-	gMassMC->SetPoint(i, x, y+0.004);
-      if (y > 0.007)
-	gMassMC->SetPoint(i, x, 0.0055);
-    }
-    
     gMassMC->Fit("pol1");
     TF1 *f = gMassMC->GetFunction("pol1");
 
